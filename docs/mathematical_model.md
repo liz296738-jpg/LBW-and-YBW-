@@ -36,7 +36,9 @@ For the current source-free, one-dimensional Euler baseline, `∂U/∂t + ∂F/�
 
 `F = [rho*u, rho*u^2 + p, u*(rho*E + p)]`
 
-**P3.1 implements the physical Euler flux `F(U)`.** Spatial discretization, numerical interface fluxes, time integration, and a solver remain unimplemented.
+**P3.1 implements the physical Euler flux `F(U)`.** Spatial discretization, time integration, and a solver remain unimplemented.
+
+P3.2 implements the separate Rusanov baseline numerical interface flux `F_hat(U_L, U_R)` for conservative states on either side of an interface. This numerical flux is not part of the governing physical law.
 
 The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved.
 

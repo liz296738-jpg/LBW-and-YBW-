@@ -18,7 +18,7 @@
 ## P3 Breakdown
 
 - P3.1 Euler physical flux — Complete
-- P3.2 Numerical interface flux — Planned
+- P3.2 Rusanov numerical interface flux — Complete
 - P3.3 Spatial residual — Planned
 - P3.4 Time integration — Planned
 - P3.5 Baseline solver — Planned
