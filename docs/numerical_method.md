@@ -12,6 +12,14 @@ P3.2 implements the temporary verified baseline Rusanov / Local Lax-Friedrichs f
 
 where `alpha = max(|u_L| + a_L, |u_R| + a_R)`. It provides a simple, stable, but comparatively dissipative baseline for later spatial-residual and time-integration verification. The planned Steger-Warming method remains unchanged.
 
+## Baseline Spatial Discretization
+
+P3.3 implements a first-order finite-volume formulation with piecewise-constant cell states and Rusanov interface fluxes on a uniform grid only:
+
+`dU_i/dt = -(F_hat_(i+1/2) - F_hat_(i-1/2)) / dx`
+
+Boundary interface fluxes are not implemented.
+
 ## Time Integration
 
 Planned: third-order TVD / SSP Runge-Kutta.
@@ -26,4 +34,4 @@ Future steady-state convergence will use normalized residuals and/or relative st
 
 ## Important Note
 
-**No spatial discretization, time integration, or CFD solver is implemented in P3.2.**
+**No boundary treatment, time integration, or CFD solver is implemented in P3.3.**

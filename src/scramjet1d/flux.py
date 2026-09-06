@@ -1,4 +1,4 @@
-"""Physical fluxes for approved governing equations."""
+"""Physical and numerical fluxes for the 1D Euler equations."""
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray

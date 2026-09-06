@@ -6,9 +6,9 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P3.2 — numerical interface flux**.
+Current stage: **P3.3 — finite-volume spatial residual**.
 
-Implemented: ideal calorically perfect gas utilities, primitive/conservative conversions, physical Euler flux, Rusanov numerical interface flux, automated unit tests, and GitHub Actions CI. **No spatial residual or time-advancing CFD solver exists yet**, and this project must not yet be used for research calculations.
+Implemented: ideal calorically perfect gas utilities, primitive/conservative conversions, physical Euler flux, Rusanov interface flux, internal interface assembly, conservative finite-volume flux divergence, automated unit tests, and GitHub Actions CI. **No boundary-condition treatment or time-advancing CFD solver exists yet**, and this project must not yet be used for research calculations.
 
 ## Planned Physics
 

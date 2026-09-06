@@ -40,6 +40,8 @@ For the current source-free, one-dimensional Euler baseline, `∂U/∂t + ∂F/�
 
 P3.2 implements the separate Rusanov baseline numerical interface flux `F_hat(U_L, U_R)` for conservative states on either side of an interface. This numerical flux is not part of the governing physical law.
 
+P3.3 constructs the source-free semi-discrete finite-volume system `dU/dt = L(U)`, where `L_i(U) = -(F_hat_(i+1/2) - F_hat_(i-1/2)) / dx`. This is numerical discretization, not a new physical equation.
+
 The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved.
 
 ## P2 Implemented Relations
