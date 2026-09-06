@@ -30,7 +30,15 @@ The future baseline model is one-dimensional, compressible, inviscid, and adiaba
 
 `∂U/∂t + ∂F/∂x = S`
 
-The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved. No source-term formula is implemented in P2.
+For the current source-free, one-dimensional Euler baseline, `∂U/∂t + ∂F/∂x = 0`.
+
+`U = [rho, rho*u, rho*E]`
+
+`F = [rho*u, rho*u^2 + p, u*(rho*E + p)]`
+
+**P3.1 implements the physical Euler flux `F(U)`.** Spatial discretization, numerical interface fluxes, time integration, and a solver remain unimplemented.
+
+The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved.
 
 ## P2 Implemented Relations
 

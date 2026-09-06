@@ -6,9 +6,9 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P2 — thermodynamics and primitive/conservative state conversion**.
+Current stage: **P3.1 — Euler physical flux**.
 
-Implemented: ideal calorically perfect gas utilities, primitive/conservative conversions, automated unit tests, and GitHub Actions CI. A production CFD solver has **not** been implemented and this project must not yet be used for research calculations.
+Implemented: ideal calorically perfect gas utilities, primitive/conservative conversions, physical Euler flux, automated unit tests, and GitHub Actions CI. **No time-advancing CFD solver exists yet**, and this project must not yet be used for research calculations.
 
 ## Planned Physics
 
