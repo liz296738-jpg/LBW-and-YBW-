@@ -30,5 +30,10 @@ The future baseline model is one-dimensional, compressible, inviscid, and adiaba
 
 `∂U/∂t + ∂F/∂x = S`
 
-The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved. No source-term formula is implemented in P0/P1.
+The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved. No source-term formula is implemented in P2.
 
+## P2 Implemented Relations
+
+P2 implements and tests the ideal-gas relation `p = rho R T`, the energy relations `e = p / [rho (gamma - 1)]` and `E = e + u^2 / 2`, the sound speed `a = sqrt(gamma R T)`, and `Mach = u / a`.
+
+The implemented conservative state is `U = [rho, rho*u, rho*E]`. The governing PDE and all numerical solver methods remain unimplemented.

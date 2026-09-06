@@ -6,7 +6,9 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-This repository is in the P0/P1 initialization stage. A production CFD solver has **not** been implemented and this project must not yet be used for research calculations.
+Current stage: **P2 — thermodynamics and primitive/conservative state conversion**.
+
+Implemented: ideal calorically perfect gas utilities, primitive/conservative conversions, automated unit tests, and GitHub Actions CI. A production CFD solver has **not** been implemented and this project must not yet be used for research calculations.
 
 ## Planned Physics
 
@@ -26,9 +28,8 @@ Each item will be introduced and validated in a separate stage.
 - Third-order TVD / SSP Runge-Kutta time integration
 - CFL-based time stepping
 
-These methods are documented as plans only; none is implemented in P0/P1.
+These methods are documented as plans only and are not yet implemented.
 
 ## Development Philosophy
 
 Each physical model is introduced independently and validated before the next model is added. See `docs/` for the frozen scope, baseline model, numerical-method plan, and staged roadmap.
-
