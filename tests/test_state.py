@@ -49,6 +49,18 @@ def test_vector_round_trip_preserves_primitive_variables() -> None:
     np.testing.assert_allclose(primitive.p, p, rtol=1e-12)
 
 
+def test_primitive_broadcasting_preserves_each_field() -> None:
+    """Scalar rho and p broadcast naturally over a vector velocity."""
+    u = np.array([100.0, 200.0, 300.0])
+    U = state_module.primitive_to_conservative(1.0, u, 100_000.0, GAS)
+    primitive = state_module.conservative_to_primitive(U, GAS)
+
+    assert U.shape == (3, 3)
+    np.testing.assert_allclose(primitive.rho, np.ones(3), rtol=1e-12)
+    np.testing.assert_allclose(primitive.u, u, rtol=1e-12)
+    np.testing.assert_allclose(primitive.p, np.full(3, 100_000.0), rtol=1e-12)
+
+
 def test_negative_velocity_is_preserved() -> None:
     """Reverse flow remains mathematically valid and retains its sign."""
     U = state_module.primitive_to_conservative(1.0, -100.0, 100_000.0, GAS)

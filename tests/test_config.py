@@ -34,7 +34,14 @@ def test_gas_rejects_nonpositive_specific_gas_constant(R: float) -> None:
 
 @pytest.mark.parametrize(
     "kwargs",
-    [{"cfl": 0.0}, {"tolerance": 0.0}, {"cfl": math.inf}, {"tolerance": math.nan}],
+    [
+        {"cfl": 0.0},
+        {"tolerance": 0.0},
+        {"cfl": -0.5},
+        {"tolerance": -1.0e-4},
+        {"cfl": math.inf},
+        {"tolerance": math.nan},
+    ],
 )
 def test_numerical_config_rejects_nonpositive_controls(kwargs: dict[str, float]) -> None:
     """Reserved numerical controls must be strictly positive."""
