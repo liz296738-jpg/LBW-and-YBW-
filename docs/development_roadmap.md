@@ -20,5 +20,5 @@
 - P3.1 Euler physical flux — Complete
 - P3.2 Rusanov numerical interface flux — Complete
 - P3.3 Finite-volume spatial residual — Complete
-- P3.4 Time integration — Planned
+- P3.4 SSP-RK3 time integration — Complete
 - P3.5 Baseline solver — Planned

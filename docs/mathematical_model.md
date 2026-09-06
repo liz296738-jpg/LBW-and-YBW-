@@ -42,6 +42,8 @@ P3.2 implements the separate Rusanov baseline numerical interface flux `F_hat(U_
 
 P3.3 constructs the source-free semi-discrete finite-volume system `dU/dt = L(U)`, where `L_i(U) = -(F_hat_(i+1/2) - F_hat_(i-1/2)) / dx`. This is numerical discretization, not a new physical equation.
 
+P3.4 applies SSP-RK3 to this semi-discrete system as numerical time discretization.
+
 The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved.
 
 ## P2 Implemented Relations

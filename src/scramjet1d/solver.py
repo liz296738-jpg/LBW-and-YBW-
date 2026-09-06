@@ -1,1 +1,1 @@
-"""Reserved for the staged CFD solver; no time-advancing solver exists yet."""
+"""Reserved for the assembled CFD solver; no complete solver exists yet."""

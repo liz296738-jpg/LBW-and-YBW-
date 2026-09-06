@@ -22,7 +22,7 @@ Boundary interface fluxes are not implemented.
 
 ## Time Integration
 
-Planned: third-order TVD / SSP Runge-Kutta.
+P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n + dt L(U^n)`, `U2 = 3/4 U^n + 1/4 [U1 + dt L(U1)]`, and `U^(n+1) = 1/3 U^n + 2/3 [U2 + dt L(U2)]`. CFL-based dt, boundary treatment, and a complete CFD time loop remain unimplemented.
 
 ## Time Step
 
