@@ -24,7 +24,13 @@ P3.5 completes the baseline assembly with transmissive zero-gradient ghost cells
 
 P4.1 represents a mesh with `N` cell areas `A_i` and `N + 1` face areas `A_(i+1/2)`. The signed area change in cell `i` is `ΔA_i = A_(i+1/2) - A_(i-1/2)`.
 
-P4.2 is planned to use face-area weighting and the geometric source in a quasi-1D residual; neither is implemented in P4.1.
+## Quasi-1D Spatial Discretization
+
+P4.2 retains the numerical interface flux as `F_hat`; area weighting belongs to the spatial layer. Face fluxes are weighted by `A_face`, their difference is normalized by `A_cell * dx`, and the geometric momentum source uses the same face-area difference:
+
+`L_i = -[A_R F_hat_R - A_L F_hat_L] / (A_i dx) + [0, p_i (A_R - A_L) / (A_i dx), 0]`.
+
+Using the identical `A_R - A_L` in both terms preserves the static constant-pressure equilibrium. This P4.2 operator accepts complete supplied interface fluxes; it does not construct boundaries, select a numerical flux, or advance time.
 
 ## Time Integration
 
@@ -40,4 +46,4 @@ Future steady-state convergence will use normalized residuals and/or relative st
 
 ## Important Note
 
-**P3 solves the source-free constant-area baseline only. P4.1 represents area geometry, but variable-area equations, source terms, and planned higher-fidelity methods remain future work.**
+**P3 solves the source-free constant-area baseline. P4.2 adds only a quasi-1D semi-discrete spatial operator; variable-area boundary integration, time advancement, and planned higher-fidelity methods remain future work.**

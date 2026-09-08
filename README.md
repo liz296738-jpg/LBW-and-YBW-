@@ -6,11 +6,13 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P4.1 - variable-area geometry representation**.
+Current stage: **P4.2 - quasi-1D area-weighted residual and geometric source**.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 
-P4.1 adds immutable `AreaProfile` geometry with positive cell-centred and face-centred areas, a constant-area profile helper, and signed per-cell area changes. Geometry inputs are validated and CI continues to cover the full baseline. Variable-area CFD equations, a quasi-1D residual, and geometric source terms are not assembled yet.
+P4.1 adds immutable `AreaProfile` geometry with positive cell-centred and face-centred areas, a constant-area profile helper, and signed per-cell area changes. P4.2 adds area-weighted face-flux divergence, the normalized geometric momentum source, and their quasi-1D semi-discrete residual. Constant-area compatibility and static equal-pressure well-balanced behavior are covered by automated tests and CI.
+
+No variable-area time-advancing solver exists yet. Boundary integration, nozzle cases, friction, heat transfer, fuel injection, combustion, and Steger-Warming remain unimplemented.
 
 ## Planned Physics
 

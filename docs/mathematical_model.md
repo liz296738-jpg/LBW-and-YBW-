@@ -48,7 +48,11 @@ The future quasi-1D formulation is
 
 `∂(A U)/∂t + ∂(A F)/∂x = [0, p dA/dx, 0]`.
 
-P4.1 implements only the geometry representation required by this equation. It does not assemble a quasi-1D right-hand side, area-weighted fluxes, or a geometric source term.
+P4.1 implements the geometry representation required by this equation. P4.2 implements the semi-discrete quasi-1D spatial operator while retaining the conservative state as `U`, rather than changing the state API to `A U`:
+
+`dU_i/dt = -[A_(i+1/2) F_hat_(i+1/2) - A_(i-1/2) F_hat_(i-1/2)] / (A_i dx) + [0, p_i (A_(i+1/2) - A_(i-1/2)) / (A_i dx), 0]`.
+
+The two terms use the same face-area difference. Consequently, a static state with constant pressure has zero residual for arbitrary valid area profiles. This is a semi-discrete spatial operator, not a complete variable-area solver.
 
 ## P2 Implemented Relations
 

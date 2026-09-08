@@ -18,3 +18,11 @@ def require_finite(name: str, value: ArrayLike) -> NDArray[np.float64]:
     if not np.all(np.isfinite(array)):
         raise ValueError(f"{name} must be finite")
     return array
+
+
+def require_positive_scalar(name: str, value: object) -> float:
+    """Return a finite, strictly positive scalar value."""
+    scalar = np.asarray(value, dtype=float)
+    if scalar.ndim != 0 or not np.isfinite(scalar) or scalar <= 0.0:
+        raise ValueError(f"{name} must be a finite and strictly positive scalar")
+    return float(scalar)
