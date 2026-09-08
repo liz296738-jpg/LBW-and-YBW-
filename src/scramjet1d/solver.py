@@ -9,7 +9,7 @@ from .boundary import transmissive_ghost_cells
 from .config import GasProperties, NumericalConfig
 from .gas import speed_of_sound
 from .geometry import AreaProfile
-from .spatial import finite_volume_residual, internal_rusanov_fluxes, quasi_1d_residual
+from .spatial import finite_volume_residual, internal_rusanov_fluxes, internal_numerical_fluxes, quasi_1d_residual
 from .state import conservative_to_primitive
 from .time_integration import ssp_rk3_step
 
@@ -49,7 +49,7 @@ def euler_rhs_transmissive(U: ArrayLike, dx: object, gas: GasProperties) -> NDAr
 
 
 def quasi_1d_rhs_transmissive(
-    U: ArrayLike, geometry: AreaProfile, dx: object, gas: GasProperties
+    U: ArrayLike, geometry: AreaProfile, dx: object, gas: GasProperties, *, flux_scheme: object = "rusanov"
 ) -> NDArray[np.float64]:
     """Return the quasi-1D Euler RHS with transmissive baseline boundaries in SI units."""
     if not isinstance(geometry, AreaProfile):
@@ -62,7 +62,7 @@ def quasi_1d_rhs_transmissive(
 
     spacing = _positive_scalar("dx", dx)
     ghosted = transmissive_ghost_cells(states)
-    interface_fluxes = internal_rusanov_fluxes(ghosted, gas)
+    interface_fluxes = internal_numerical_fluxes(ghosted, gas, scheme=flux_scheme)
     return quasi_1d_residual(states, interface_fluxes, geometry, spacing, gas)
 
 
@@ -117,6 +117,8 @@ def solve_quasi_1d(
     gas: GasProperties,
     numerical: NumericalConfig,
     max_steps: int = 100_000,
+    *,
+    flux_scheme: object = "rusanov",
 ) -> SolverResult:
     """Advance the quasi-1D Euler state with fixed area geometry to t_final [s]."""
     state = np.asarray(U0, dtype=float)
@@ -131,13 +133,15 @@ def solve_quasi_1d(
     final_time = _positive_scalar("t_final", t_final)
     if isinstance(max_steps, (bool, np.bool_)) or not isinstance(max_steps, (int, np.integer)) or max_steps <= 0:
         raise ValueError("max_steps must be a positive integer")
+    if flux_scheme not in ("rusanov", "steger-warming"):
+        raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
 
     state = np.array(state, dtype=float, copy=True)
     time = 0.0
     steps = 0
 
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
-        return quasi_1d_rhs_transmissive(stage_state, geometry, spacing, gas)
+        return quasi_1d_rhs_transmissive(stage_state, geometry, spacing, gas, flux_scheme=flux_scheme)
 
     while time < final_time:
         if steps >= max_steps:

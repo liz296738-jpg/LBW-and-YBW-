@@ -50,6 +50,10 @@ P5.1 implements raw, unsmoothed single-state splitting with Euler eigenvalues `l
 
 P5.2 defines the first-order piecewise-constant interface construction `F_hat_(i+1/2) = F_plus(U_i) + F_minus(U_(i+1))`. It is vectorized and supports broadcast-compatible state arrays. It has not yet been connected to a spatial operator or solver; production integration remains Rusanov.
 
+## Flux Scheme Selection
+
+P5.3 connects explicit `rusanov` and `steger-warming` interface choices to the quasi-1D solver. Both choices use the same state representation, geometry, source discretization, transmissive boundary, CFL and SSP-RK3; only the interface numerical flux changes. Rusanov remains the default.
+
 ## Time Integration
 
 P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n + dt L(U^n)`, `U2 = 3/4 U^n + 1/4 [U1 + dt L(U1)]`, and `U^(n+1) = 1/3 U^n + 2/3 [U2 + dt L(U2)]`.

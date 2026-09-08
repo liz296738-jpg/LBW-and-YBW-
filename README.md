@@ -6,7 +6,7 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P5.2 - Steger-Warming interface numerical flux**.
+Current stage: **P5.3 - Steger-Warming quasi-1D solver integration**.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 
@@ -14,7 +14,7 @@ P4.1 adds immutable `AreaProfile` geometry with positive cell-centred and face-c
 
 P4 validates inviscid, adiabatic, constant-gamma quasi-1D area physics. P5.1 adds Euler characteristic speeds and unsmoothed Steger-Warming positive/negative single-state flux splitting. P5.2 adds the two-state, first-order flux-vector-splitting interface law `F_hat = F_plus(U_left) + F_minus(U_right)`, including equal-state consistency, supersonic upwinding, and vectorized broadcasting tests.
 
-Steger-Warming interface flux exists but is not yet connected to the CFD spatial operator or solver: the production CFD solver remains Rusanov. The transmissive boundary is a baseline verification boundary, not a physical scramjet inlet/outlet model; friction, wall heat transfer, fuel injection, combustion, chemistry, and entropy/sonic treatment remain future work.
+`solve_quasi_1d` now accepts `flux_scheme="rusanov"` (the default) or `flux_scheme="steger-warming"`. Both share geometry, sources, boundaries, CFL and SSP-RK3; only the interface flux differs. Formal validation and comparison remain P5.4 work. The transmissive boundary is a baseline verification boundary, not a physical scramjet inlet/outlet model.
 
 ## Planned Physics
 

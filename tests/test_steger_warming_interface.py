@@ -74,6 +74,12 @@ def test_vectorized_batched_and_broadcast_interfaces() -> None:
     assert batched.shape == (2, 4, 3)
 
 
+def test_batched_left_single_right_broadcasts() -> None:
+    left = state(np.ones(4), np.linspace(-200.0, 200.0, 4), np.full(4, 100_000.0))
+    right = state(1.1, -50.0, 90_000.0)
+    assert_allclose(steger_warming_flux(left, right, GAS), np.stack([steger_warming_flux(item, right, GAS) for item in left]))
+
+
 def test_inputs_are_not_modified_and_mixed_regimes_are_finite() -> None:
     left, right = state(1.0, 100.0, 100_000.0), state(0.9, 800.0, 90_000.0)
     left_original, right_original = left.copy(), right.copy()

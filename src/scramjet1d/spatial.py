@@ -5,6 +5,7 @@ from numpy.typing import ArrayLike, NDArray
 
 from .config import GasProperties
 from .flux import rusanov_flux
+from .steger_warming import steger_warming_flux
 from .geometry import AreaProfile
 from .source_terms import geometric_area_source
 from .validation import require_finite, require_positive_scalar
@@ -20,6 +21,23 @@ def internal_rusanov_fluxes(U: ArrayLike, gas: GasProperties) -> NDArray[np.floa
     if states.shape[-2] < 2:
         raise ValueError("U must contain at least two cells")
     return rusanov_flux(states[..., :-1, :], states[..., 1:, :], gas)
+
+
+def internal_steger_warming_fluxes(U: ArrayLike, gas: GasProperties) -> NDArray[np.float64]:
+    """Return internal Steger-Warming fluxes for cell-centered U[..., N, 3]."""
+    states = np.asarray(U, dtype=float)
+    if states.ndim < 2 or states.shape[-1] != 3 or states.shape[-2] < 2:
+        raise ValueError("U must have shape (..., N, 3) with N >= 2")
+    return steger_warming_flux(states[..., :-1, :], states[..., 1:, :], gas)
+
+
+def internal_numerical_fluxes(U: ArrayLike, gas: GasProperties, scheme: object = "rusanov") -> NDArray[np.float64]:
+    """Return internal interface fluxes for an explicitly selected numerical scheme."""
+    if scheme == "rusanov":
+        return internal_rusanov_fluxes(U, gas)
+    if scheme == "steger-warming":
+        return internal_steger_warming_fluxes(U, gas)
+    raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
 
 
 def finite_volume_residual(interface_fluxes: ArrayLike, dx: float) -> NDArray[np.float64]:

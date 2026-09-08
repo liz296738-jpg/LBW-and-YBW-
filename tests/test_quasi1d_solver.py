@@ -166,7 +166,7 @@ def test_quasi_solver_recomputes_rhs_at_each_rk_stage(monkeypatch: pytest.Monkey
     calls: list[np.ndarray] = []
     original_rhs = solver_module.quasi_1d_rhs_transmissive
 
-    def recording_rhs(state: np.ndarray, geometry: AreaProfile, dx: object, gas: GasProperties) -> np.ndarray:
+    def recording_rhs(state: np.ndarray, geometry: AreaProfile, dx: object, gas: GasProperties, **kwargs: object) -> np.ndarray:
         calls.append(state.copy())
         return original_rhs(state, geometry, dx, gas)
 
