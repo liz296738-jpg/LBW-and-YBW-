@@ -7,7 +7,7 @@
 | P2 | Complete | Thermodynamics & state conversion | Tested gas and state utilities | Unit and physical checks |
 | P3 | Complete | Baseline 1D Euler solver | Source-free solver | Conservation checks |
 | P4 | Complete | Variable area | Quasi-1D geometry support | Controlled-area case |
-| P5 | Planned | Steger-Warming + RK3 + CFL | Planned formal numerical scheme | Stability and convergence checks |
+| P5 | In Progress | Steger-Warming + RK3 + CFL | Planned formal numerical scheme | Stability and convergence checks |
 | P6 | Planned | Friction & heat transfer | Separate source models | Per-model validation |
 | P7 | Planned | Fuel injection | Injection source model | Mass/momentum/energy checks |
 | P8 | Planned | Combustion | Heat-release model | Controlled combustion validation |
@@ -29,3 +29,10 @@
 - P4.2 Quasi-1D area-weighted residual + geometric source - Complete
 - P4.3 Variable-area solver integration - Complete
 - P4.4 Controlled-area validation - Complete
+
+## P5 Breakdown
+
+- P5.1 Steger-Warming single-state flux splitting - Complete
+- P5.2 Steger-Warming interface numerical flux - Planned
+- P5.3 Quasi-1D solver integration / scheme selection - Planned
+- P5.4 Steger-Warming validation and comparison - Planned

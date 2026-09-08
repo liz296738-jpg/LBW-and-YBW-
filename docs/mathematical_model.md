@@ -56,6 +56,8 @@ The two terms use the same face-area difference. Consequently, a static state wi
 
 P4.3 introduces no governing equation. It advances the existing semi-discrete relation `dU/dt = L_quasi1D(U)` with SSP-RK3 while the supplied `AreaProfile` remains time-independent. This is a baseline transient solver integration, not controlled nozzle validation.
 
+P5 changes only numerical flux construction methodology; it does not alter the governing equations or physical model.
+
 ## Isentropic Area Validation
 
 P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.
