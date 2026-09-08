@@ -6,13 +6,13 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P4.2 - quasi-1D area-weighted residual and geometric source**.
+Current stage: **P4.3 - variable-area quasi-1D solver integration**.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 
-P4.1 adds immutable `AreaProfile` geometry with positive cell-centred and face-centred areas, a constant-area profile helper, and signed per-cell area changes. P4.2 adds area-weighted face-flux divergence, the normalized geometric momentum source, and their quasi-1D semi-discrete residual. Constant-area compatibility and static equal-pressure well-balanced behavior are covered by automated tests and CI.
+P4.1 adds immutable `AreaProfile` geometry with positive cell-centred and face-centred areas, a constant-area profile helper, and signed per-cell area changes. P4.2 adds area-weighted face-flux divergence, the normalized geometric momentum source, and their quasi-1D semi-discrete residual. P4.3 assembles transmissive baseline boundaries, Rusanov interface fluxes, the quasi-1D residual, CFL stepping, and SSP-RK3 into a variable-area transient solver. Constant-area full-solver compatibility, variable-area static-equilibrium preservation, and a transient smoke case are covered by automated tests and CI.
 
-No variable-area time-advancing solver exists yet. Boundary integration, nozzle cases, friction, heat transfer, fuel injection, combustion, and Steger-Warming remain unimplemented.
+Controlled nozzle validation has not yet been completed. The transmissive boundary is a baseline verification boundary, not a final scramjet inlet/outlet model; friction, heat transfer, fuel injection, combustion, and Steger-Warming remain unimplemented.
 
 ## Planned Physics
 

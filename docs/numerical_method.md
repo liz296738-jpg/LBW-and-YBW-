@@ -32,6 +32,14 @@ P4.2 retains the numerical interface flux as `F_hat`; area weighting belongs to 
 
 Using the identical `A_R - A_L` in both terms preserves the static constant-pressure equilibrium. This P4.2 operator accepts complete supplied interface fluxes; it does not construct boundaries, select a numerical flux, or advance time.
 
+## Variable-Area Solver Assembly
+
+P4.3 assembles the baseline transient path:
+
+`cell state -> transmissive ghost states -> Rusanov fluxes -> face-area weighting + geometric source -> quasi-1D RHS -> CFL -> SSP-RK3`.
+
+The time step remains `dt = CFL * dx / max(|u| + a)`; area is not a CFL multiplier. The transmissive ghost states are a baseline verification boundary, not a final scramjet inlet or outlet condition.
+
 ## Time Integration
 
 P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n + dt L(U^n)`, `U2 = 3/4 U^n + 1/4 [U1 + dt L(U1)]`, and `U^(n+1) = 1/3 U^n + 2/3 [U2 + dt L(U2)]`.
@@ -46,4 +54,4 @@ Future steady-state convergence will use normalized residuals and/or relative st
 
 ## Important Note
 
-**P3 solves the source-free constant-area baseline. P4.2 adds only a quasi-1D semi-discrete spatial operator; variable-area boundary integration, time advancement, and planned higher-fidelity methods remain future work.**
+**P3 solves the source-free constant-area baseline. P4.3 adds variable-area baseline transient integration; controlled nozzle validation and planned higher-fidelity methods remain future work.**

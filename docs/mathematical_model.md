@@ -52,7 +52,9 @@ P4.1 implements the geometry representation required by this equation. P4.2 impl
 
 `dU_i/dt = -[A_(i+1/2) F_hat_(i+1/2) - A_(i-1/2) F_hat_(i-1/2)] / (A_i dx) + [0, p_i (A_(i+1/2) - A_(i-1/2)) / (A_i dx), 0]`.
 
-The two terms use the same face-area difference. Consequently, a static state with constant pressure has zero residual for arbitrary valid area profiles. This is a semi-discrete spatial operator, not a complete variable-area solver.
+The two terms use the same face-area difference. Consequently, a static state with constant pressure has zero residual for arbitrary valid area profiles.
+
+P4.3 introduces no governing equation. It advances the existing semi-discrete relation `dU/dt = L_quasi1D(U)` with SSP-RK3 while the supplied `AreaProfile` remains time-independent. This is a baseline transient solver integration, not controlled nozzle validation.
 
 ## P2 Implemented Relations
 

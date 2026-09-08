@@ -27,5 +27,5 @@
 
 - P4.1 Area geometry representation - Complete
 - P4.2 Quasi-1D area-weighted residual + geometric source - Complete
-- P4.3 Variable-area solver integration - Planned
+- P4.3 Variable-area solver integration - Complete
 - P4.4 Controlled-area validation - Planned
