@@ -40,6 +40,10 @@ P4.3 assembles the baseline transient path:
 
 The time step remains `dt = CFL * dx / max(|u| + a)`; area is not a CFL multiplier. The transmissive ghost states are a baseline verification boundary, not a final scramjet inlet or outlet condition.
 
+## P4 Validation Strategy
+
+Analytical-face consistency evaluates analytical face fluxes with the discrete geometry source. On smooth grids this controlled geometry/source check approaches second-order truncation consistency. The actual baseline numerical path uses piecewise-constant states and Rusanov fluxes, and its interior residual is expected to approach first order. This does not make the production solver second order: no MUSCL reconstruction or limiter is implemented.
+
 ## Time Integration
 
 P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n + dt L(U^n)`, `U2 = 3/4 U^n + 1/4 [U1 + dt L(U1)]`, and `U^(n+1) = 1/3 U^n + 2/3 [U2 + dt L(U2)]`.

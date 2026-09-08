@@ -56,6 +56,10 @@ The two terms use the same face-area difference. Consequently, a static state wi
 
 P4.3 introduces no governing equation. It advances the existing semi-discrete relation `dU/dt = L_quasi1D(U)` with SSP-RK3 while the supplied `AreaProfile` remains time-independent. This is a baseline transient solver integration, not controlled nozzle validation.
 
+## Isentropic Area Validation
+
+P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.
+
 ## P2 Implemented Relations
 
 P2 implements and tests the ideal-gas relation `p = rho R T`, the energy relations `e = p / [rho (gamma - 1)]` and `E = e + u^2 / 2`, the sound speed `a = sqrt(gamma R T)`, and `Mach = u / a`.
