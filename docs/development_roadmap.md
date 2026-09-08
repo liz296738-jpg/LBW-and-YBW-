@@ -33,6 +33,6 @@
 ## P5 Breakdown
 
 - P5.1 Steger-Warming single-state flux splitting - Complete
-- P5.2 Steger-Warming interface numerical flux - Planned
+- P5.2 Steger-Warming interface numerical flux - Complete
 - P5.3 Quasi-1D solver integration / scheme selection - Planned
 - P5.4 Steger-Warming validation and comparison - Planned

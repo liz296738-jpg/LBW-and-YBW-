@@ -53,3 +53,26 @@ def steger_warming_split_flux(
         return (rho / (2.0 * gas.gamma))[..., np.newaxis] * np.stack((mass, momentum, energy), axis=-1)
 
     return split_flux(lambda_plus), split_flux(lambda_minus)
+
+
+def steger_warming_flux(
+    U_left: ArrayLike, U_right: ArrayLike, gas: GasProperties
+) -> NDArray[np.float64]:
+    """Return raw Steger-Warming interface flux for left/right conservative SI states.
+
+    The first-order flux-vector-splitting law is ``F_plus(U_left) +
+    F_minus(U_right)``. It is not connected to a spatial operator or solver.
+    """
+    left = np.asarray(U_left, dtype=float)
+    right = np.asarray(U_right, dtype=float)
+    if left.ndim == 0 or left.shape[-1] != 3:
+        raise ValueError("U_left last dimension must have length 3")
+    if right.ndim == 0 or right.shape[-1] != 3:
+        raise ValueError("U_right last dimension must have length 3")
+    try:
+        left, right = np.broadcast_arrays(left, right)
+    except ValueError as error:
+        raise ValueError("U_left and U_right must be broadcast-compatible") from error
+    left_plus, _ = steger_warming_split_flux(left, gas)
+    _, right_minus = steger_warming_split_flux(right, gas)
+    return left_plus + right_minus

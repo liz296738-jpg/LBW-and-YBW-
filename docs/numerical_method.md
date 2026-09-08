@@ -46,7 +46,9 @@ Analytical-face consistency evaluates analytical face fluxes with the discrete g
 
 ## Steger-Warming Flux Vector Splitting
 
-P5.1 implements raw, unsmoothed single-state splitting with Euler eigenvalues `lambda = [u-a, u, u+a]` and `lambda_plus/minus = 0.5 * (lambda +/- |lambda|)`. The closed-form split fluxes satisfy `F_plus + F_minus = F`. No entropy fix or sonic smoothing is applied. This is not yet an interface flux: P5.2 will separately define any `F_hat(U_L, U_R)` construction, and the production solver remains Rusanov.
+P5.1 implements raw, unsmoothed single-state splitting with Euler eigenvalues `lambda = [u-a, u, u+a]` and `lambda_plus/minus = 0.5 * (lambda +/- |lambda|)`. The closed-form split fluxes satisfy `F_plus + F_minus = F`. No entropy fix or sonic smoothing is applied.
+
+P5.2 defines the first-order piecewise-constant interface construction `F_hat_(i+1/2) = F_plus(U_i) + F_minus(U_(i+1))`. It is vectorized and supports broadcast-compatible state arrays. It has not yet been connected to a spatial operator or solver; production integration remains Rusanov.
 
 ## Time Integration
 
