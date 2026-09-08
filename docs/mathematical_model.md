@@ -44,7 +44,11 @@ P3.3 constructs the source-free semi-discrete finite-volume system `dU/dt = L(U)
 
 P3.4 applies SSP-RK3 to this semi-discrete system as numerical time discretization. P3.5 solves the source-free, constant-area 1D Euler system with transmissive boundaries; it does not yet represent a quasi-1D scramjet combustor with area or source terms.
 
-The future quasi-1D formulation will include area effects and other source terms only when their equations have been approved.
+The future quasi-1D formulation is
+
+`∂(A U)/∂t + ∂(A F)/∂x = [0, p dA/dx, 0]`.
+
+P4.1 implements only the geometry representation required by this equation. It does not assemble a quasi-1D right-hand side, area-weighted fluxes, or a geometric source term.
 
 ## P2 Implemented Relations
 

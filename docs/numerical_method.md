@@ -20,6 +20,12 @@ P3.3 implements a first-order finite-volume formulation with piecewise-constant 
 
 P3.5 completes the baseline assembly with transmissive zero-gradient ghost cells.
 
+## Geometry Discretization
+
+P4.1 represents a mesh with `N` cell areas `A_i` and `N + 1` face areas `A_(i+1/2)`. The signed area change in cell `i` is `ΔA_i = A_(i+1/2) - A_(i-1/2)`.
+
+P4.2 is planned to use face-area weighting and the geometric source in a quasi-1D residual; neither is implemented in P4.1.
+
 ## Time Integration
 
 P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n + dt L(U^n)`, `U2 = 3/4 U^n + 1/4 [U1 + dt L(U1)]`, and `U^(n+1) = 1/3 U^n + 2/3 [U2 + dt L(U2)]`.
@@ -34,4 +40,4 @@ Future steady-state convergence will use normalized residuals and/or relative st
 
 ## Important Note
 
-**P3 solves the source-free constant-area baseline only. Variable area, source terms, and planned higher-fidelity methods remain future work.**
+**P3 solves the source-free constant-area baseline only. P4.1 represents area geometry, but variable-area equations, source terms, and planned higher-fidelity methods remain future work.**
