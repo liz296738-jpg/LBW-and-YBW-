@@ -18,15 +18,15 @@ P3.3 implements a first-order finite-volume formulation with piecewise-constant 
 
 `dU_i/dt = -(F_hat_(i+1/2) - F_hat_(i-1/2)) / dx`
 
-Boundary interface fluxes are not implemented.
+P3.5 completes the baseline assembly with transmissive zero-gradient ghost cells.
 
 ## Time Integration
 
-P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n + dt L(U^n)`, `U2 = 3/4 U^n + 1/4 [U1 + dt L(U1)]`, and `U^(n+1) = 1/3 U^n + 2/3 [U2 + dt L(U2)]`. CFL-based dt, boundary treatment, and a complete CFD time loop remain unimplemented.
+P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n + dt L(U^n)`, `U2 = 3/4 U^n + 1/4 [U1 + dt L(U1)]`, and `U^(n+1) = 1/3 U^n + 2/3 [U2 + dt L(U2)]`.
 
 ## Time Step
 
-Planned: CFL-based adaptive time step.
+P3.5 uses the uniform-grid baseline `dt = CFL * dx / max(|u| + a)` with default `CFL = 0.5`. Rusanov remains a verified baseline; the planned Steger-Warming method remains unchanged.
 
 ## Convergence
 
@@ -34,4 +34,4 @@ Future steady-state convergence will use normalized residuals and/or relative st
 
 ## Important Note
 
-**No boundary treatment, time integration, or CFD solver is implemented in P3.3.**
+**P3 solves the source-free constant-area baseline only. Variable area, source terms, and planned higher-fidelity methods remain future work.**

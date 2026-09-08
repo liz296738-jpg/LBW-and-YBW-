@@ -66,7 +66,14 @@ def test_rejects_nonfinite_state(U: np.ndarray) -> None:
         time_integration.ssp_rk3_step(U, 0.1, lambda state: state)
 
 
-@pytest.mark.parametrize("rhs", [lambda state: np.zeros((4,)), lambda state: np.full_like(state, np.nan)])
+@pytest.mark.parametrize(
+    "rhs",
+    [
+        lambda state: np.zeros((4,)),
+        lambda state: np.full_like(state, np.nan),
+        lambda state: np.full_like(state, np.inf),
+    ],
+)
 def test_rejects_bad_rhs_output(rhs: object) -> None:
     """RHS output must preserve shape and be finite at every stage."""
     with pytest.raises(ValueError):

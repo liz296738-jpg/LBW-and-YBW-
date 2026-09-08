@@ -6,9 +6,9 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P3.4 — SSP-RK3 time integration**.
+Current stage: **P3.5 — baseline 1D Euler CFD solver**.
 
-Implemented: ideal calorically perfect gas utilities, primitive/conservative conversions, Euler physical flux, Rusanov interface flux, finite-volume spatial residual, SSP-RK3 single-step time integration, automated tests, and GitHub Actions CI. **No CFL controller, boundary-condition treatment, or complete CFD solver exists yet**, and this project must not yet be used for research calculations.
+Implemented: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI. This is a baseline verification solver, not the final scramjet model: variable area, fuel, combustion, friction, heat transfer, and Steger-Warming remain unimplemented.
 
 ## Planned Physics
 
