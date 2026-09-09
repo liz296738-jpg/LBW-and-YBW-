@@ -114,7 +114,11 @@ P7.2 accepts a prescribed axial distribution `mdot'_f = d(mdot_f)/dx` [kg/(m s)]
 
 The discrete conservation identities are `sum(rho_dot_f,i A_i dx)=sum(mdot'_f,i dx)`, `sum(S_m,i A_i dx)=sum(mdot'_f,i u_f,i dx)`, and `sum(S_E,i A_i dx)=sum(mdot'_f,i h_t,f,i dx)`. A smaller cell area gives a larger volumetric source for the same line distribution, but not more integrated injected fuel because the cell volume decreases by the same factor.
 
-The distribution is prescribed by the caller. P7.2 implements no injector geometry, profile generator, jet penetration, spray, or mixing model. It converts the prescribed line source and reuses the P7.1 source mapping; it is not connected to `solve_quasi_1d`.
+The distribution is prescribed by the caller. P7.2 implements no injector geometry, profile generator, jet penetration, spray, or mixing model. It converts the prescribed line source and reuses the P7.1 source mapping.
+
+## P7.3 Fuel-Source Solver Integration
+
+The quasi-1D RHS is `dU_i/dt = R_quasi1D,i + S_wall,i + S_fuel,i`. The fuel source is evaluated anew from every current SSP-RK3 stage state, rather than cached for a timestep. This retains state validation, matches the wall-source architecture, and supports future state-dependent fuel models. The CFL formula remains based only on Euler wave speed.
 
 ## Isentropic Area Validation
 

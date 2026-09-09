@@ -5,6 +5,9 @@ from numpy.testing import assert_allclose
 from scramjet1d.config import GasProperties, NumericalConfig
 from scramjet1d.geometry import constant_area_profile
 from scramjet1d.solver import quasi_1d_rhs_transmissive, solve_quasi_1d
+from scramjet1d.boundary import transmissive_ghost_cells
+from scramjet1d.spatial import internal_numerical_fluxes, quasi_1d_residual
+from scramjet1d.source_terms import combined_wall_source, distributed_fuel_injection_source
 from scramjet1d.state import primitive_to_conservative, conservative_to_primitive
 
 GAS=GasProperties()
@@ -24,6 +27,18 @@ def test_explicit_zero_fuel_is_identical_to_default():
     default=solve_quasi_1d(*args); zero=solve_quasi_1d(*args,fuel_mass_flow_rate_per_length=0.,fuel_axial_velocity=0.,fuel_specific_total_enthalpy=0.)
     assert default.time==zero.time and default.steps==zero.steps
     assert_allclose(default.U,zero.U,rtol=0,atol=0)
+
+@pytest.mark.parametrize("scheme",["rusanov","steger-warming"])
+def test_rhs_matches_manual_fuel_and_wall_composition(scheme):
+    U=primitive_to_conservative(np.array([1.,.9,1.1]),np.array([300.,350.,250.]),np.array([1e5,1.1e5,.9e5]),GAS)
+    geo=constant_area_profile(3,.02); dx=.1; m=np.array([.01,.02,.03]); v=np.array([10.,20.,30.]); h=np.array([1e5,2e5,3e5])
+    base=quasi_1d_residual(U,internal_numerical_fluxes(transmissive_ghost_cells(U),GAS,scheme=scheme),geo,dx,GAS)
+    fuel=distributed_fuel_injection_source(U,geo,m,v,h,GAS)
+    actual=quasi_1d_rhs_transmissive(U,geo,dx,GAS,flux_scheme=scheme,fuel_mass_flow_rate_per_length=m,fuel_axial_velocity=v,fuel_specific_total_enthalpy=h)
+    assert_allclose(actual,base+fuel,rtol=0,atol=1e-10)
+    wall=combined_wall_source(U,.1,.01,20000.,GAS)
+    both=quasi_1d_rhs_transmissive(U,geo,dx,GAS,flux_scheme=scheme,hydraulic_diameter=.1,darcy_friction_factor=.01,wall_heat_flux=20000.,fuel_mass_flow_rate_per_length=m,fuel_axial_velocity=v,fuel_specific_total_enthalpy=h)
+    assert_allclose(both,base+wall+fuel,rtol=0,atol=1e-10)
 
 @pytest.mark.parametrize("kwargs",[{"fuel_mass_flow_rate_per_length":-1.},{"fuel_mass_flow_rate_per_length":np.nan},{"fuel_axial_velocity":np.nan},{"fuel_specific_total_enthalpy":np.inf}])
 def test_invalid_fuel_configuration_fails_early(kwargs):
