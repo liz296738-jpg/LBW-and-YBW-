@@ -63,6 +63,11 @@ def test_residual_assessment_rejects_nonmonotone_or_low_order_sequences() -> Non
     assert assess_residual_convergence([1.0, 1.1, 0.5], 1.0).classification == "failed"
 
 
+@pytest.mark.parametrize("errors", ([1.0, 0.1, -1e-12], [1.0, np.nan, 1e-12], [1.0, np.inf, 1e-12]))
+def test_residual_assessment_rejects_negative_nan_and_infinite_errors(errors: list[float]) -> None:
+    assert assess_residual_convergence(errors, 1.0).classification == "failed"
+
+
 @pytest.mark.parametrize("mach", [0.4, 0.8, 1.5, 2.0])
 def test_rayleigh_ratio_and_branch_inversion_are_consistent(mach: float) -> None:
     branch = "subsonic" if mach < 1.0 else "supersonic"

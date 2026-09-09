@@ -10,6 +10,8 @@ For uniform constant-area flow, `rho=rho0`, `u=u0/[1+(f_D/(2D_h))u0t]`, and `(rh
 
 ## Fanno residual consistency
 
+Exact-temporal acceptance is calculated from numerical solver output itself: density conservation, final energy-density error, actual mean energy increment, and its difference from the analytical increment are recorded for every scheme/CFL run; none are hard-coded status flags.
+
 Fanno references preserve `rho*u` and stagnation temperature (variation below `1e-10`) and move Mach toward one on each separate branch. Residuals report mass, momentum, and energy RMS values. The momentum residual is normalized by RMS `|S_f,momentum|`; its finest-grid classifications are: Rusanov subsonic `superconvergent` (1.939), Rusanov supersonic `superconvergent` (1.978), Steger-Warming subsonic `convergent` (0.978), and Steger-Warming supersonic `convergent` (0.999). The Rusanov result is accepted as superconvergence, not rejected for exceeding first order.
 
 ## Rayleigh residual consistency

@@ -22,8 +22,11 @@ def test_p6_exact_temporal_and_source_strength_hard_gates(tmp_path: Path) -> Non
     metrics = _metrics(tmp_path)
     for scheme in ("rusanov", "steger-warming"):
         exact = metrics["exact_temporal"][scheme]
-        assert exact["rho_exact"]
-        assert exact["energy_increment_exact"] == 8000.0
+        for record in exact["runs"]:
+            assert record["density_error"] <= 1e-12
+            assert record["energy_density_error"] <= 1e-5
+            assert record["energy_increment_error"] <= 1e-5
+            assert record["physical"]
         assert np.all(np.diff(exact["velocity_error"]) < 0.0)
         assert exact["temporal_order"][-1] >= 2.5
     for strength in ("1x", "2x", "4x"):

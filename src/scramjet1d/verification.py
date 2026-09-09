@@ -141,11 +141,13 @@ def assess_residual_convergence(
     threshold = require_positive_scalar("roundoff_threshold", roundoff_threshold)
     if values.ndim != 1 or values.size == 0:
         raise ValueError("errors must be a nonempty one-dimensional array")
-    normalized_finest = float(values[-1] / scale) if np.isfinite(values[-1]) else float("inf")
-    monotone = bool(np.all(np.isfinite(values)) and np.all(values[1:] < values[:-1]))
+    if not np.all(np.isfinite(values)) or np.any(values < 0.0):
+        return ResidualConvergenceAssessment("failed", False, None, float("inf"))
+    normalized_finest = float(values[-1] / scale)
+    monotone = bool(np.all(values[1:] < values[:-1]))
     if normalized_finest <= threshold:
         return ResidualConvergenceAssessment("roundoff-limited", monotone, None, normalized_finest)
-    if not np.all(np.isfinite(values) & (values > 0.0)):
+    if not np.all(values > 0.0):
         return ResidualConvergenceAssessment("failed", monotone, None, normalized_finest)
     final_order = observed_order(values[-2], values[-1]) if values.size >= 2 else None
     if monotone and final_order is not None and final_order >= 0.75:
