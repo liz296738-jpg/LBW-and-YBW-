@@ -1,4 +1,4 @@
-"""Approved geometric, prescribed wall-friction, and wall-heat source contributions."""
+"""Approved geometric, wall-friction, wall-heat, and combined wall-source contributions."""
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -50,8 +50,8 @@ def wall_friction_source(
 
     ``hydraulic_diameter`` [m] and the Darcy friction factor may be scalar or
     broadcast to the state-cell shape.  This independent P6.1 contribution is
-    ``[0, -f_D rho u |u| / (2 D_h), 0]`` [kg/(m^2 s^2)]; it is not yet assembled
-    into the quasi-1D solver.
+    ``[0, -f_D rho u |u| / (2 D_h), 0]`` [kg/(m^2 s^2)]. P6.3 composes this
+    source with prescribed wall heat inside the quasi-1D solver.
     """
     states = np.asarray(U, dtype=float)
     if states.ndim < 1 or states.shape[-1] != 3:
@@ -87,7 +87,8 @@ def wall_heat_transfer_source(
     ``wall_heat_flux`` [W/m^2] is positive into the gas and negative for gas
     cooling. ``hydraulic_diameter`` [m] and heat flux may be scalar or broadcast
     to the state-cell shape. This independent P6.2 contribution is
-    ``[0, 0, 4 q''_w / D_h]`` [W/m^3]; it is not yet assembled into the solver.
+    ``[0, 0, 4 q''_w / D_h]`` [W/m^3]. P6.3 composes this source with prescribed
+    wall friction inside the quasi-1D solver.
     """
     states = np.asarray(U, dtype=float)
     if states.ndim < 1 or states.shape[-1] != 3:
@@ -110,3 +111,16 @@ def wall_heat_transfer_source(
     source = np.zeros_like(states, dtype=float)
     source[..., 2] = 4.0 * heat_flux / diameter
     return source
+
+
+def combined_wall_source(
+    U: ArrayLike,
+    hydraulic_diameter: ArrayLike,
+    darcy_friction_factor: ArrayLike,
+    wall_heat_flux: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Return the sum of prescribed friction and wall-heat source contributions."""
+    friction_source = wall_friction_source(U, hydraulic_diameter, darcy_friction_factor, gas)
+    heat_source = wall_heat_transfer_source(U, hydraulic_diameter, wall_heat_flux, gas)
+    return friction_source + heat_source

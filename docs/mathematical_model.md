@@ -84,7 +84,17 @@ For a control volume of length `dx`, wall heating is `dQdot = q''_w P_w dx` and 
 
 `S_q = [0, 0, 4 q''_w / D_h]`.
 
-Mass and direct momentum sources are exactly zero; only the total-energy equation receives the prescribed heat contribution. The function accepts explicit hydraulic diameter because area alone does not determine wetted perimeter. It is deliberately not a wall-temperature, heat-transfer-coefficient, Stanton/Nusselt, radiation, or Reynolds-correlation model: `q''_w` is the prescribed output of any future constitutive or boundary model. Like friction, it is not yet connected to the quasi-1D solver; P6.3 will compose and integrate independent sources.
+Mass and direct momentum sources are exactly zero; only the total-energy equation receives the prescribed heat contribution. The function accepts explicit hydraulic diameter because area alone does not determine wetted perimeter. It is deliberately not a wall-temperature, heat-transfer-coefficient, Stanton/Nusselt, radiation, or Reynolds-correlation model: `q''_w` is the prescribed output of any future constitutive or boundary model.
+
+## P6.3 Coupled Wall-Source Integration
+
+P6.3 retains the P4/P5 quasi-1D residual and adds the already-defined wall contributions:
+
+`dU_i/dt = -[A_R Fhat_R - A_L Fhat_L] / (A_i dx) + S_area,i + S_f,i + S_q,i`.
+
+Here `S_area = [0, p Delta_A / (A dx), 0]`, `S_f = [0, -f_D rho u |u| / (2 D_h), 0]`, and `S_q = [0, 0, 4 q''_w / D_h]`. The independent source functions are composed without duplicating their formulas. `hydraulic_diameter=None` means wall physics is disabled only when both prescribed wall inputs are zero; enabling either source without a hydraulic diameter is an error.
+
+All active physical sources are evaluated from the current SSP-RK3 stage state rather than being frozen once per timestep. The existing Euler-wave-speed CFL formula is unchanged. No source-stiffness limiter, clipping, new boundary condition, friction correlation, or heat-transfer correlation is introduced.
 
 ## Isentropic Area Validation
 

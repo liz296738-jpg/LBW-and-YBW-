@@ -1,4 +1,4 @@
-"""Baseline constant-area, source-free one-dimensional Euler solver."""
+"""Source-free Euler and wall-source-enabled quasi-one-dimensional solvers."""
 
 from typing import NamedTuple
 
@@ -10,6 +10,7 @@ from .config import GasProperties, NumericalConfig
 from .gas import speed_of_sound
 from .geometry import AreaProfile
 from .spatial import finite_volume_residual, internal_rusanov_fluxes, internal_numerical_fluxes, quasi_1d_residual
+from .source_terms import combined_wall_source
 from .state import conservative_to_primitive
 from .time_integration import ssp_rk3_step
 
@@ -28,6 +29,42 @@ def _positive_scalar(name: str, value: object) -> float:
     if scalar.ndim != 0 or not np.isfinite(scalar) or scalar <= 0.0:
         raise ValueError(f"{name} must be a finite and strictly positive scalar")
     return float(scalar)
+
+
+def _wall_physics_enabled(
+    states: NDArray[np.float64],
+    hydraulic_diameter: object,
+    darcy_friction_factor: object,
+    wall_heat_flux: object,
+) -> bool:
+    """Validate wall-source configuration and return whether either source is active."""
+    target_shape = states.shape[:-1]
+    friction = np.asarray(darcy_friction_factor, dtype=float)
+    heat_flux = np.asarray(wall_heat_flux, dtype=float)
+    try:
+        friction = np.broadcast_to(friction, target_shape)
+        heat_flux = np.broadcast_to(heat_flux, target_shape)
+    except ValueError as error:
+        raise ValueError("darcy_friction_factor and wall_heat_flux must broadcast to the state shape") from error
+    if not np.all(np.isfinite(friction) & (friction >= 0.0)):
+        raise ValueError("darcy_friction_factor must be finite and nonnegative")
+    if not np.all(np.isfinite(heat_flux)):
+        raise ValueError("wall_heat_flux must be finite")
+
+    active = bool(np.any(friction != 0.0) or np.any(heat_flux != 0.0))
+    if hydraulic_diameter is None:
+        if active:
+            raise ValueError("hydraulic_diameter is required when wall friction or wall heat transfer is enabled")
+        return False
+
+    diameter = np.asarray(hydraulic_diameter, dtype=float)
+    try:
+        diameter = np.broadcast_to(diameter, target_shape)
+    except ValueError as error:
+        raise ValueError("hydraulic_diameter must broadcast to the state shape") from error
+    if not np.all(np.isfinite(diameter) & (diameter > 0.0)):
+        raise ValueError("hydraulic_diameter must be finite and strictly positive")
+    return active
 
 
 def cfl_timestep(U: ArrayLike, dx: object, gas: GasProperties, numerical: NumericalConfig) -> float:
@@ -49,9 +86,17 @@ def euler_rhs_transmissive(U: ArrayLike, dx: object, gas: GasProperties) -> NDAr
 
 
 def quasi_1d_rhs_transmissive(
-    U: ArrayLike, geometry: AreaProfile, dx: object, gas: GasProperties, *, flux_scheme: object = "rusanov"
+    U: ArrayLike,
+    geometry: AreaProfile,
+    dx: object,
+    gas: GasProperties,
+    *,
+    flux_scheme: object = "rusanov",
+    hydraulic_diameter: object = None,
+    darcy_friction_factor: object = 0.0,
+    wall_heat_flux: object = 0.0,
 ) -> NDArray[np.float64]:
-    """Return the quasi-1D Euler RHS with transmissive baseline boundaries in SI units."""
+    """Return the quasi-1D RHS with transmissive boundaries and optional wall sources."""
     if not isinstance(geometry, AreaProfile):
         raise TypeError("geometry must be an AreaProfile")
     states = np.asarray(U, dtype=float)
@@ -61,9 +106,13 @@ def quasi_1d_rhs_transmissive(
         raise ValueError("U cell count must match geometry.num_cells")
 
     spacing = _positive_scalar("dx", dx)
+    wall_active = _wall_physics_enabled(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
     ghosted = transmissive_ghost_cells(states)
     interface_fluxes = internal_numerical_fluxes(ghosted, gas, scheme=flux_scheme)
-    return quasi_1d_residual(states, interface_fluxes, geometry, spacing, gas)
+    rhs = quasi_1d_residual(states, interface_fluxes, geometry, spacing, gas)
+    if not wall_active:
+        return rhs
+    return rhs + combined_wall_source(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
 
 
 def solve_euler_1d(
@@ -119,8 +168,11 @@ def solve_quasi_1d(
     max_steps: int = 100_000,
     *,
     flux_scheme: object = "rusanov",
+    hydraulic_diameter: object = None,
+    darcy_friction_factor: object = 0.0,
+    wall_heat_flux: object = 0.0,
 ) -> SolverResult:
-    """Advance the quasi-1D Euler state with fixed area geometry to t_final [s]."""
+    """Advance quasi-1D Euler flow with optional prescribed wall sources to t_final."""
     state = np.asarray(U0, dtype=float)
     if state.ndim != 2 or state.shape[-1] != 3 or state.shape[0] < 2:
         raise ValueError("U0 must have shape (N, 3) with N >= 2")
@@ -135,13 +187,27 @@ def solve_quasi_1d(
         raise ValueError("max_steps must be a positive integer")
     if flux_scheme not in ("rusanov", "steger-warming"):
         raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
+    wall_active = _wall_physics_enabled(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
+    if wall_active:
+        combined_wall_source(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
 
     state = np.array(state, dtype=float, copy=True)
     time = 0.0
     steps = 0
 
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
-        return quasi_1d_rhs_transmissive(stage_state, geometry, spacing, gas, flux_scheme=flux_scheme)
+        if not wall_active:
+            return quasi_1d_rhs_transmissive(stage_state, geometry, spacing, gas, flux_scheme=flux_scheme)
+        return quasi_1d_rhs_transmissive(
+            stage_state,
+            geometry,
+            spacing,
+            gas,
+            flux_scheme=flux_scheme,
+            hydraulic_diameter=hydraulic_diameter,
+            darcy_friction_factor=darcy_friction_factor,
+            wall_heat_flux=wall_heat_flux,
+        )
 
     while time < final_time:
         if steps >= max_steps:

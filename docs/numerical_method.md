@@ -62,6 +62,10 @@ P3.4 implements generic third-order SSP / TVD Runge-Kutta integration: `U1 = U^n
 
 P3.5 uses the uniform-grid baseline `dt = CFL * dx / max(|u| + a)` with default `CFL = 0.5`. Both Rusanov and Steger-Warming use this identical CFL calculation.
 
+## P6.3 Wall-Source Integration
+
+The quasi-1D RHS retains its area-weighted flux divergence and geometric source, then adds the composed prescribed wall-friction and wall-heat sources. Active wall sources are evaluated inside `RHS(U_stage)` for each of the three SSP-RK3 stages; they are not frozen at the start of a timestep. The CFL formula remains based only on Euler wave speed. Assessment of source stiffness for stronger cases is deferred to P6.4.
+
 P5.4 controlled validation confirms the interface law `F_hat_SW = F_plus(U_L) + F_minus(U_R)`, first-order spatial convergence on isentropic residual and smooth entropy-wave benchmarks, and physical finite states in the requested shock and near-sonic smoke cases. SSP-RK3 is third order in time, but the overall smooth-benchmark accuracy is spatial first-order dominant because reconstruction remains piecewise constant.
 
 ## Convergence
