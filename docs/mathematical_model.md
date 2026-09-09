@@ -72,9 +72,19 @@ The source contribution is
 
 `S_f = [0, -f_D rho u |u| / (2 D_h), 0]`.
 
-The signed `u |u|` factor ensures drag opposes either flow direction. The mass source is exactly zero. For the stationary, adiabatic wall assumed here, the total-energy source is also exactly zero: friction redistributes kinetic and internal energy without net wall energy transfer. Heat transfer is deferred to P6.2.
+The signed `u |u|` factor ensures drag opposes either flow direction. The mass source is exactly zero. For the stationary, adiabatic wall assumed here, the total-energy source is also exactly zero: friction redistributes kinetic and internal energy without net wall energy transfer.
 
 Cross-sectional area alone does not determine wetted perimeter or hydraulic diameter. Therefore `D_h` is prescribed explicitly and is not inferred from `AreaProfile`; this avoids making an unsupported circular-duct assumption. The Darcy factor is likewise prescribed, with no Reynolds-number or roughness correlation in P6.1. The source function is not yet connected to the quasi-1D solver; P6.3 will compose and integrate source terms.
+
+## Wall Heat-Transfer Model — P6.2
+
+P6.2 defines an independent, prescribed wall-heat-flux source. The signed wall heat flux `q''_w` is measured in W/m²: `q''_w > 0` transfers heat from the wall into the gas, while `q''_w < 0` transfers heat from the gas to the wall.
+
+For a control volume of length `dx`, wall heating is `dQdot = q''_w P_w dx` and the control-volume size is `dV = A dx`. Therefore the energy source density is `S_E = q''_w P_w / A`. With `D_h = 4 A / P_w`, the complete source vector is
+
+`S_q = [0, 0, 4 q''_w / D_h]`.
+
+Mass and direct momentum sources are exactly zero; only the total-energy equation receives the prescribed heat contribution. The function accepts explicit hydraulic diameter because area alone does not determine wetted perimeter. It is deliberately not a wall-temperature, heat-transfer-coefficient, Stanton/Nusselt, radiation, or Reynolds-correlation model: `q''_w` is the prescribed output of any future constitutive or boundary model. Like friction, it is not yet connected to the quasi-1D solver; P6.3 will compose and integrate independent sources.
 
 ## Isentropic Area Validation
 

@@ -40,6 +40,6 @@
 ## P6 Breakdown
 
 - P6.1 Wall Friction Source Model - Complete
-- P6.2 Wall Heat-Transfer Source Model - Planned
+- P6.2 Wall Heat-Transfer Source Model - Complete
 - P6.3 Source Composition / Solver Integration - Planned
 - P6.4 Friction / Heat Validation - Planned

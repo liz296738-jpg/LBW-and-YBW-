@@ -1,4 +1,4 @@
-"""Approved geometric and prescribed wall-friction source contributions."""
+"""Approved geometric, prescribed wall-friction, and wall-heat source contributions."""
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -16,8 +16,8 @@ def geometric_area_source(
 
     The mass and energy components are zero.  The momentum component is
     ``p_i * (A_right - A_left) / (A_i * dx)`` [N/m^3], already normalized for
-    direct addition to ``dU/dt``.  Geometry and the independent prescribed wall-
-    friction source are implemented; heat, fuel, and combustion remain unimplemented.
+    direct addition to ``dU/dt``.  Geometry and independent prescribed wall-
+    friction and wall-heat sources are implemented; fuel and combustion remain unimplemented.
     """
     if not isinstance(geometry, AreaProfile):
         raise TypeError("geometry must be an AreaProfile")
@@ -73,4 +73,40 @@ def wall_friction_source(
 
     source = np.zeros_like(states, dtype=float)
     source[..., 1] = -0.5 * friction / diameter * primitive.rho * primitive.u * np.abs(primitive.u)
+    return source
+
+
+def wall_heat_transfer_source(
+    U: ArrayLike,
+    hydraulic_diameter: ArrayLike,
+    wall_heat_flux: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Return the prescribed wall-heat-flux source in SI units.
+
+    ``wall_heat_flux`` [W/m^2] is positive into the gas and negative for gas
+    cooling. ``hydraulic_diameter`` [m] and heat flux may be scalar or broadcast
+    to the state-cell shape. This independent P6.2 contribution is
+    ``[0, 0, 4 q''_w / D_h]`` [W/m^3]; it is not yet assembled into the solver.
+    """
+    states = np.asarray(U, dtype=float)
+    if states.ndim < 1 or states.shape[-1] != 3:
+        raise ValueError("U must have shape (..., 3)")
+    primitive = conservative_to_primitive(states, gas)
+    target_shape = primitive.rho.shape
+
+    diameter = np.asarray(hydraulic_diameter, dtype=float)
+    heat_flux = np.asarray(wall_heat_flux, dtype=float)
+    try:
+        diameter = np.broadcast_to(diameter, target_shape)
+        heat_flux = np.broadcast_to(heat_flux, target_shape)
+    except ValueError as error:
+        raise ValueError("hydraulic_diameter and wall_heat_flux must broadcast to the state shape") from error
+    if not np.all(np.isfinite(diameter) & (diameter > 0.0)):
+        raise ValueError("hydraulic_diameter must be finite and strictly positive")
+    if not np.all(np.isfinite(heat_flux)):
+        raise ValueError("wall_heat_flux must be finite")
+
+    source = np.zeros_like(states, dtype=float)
+    source[..., 2] = 4.0 * heat_flux / diameter
     return source
