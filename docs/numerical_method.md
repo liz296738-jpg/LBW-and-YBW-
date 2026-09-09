@@ -64,6 +64,8 @@ P3.5 uses the uniform-grid baseline `dt = CFL * dx / max(|u| + a)` with default 
 
 ## P6.3 Wall-Source Integration
 
+P7.3 composes the prescribed distributed fuel source explicitly into the quasi-1D RHS after the base residual and optional wall sources. It is evaluated anew at every SSP-RK3 stage; the Euler-wave CFL formula is unchanged and no source-specific limiter is used.
+
 The quasi-1D RHS retains its area-weighted flux divergence and geometric source, then adds the composed prescribed wall-friction and wall-heat sources. Active wall sources are evaluated inside `RHS(U_stage)` for each of the three SSP-RK3 stages; they are not frozen at the start of a timestep. The CFL formula remains based only on Euler wave speed. Assessment of source stiffness for stronger cases is deferred to P6.4.
 
 ## P6.4 Validation Status

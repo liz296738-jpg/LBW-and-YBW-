@@ -1,4 +1,4 @@
-"""Source-free Euler and wall-source-enabled quasi-one-dimensional solvers."""
+"""Euler and quasi-one-dimensional solvers with optional wall and fuel sources."""
 
 from typing import NamedTuple
 
@@ -10,7 +10,7 @@ from .config import GasProperties, NumericalConfig
 from .gas import speed_of_sound
 from .geometry import AreaProfile
 from .spatial import finite_volume_residual, internal_rusanov_fluxes, internal_numerical_fluxes, quasi_1d_residual
-from .source_terms import combined_wall_source
+from .source_terms import combined_wall_source, distributed_fuel_injection_source
 from .state import conservative_to_primitive
 from .time_integration import ssp_rk3_step
 
@@ -67,6 +67,21 @@ def _wall_physics_enabled(
     return active
 
 
+def _fuel_injection_enabled(states: NDArray[np.float64], mass_flow: object, velocity: object, enthalpy: object) -> bool:
+    """Validate fuel inputs and return whether the prescribed distribution is active."""
+    target_shape = states.shape[:-1]
+    values = [np.asarray(value, dtype=float) for value in (mass_flow, velocity, enthalpy)]
+    try:
+        distribution, injection_velocity, total_enthalpy = [np.broadcast_to(value, target_shape) for value in values]
+    except ValueError as error:
+        raise ValueError("fuel inputs must broadcast to the state shape") from error
+    if not np.all(np.isfinite(distribution) & (distribution >= 0.0)):
+        raise ValueError("fuel_mass_flow_rate_per_length must be finite and nonnegative")
+    if not np.all(np.isfinite(injection_velocity)) or not np.all(np.isfinite(total_enthalpy)):
+        raise ValueError("fuel axial velocity and total enthalpy must be finite")
+    return bool(np.any(distribution != 0.0))
+
+
 def cfl_timestep(U: ArrayLike, dx: object, gas: GasProperties, numerical: NumericalConfig) -> float:
     """Return CFL*dx/max(|u|+a) [s] for valid conservative states on a uniform grid."""
     spacing = _positive_scalar("dx", dx)
@@ -95,6 +110,9 @@ def quasi_1d_rhs_transmissive(
     hydraulic_diameter: object = None,
     darcy_friction_factor: object = 0.0,
     wall_heat_flux: object = 0.0,
+    fuel_mass_flow_rate_per_length: object = 0.0,
+    fuel_axial_velocity: object = 0.0,
+    fuel_specific_total_enthalpy: object = 0.0,
 ) -> NDArray[np.float64]:
     """Return the quasi-1D RHS with transmissive boundaries and optional wall sources."""
     if not isinstance(geometry, AreaProfile):
@@ -107,12 +125,15 @@ def quasi_1d_rhs_transmissive(
 
     spacing = _positive_scalar("dx", dx)
     wall_active = _wall_physics_enabled(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
+    fuel_active = _fuel_injection_enabled(states, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
     ghosted = transmissive_ghost_cells(states)
     interface_fluxes = internal_numerical_fluxes(ghosted, gas, scheme=flux_scheme)
     rhs = quasi_1d_residual(states, interface_fluxes, geometry, spacing, gas)
-    if not wall_active:
-        return rhs
-    return rhs + combined_wall_source(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
+    if wall_active:
+        rhs = rhs + combined_wall_source(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
+    if fuel_active:
+        rhs = rhs + distributed_fuel_injection_source(states, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
+    return rhs
 
 
 def solve_euler_1d(
@@ -136,7 +157,6 @@ def solve_euler_1d(
     state = np.array(state, dtype=float, copy=True)
     time = 0.0
     steps = 0
-
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
         return euler_rhs_transmissive(stage_state, spacing, gas)
 
@@ -171,6 +191,9 @@ def solve_quasi_1d(
     hydraulic_diameter: object = None,
     darcy_friction_factor: object = 0.0,
     wall_heat_flux: object = 0.0,
+    fuel_mass_flow_rate_per_length: object = 0.0,
+    fuel_axial_velocity: object = 0.0,
+    fuel_specific_total_enthalpy: object = 0.0,
 ) -> SolverResult:
     """Advance quasi-1D Euler flow with optional prescribed wall sources to t_final."""
     state = np.asarray(U0, dtype=float)
@@ -188,25 +211,29 @@ def solve_quasi_1d(
     if flux_scheme not in ("rusanov", "steger-warming"):
         raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
     wall_active = _wall_physics_enabled(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
+    fuel_active = _fuel_injection_enabled(state, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
     if wall_active:
         combined_wall_source(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
+    if fuel_active:
+        distributed_fuel_injection_source(state, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
 
     state = np.array(state, dtype=float, copy=True)
     time = 0.0
     steps = 0
+    source_kwargs: dict[str, object] = {}
+    if wall_active:
+        source_kwargs.update(hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux)
+    if fuel_active:
+        source_kwargs.update(fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy)
 
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
-        if not wall_active:
-            return quasi_1d_rhs_transmissive(stage_state, geometry, spacing, gas, flux_scheme=flux_scheme)
         return quasi_1d_rhs_transmissive(
             stage_state,
             geometry,
             spacing,
             gas,
             flux_scheme=flux_scheme,
-            hydraulic_diameter=hydraulic_diameter,
-            darcy_friction_factor=darcy_friction_factor,
-            wall_heat_flux=wall_heat_flux,
+            **source_kwargs,
         )
 
     while time < final_time:
