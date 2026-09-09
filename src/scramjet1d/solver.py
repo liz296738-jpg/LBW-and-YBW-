@@ -114,7 +114,7 @@ def quasi_1d_rhs_transmissive(
     fuel_axial_velocity: object = 0.0,
     fuel_specific_total_enthalpy: object = 0.0,
 ) -> NDArray[np.float64]:
-    """Return the quasi-1D RHS with transmissive boundaries and optional wall sources."""
+    """Return the quasi-1D RHS with transmissive boundaries and optional wall and fuel sources."""
     if not isinstance(geometry, AreaProfile):
         raise TypeError("geometry must be an AreaProfile")
     states = np.asarray(U, dtype=float)
@@ -195,7 +195,7 @@ def solve_quasi_1d(
     fuel_axial_velocity: object = 0.0,
     fuel_specific_total_enthalpy: object = 0.0,
 ) -> SolverResult:
-    """Advance quasi-1D Euler flow with optional prescribed wall sources to t_final."""
+    """Advance quasi-1D Euler flow with optional prescribed wall and fuel sources to t_final."""
     state = np.asarray(U0, dtype=float)
     if state.ndim != 2 or state.shape[-1] != 3 or state.shape[0] < 2:
         raise ValueError("U0 must have shape (N, 3) with N >= 2")

@@ -43,3 +43,23 @@ def test_rhs_matches_manual_fuel_and_wall_composition(scheme):
 @pytest.mark.parametrize("kwargs",[{"fuel_mass_flow_rate_per_length":-1.},{"fuel_mass_flow_rate_per_length":np.nan},{"fuel_axial_velocity":np.nan},{"fuel_specific_total_enthalpy":np.inf}])
 def test_invalid_fuel_configuration_fails_early(kwargs):
     with pytest.raises(ValueError): solve_quasi_1d(state(),constant_area_profile(12,.02),1/12,.0001,GAS,NumericalConfig(),**kwargs)
+
+def test_fuel_source_is_re_evaluated_for_three_distinct_rk_stages(monkeypatch):
+    import scramjet1d.solver as solver_module
+    calls=[]; original=solver_module.distributed_fuel_injection_source
+    def wrapped(U, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas):
+        calls.append((np.array(U, copy=True), geometry, np.array(fuel_mass_flow_rate_per_length, copy=True), np.array(fuel_axial_velocity, copy=True), np.array(fuel_specific_total_enthalpy, copy=True)))
+        return original(U, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
+    monkeypatch.setattr(solver_module, "distributed_fuel_injection_source", wrapped)
+    solve_quasi_1d(state(), constant_area_profile(12,.02), 1/12, 1e-6, GAS, NumericalConfig(cfl=.5), fuel_mass_flow_rate_per_length=.02, fuel_axial_velocity=100., fuel_specific_total_enthalpy=1e6)
+    stages=calls[-3:]
+    assert len(stages)==3
+    assert np.max(np.abs(stages[0][0]-stages[1][0]))>0
+    assert np.max(np.abs(stages[1][0]-stages[2][0]))>0
+    assert all(item[1] is stages[0][1] for item in stages)
+
+def test_wall_only_equals_wall_with_explicit_zero_fuel():
+    args=(state(),constant_area_profile(12,.02),1/12,1e-5,GAS,NumericalConfig(cfl=.5))
+    a=solve_quasi_1d(*args,hydraulic_diameter=.1,darcy_friction_factor=.01,wall_heat_flux=20000.)
+    b=solve_quasi_1d(*args,hydraulic_diameter=.1,darcy_friction_factor=.01,wall_heat_flux=20000.,fuel_mass_flow_rate_per_length=0.,fuel_axial_velocity=0.,fuel_specific_total_enthalpy=0.)
+    assert_allclose(a.U,b.U,rtol=0,atol=0); assert a.time==b.time and a.steps==b.steps

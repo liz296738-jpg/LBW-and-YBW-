@@ -24,7 +24,7 @@ P6.1 adds the independent prescribed Darcy-factor wall-friction momentum source.
 - Variable-area duct
 - Prescribed Darcy-factor wall-friction momentum source
 - Prescribed wall-heat-flux energy source
-- Prescribed local fuel mass/momentum/energy injection source (not yet integrated into `solve_quasi_1d`)
+- Prescribed local and distributed fuel mass/momentum/energy injection source integrated into `solve_quasi_1d`
 - Mapping from prescribed axial fuel mass-flow distribution `d(mdot_f)/dx` to a local volumetric source
 
 ## Planned Physics
