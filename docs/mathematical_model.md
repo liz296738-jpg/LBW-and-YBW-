@@ -74,7 +74,7 @@ The source contribution is
 
 The signed `u |u|` factor ensures drag opposes either flow direction. The mass source is exactly zero. For the stationary, adiabatic wall assumed here, the total-energy source is also exactly zero: friction redistributes kinetic and internal energy without net wall energy transfer.
 
-Cross-sectional area alone does not determine wetted perimeter or hydraulic diameter. Therefore `D_h` is prescribed explicitly and is not inferred from `AreaProfile`; this avoids making an unsupported circular-duct assumption. The Darcy factor is likewise prescribed, with no Reynolds-number or roughness correlation in P6.1. The source function is not yet connected to the quasi-1D solver; P6.3 will compose and integrate source terms.
+Cross-sectional area alone does not determine wetted perimeter or hydraulic diameter. Therefore `D_h` is prescribed explicitly and is not inferred from `AreaProfile`; this avoids making an unsupported circular-duct assumption. The Darcy factor is likewise prescribed, with no Reynolds-number or roughness correlation. The source is composed with wall heat and evaluated at every SSP-RK3 stage in the quasi-1D solver.
 
 ## Wall Heat-Transfer Model — P6.2
 
@@ -96,7 +96,7 @@ Here `S_area = [0, p Delta_A / (A dx), 0]`, `S_f = [0, -f_D rho u |u| / (2 D_h),
 
 All active physical sources are evaluated from the current SSP-RK3 stage state rather than being frozen once per timestep. The existing Euler-wave-speed CFL formula is unchanged. No source-stiffness limiter, clipping, new boundary condition, friction correlation, or heat-transfer correlation is introduced.
 
-P6.4 validates the exact uniform-source temporal evolution and constructs Fanno/Rayleigh continuum profiles for steady residual-consistency checks. The strict all-path first-order residual gate is not yet satisfied: smooth Fanno Rusanov residuals converge near second order, while the supersonic Steger-Warming Rayleigh energy residual is at discrete roundoff level. The prescribed P6 model is implemented and coupled, but P6 remains in progress pending a validation-criterion decision.
+P6.4 validates exact uniform-source temporal evolution and Fanno/Rayleigh continuum steady residual consistency. Primary residuals are normalized by the RMS magnitude of their prescribed source. Monotone first-order-or-better paths are classified as convergent or superconvergent; a normalized finest residual at or below `1e-10` is roundoff-limited. Rusanov Fanno paths are valid superconvergent residuals, while the fully rightgoing supersonic Steger-Warming Rayleigh energy residual is roundoff-limited because the corresponding discrete flux/source balance is exact for the linear energy flux. This is not a general higher-order claim for Steger-Warming.
 
 ## Isentropic Area Validation
 

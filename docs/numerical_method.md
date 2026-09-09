@@ -10,7 +10,7 @@ P3.2 implements the temporary verified baseline Rusanov / Local Lax-Friedrichs f
 
 `F_hat = 0.5 * (F_L + F_R) - 0.5 * alpha * (U_R - U_L)`
 
-where `alpha = max(|u_L| + a_L, |u_R| + a_R)`. It provides a simple, stable, but comparatively dissipative baseline for later spatial-residual and time-integration verification. The planned Steger-Warming method remains unchanged.
+where `alpha = max(|u_L| + a_L, |u_R| + a_R)`. It provides a simple, stable, but comparatively dissipative baseline. Steger-Warming is implemented and independently validated as the alternate first-order interface flux.
 
 ## Baseline Spatial Discretization
 
@@ -68,7 +68,7 @@ The quasi-1D RHS retains its area-weighted flux divergence and geometric source,
 
 ## P6.4 Validation Status
 
-The uniform wall-source benchmark shows third-order SSP-RK3 temporal behavior (observed velocity order about 2.999) and the tested mild/moderate prescribed-source range remains physical with the existing Euler-wave CFL. Fanno and Rayleigh profiles are evaluated as continuum steady residual-consistency references, not as boundary-driven solutions under transmissive boundaries. The strict requirement that every scheme/branch exhibit a first-order residual trend is not met: smooth Fanno Rusanov residuals converge near second order, while the supersonic Steger-Warming Rayleigh energy residual is at discrete roundoff level and is not monotonic. P6 therefore remains in progress pending an architectural decision on the validation criterion; no numerical method was changed to force this result.
+The uniform wall-source benchmark shows third-order SSP-RK3 temporal behavior (final observed velocity order about 2.999) for both flux schemes. The 1x, 2x, and 4x prescribed-source cases (`f_D=0.02/0.04/0.08`, `q''=50/100/200 kW/m²`) remain physical and reach final time at CFL 0.5/0.25/0.125. Fanno and Rayleigh profiles are continuum steady residual-consistency references, not boundary-driven solutions under transmissive boundaries. Fanno Rusanov primary residuals are valid superconvergent paths; supersonic Steger-Warming Rayleigh energy is normalized roundoff-limited because fully rightgoing splitting reduces to the left physical flux and its linear energy-flux profile is differentiated exactly by the backward difference. No general Steger-Warming high-order property is inferred.
 
 P5.4 controlled validation confirms the interface law `F_hat_SW = F_plus(U_L) + F_minus(U_R)`, first-order spatial convergence on isentropic residual and smooth entropy-wave benchmarks, and physical finite states in the requested shock and near-sonic smoke cases. SSP-RK3 is third order in time, but the overall smooth-benchmark accuracy is spatial first-order dominant because reconstruction remains piecewise constant.
 

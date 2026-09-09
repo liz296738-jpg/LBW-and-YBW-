@@ -1,2 +1,1 @@
-"""Scramjet quasi-1D CFD package skeleton (P0/P1 only)."""
-
+"""Quasi-one-dimensional compressible-flow CFD tools for scramjet modeling."""

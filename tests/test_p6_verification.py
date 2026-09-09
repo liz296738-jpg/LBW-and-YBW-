@@ -7,6 +7,7 @@ from numpy.testing import assert_allclose
 from scramjet1d.config import GasProperties
 from scramjet1d.state import conservative_to_primitive
 from scramjet1d.verification import (
+    assess_residual_convergence,
     fanno_parameter,
     fanno_flow_reference,
     mach_from_fanno_parameter,
@@ -39,6 +40,27 @@ def test_fanno_parameter_has_sonic_zero_and_positive_nonsonic_values() -> None:
     assert_allclose(fanno_parameter(1.0, GAS), 0.0, rtol=0.0, atol=1e-14)
     assert fanno_parameter(0.4, GAS) > 0.0
     assert fanno_parameter(2.0, GAS) > 0.0
+
+
+def test_fanno_supersonic_inversion_rejects_targets_beyond_its_finite_branch_limit() -> None:
+    limit = -1.0 / GAS.gamma + (GAS.gamma + 1.0) / (2.0 * GAS.gamma) * np.log((GAS.gamma + 1.0) / (GAS.gamma - 1.0))
+    with pytest.raises(ValueError, match="exceeds the supersonic branch limit"):
+        mach_from_fanno_parameter(limit * (1.0 + 1e-8), GAS, "supersonic")
+
+
+def test_residual_assessment_accepts_superconvergence_and_roundoff_limited_sequences() -> None:
+    superconvergent = assess_residual_convergence([1.0, 0.25, 0.0625], 2.0)
+    roundoff_limited = assess_residual_convergence([3e-13, 8e-13, 2e-13], 1.0)
+    assert superconvergent.classification == "superconvergent"
+    assert superconvergent.monotone
+    assert_allclose(superconvergent.final_order, 2.0)
+    assert roundoff_limited.classification == "roundoff-limited"
+    assert roundoff_limited.normalized_finest_error <= 1e-10
+
+
+def test_residual_assessment_rejects_nonmonotone_or_low_order_sequences() -> None:
+    assert assess_residual_convergence([1.0, 0.9, 0.85], 1.0).classification == "failed"
+    assert assess_residual_convergence([1.0, 1.1, 0.5], 1.0).classification == "failed"
 
 
 @pytest.mark.parametrize("mach", [0.4, 0.8, 1.5, 2.0])

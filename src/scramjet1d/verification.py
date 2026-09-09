@@ -120,6 +120,40 @@ class UniformWallSourceReference(NamedTuple):
     primitive: PrimitiveVariables
 
 
+class ResidualConvergenceAssessment(NamedTuple):
+    """Classification of a grid-refined, source-normalized residual series."""
+
+    classification: str
+    monotone: bool
+    final_order: float | None
+    normalized_finest_error: float
+
+
+def assess_residual_convergence(
+    errors: ArrayLike,
+    reference_scale: object,
+    *,
+    roundoff_threshold: float = 1e-10,
+) -> ResidualConvergenceAssessment:
+    """Classify residual refinement, allowing nonmonotone floating-point roundoff."""
+    values = np.asarray(errors, dtype=float)
+    scale = require_positive_scalar("reference_scale", reference_scale)
+    threshold = require_positive_scalar("roundoff_threshold", roundoff_threshold)
+    if values.ndim != 1 or values.size == 0:
+        raise ValueError("errors must be a nonempty one-dimensional array")
+    normalized_finest = float(values[-1] / scale) if np.isfinite(values[-1]) else float("inf")
+    monotone = bool(np.all(np.isfinite(values)) and np.all(values[1:] < values[:-1]))
+    if normalized_finest <= threshold:
+        return ResidualConvergenceAssessment("roundoff-limited", monotone, None, normalized_finest)
+    if not np.all(np.isfinite(values) & (values > 0.0)):
+        return ResidualConvergenceAssessment("failed", monotone, None, normalized_finest)
+    final_order = observed_order(values[-2], values[-1]) if values.size >= 2 else None
+    if monotone and final_order is not None and final_order >= 0.75:
+        classification = "superconvergent" if final_order > 1.5 else "convergent"
+        return ResidualConvergenceAssessment(classification, monotone, final_order, normalized_finest)
+    return ResidualConvergenceAssessment("failed", monotone, final_order, normalized_finest)
+
+
 def _branch_name(branch: object) -> str:
     if branch not in ("subsonic", "supersonic"):
         raise ValueError("branch must be 'subsonic' or 'supersonic'")
@@ -172,6 +206,9 @@ def mach_from_fanno_parameter(value: ArrayLike, gas: GasProperties, branch: str)
         if selected_branch == "subsonic":
             low, high = np.finfo(float).eps, 1.0
         else:
+            supersonic_limit = -1.0 / gas.gamma + (gas.gamma + 1.0) / (2.0 * gas.gamma) * np.log((gas.gamma + 1.0) / (gas.gamma - 1.0))
+            if target >= supersonic_limit:
+                raise ValueError("target Fanno parameter exceeds the supersonic branch limit")
             low, high = 1.0, 2.0
             while float(fanno_parameter(high, gas)) < target:
                 high *= 2.0
