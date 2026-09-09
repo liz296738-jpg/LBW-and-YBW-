@@ -80,6 +80,22 @@ def test_batched_left_single_right_broadcasts() -> None:
     assert_allclose(steger_warming_flux(left, right, GAS), np.stack([steger_warming_flux(item, right, GAS) for item in left]))
 
 
+@pytest.mark.parametrize(
+    "right",
+    [
+        np.array([np.nan, 0.0, 1.0]),
+        np.array([np.inf, 0.0, 1.0]),
+        np.array([0.0, 0.0, 1.0]),
+        np.array([1.0, 0.0, 0.0]),
+    ],
+    ids=["nan", "infinite", "nonpositive-density", "nonpositive-pressure"],
+)
+def test_valid_left_rejects_invalid_right_state(right: np.ndarray) -> None:
+    left = state(1.0, 100.0, 100_000.0)
+    with pytest.raises(ValueError):
+        steger_warming_flux(left, right, GAS)
+
+
 def test_inputs_are_not_modified_and_mixed_regimes_are_finite() -> None:
     left, right = state(1.0, 100.0, 100_000.0), state(0.9, 800.0, 90_000.0)
     left_original, right_original = left.copy(), right.copy()
