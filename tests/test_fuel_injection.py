@@ -97,6 +97,11 @@ def test_nonbroadcastable_parameters_are_rejected(parameter: np.ndarray) -> None
     with pytest.raises(ValueError): fuel_injection_source(_state((2, 5)), parameter, 1.0, 1.0, GAS)
 
 
+def test_nonbroadcastable_velocity_and_enthalpy_are_rejected() -> None:
+    with pytest.raises(ValueError): fuel_injection_source(_state((2, 5)), 1.0, np.ones(3), 1.0, GAS)
+    with pytest.raises(ValueError): fuel_injection_source(_state((2, 5)), 1.0, 1.0, np.ones(3), GAS)
+
+
 @pytest.mark.parametrize("state", [np.array([np.nan, 1.0, 1.0]), np.array([np.inf, 1.0, 1.0]), np.array([-1.0, 0.0, 1.0]), np.array([1.0, 0.0, 0.0])])
 def test_invalid_cfd_state_is_rejected(state: np.ndarray) -> None:
     with pytest.raises(ValueError): fuel_injection_source(state, 1.0, 1.0, 1.0, GAS)

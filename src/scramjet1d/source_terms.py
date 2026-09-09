@@ -19,8 +19,8 @@ def geometric_area_source(
 
     The mass and energy components are zero.  The momentum component is
     ``p_i * (A_right - A_left) / (A_i * dx)`` [N/m^3], already normalized for
-    direct addition to ``dU/dt``.  Geometry and independent prescribed wall-
-    friction and wall-heat sources are implemented; fuel and combustion remain unimplemented.
+    direct addition to ``dU/dt``. Wall sources and prescribed fuel injection
+    are implemented independently; combustion remains unimplemented.
     """
     if not isinstance(geometry, AreaProfile):
         raise TypeError("geometry must be an AreaProfile")
@@ -172,3 +172,51 @@ def fuel_injection_source(
     source[..., 1] = mass_rate * injection_velocity
     source[..., 2] = mass_rate * total_enthalpy
     return source
+
+
+def fuel_mass_source_rate_from_axial_distribution(
+    U: ArrayLike,
+    geometry: AreaProfile,
+    fuel_mass_flow_rate_per_length: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Convert prescribed ``d(mdot_f)/dx`` [kg/(m s)] to kg/(m^3 s).
+
+    The local quasi-1D mapping is ``rho_dot_f = (d(mdot_f)/dx) / A_cell``;
+    it deliberately has no ``dx`` argument.  A distributed source requires a
+    cell dimension, so local single-state input ``(3,)`` is not accepted.
+    """
+    if not isinstance(geometry, AreaProfile):
+        raise TypeError("geometry must be an AreaProfile")
+    states = np.asarray(U, dtype=float)
+    if states.ndim < 2 or states.shape[-1] != 3:
+        raise ValueError("U must have shape (..., N, 3) for axial distribution")
+    if states.shape[-2] != geometry.num_cells:
+        raise ValueError("U cell count must match geometry.num_cells")
+    primitive = conservative_to_primitive(states, gas)
+    target_shape = primitive.rho.shape
+    distribution = np.asarray(fuel_mass_flow_rate_per_length, dtype=float)
+    try:
+        distribution = np.broadcast_to(distribution, target_shape)
+    except ValueError as error:
+        raise ValueError("fuel_mass_flow_rate_per_length must broadcast to the state cell shape") from error
+    if not np.all(np.isfinite(distribution) & (distribution >= 0.0)):
+        raise ValueError("fuel_mass_flow_rate_per_length must be finite and nonnegative")
+    return distribution / geometry.cell_area
+
+
+def distributed_fuel_injection_source(
+    U: ArrayLike,
+    geometry: AreaProfile,
+    fuel_mass_flow_rate_per_length: ArrayLike,
+    fuel_axial_velocity: ArrayLike,
+    fuel_specific_total_enthalpy: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Compose axial-distribution conversion with the P7.1 fuel source."""
+    mass_source_rate = fuel_mass_source_rate_from_axial_distribution(
+        U, geometry, fuel_mass_flow_rate_per_length, gas
+    )
+    return fuel_injection_source(
+        U, mass_source_rate, fuel_axial_velocity, fuel_specific_total_enthalpy, gas
+    )

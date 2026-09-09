@@ -108,6 +108,14 @@ The components have units kg/(m^3 s), N/m^3, and W/m^3 respectively. The injecte
 
 `S_fuel` is not a combustion source: P7.1 includes no LHV, heat release, combustion efficiency, reaction progress, mixing-loss model, injector pressure force, spray model, or phase-change model. Fuel is represented only as added mass, axial momentum, and total enthalpy in the existing three-equation homogenized perfect-gas state. No fuel mass fraction or species transport equation is present, and this standalone source is not yet connected to `solve_quasi_1d`.
 
+## Quasi-1D Fuel Distribution — P7.2
+
+P7.2 accepts a prescribed axial distribution `mdot'_f = d(mdot_f)/dx` [kg/(m s)]. For a cell of length `dx`, `d(mdot_f)=mdot'_f dx` and `dV=A dx`; therefore the local volumetric rate is `rho_dot_f=mdot'_f/A`. The local conversion needs no `dx` argument and uses the cell-centred area `A_i`, not face area.
+
+The discrete conservation identities are `sum(rho_dot_f,i A_i dx)=sum(mdot'_f,i dx)`, `sum(S_m,i A_i dx)=sum(mdot'_f,i u_f,i dx)`, and `sum(S_E,i A_i dx)=sum(mdot'_f,i h_t,f,i dx)`. A smaller cell area gives a larger volumetric source for the same line distribution, but not more integrated injected fuel because the cell volume decreases by the same factor.
+
+The distribution is prescribed by the caller. P7.2 implements no injector geometry, profile generator, jet penetration, spray, or mixing model. It converts the prescribed line source and reuses the P7.1 source mapping; it is not connected to `solve_quasi_1d`.
+
 ## Isentropic Area Validation
 
 P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.

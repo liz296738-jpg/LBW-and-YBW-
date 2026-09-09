@@ -47,6 +47,6 @@
 ## P7 Breakdown
 
 - P7.1 Prescribed Local Fuel Injection Source - Complete
-- P7.2 Quasi-1D Injection Distribution / Composition - Planned
+- P7.2 Quasi-1D Injection Distribution / Composition - Complete
 - P7.3 Solver Integration - Planned
 - P7.4 Fuel-Injection Validation - Planned

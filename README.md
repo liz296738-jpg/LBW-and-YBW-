@@ -6,7 +6,7 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P7.1 - Prescribed Local Fuel Injection Source Model**. P7 is in progress.
+Current stage: **P7.2 - Quasi-1D Fuel Injection Distribution**. P7 is in progress.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 
@@ -25,6 +25,7 @@ P6.1 adds the independent prescribed Darcy-factor wall-friction momentum source.
 - Prescribed Darcy-factor wall-friction momentum source
 - Prescribed wall-heat-flux energy source
 - Prescribed local fuel mass/momentum/energy injection source (not yet integrated into `solve_quasi_1d`)
+- Mapping from prescribed axial fuel mass-flow distribution `d(mdot_f)/dx` to a local volumetric source
 
 ## Planned Physics
 
@@ -40,7 +41,7 @@ Each item will be introduced and validated in a separate stage.
 - Third-order SSP Runge-Kutta time integration
 - CFL-based time stepping
 
-P7.1 provides an independent prescribed local injection mapping only. It has no combustion, species transport, or solver integration; injection distribution is deferred to P7.2 and solver composition to P7.3.
+P7.2 accepts a prescribed axial fuel mass-flow distribution and converts it using local cell area. It has no combustion, species transport, injector-profile model, or solver integration; solver composition remains deferred to P7.3.
 
 ## Development Philosophy
 
