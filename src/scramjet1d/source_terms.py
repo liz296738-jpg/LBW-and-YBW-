@@ -1,4 +1,7 @@
-"""Approved geometric, wall-friction, wall-heat, and combined wall-source contributions."""
+"""Geometry, prescribed wall, and prescribed fuel-injection source contributions.
+
+Combustion remains unimplemented.
+"""
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -124,3 +127,48 @@ def combined_wall_source(
     friction_source = wall_friction_source(U, hydraulic_diameter, darcy_friction_factor, gas)
     heat_source = wall_heat_transfer_source(U, hydraulic_diameter, wall_heat_flux, gas)
     return friction_source + heat_source
+
+
+def fuel_injection_source(
+    U: ArrayLike,
+    fuel_mass_source_rate: ArrayLike,
+    fuel_axial_velocity: ArrayLike,
+    fuel_specific_total_enthalpy: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Return prescribed local fuel injection source ``[mass, momentum, energy]``.
+
+    ``fuel_mass_source_rate`` is nonnegative and expressed in kg/(m^3 s).
+    ``fuel_axial_velocity`` [m/s] and ``fuel_specific_total_enthalpy`` [J/kg]
+    are finite signed prescribed values.  The mapping is
+    ``[rho_dot_f, rho_dot_f*u_f,x, rho_dot_f*h_t,f]``.  The supplied total
+    enthalpy already includes injected-stream kinetic energy; no extra
+    velocity-squared term or combustion heat release is added.
+    """
+    states = np.asarray(U, dtype=float)
+    if states.ndim < 1 or states.shape[-1] != 3:
+        raise ValueError("U must have shape (..., 3)")
+    primitive = conservative_to_primitive(states, gas)
+    target_shape = primitive.rho.shape
+
+    mass_rate = np.asarray(fuel_mass_source_rate, dtype=float)
+    injection_velocity = np.asarray(fuel_axial_velocity, dtype=float)
+    total_enthalpy = np.asarray(fuel_specific_total_enthalpy, dtype=float)
+    try:
+        mass_rate = np.broadcast_to(mass_rate, target_shape)
+        injection_velocity = np.broadcast_to(injection_velocity, target_shape)
+        total_enthalpy = np.broadcast_to(total_enthalpy, target_shape)
+    except ValueError as error:
+        raise ValueError("fuel injection inputs must broadcast to the state shape") from error
+    if not np.all(np.isfinite(mass_rate) & (mass_rate >= 0.0)):
+        raise ValueError("fuel_mass_source_rate must be finite and nonnegative")
+    if not np.all(np.isfinite(injection_velocity)):
+        raise ValueError("fuel_axial_velocity must be finite")
+    if not np.all(np.isfinite(total_enthalpy)):
+        raise ValueError("fuel_specific_total_enthalpy must be finite")
+
+    source = np.zeros_like(states, dtype=float)
+    source[..., 0] = mass_rate
+    source[..., 1] = mass_rate * injection_velocity
+    source[..., 2] = mass_rate * total_enthalpy
+    return source

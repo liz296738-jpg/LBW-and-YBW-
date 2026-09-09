@@ -98,6 +98,16 @@ All active physical sources are evaluated from the current SSP-RK3 stage state r
 
 P6.4 validates exact uniform-source temporal evolution and Fanno/Rayleigh continuum steady residual consistency. Primary residuals are normalized by the RMS magnitude of their prescribed source. Monotone first-order-or-better paths are classified as convergent or superconvergent; a normalized finest residual at or below `1e-10` is roundoff-limited. Rusanov Fanno paths are valid superconvergent residuals, while the fully rightgoing supersonic Steger-Warming Rayleigh energy residual is roundoff-limited because the corresponding discrete flux/source balance is exact for the linear energy flux. This is not a general higher-order claim for Steger-Warming.
 
+## Fuel Injection Model — P7.1
+
+P7.1 introduces an independent prescribed local volumetric fuel source, with fuel mass source rate `rho_dot_f` [kg/(m^3 s)], axial injection velocity `u_f,x` [m/s], and injected-stream specific total enthalpy `h_t,f` [J/kg]:
+
+`S_fuel = [rho_dot_f, rho_dot_f u_f,x, rho_dot_f h_t,f]`.
+
+The components have units kg/(m^3 s), N/m^3, and W/m^3 respectively. The injected energy source uses specific total enthalpy because fuel enters the control volume as a mass flux. The supplied total enthalpy already includes the injected stream kinetic contribution, so `fuel_injection_source` adds no additional `u_f^2/2` term.
+
+`S_fuel` is not a combustion source: P7.1 includes no LHV, heat release, combustion efficiency, reaction progress, mixing-loss model, injector pressure force, spray model, or phase-change model. Fuel is represented only as added mass, axial momentum, and total enthalpy in the existing three-equation homogenized perfect-gas state. No fuel mass fraction or species transport equation is present, and this standalone source is not yet connected to `solve_quasi_1d`.
+
 ## Isentropic Area Validation
 
 P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.
