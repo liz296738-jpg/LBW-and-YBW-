@@ -66,6 +66,10 @@ P3.5 uses the uniform-grid baseline `dt = CFL * dx / max(|u| + a)` with default 
 
 The quasi-1D RHS retains its area-weighted flux divergence and geometric source, then adds the composed prescribed wall-friction and wall-heat sources. Active wall sources are evaluated inside `RHS(U_stage)` for each of the three SSP-RK3 stages; they are not frozen at the start of a timestep. The CFL formula remains based only on Euler wave speed. Assessment of source stiffness for stronger cases is deferred to P6.4.
 
+## P6.4 Validation Status
+
+The uniform wall-source benchmark shows third-order SSP-RK3 temporal behavior (observed velocity order about 2.999) and the tested mild/moderate prescribed-source range remains physical with the existing Euler-wave CFL. Fanno and Rayleigh profiles are evaluated as continuum steady residual-consistency references, not as boundary-driven solutions under transmissive boundaries. The strict requirement that every scheme/branch exhibit a first-order residual trend is not met: smooth Fanno Rusanov residuals converge near second order, while the supersonic Steger-Warming Rayleigh energy residual is at discrete roundoff level and is not monotonic. P6 therefore remains in progress pending an architectural decision on the validation criterion; no numerical method was changed to force this result.
+
 P5.4 controlled validation confirms the interface law `F_hat_SW = F_plus(U_L) + F_minus(U_R)`, first-order spatial convergence on isentropic residual and smooth entropy-wave benchmarks, and physical finite states in the requested shock and near-sonic smoke cases. SSP-RK3 is third order in time, but the overall smooth-benchmark accuracy is spatial first-order dominant because reconstruction remains piecewise constant.
 
 ## Convergence

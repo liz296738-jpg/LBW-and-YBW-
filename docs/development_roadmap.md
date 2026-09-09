@@ -42,4 +42,4 @@
 - P6.1 Wall Friction Source Model - Complete
 - P6.2 Wall Heat-Transfer Source Model - Complete
 - P6.3 Source Composition / Solver Integration - Complete
-- P6.4 Friction / Heat Validation - Planned
+- P6.4 Friction / Heat Validation - Incomplete (strict residual-order gate not met on every path)

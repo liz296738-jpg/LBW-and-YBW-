@@ -96,6 +96,8 @@ Here `S_area = [0, p Delta_A / (A dx), 0]`, `S_f = [0, -f_D rho u |u| / (2 D_h),
 
 All active physical sources are evaluated from the current SSP-RK3 stage state rather than being frozen once per timestep. The existing Euler-wave-speed CFL formula is unchanged. No source-stiffness limiter, clipping, new boundary condition, friction correlation, or heat-transfer correlation is introduced.
 
+P6.4 validates the exact uniform-source temporal evolution and constructs Fanno/Rayleigh continuum profiles for steady residual-consistency checks. The strict all-path first-order residual gate is not yet satisfied: smooth Fanno Rusanov residuals converge near second order, while the supersonic Steger-Warming Rayleigh energy residual is at discrete roundoff level. The prescribed P6 model is implemented and coupled, but P6 remains in progress pending a validation-criterion decision.
+
 ## Isentropic Area Validation
 
 P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.
