@@ -58,6 +58,24 @@ P4.3 introduces no governing equation. It advances the existing semi-discrete re
 
 P5 changes only numerical flux construction methodology; it does not alter the governing equations or physical model.
 
+## Wall Friction Model — P6.1
+
+P6.1 defines an independent, prescribed wall-friction source using the **Darcy friction factor** `f_D` (not the Fanning factor; `f_D = 4 f_F`). The hydraulic diameter is an explicit input,
+
+`D_h = 4 A / P_w`,
+
+where `P_w` is wetted perimeter. The Darcy wall shear stress is
+
+`tau_w = (f_D / 8) rho u |u|`.
+
+The source contribution is
+
+`S_f = [0, -f_D rho u |u| / (2 D_h), 0]`.
+
+The signed `u |u|` factor ensures drag opposes either flow direction. The mass source is exactly zero. For the stationary, adiabatic wall assumed here, the total-energy source is also exactly zero: friction redistributes kinetic and internal energy without net wall energy transfer. Heat transfer is deferred to P6.2.
+
+Cross-sectional area alone does not determine wetted perimeter or hydraulic diameter. Therefore `D_h` is prescribed explicitly and is not inferred from `AreaProfile`; this avoids making an unsupported circular-duct assumption. The Darcy factor is likewise prescribed, with no Reynolds-number or roughness correlation in P6.1. The source function is not yet connected to the quasi-1D solver; P6.3 will compose and integrate source terms.
+
 ## Isentropic Area Validation
 
 P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.

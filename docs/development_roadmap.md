@@ -8,7 +8,7 @@
 | P3 | Complete | Baseline 1D Euler solver | Source-free solver | Conservation checks |
 | P4 | Complete | Variable area | Quasi-1D geometry support | Controlled-area case |
 | P5 | Complete | Steger-Warming + RK3 + CFL | Validated Rusanov / Steger-Warming quasi-1D schemes | Controlled convergence and robustness cases |
-| P6 | Planned | Friction & heat transfer | Separate source models | Per-model validation |
+| P6 | In Progress | Friction & heat transfer | Separate source models | Per-model validation |
 | P7 | Planned | Fuel injection | Injection source model | Mass/momentum/energy checks |
 | P8 | Planned | Combustion | Heat-release model | Controlled combustion validation |
 | P9 | Planned | Boundary/stability improvements | Robust boundary handling | Edge-case test suite |
@@ -36,3 +36,10 @@
 - P5.2 Steger-Warming interface numerical flux - Complete
 - P5.3 Quasi-1D solver integration / scheme selection - Complete
 - P5.4 Steger-Warming validation and comparison - Complete
+
+## P6 Breakdown
+
+- P6.1 Wall Friction Source Model - Complete
+- P6.2 Wall Heat-Transfer Source Model - Planned
+- P6.3 Source Composition / Solver Integration - Planned
+- P6.4 Friction / Heat Validation - Planned
