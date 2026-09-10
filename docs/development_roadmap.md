@@ -10,7 +10,7 @@
 | P5 | Complete | Steger-Warming + RK3 + CFL | Validated Rusanov / Steger-Warming quasi-1D schemes | Controlled convergence and robustness cases |
 | P6 | Complete | Friction & heat transfer | Separate source models | Per-model validation |
 | P7 | Complete | Fuel injection | Prescribed local and distributed injection source | Formal prescribed-source model validation |
-| P8 | In Progress | Combustion | Prescribed local heat-release source | P8.1 unit verification complete |
+| P8 | In Progress | Combustion | Prescribed local and distributed fuel-linked heat-release closures | P8.1/P8.2 unit verification complete |
 | P9 | Planned | Boundary/stability improvements | Robust boundary handling | Edge-case test suite |
 | P10 | Planned | Verification & validation | Verified cases and comparisons | Conservation, benchmark, and grid checks |
 | P11 | Planned | Parametric studies | Reproducible study workflow | Repeatable case outputs |
@@ -54,6 +54,6 @@
 ## P8 Breakdown
 
 - P8.1 Prescribed Local Combustion Heat-Release Source - Complete
-- P8.2 Distributed / Fuel-Linked Heat-Release Closure - Planned
+- P8.2 Distributed / Fuel-Linked Heat-Release Closure - Complete
 - P8.3 Solver Integration - Planned
 - P8.4 Combustion Validation - Planned

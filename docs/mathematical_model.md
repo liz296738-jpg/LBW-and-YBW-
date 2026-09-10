@@ -146,6 +146,35 @@ constant-gamma, constant-R, three-equation homogenized perfect-gas state.
 P8.1 is a standalone source function and is not yet integrated into
 `solve_quasi_1d`.
 
+## Distributed / Fuel-Linked Combustion Heat Release — P8.2
+
+P8.2 closes a prescribed **burned-fuel** axial distribution to the P8.1
+chemical-energy source.  Given a burn rate per length
+`mdot'_burn [kg/(m s)]` and a lower heating value `LHV [J/kg]`, it first forms
+
+`Qdot'_comb = mdot'_burn LHV [W/m]`.
+
+For a cell with cross-sectional area `A_cell [m^2]`, the corresponding
+volumetric heat-release rate is
+
+`qdot_comb = Qdot'_comb / A_cell [W/m^3]`,
+
+and P8.1 then provides `S_comb = [0, 0, qdot_comb]`.  This mapping does not
+include `dx`: multiplication by cell volume `A_cell dx` recovers the assigned
+heat release `Qdot'_comb dx` for every cell, including variable-area ducts.
+
+The P8.2 burn profile is independent of P7's prescribed
+`fuel_mass_flow_rate_per_length` injection profile.  P8.2 neither uses that
+injection rate internally nor assumes injected fuel burns where it is injected;
+injection and burning may occur at different axial locations.  The externally
+prescribed burn rate already denotes reacted fuel, so no combustion-efficiency
+multiplier is applied.  P8.2 does not predict the burn rate or implement fuel
+inventory limiting, species transport, mixing, ignition, flameholding,
+finite-rate chemistry, or reaction progress.  Fuel-availability consistency is
+therefore the caller's responsibility until a transported fuel species exists.
+The constant-gamma, constant-R, three-equation homogenized perfect-gas model is
+unchanged.  P8.2 is standalone and is not yet integrated into `solve_quasi_1d`.
+
 ## Isentropic Area Validation
 
 P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.

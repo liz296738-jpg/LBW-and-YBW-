@@ -1,4 +1,4 @@
-"""Geometry, prescribed wall, fuel-injection, and local heat-release sources."""
+"""Geometry, wall, fuel-injection, and prescribed combustion-source contributions."""
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -161,6 +161,97 @@ def combustion_heat_release_source(
     source = np.zeros_like(states, dtype=float)
     source[..., 2] = heat_release
     return source
+
+
+def heat_release_rate_per_length_from_burned_fuel(
+    fuel_burn_rate_per_length: ArrayLike,
+    fuel_lower_heating_value: ArrayLike,
+) -> NDArray[np.float64]:
+    """Convert a prescribed burned-fuel rate to chemical heat release [W/m].
+
+    ``fuel_burn_rate_per_length`` is the independently prescribed rate of fuel
+    that has actually reacted [kg/(m s)], not the P7 fuel-injection rate. It
+    must be finite and nonnegative. ``fuel_lower_heating_value`` is caller
+    supplied [J/kg], must be finite and strictly positive, and has no default
+    fuel database value. Both inputs may be scalar or broadcast-compatible
+    arrays. The returned line heat-release rate is exactly
+    ``fuel_burn_rate_per_length * fuel_lower_heating_value`` [W/m]. No
+    combustion-efficiency factor, fuel inventory limiter, species transport,
+    or reaction-rate model is applied.
+    """
+    burn_rate = np.asarray(fuel_burn_rate_per_length, dtype=float)
+    lower_heating_value = np.asarray(fuel_lower_heating_value, dtype=float)
+    try:
+        burn_rate, lower_heating_value = np.broadcast_arrays(burn_rate, lower_heating_value)
+    except ValueError as error:
+        raise ValueError("fuel_burn_rate_per_length and fuel_lower_heating_value must broadcast together") from error
+    if not np.all(np.isfinite(burn_rate) & (burn_rate >= 0.0)):
+        raise ValueError("fuel_burn_rate_per_length must be finite and nonnegative")
+    if not np.all(np.isfinite(lower_heating_value) & (lower_heating_value > 0.0)):
+        raise ValueError("fuel_lower_heating_value must be finite and strictly positive")
+    return burn_rate * lower_heating_value
+
+
+def volumetric_heat_release_rate_from_axial_distribution(
+    U: ArrayLike,
+    geometry: AreaProfile,
+    heat_release_rate_per_length: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Map prescribed line heat release [W/m] to cell heat release [W/m^3].
+
+    The rate is divided only by the positive cell-centred area, giving
+    ``qdot_comb = Qdot'_comb / A_cell``. There is deliberately no ``dx``
+    factor. ``heat_release_rate_per_length`` must be finite, nonnegative, and
+    broadcast to ``U.shape[:-1]``. The conservative state and geometry are
+    validated using the existing quasi-1D conventions, while the mapping is
+    otherwise independent of thermodynamic state.
+    """
+    if not isinstance(geometry, AreaProfile):
+        raise TypeError("geometry must be an AreaProfile")
+    states = np.asarray(U, dtype=float)
+    if states.ndim < 2 or states.shape[-1] != 3:
+        raise ValueError("U must have shape (..., N, 3) for axial distribution")
+    if states.shape[-2] != geometry.num_cells:
+        raise ValueError("U cell count must match geometry.num_cells")
+    primitive = conservative_to_primitive(states, gas)
+    target_shape = primitive.rho.shape
+
+    line_heat_release = np.asarray(heat_release_rate_per_length, dtype=float)
+    try:
+        line_heat_release = np.broadcast_to(line_heat_release, target_shape)
+    except ValueError as error:
+        raise ValueError("heat_release_rate_per_length must broadcast to the state shape") from error
+    if not np.all(np.isfinite(line_heat_release) & (line_heat_release >= 0.0)):
+        raise ValueError("heat_release_rate_per_length must be finite and nonnegative")
+    return line_heat_release / geometry.cell_area
+
+
+def distributed_combustion_heat_release_source(
+    U: ArrayLike,
+    geometry: AreaProfile,
+    fuel_burn_rate_per_length: ArrayLike,
+    fuel_lower_heating_value: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Return P8.1 source from an independently prescribed burned-fuel profile.
+
+    This P8.2 composition maps prescribed reacted fuel [kg/(m s)] through a
+    caller-supplied positive LHV [J/kg] to line heat release [W/m], then uses
+    cell area to obtain local heat release [W/m^3], and finally calls
+    :func:`combustion_heat_release_source`. The burned-fuel profile is not the
+    P7 injection profile: injection and burning may occur at different axial
+    locations. No solver integration, combustion efficiency, LHV default,
+    fuel inventory constraint, species transport, mixing, ignition, or
+    chemical kinetics is introduced.
+    """
+    line_heat_release = heat_release_rate_per_length_from_burned_fuel(
+        fuel_burn_rate_per_length, fuel_lower_heating_value
+    )
+    volumetric_heat_release = volumetric_heat_release_rate_from_axial_distribution(
+        U, geometry, line_heat_release, gas
+    )
+    return combustion_heat_release_source(U, volumetric_heat_release, gas)
 
 
 def fuel_injection_source(
