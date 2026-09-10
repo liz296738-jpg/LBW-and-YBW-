@@ -61,6 +61,12 @@ cannot demonstrate third-order temporal convergence. It verifies source
 mapping, conservative source integration, both solver branches, and the
 absence of unintended extra source terms.
 
+The generated figures explicitly show the analytical conservative profiles
+together with both numerical branches for density, momentum, and energy. An
+absolute-error figure retains the measured floating-point errors; exact zero
+errors are omitted only from its logarithmic display, never replaced in the
+metrics.
+
 ## V2 — Discrete integrated-source conservation
 
 V2 uses a positive sinusoidally varying area profile with 31 cells, plus
@@ -128,6 +134,8 @@ On the V5 case, final relative Linf differences between the two schemes are
 `5.818e-3` for density, `6.871e-3` for pressure, and `4.893e-3` for Mach.
 Both states are physical and retain qualitatively consistent smooth profiles.
 This is not a universal accuracy or robustness ranking of the two schemes.
+The V6 `both_physical` result is derived directly from the two V5 transient
+physical-state flags, rather than being a fixed status value.
 
 ## Result artifacts
 
@@ -137,9 +145,10 @@ This is not a universal accuracy or robustness ranking of the two schemes.
   `strength_scaling_metrics.csv`, `cfl_sensitivity_metrics.csv`, and
   `scheme_comparison_metrics.csv`;
 - `metrics.json` and `validation_report.md`;
-- `exact_uniform.png`, `strength_scaling.png`, `cfl_sensitivity.png`,
-  `distributed_profiles.png`, and `scheme_comparison.png` (plus pressure and
-  Mach distributed-profile plots).
+- `exact_uniform.png`, separate exact-vs-numerical density, momentum, and
+  energy plots, plus an absolute-error plot;
+- `strength_scaling.png`, `cfl_sensitivity.png`, and `scheme_comparison.png`;
+- separate distributed `rho(x)`, `u(x)`, `p(x)`, `T(x)`, and `Mach(x)` plots.
 
 ## Limitations and P7 conclusion
 
@@ -153,8 +162,22 @@ assesses numerical sensitivity but introduces no fuel-specific timestep
 limiter. Transmissive boundaries remain verification boundaries rather than
 final physical scramjet inlet/outlet conditions.
 
-Within those limits, P7's prescribed local and distributed fuel source has
-passed local exact conservative integration, discrete source conservation,
-source-strength scaling, controlled timestep sensitivity, and controlled
-distributed-transient checks. Formal P7 closure remains conditional on a
-successful CI run for the exact P7.4 commit; P8 combustion remains planned.
+The accepted P7.4 validation commit passed CI: the full automated regression
+suite reported `519 passed in 40.71 s`. The final closure update, including
+the visual-integrity hard gate, passes `520` tests locally.
+
+Within the stated scope, P7 has now completed:
+
+- prescribed local fuel-source definition;
+- quasi-1D distributed source mapping;
+- solver integration and SSP-RK3 stage-wise evaluation;
+- exact conservative source verification;
+- discrete integral conservation verification;
+- source-strength linearity checks;
+- CFL/timestep sensitivity assessment;
+- controlled distributed-transient checks; and
+- Rusanov / Steger-Warming consistency comparison.
+
+Within the documented prescribed-source model limitations, P7 fuel injection
+is formally complete. P7 does not include combustion; P8 combustion remains
+planned.

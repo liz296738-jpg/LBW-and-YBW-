@@ -9,7 +9,7 @@
 | P4 | Complete | Variable area | Quasi-1D geometry support | Controlled-area case |
 | P5 | Complete | Steger-Warming + RK3 + CFL | Validated Rusanov / Steger-Warming quasi-1D schemes | Controlled convergence and robustness cases |
 | P6 | Complete | Friction & heat transfer | Separate source models | Per-model validation |
-| P7 | In Progress | Fuel injection | Prescribed local and distributed injection source | Local formal source-model validation complete; CI pending |
+| P7 | Complete | Fuel injection | Prescribed local and distributed injection source | Formal prescribed-source model validation |
 | P8 | Planned | Combustion | Heat-release model | Controlled combustion validation |
 | P9 | Planned | Boundary/stability improvements | Robust boundary handling | Edge-case test suite |
 | P10 | Planned | Verification & validation | Verified cases and comparisons | Conservation, benchmark, and grid checks |
@@ -49,4 +49,4 @@
 - P7.1 Prescribed Local Fuel Injection Source - Complete
 - P7.2 Quasi-1D Injection Distribution / Composition - Complete
 - P7.3 Solver Integration - Complete
-- P7.4 Fuel-Injection Validation - Local validation complete; CI pending (exact source, conservation, scaling, CFL sensitivity, and controlled transient)
+- P7.4 Fuel-Injection Validation - Complete (exact source, conservation, scaling, CFL sensitivity, and controlled transient)

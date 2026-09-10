@@ -31,10 +31,16 @@ def test_p7_4_validation_generates_required_artifacts_and_hard_gate_metrics(tmp_
         "cfl_sensitivity_metrics.csv",
         "scheme_comparison_metrics.csv",
         "exact_uniform.png",
+        "exact_uniform_density.png",
+        "exact_uniform_momentum.png",
+        "exact_uniform_energy.png",
+        "exact_uniform_error.png",
         "strength_scaling.png",
         "cfl_sensitivity.png",
         "distributed_profiles.png",
+        "distributed_u.png",
         "scheme_comparison.png",
+        "distributed_T.png",
         "validation_report.md",
     ):
         assert (tmp_path / filename).is_file()
@@ -64,5 +70,22 @@ def test_p7_4_validation_generates_required_artifacts_and_hard_gate_metrics(tmp_
         assert transient["physical"]
 
     comparison = metrics["scheme_comparison"]
+    assert comparison["both_physical"] == (
+        metrics["distributed_transient"]["rusanov"]["physical"]
+        and metrics["distributed_transient"]["steger-warming"]["physical"]
+    )
     assert comparison["both_physical"]
     assert comparison["qualitatively_consistent"]
+
+
+def test_scheme_comparison_derives_physical_status_from_both_transients() -> None:
+    """Catch a comparison that reports physical status without using run outcomes."""
+    script = Path(__file__).parents[1] / "cases" / "baseline" / "p7_4_fuel_injection_validation.py"
+    module = runpy.run_path(str(script))
+    profiles = {
+        "rusanov": {"rho": np.array([1.0]), "p": np.array([100000.0]), "mach": np.array([1.5])},
+        "steger-warming": {"rho": np.array([1.0]), "p": np.array([100000.0]), "mach": np.array([1.5])},
+    }
+    transient = {"rusanov": {"physical": True}, "steger-warming": {"physical": False}}
+
+    assert not module["_scheme_comparison"](profiles, transient)["both_physical"]

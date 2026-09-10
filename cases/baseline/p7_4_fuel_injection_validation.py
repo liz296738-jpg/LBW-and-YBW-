@@ -138,7 +138,10 @@ def _exact_uniform():
                 "classification": "roundoff-limited / exact-source benchmark passed",
             }
             rows.append(record)
-            profiles[f"{scheme}_{int(velocity)}"] = result.U[:, 0]
+            profiles[f"{scheme}_{int(velocity)}"] = {
+                "numerical": np.array(result.U, copy=True),
+                "exact": np.array(exact, copy=True),
+            }
     return rows, profiles
 
 
@@ -300,14 +303,17 @@ def _distributed_transient():
     return data, profiles
 
 
-def _scheme_comparison(profiles):
+def _scheme_comparison(profiles, transient):
     comparison = {}
     for name, field in (("rho", "rho"), ("pressure", "p"), ("mach", "mach")):
         norms = _norms(profiles["rusanov"][field], profiles["steger-warming"][field])
         comparison[f"{name}_l1_difference"] = norms["l1"]
         comparison[f"{name}_l2_difference"] = norms["l2"]
         comparison[f"{name}_linf_difference"] = norms["linf"]
-    comparison["both_physical"] = True
+    comparison["both_physical"] = bool(
+        transient["rusanov"]["physical"]
+        and transient["steger-warming"]["physical"]
+    )
     comparison["qualitatively_consistent"] = bool(max(
         comparison["rho_linf_difference"], comparison["pressure_linf_difference"], comparison["mach_linf_difference"]
     ) < 0.10)
@@ -317,10 +323,45 @@ def _scheme_comparison(profiles):
 
 def _plots(output, exact, scaling, cfl, profiles):
     x = exact["x"]
-    for key, values in exact.items():
-        if key != "x":
-            plt.plot(x, values, marker="o", label=key)
-    _save(output / "exact_uniform.png", "V1 exact uniform fuel-source density", "x [m]", "rho [kg/m^3]")
+    labels = (("density", 0, "rho [kg/m^3]"), ("momentum", 1, "rho u [kg/(m^2 s)]"), ("energy", 2, "rho E [J/m^3]"))
+    representative = {scheme: exact[f"{scheme}_100"] for scheme in SCHEMES}
+    figure, axes = plt.subplots(3, 1, figsize=(7, 9), sharex=True)
+    for axis, (name, component, ylabel) in zip(axes, labels):
+        axis.plot(x, representative["rusanov"]["exact"][:, component], "k--", linewidth=2, label="analytical")
+        for scheme in SCHEMES:
+            axis.plot(x, representative[scheme]["numerical"][:, component], marker="o", label=scheme)
+        axis.set_title(f"V1 exact vs numerical {name} (u_f = 100 m/s)")
+        axis.set_ylabel(ylabel)
+        axis.grid(True, alpha=0.3)
+        axis.legend()
+    axes[-1].set_xlabel("x [m]")
+    figure.tight_layout()
+    figure.savefig(output / "exact_uniform.png", dpi=150)
+    plt.close(figure)
+
+    for name, component, ylabel in labels:
+        analytical = representative["rusanov"]["exact"][:, component]
+        plt.plot(x, analytical, "k--", linewidth=2, label="analytical")
+        for scheme in SCHEMES:
+            plt.plot(x, representative[scheme]["numerical"][:, component], marker="o", label=scheme)
+        _save(output / f"exact_uniform_{name}.png", f"V1 exact vs numerical {name} (u_f = 100 m/s)", "x [m]", ylabel)
+
+    figure, axes = plt.subplots(3, 1, figsize=(7, 9), sharex=True)
+    for axis, (name, component, ylabel) in zip(axes, labels):
+        for scheme in SCHEMES:
+            for velocity in (0, 100):
+                values = np.abs(exact[f"{scheme}_{velocity}"]["numerical"][:, component] - exact[f"{scheme}_{velocity}"]["exact"][:, component])
+                nonzero = values > 0.0
+                if np.any(nonzero):
+                    axis.semilogy(x[nonzero], values[nonzero], marker="o", label=f"{scheme}, u_f={velocity:g}")
+        axis.set_title(f"V1 absolute {name} error (zero errors omitted on log scale)")
+        axis.set_ylabel(f"|error| [{ylabel.split(' [', 1)[1]}")
+        axis.grid(True, alpha=0.3)
+        axis.legend()
+    axes[-1].set_xlabel("x [m]")
+    figure.tight_layout()
+    figure.savefig(output / "exact_uniform_error.png", dpi=150)
+    plt.close(figure)
 
     for scheme in SCHEMES:
         increments = np.asarray(scaling[scheme]["increments"])
@@ -333,10 +374,11 @@ def _plots(output, exact, scaling, cfl, profiles):
         plt.plot([row["cfl"] for row in rows], cfl[scheme]["aggregate_linf_errors"], marker="o", label=scheme)
     _save(output / "cfl_sensitivity.png", "V4 timestep sensitivity against CFL=0.025", "CFL [-]", "maximum relative Linf difference [-]")
 
-    for field, label in (("rho", "rho [kg/m^3]"), ("p", "p [Pa]"), ("mach", "Mach [-]")):
+    for field, label in (("rho", "rho [kg/m^3]"), ("u", "u [m/s]"), ("p", "p [Pa]"), ("T", "T [K]"), ("mach", "Mach [-]")):
         for scheme in SCHEMES:
             plt.plot(profiles["x"], profiles[scheme][field], label=scheme)
-        _save(output / ("distributed_profiles.png" if field == "rho" else f"distributed_{field}.png"), f"V5 distributed-injection {field}", "x [m]", label)
+        filename = "distributed_profiles.png" if field == "rho" else f"distributed_{field}.png"
+        _save(output / filename, f"V5/V6 distributed-injection {field}", "x [m]", label)
 
     for scheme in SCHEMES:
         plt.plot(profiles["x"], profiles[scheme]["mach"], label=f"{scheme} Mach")
@@ -384,7 +426,7 @@ def run(output_directory=None):
     scaling, scaling_rows = _source_scaling()
     cfl, cfl_rows = _cfl_sensitivity()
     transient, profiles = _distributed_transient()
-    comparison = _scheme_comparison(profiles)
+    comparison = _scheme_comparison(profiles, transient)
     metrics = {
         "exact_uniform": exact_rows,
         "integral_conservation": conservation,
