@@ -173,7 +173,33 @@ inventory limiting, species transport, mixing, ignition, flameholding,
 finite-rate chemistry, or reaction progress.  Fuel-availability consistency is
 therefore the caller's responsibility until a transported fuel species exists.
 The constant-gamma, constant-R, three-equation homogenized perfect-gas model is
-unchanged.  P8.2 is standalone and is not yet integrated into `solve_quasi_1d`.
+unchanged.
+
+## Combustion Solver Integration — P8.3
+
+P8.3 integrates the P8.2 source into the quasi-1D solver without changing its
+closure. The semi-discrete right-hand side is
+
+`R(U) = R_geometry(U) + S_wall(U) + S_fuel(U) + S_comb(U)`.
+
+Its energy component is the additive decomposition
+
+`S_E = 4 q''_w / D_h + rho_dot_f h_t,f + mdot'_burn LHV / A_cell`.
+
+Thus P7 injected-stream total enthalpy and P8 chemical heat release remain
+distinct terms; neither is converted into, or replaces, the other. The solver
+accepts the prescribed P8 inputs `fuel_burn_rate_per_length [kg/(m s)]` and
+`fuel_lower_heating_value [J/kg]` independently of P7 injection inputs. Zero
+burn with `fuel_lower_heating_value=None` disables combustion. Any active burn
+requires an explicitly supplied, finite, strictly positive LHV; an explicitly
+supplied LHV is validated even when burn is zero.
+
+The P8.2 distributed source is evaluated through every SSP-RK3 RHS stage, not
+cached per timestep. CFL remains based only on Euler wave speed: no
+combustion-source stiffness limiter is introduced. There is still no combustion
+efficiency, ignition, mixing, flameholding, reaction-progress, finite-rate
+chemistry, species transport, or fuel-inventory model. P8.4 remains responsible
+for formal combustion validation.
 
 ## Isentropic Area Validation
 

@@ -6,7 +6,7 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P8.2 complete; P8 combustion is in progress.** Standalone local and distributed fuel-linked combustion heat-release closures exist, but neither is yet connected to the quasi-1D solver.
+Current stage: **P8.3 complete; P8 combustion is in progress.** The prescribed distributed combustion heat-release closure is integrated into the quasi-1D RHS and SSP-RK3 solver path, but P8 combustion is not yet formally validated.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 
@@ -26,8 +26,7 @@ P6.1 adds the independent prescribed Darcy-factor wall-friction momentum source.
 - Prescribed wall-heat-flux energy source
 - Prescribed local and distributed fuel mass/momentum/energy injection source integrated into `solve_quasi_1d`
 - Mapping from prescribed axial fuel mass-flow distribution `d(mdot_f)/dx` to a local volumetric source
-- Standalone prescribed local combustion heat-release source `[0, 0, qdot_comb]` (not yet solver-integrated)
-- Standalone distributed combustion closure from a prescribed burned-fuel rate, lower heating value, and cell area (not yet solver-integrated)
+- Prescribed distributed combustion heat-release source integrated into `solve_quasi_1d`
 
 ## Planned Physics
 
@@ -44,7 +43,7 @@ Each item will be introduced and validated in a separate stage.
 - Third-order SSP Runge-Kutta time integration
 - CFL-based time stepping
 
-P7.3 integrates the prescribed distributed fuel mass/momentum/energy source into `solve_quasi_1d`, evaluated at every SSP-RK3 stage. P7.4 formally verifies and controlled-validates the prescribed quasi-1D fuel-source model through exact conservative integration, discrete integral conservation, source-strength scaling, and controlled timestep sensitivity; see `docs/p7_fuel_injection_validation.md`. P8.1 adds an externally prescribed local chemical heat-release source. P8.2 maps an independently prescribed burned-fuel axial distribution through its lower heating value and each cell area to that P8.1 source. P8.2 does not infer burning from P7 injection, assume burning at the injection location, apply a combustion efficiency, transport fuel species, or model fuel inventory, mixing, ignition, flameholding, or chemical kinetics; it also has no solver integration.
+P7.3 integrates the prescribed distributed fuel mass/momentum/energy source into `solve_quasi_1d`, evaluated at every SSP-RK3 stage. P7.4 formally verifies and controlled-validates the prescribed quasi-1D fuel-source model through exact conservative integration, discrete integral conservation, source-strength scaling, and controlled timestep sensitivity; see `docs/p7_fuel_injection_validation.md`. P8.1 adds an externally prescribed local chemical heat-release source. P8.2 maps an independently prescribed burned-fuel axial distribution through its lower heating value and each cell area to that P8.1 source. P8.3 adds that source independently to the quasi-1D RHS at every SSP-RK3 stage. P8 combustion does not infer burning from P7 injection, assume burning at the injection location, apply a combustion efficiency, transport fuel species, or model fuel inventory, mixing, ignition, flameholding, or chemical kinetics; formal combustion validation remains P8.4.
 
 ## Development Philosophy
 

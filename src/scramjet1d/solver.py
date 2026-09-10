@@ -1,4 +1,4 @@
-"""Euler and quasi-one-dimensional solvers with optional wall and fuel sources."""
+"""Euler and quasi-one-dimensional solvers with optional prescribed sources."""
 
 from typing import NamedTuple
 
@@ -10,7 +10,12 @@ from .config import GasProperties, NumericalConfig
 from .gas import speed_of_sound
 from .geometry import AreaProfile
 from .spatial import finite_volume_residual, internal_rusanov_fluxes, internal_numerical_fluxes, quasi_1d_residual
-from .source_terms import combined_wall_source, distributed_fuel_injection_source
+from .source_terms import (
+    combined_wall_source,
+    distributed_combustion_heat_release_source,
+    distributed_fuel_injection_source,
+    heat_release_rate_per_length_from_burned_fuel,
+)
 from .state import conservative_to_primitive
 from .time_integration import ssp_rk3_step
 
@@ -82,6 +87,37 @@ def _fuel_injection_enabled(states: NDArray[np.float64], mass_flow: object, velo
     return bool(np.any(distribution != 0.0))
 
 
+def _combustion_enabled(
+    states: NDArray[np.float64],
+    fuel_burn_rate_per_length: object,
+    fuel_lower_heating_value: object,
+) -> bool:
+    """Validate P8 inputs and return whether prescribed combustion is active."""
+    target_shape = states.shape[:-1]
+    burn_rate = np.asarray(fuel_burn_rate_per_length, dtype=float)
+    try:
+        burn_rate = np.broadcast_to(burn_rate, target_shape)
+    except ValueError as error:
+        raise ValueError("fuel_burn_rate_per_length must broadcast to the state shape") from error
+    if not np.all(np.isfinite(burn_rate) & (burn_rate >= 0.0)):
+        raise ValueError("fuel_burn_rate_per_length must be finite and nonnegative")
+    if fuel_lower_heating_value is None:
+        if np.any(burn_rate > 0.0):
+            raise ValueError("fuel_lower_heating_value is required when combustion is active")
+        return False
+
+    line_heat_release = heat_release_rate_per_length_from_burned_fuel(
+        burn_rate, fuel_lower_heating_value
+    )
+    try:
+        np.broadcast_to(line_heat_release, target_shape)
+    except ValueError as error:
+        raise ValueError(
+            "fuel_burn_rate_per_length and fuel_lower_heating_value must broadcast to the state shape"
+        ) from error
+    return bool(np.any(burn_rate > 0.0))
+
+
 def cfl_timestep(U: ArrayLike, dx: object, gas: GasProperties, numerical: NumericalConfig) -> float:
     """Return CFL*dx/max(|u|+a) [s] for valid conservative states on a uniform grid."""
     spacing = _positive_scalar("dx", dx)
@@ -113,8 +149,17 @@ def quasi_1d_rhs_transmissive(
     fuel_mass_flow_rate_per_length: object = 0.0,
     fuel_axial_velocity: object = 0.0,
     fuel_specific_total_enthalpy: object = 0.0,
+    fuel_burn_rate_per_length: ArrayLike = 0.0,
+    fuel_lower_heating_value: ArrayLike | None = None,
 ) -> NDArray[np.float64]:
-    """Return the quasi-1D RHS with transmissive boundaries and optional wall and fuel sources."""
+    """Return quasi-1D RHS with optional wall, injection, and combustion sources.
+
+    ``fuel_burn_rate_per_length`` [kg/(m s)] is a prescribed reacted-fuel
+    distribution independent of P7's ``fuel_mass_flow_rate_per_length``.
+    ``fuel_lower_heating_value`` [J/kg] is required when any burn rate is
+    positive; ``None`` is valid only when all burn rates are zero. The P8.2
+    source is re-evaluated from each supplied state and adds only energy.
+    """
     if not isinstance(geometry, AreaProfile):
         raise TypeError("geometry must be an AreaProfile")
     states = np.asarray(U, dtype=float)
@@ -126,6 +171,9 @@ def quasi_1d_rhs_transmissive(
     spacing = _positive_scalar("dx", dx)
     wall_active = _wall_physics_enabled(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
     fuel_active = _fuel_injection_enabled(states, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
+    combustion_active = _combustion_enabled(
+        states, fuel_burn_rate_per_length, fuel_lower_heating_value
+    )
     ghosted = transmissive_ghost_cells(states)
     interface_fluxes = internal_numerical_fluxes(ghosted, gas, scheme=flux_scheme)
     rhs = quasi_1d_residual(states, interface_fluxes, geometry, spacing, gas)
@@ -133,6 +181,10 @@ def quasi_1d_rhs_transmissive(
         rhs = rhs + combined_wall_source(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
     if fuel_active:
         rhs = rhs + distributed_fuel_injection_source(states, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
+    if combustion_active:
+        rhs = rhs + distributed_combustion_heat_release_source(
+            states, geometry, fuel_burn_rate_per_length, fuel_lower_heating_value, gas
+        )
     return rhs
 
 
@@ -194,8 +246,17 @@ def solve_quasi_1d(
     fuel_mass_flow_rate_per_length: object = 0.0,
     fuel_axial_velocity: object = 0.0,
     fuel_specific_total_enthalpy: object = 0.0,
+    fuel_burn_rate_per_length: ArrayLike = 0.0,
+    fuel_lower_heating_value: ArrayLike | None = None,
 ) -> SolverResult:
-    """Advance quasi-1D Euler flow with optional prescribed wall and fuel sources to t_final."""
+    """Advance quasi-1D flow with optional wall, injection, and combustion sources.
+
+    ``fuel_burn_rate_per_length`` [kg/(m s)] and its caller-supplied
+    ``fuel_lower_heating_value`` [J/kg] define P8 chemical heat release and
+    are independent from the P7 injected-fuel inputs. Zero burn with ``None``
+    LHV disables combustion; an explicit LHV is always validated. Combustion
+    is evaluated in the full SSP-RK3 RHS path and does not alter the CFL rule.
+    """
     state = np.asarray(U0, dtype=float)
     if state.ndim != 2 or state.shape[-1] != 3 or state.shape[0] < 2:
         raise ValueError("U0 must have shape (N, 3) with N >= 2")
@@ -212,6 +273,9 @@ def solve_quasi_1d(
         raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
     wall_active = _wall_physics_enabled(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
     fuel_active = _fuel_injection_enabled(state, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
+    combustion_active = _combustion_enabled(
+        state, fuel_burn_rate_per_length, fuel_lower_heating_value
+    )
     if wall_active:
         combined_wall_source(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
     if fuel_active:
@@ -225,6 +289,11 @@ def solve_quasi_1d(
         source_kwargs.update(hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux)
     if fuel_active:
         source_kwargs.update(fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy)
+    if combustion_active:
+        source_kwargs.update(
+            fuel_burn_rate_per_length=fuel_burn_rate_per_length,
+            fuel_lower_heating_value=fuel_lower_heating_value,
+        )
 
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
         return quasi_1d_rhs_transmissive(
