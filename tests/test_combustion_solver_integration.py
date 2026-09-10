@@ -107,7 +107,7 @@ INVALID_COMBUSTION_CASES = [
     pytest.param({"fuel_burn_rate_per_length": 0.001, "fuel_lower_heating_value": np.nan}, id="nan-lhv"),
     pytest.param({"fuel_burn_rate_per_length": 0.001, "fuel_lower_heating_value": np.inf}, id="positive-inf-lhv"),
     pytest.param({"fuel_burn_rate_per_length": 0.001, "fuel_lower_heating_value": -np.inf}, id="negative-inf-lhv"),
-    pytest.param({"fuel_burn_rate_per_length": np.ones(3), "fuel_lower_heating_value": np.ones(5)}, id="bad-lhv-shape"),
+    pytest.param({"fuel_burn_rate_per_length": np.full(12, 0.001), "fuel_lower_heating_value": np.ones(5)}, id="bad-lhv-shape"),
     pytest.param({"fuel_burn_rate_per_length": 0.0, "fuel_lower_heating_value": np.nan}, id="zero-burn-nan-lhv"),
 ]
 
