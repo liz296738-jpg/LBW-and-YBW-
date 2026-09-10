@@ -120,6 +120,32 @@ The distribution is prescribed by the caller. P7.2 implements no injector geomet
 
 The quasi-1D RHS is `dU_i/dt = R_quasi1D,i + S_wall,i + S_fuel,i`. The fuel source is evaluated anew from every current SSP-RK3 stage state, rather than cached for a timestep. This retains state validation, matches the wall-source architecture, and supports future state-dependent fuel models. The CFL formula remains based only on Euler wave speed.
 
+## Prescribed Local Combustion Heat Release — P8.1
+
+P8.1 defines an independent prescribed local chemical heat-release source,
+
+`S_comb = [0, 0, qdot_comb]`,
+
+where `qdot_comb` is the externally prescribed local volumetric chemical
+heat-release rate [W/m^3 = J/(m^3 s)]. Its sign convention is
+`qdot_comb >= 0`: zero disables local combustion heat release and a positive
+value adds chemical energy to the gas. Negative and nonfinite values are
+invalid.
+
+The mass and axial-momentum components are exactly zero. P8.1 represents
+chemical energy becoming thermal/internal energy; it is not another fuel
+injection source. In particular, P7 injected-stream energy
+`S_fuel,E = rho_dot_f h_t,f` remains distinct from P8 chemical heat release:
+`rho_dot_f h_t,f != qdot_comb` in general.
+
+The heat-release rate is prescribed externally. P8.1 does not infer heat
+release from fuel injection, and it does not implement an LHV-based closure,
+combustion efficiency, ignition, reaction rate, finite-rate chemistry, species
+transport, flameholding, mixing, or injector model. It retains the existing
+constant-gamma, constant-R, three-equation homogenized perfect-gas state.
+P8.1 is a standalone source function and is not yet integrated into
+`solve_quasi_1d`.
+
 ## Isentropic Area Validation
 
 P4.4 uses the isentropic reference relation `A/A* = (1/M) [2/(gamma+1) * (1 + (gamma-1) M^2 / 2)]^((gamma+1)/(2(gamma-1)))` and `dA/A = (M^2 - 1) du/u`. These relations are validation references, not replacements for the solver governing equation. Validation remains on separate subsonic and supersonic branches and does not cross the sonic point.

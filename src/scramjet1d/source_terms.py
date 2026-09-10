@@ -1,7 +1,4 @@
-"""Geometry, prescribed wall, and prescribed fuel-injection source contributions.
-
-Combustion remains unimplemented.
-"""
+"""Geometry, prescribed wall, fuel-injection, and local heat-release sources."""
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -19,8 +16,8 @@ def geometric_area_source(
 
     The mass and energy components are zero.  The momentum component is
     ``p_i * (A_right - A_left) / (A_i * dx)`` [N/m^3], already normalized for
-    direct addition to ``dU/dt``. Wall sources and prescribed fuel injection
-    are implemented independently; combustion remains unimplemented.
+    direct addition to ``dU/dt``. Wall, prescribed fuel-injection, and local
+    prescribed combustion heat-release sources are implemented independently.
     """
     if not isinstance(geometry, AreaProfile):
         raise TypeError("geometry must be an AreaProfile")
@@ -127,6 +124,43 @@ def combined_wall_source(
     friction_source = wall_friction_source(U, hydraulic_diameter, darcy_friction_factor, gas)
     heat_source = wall_heat_transfer_source(U, hydraulic_diameter, wall_heat_flux, gas)
     return friction_source + heat_source
+
+
+def combustion_heat_release_source(
+    U: ArrayLike,
+    volumetric_heat_release_rate: ArrayLike,
+    gas: GasProperties,
+) -> NDArray[np.float64]:
+    """Return a prescribed local combustion heat-release source in SI units.
+
+    ``volumetric_heat_release_rate`` is an externally prescribed local
+    chemical heat-release rate [W/m^3]. It may be scalar or broadcast to the
+    state-cell shape ``U.shape[:-1]`` and must be finite and nonnegative:
+    zero disables local heat release, while positive values add energy to the
+    gas. The returned source has the same shape as ``U`` and maps exactly to
+    ``[0, 0, qdot_comb]``. It adds no mass or axial momentum and is independent
+    of thermodynamic state after that state has passed normal physical-state
+    validation. This standalone P8.1 source is not solver-integrated and does
+    not infer heat release from fuel injection, LHV, efficiency, species,
+    mixing, ignition, or chemical kinetics.
+    """
+    states = np.asarray(U, dtype=float)
+    if states.ndim < 1 or states.shape[-1] != 3:
+        raise ValueError("U must have shape (..., 3)")
+    primitive = conservative_to_primitive(states, gas)
+    target_shape = primitive.rho.shape
+
+    heat_release = np.asarray(volumetric_heat_release_rate, dtype=float)
+    try:
+        heat_release = np.broadcast_to(heat_release, target_shape)
+    except ValueError as error:
+        raise ValueError("volumetric_heat_release_rate must broadcast to the state shape") from error
+    if not np.all(np.isfinite(heat_release) & (heat_release >= 0.0)):
+        raise ValueError("volumetric_heat_release_rate must be finite and nonnegative")
+
+    source = np.zeros_like(states, dtype=float)
+    source[..., 2] = heat_release
+    return source
 
 
 def fuel_injection_source(
