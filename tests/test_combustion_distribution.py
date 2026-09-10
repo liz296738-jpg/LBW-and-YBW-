@@ -56,6 +56,16 @@ def test_line_heat_release_supports_scalar_and_batched_broadcasting() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    ("burn_rate", "lhv"),
+    [(np.ones(3), np.ones(5)), (np.ones((2, 3)), np.ones(4))],
+)
+def test_burn_rate_and_lhv_incompatible_shapes_raise_value_error(burn_rate, lhv) -> None:
+    """Catch removal of the closure's explicit incompatible-broadcast guard."""
+    with pytest.raises(ValueError):
+        heat_release_rate_per_length_from_burned_fuel(burn_rate, lhv)
+
+
 def test_variable_area_mapping_uses_cell_area_without_dx() -> None:
     geometry = _variable_geometry()
     heat_per_length = np.array([100.0, 200.0, 400.0])
@@ -71,6 +81,26 @@ def test_variable_area_mapping_uses_cell_area_without_dx() -> None:
         rtol=1.0e-14,
         atol=1.0e-14,
     )
+
+
+def test_distributed_combustion_source_satisfies_integrated_energy_identity() -> None:
+    """Catch an area or dx error in the final distributed source mapping."""
+    num_cells = 12
+    dx = 0.04
+    cell_area = np.linspace(0.015, 0.030, num_cells)
+    geometry = AreaProfile(cell_area, np.linspace(0.015, 0.030, num_cells + 1))
+    burn_rate = np.linspace(0.0, 0.02, num_cells)
+    lhv = np.linspace(40.0e6, 44.0e6, num_cells)
+
+    source = distributed_combustion_heat_release_source(
+        _state((num_cells,)), geometry, burn_rate, lhv, GAS
+    )
+    reference = np.sum(burn_rate * lhv) * dx
+    actual = np.sum(geometry.cell_area * source[:, 2]) * dx
+
+    assert_array_equal(source[:, 0], np.zeros(num_cells))
+    assert_array_equal(source[:, 1], np.zeros(num_cells))
+    assert_allclose(actual, reference, rtol=1.0e-13, atol=1.0e-13)
 
 
 def test_distributed_source_composes_through_p8_1(monkeypatch) -> None:
@@ -141,6 +171,32 @@ def test_invalid_geometry_state_and_cell_count_are_rejected() -> None:
         volumetric_heat_release_rate_from_axial_distribution(_state((2,)), _variable_geometry(), 1.0, GAS)
     with pytest.raises(ValueError):
         volumetric_heat_release_rate_from_axial_distribution(np.ones(3), _variable_geometry(), 1.0, GAS)
+
+
+def _make_negative_density(U: np.ndarray) -> None:
+    U[0, 0] = -1.0
+
+
+def _make_nonpositive_recovered_pressure(U: np.ndarray) -> None:
+    U[0, 2] = 0.0
+
+
+def _make_nonfinite_state(U: np.ndarray) -> None:
+    U[0, 1] = np.nan
+
+
+@pytest.mark.parametrize(
+    "mutator",
+    [_make_negative_density, _make_nonpositive_recovered_pressure, _make_nonfinite_state],
+    ids=["negative-density", "nonpositive-pressure", "nonfinite-state"],
+)
+def test_distributed_combustion_source_rejects_invalid_physical_state(mutator) -> None:
+    """Catch bypassing conservative-state validation in the final P8.2 API."""
+    state = _state((3,))
+    mutator(state)
+
+    with pytest.raises(ValueError):
+        distributed_combustion_heat_release_source(state, _variable_geometry(), 0.01, 43.0e6, GAS)
 
 
 def test_all_closure_inputs_remain_immutable() -> None:
