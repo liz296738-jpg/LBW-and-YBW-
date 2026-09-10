@@ -106,7 +106,7 @@ P7.1 introduces an independent prescribed local volumetric fuel source, with fue
 
 The components have units kg/(m^3 s), N/m^3, and W/m^3 respectively. The injected energy source uses specific total enthalpy because fuel enters the control volume as a mass flux. The supplied total enthalpy already includes the injected stream kinetic contribution, so `fuel_injection_source` adds no additional `u_f^2/2` term.
 
-`S_fuel` is not a combustion source: P7.1 includes no LHV, heat release, combustion efficiency, reaction progress, mixing-loss model, injector pressure force, spray model, or phase-change model. Fuel is represented only as added mass, axial momentum, and total enthalpy in the existing three-equation homogenized perfect-gas state. No fuel mass fraction or species transport equation is present, and this standalone source is not yet connected to `solve_quasi_1d`.
+`S_fuel` is not a combustion source: P7.1 includes no LHV, heat release, combustion efficiency, reaction progress, mixing-loss model, injector pressure force, spray model, or phase-change model. Fuel is represented only as added mass, axial momentum, and total enthalpy in the existing three-equation homogenized perfect-gas state. No fuel mass fraction or species transport equation is present. P7.1 defines the standalone local source model; P7.3 later integrates its distributed quasi-1D form into `solve_quasi_1d`.
 
 ## Quasi-1D Fuel Distribution — P7.2
 
