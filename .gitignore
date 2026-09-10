@@ -10,3 +10,5 @@ build/
 venv/
 results/*
 !results/.gitkeep
+!results/p7_4/
+!results/p7_4/**

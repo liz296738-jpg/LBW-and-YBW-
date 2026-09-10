@@ -6,7 +6,7 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P7.3 - Fuel Injection Solver Integration**. P7 is in progress.
+Current stage: **P7.4 - Fuel-Injection Formal Validation**. Local validation is complete; P7 remains in progress until CI confirms the current commit. P8 combustion remains planned.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 
@@ -41,7 +41,7 @@ Each item will be introduced and validated in a separate stage.
 - Third-order SSP Runge-Kutta time integration
 - CFL-based time stepping
 
-P7.3 integrates the prescribed distributed fuel mass/momentum/energy source into `solve_quasi_1d`, evaluated at every SSP-RK3 stage. There is still no fuel species equation, combustion, LHV, or injector-profile model; P7.4 formal validation remains pending.
+P7.3 integrates the prescribed distributed fuel mass/momentum/energy source into `solve_quasi_1d`, evaluated at every SSP-RK3 stage. P7.4 formally validates exact conservative source integration, discrete integral conservation, source-strength scaling, and controlled timestep sensitivity; see `docs/p7_fuel_injection_validation.md`. There is still no fuel species equation, combustion, LHV, or injector-profile model.
 
 ## Development Philosophy
 

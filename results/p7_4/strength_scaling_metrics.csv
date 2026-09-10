@@ -1,0 +1,7 @@
+cfl,classification,energy_increment,grid_cells,mass_increment,momentum_increment,scheme,steps,strength_factor,t_final,validation_case
+0.4,linear prescribed-source response confirmed,99.99999999988358,20,9.99999999995449e-05,0.009999999999934062,rusanov,5,1.0,0.0001,V3_source_scaling
+0.4,linear prescribed-source response confirmed,199.99999999988358,20,0.00019999999999953388,0.01999999999981128,rusanov,5,2.0,0.0001,V3_source_scaling
+0.4,linear prescribed-source response confirmed,399.9999999999418,20,0.0003999999999997339,0.03999999999984993,rusanov,5,4.0,0.0001,V3_source_scaling
+0.4,linear prescribed-source response confirmed,99.99999999988358,20,9.99999999995449e-05,0.009999999999934062,steger-warming,5,1.0,0.0001,V3_source_scaling
+0.4,linear prescribed-source response confirmed,199.99999999988358,20,0.00019999999999953388,0.01999999999981128,steger-warming,5,2.0,0.0001,V3_source_scaling
+0.4,linear prescribed-source response confirmed,399.9999999999418,20,0.0003999999999997339,0.03999999999984993,steger-warming,5,4.0,0.0001,V3_source_scaling

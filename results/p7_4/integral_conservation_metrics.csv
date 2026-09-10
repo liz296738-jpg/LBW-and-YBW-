@@ -1,0 +1,2 @@
+cfl,classification,energy_error,energy_numerical,energy_reference,energy_relative_error,grid_cells,mass_error,mass_numerical,mass_reference,mass_relative_error,momentum_error,momentum_numerical,momentum_reference,momentum_relative_error,nonuniform_enthalpy,nonuniform_mass_flow,nonuniform_velocity,steps,t_final,validation_case,variable_area
+not-applicable,discrete source conservation passed,0.0,8215.201843061674,8215.201843061674,0.0,31,0.0,0.009,0.009,0.0,0.0,0.24912110583700403,0.24912110583700403,0.0,True,True,True,0,not-applicable,V2_integral_conservation,True

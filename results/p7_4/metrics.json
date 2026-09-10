@@ -1,0 +1,362 @@
+{
+  "exact_uniform": [
+    {
+      "validation_case": "V1_exact_uniform",
+      "scheme": "rusanov",
+      "u_f": 0.0,
+      "grid_cells": 20,
+      "cfl": 0.4,
+      "t_final": 0.0001,
+      "steps": 5,
+      "rho_linf_error": 6.661338147750939e-16,
+      "momentum_linf_error": 0.0,
+      "energy_linf_error": 0.0,
+      "relative_density_error": 6.660672080542885e-16,
+      "relative_momentum_error": 0.0,
+      "relative_energy_error": 0.0,
+      "min_rho": 1.0000999999999993,
+      "min_p": 100044.99950004995,
+      "min_T": 348.55399303292677,
+      "physical": true,
+      "classification": "roundoff-limited / exact-source benchmark passed"
+    },
+    {
+      "validation_case": "V1_exact_uniform",
+      "scheme": "rusanov",
+      "u_f": 100.0,
+      "grid_cells": 20,
+      "cfl": 0.4,
+      "t_final": 0.0001,
+      "steps": 5,
+      "rho_linf_error": 4.440892098500626e-16,
+      "momentum_linf_error": 5.684341886080802e-14,
+      "energy_linf_error": 1.1641532182693481e-10,
+      "relative_density_error": 4.4404480536952566e-16,
+      "relative_momentum_error": 1.1368456403033543e-16,
+      "relative_energy_error": 3.103580960462138e-16,
+      "min_rho": 1.0000999999999995,
+      "min_p": 100042.99968003193,
+      "min_T": 348.5470257156584,
+      "physical": true,
+      "classification": "roundoff-limited / exact-source benchmark passed"
+    },
+    {
+      "validation_case": "V1_exact_uniform",
+      "scheme": "steger-warming",
+      "u_f": 0.0,
+      "grid_cells": 20,
+      "cfl": 0.4,
+      "t_final": 0.0001,
+      "steps": 5,
+      "rho_linf_error": 6.661338147750939e-16,
+      "momentum_linf_error": 0.0,
+      "energy_linf_error": 0.0,
+      "relative_density_error": 6.660672080542885e-16,
+      "relative_momentum_error": 0.0,
+      "relative_energy_error": 0.0,
+      "min_rho": 1.0000999999999993,
+      "min_p": 100044.99950004995,
+      "min_T": 348.55399303292677,
+      "physical": true,
+      "classification": "roundoff-limited / exact-source benchmark passed"
+    },
+    {
+      "validation_case": "V1_exact_uniform",
+      "scheme": "steger-warming",
+      "u_f": 100.0,
+      "grid_cells": 20,
+      "cfl": 0.4,
+      "t_final": 0.0001,
+      "steps": 5,
+      "rho_linf_error": 4.440892098500626e-16,
+      "momentum_linf_error": 5.684341886080802e-14,
+      "energy_linf_error": 1.1641532182693481e-10,
+      "relative_density_error": 4.4404480536952566e-16,
+      "relative_momentum_error": 1.1368456403033543e-16,
+      "relative_energy_error": 3.103580960462138e-16,
+      "min_rho": 1.0000999999999995,
+      "min_p": 100042.99968003193,
+      "min_T": 348.5470257156584,
+      "physical": true,
+      "classification": "roundoff-limited / exact-source benchmark passed"
+    }
+  ],
+  "integral_conservation": {
+    "validation_case": "V2_integral_conservation",
+    "grid_cells": 31,
+    "cfl": "not-applicable",
+    "t_final": "not-applicable",
+    "steps": 0,
+    "mass_reference": 0.009,
+    "mass_numerical": 0.009,
+    "mass_error": 0.0,
+    "mass_relative_error": 0.0,
+    "momentum_reference": 0.24912110583700403,
+    "momentum_numerical": 0.24912110583700403,
+    "momentum_error": 0.0,
+    "momentum_relative_error": 0.0,
+    "energy_reference": 8215.201843061674,
+    "energy_numerical": 8215.201843061674,
+    "energy_error": 0.0,
+    "energy_relative_error": 0.0,
+    "variable_area": true,
+    "nonuniform_mass_flow": true,
+    "nonuniform_velocity": true,
+    "nonuniform_enthalpy": true,
+    "classification": "discrete source conservation passed"
+  },
+  "source_scaling": {
+    "rusanov": {
+      "mass_ratios": [
+        2.000000000004441,
+        4.000000000015543
+      ],
+      "momentum_ratios": [
+        1.9999999999943157,
+        4.000000000011369
+      ],
+      "energy_ratios": [
+        2.000000000001164,
+        4.000000000004075
+      ],
+      "increments": [
+        [
+          9.99999999995449e-05,
+          0.009999999999934062,
+          99.99999999988358
+        ],
+        [
+          0.00019999999999953388,
+          0.01999999999981128,
+          199.99999999988358
+        ],
+        [
+          0.0003999999999997339,
+          0.03999999999984993,
+          399.9999999999418
+        ]
+      ],
+      "classification": "linear prescribed-source response confirmed"
+    },
+    "steger-warming": {
+      "mass_ratios": [
+        2.000000000004441,
+        4.000000000015543
+      ],
+      "momentum_ratios": [
+        1.9999999999943157,
+        4.000000000011369
+      ],
+      "energy_ratios": [
+        2.000000000001164,
+        4.000000000004075
+      ],
+      "increments": [
+        [
+          9.99999999995449e-05,
+          0.009999999999934062,
+          99.99999999988358
+        ],
+        [
+          0.00019999999999953388,
+          0.01999999999981128,
+          199.99999999988358
+        ],
+        [
+          0.0003999999999997339,
+          0.03999999999984993,
+          399.9999999999418
+        ]
+      ],
+      "classification": "linear prescribed-source response confirmed"
+    }
+  },
+  "cfl_sensitivity": {
+    "rusanov": {
+      "reference_cfl": 0.025,
+      "reference_steps": 171,
+      "reference_physical": true,
+      "runs": [
+        {
+          "validation_case": "V4_cfl_sensitivity",
+          "scheme": "rusanov",
+          "grid_cells": 24,
+          "cfl": 0.4,
+          "t_final": 0.0002,
+          "steps": 11,
+          "rho_l1_error": 1.257004494340395e-06,
+          "rho_l2_error": 1.5078986133354781e-06,
+          "rho_linf_error": 2.866815005357592e-06,
+          "p_l1_error": 1.6836117915308294e-06,
+          "p_l2_error": 2.0118669083575436e-06,
+          "p_linf_error": 3.896992617605312e-06,
+          "mach_l1_error": 6.9264656690592e-07,
+          "mach_l2_error": 8.28726856439937e-07,
+          "mach_linf_error": 1.5355510850182289e-06,
+          "physical": true,
+          "classification": "CFL-convergent"
+        },
+        {
+          "validation_case": "V4_cfl_sensitivity",
+          "scheme": "rusanov",
+          "grid_cells": 24,
+          "cfl": 0.2,
+          "t_final": 0.0002,
+          "steps": 22,
+          "rho_l1_error": 1.577649622161881e-07,
+          "rho_l2_error": 1.90133393384758e-07,
+          "rho_linf_error": 3.687033141408784e-07,
+          "p_l1_error": 2.1124284129352411e-07,
+          "p_l2_error": 2.536694019823858e-07,
+          "p_linf_error": 5.015758790390521e-07,
+          "mach_l1_error": 8.660452762266732e-08,
+          "mach_l2_error": 1.0446803032756364e-07,
+          "mach_linf_error": 1.9702974825827477e-07,
+          "physical": true,
+          "classification": "CFL-convergent"
+        },
+        {
+          "validation_case": "V4_cfl_sensitivity",
+          "scheme": "rusanov",
+          "grid_cells": 24,
+          "cfl": 0.1,
+          "t_final": 0.0002,
+          "steps": 43,
+          "rho_l1_error": 1.9408148252081642e-08,
+          "rho_l2_error": 2.3323718839683673e-08,
+          "rho_linf_error": 4.555216321414755e-08,
+          "p_l1_error": 2.5809897431328736e-08,
+          "p_l2_error": 3.111830639837519e-08,
+          "p_linf_error": 6.202948336189428e-08,
+          "mach_l1_error": 1.0633742788596429e-08,
+          "mach_l2_error": 1.2822143415875518e-08,
+          "mach_linf_error": 2.4341401662465452e-08,
+          "physical": true,
+          "classification": "CFL-convergent"
+        }
+      ],
+      "aggregate_linf_errors": [
+        3.896992617605312e-06,
+        5.015758790390521e-07,
+        6.202948336189428e-08
+      ],
+      "classification": "CFL-convergent",
+      "physical": true
+    },
+    "steger-warming": {
+      "reference_cfl": 0.025,
+      "reference_steps": 171,
+      "reference_physical": true,
+      "runs": [
+        {
+          "validation_case": "V4_cfl_sensitivity",
+          "scheme": "steger-warming",
+          "grid_cells": 24,
+          "cfl": 0.4,
+          "t_final": 0.0002,
+          "steps": 11,
+          "rho_l1_error": 1.276889449449262e-06,
+          "rho_l2_error": 1.5230395281939122e-06,
+          "rho_linf_error": 2.8659510639961313e-06,
+          "p_l1_error": 1.6702959084822005e-06,
+          "p_l2_error": 1.9996693634481537e-06,
+          "p_linf_error": 3.925044714871594e-06,
+          "mach_l1_error": 7.085104050796134e-07,
+          "mach_l2_error": 8.412787218908999e-07,
+          "mach_linf_error": 1.534678140726296e-06,
+          "physical": true,
+          "classification": "CFL-convergent"
+        },
+        {
+          "validation_case": "V4_cfl_sensitivity",
+          "scheme": "steger-warming",
+          "grid_cells": 24,
+          "cfl": 0.2,
+          "t_final": 0.0002,
+          "steps": 22,
+          "rho_l1_error": 1.5975576747477697e-07,
+          "rho_l2_error": 1.9159722431875608e-07,
+          "rho_linf_error": 3.6713375902616766e-07,
+          "p_l1_error": 2.0930740243897476e-07,
+          "p_l2_error": 2.5163138029966254e-07,
+          "p_linf_error": 5.008843293340345e-07,
+          "mach_l1_error": 8.857353911584244e-08,
+          "mach_l2_error": 1.0587644851399244e-07,
+          "mach_linf_error": 1.963800171799429e-07,
+          "physical": true,
+          "classification": "CFL-convergent"
+        },
+        {
+          "validation_case": "V4_cfl_sensitivity",
+          "scheme": "steger-warming",
+          "grid_cells": 24,
+          "cfl": 0.1,
+          "t_final": 0.0002,
+          "steps": 43,
+          "rho_l1_error": 1.9545043100837378e-08,
+          "rho_l2_error": 2.353562954998111e-08,
+          "rho_linf_error": 4.5459872624647766e-08,
+          "p_l1_error": 2.562756434375801e-08,
+          "p_l2_error": 3.091227008334589e-08,
+          "p_linf_error": 6.20624702559603e-08,
+          "mach_l1_error": 1.0831668950487777e-08,
+          "mach_l2_error": 1.3009027550083996e-08,
+          "mach_linf_error": 2.4301573968019753e-08,
+          "physical": true,
+          "classification": "CFL-convergent"
+        }
+      ],
+      "aggregate_linf_errors": [
+        3.925044714871594e-06,
+        5.008843293340345e-07,
+        6.20624702559603e-08
+      ],
+      "classification": "CFL-convergent",
+      "physical": true
+    }
+  },
+  "distributed_transient": {
+    "rusanov": {
+      "grid_cells": 24,
+      "cfl": 0.2,
+      "t_final": 0.0002,
+      "steps": 22,
+      "final_time": 0.0002,
+      "min_rho": 0.921225159658557,
+      "min_p": 90196.23214082279,
+      "min_T": 341.14633383765533,
+      "min_mach": 1.2920940122063247,
+      "max_mach": 1.392140822157301,
+      "physical": true,
+      "classification": "controlled distributed-injection transient remains finite and physically admissible"
+    },
+    "steger-warming": {
+      "grid_cells": 24,
+      "cfl": 0.2,
+      "t_final": 0.0002,
+      "steps": 22,
+      "final_time": 0.0002,
+      "min_rho": 0.9182030639961569,
+      "min_p": 89773.65375891839,
+      "min_T": 340.6655886683185,
+      "min_mach": 1.2870821340612781,
+      "max_mach": 1.3989861694422154,
+      "physical": true,
+      "classification": "controlled distributed-injection transient remains finite and physically admissible"
+    }
+  },
+  "scheme_comparison": {
+    "rho_l1_difference": 0.0030031468743262077,
+    "rho_l2_difference": 0.003365202643555487,
+    "rho_linf_difference": 0.005818141474659759,
+    "pressure_l1_difference": 0.0036659670258890223,
+    "pressure_l2_difference": 0.004104407452257096,
+    "pressure_linf_difference": 0.006870696043069504,
+    "mach_l1_difference": 0.0024577812185583034,
+    "mach_l2_difference": 0.002753413856826666,
+    "mach_linf_difference": 0.004893077168621084,
+    "both_physical": true,
+    "qualitatively_consistent": true,
+    "classification": "qualitative controlled-case consistency only; no universal scheme ranking"
+  }
+}

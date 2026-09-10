@@ -1,0 +1,2 @@
+both_physical,classification,mach_l1_difference,mach_l2_difference,mach_linf_difference,pressure_l1_difference,pressure_l2_difference,pressure_linf_difference,qualitatively_consistent,rho_l1_difference,rho_l2_difference,rho_linf_difference,validation_case
+True,qualitative controlled-case consistency only; no universal scheme ranking,0.0024577812185583034,0.002753413856826666,0.004893077168621084,0.0036659670258890223,0.004104407452257096,0.006870696043069504,True,0.0030031468743262077,0.003365202643555487,0.005818141474659759,V6_scheme_comparison
