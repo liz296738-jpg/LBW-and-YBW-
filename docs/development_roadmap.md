@@ -12,7 +12,7 @@
 | P7 | Complete | Fuel injection | Prescribed local and distributed injection source | Formal prescribed-source model validation |
 | P8 | Complete | Combustion | Validated prescribed combustion heat-release capability | P8.1-P8.4 controlled validation complete |
 | P9 | Complete | Boundary/stability improvements | Physical boundaries and steady convergence diagnostics | Edge-case and robustness test suite |
-| P10 | Planned | Verification & validation | Verified cases and comparisons | Conservation, benchmark, and grid checks |
+| P10 | In Progress | Verification & validation | P10.1 conservation ledger and evidence matrix | Conservation, benchmark, and grid checks |
 | P11 | Planned | Parametric studies | Reproducible study workflow | Repeatable case outputs |
 
 ## P9 Breakdown

@@ -1,5 +1,6 @@
 """Analytical references and scalar metrics for controlled solver validation."""
 
+from dataclasses import dataclass
 from typing import NamedTuple
 
 import numpy as np
@@ -8,6 +9,69 @@ from numpy.typing import ArrayLike, NDArray
 from .config import GasProperties
 from .state import PrimitiveVariables, conservative_to_primitive, primitive_to_conservative
 from .validation import require_finite, require_positive, require_positive_scalar
+from .boundary import BoundaryConditions, boundary_interface_fluxes
+from .geometry import AreaProfile
+from .solver import quasi_1d_rhs
+from .spatial import area_weighted_flux_residual
+from .source_terms import combined_wall_source, distributed_combustion_heat_release_source, distributed_fuel_injection_source, geometric_area_source
+
+
+@dataclass(frozen=True)
+class ConservationBalance:
+    """SI global quasi-1D conservation ledger and absolute closure error."""
+    rhs_integral: NDArray[np.float64]
+    boundary_flux: NDArray[np.float64]
+    source_integral: NDArray[np.float64]
+    closure_error: NDArray[np.float64]
+    area_source_integral: NDArray[np.float64]
+    wall_source_integral: NDArray[np.float64]
+    fuel_source_integral: NDArray[np.float64]
+    combustion_source_integral: NDArray[np.float64]
+
+
+def _paired_finite_arrays(numerical: ArrayLike, reference: ArrayLike) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+    first, second = require_finite("numerical", numerical), require_finite("reference", reference)
+    if first.shape != second.shape or first.size == 0: raise ValueError("numerical and reference must be nonempty arrays with identical shapes")
+    return first, second
+
+
+def absolute_linf_error(numerical: ArrayLike, reference: ArrayLike) -> float:
+    """Return the finite-array absolute L-infinity error."""
+    first, second = _paired_finite_arrays(numerical, reference)
+    return float(np.max(np.abs(first - second)))
+
+
+def relative_linf_error(numerical: ArrayLike, reference: ArrayLike, reference_scale: object) -> float:
+    """Return L-infinity error divided by an explicit positive scale."""
+    return absolute_linf_error(numerical, reference) / require_positive_scalar("reference_scale", reference_scale)
+
+
+def relative_l1_error(numerical: ArrayLike, reference: ArrayLike, reference_scale: object) -> float:
+    """Return mean absolute error divided by an explicit positive scale."""
+    first, second = _paired_finite_arrays(numerical, reference)
+    return float(np.mean(np.abs(first - second)) / require_positive_scalar("reference_scale", reference_scale))
+
+
+def quasi_1d_conservation_balance(U: ArrayLike, geometry: AreaProfile, dx: object, gas: GasProperties, *, flux_scheme: object = "rusanov", boundary_conditions: BoundaryConditions | None = None, **source_kwargs: object) -> ConservationBalance:
+    """Evaluate ``sum(A R dx) = A_L F_L-A_R F_R+sum(A S dx)`` in SI units."""
+    states = np.asarray(U, dtype=float)
+    if states.ndim != 2 or states.shape != (geometry.num_cells, 3): raise ValueError("U must have shape (N, 3); batched ledgers are unsupported")
+    spacing = require_positive_scalar("dx", dx)
+    rhs = quasi_1d_rhs(states, geometry, spacing, gas, flux_scheme=flux_scheme, boundary_conditions=boundary_conditions, **source_kwargs)
+    fluxes = boundary_interface_fluxes(states, gas, boundary_conditions, scheme=flux_scheme)
+    flux_part = area_weighted_flux_residual(fluxes, geometry, spacing)
+    weights = geometry.cell_area[:, None] * spacing
+    area = geometric_area_source(states, geometry, spacing, gas)
+    zeros = np.zeros_like(states)
+    wall = combined_wall_source(states, source_kwargs["hydraulic_diameter"], source_kwargs["darcy_friction_factor"], source_kwargs["wall_heat_flux"], gas) if "hydraulic_diameter" in source_kwargs else zeros
+    fuel = distributed_fuel_injection_source(states, geometry, source_kwargs["fuel_mass_flow_rate_per_length"], source_kwargs["fuel_axial_velocity"], source_kwargs["fuel_specific_total_enthalpy"], gas) if "fuel_mass_flow_rate_per_length" in source_kwargs else zeros
+    combustion = distributed_combustion_heat_release_source(states, geometry, source_kwargs["fuel_burn_rate_per_length"], source_kwargs["fuel_lower_heating_value"], gas) if "fuel_burn_rate_per_length" in source_kwargs else zeros
+    sources = area + wall + fuel + combustion
+    rhs_integral = np.sum(weights * rhs, axis=0)
+    boundary = geometry.face_area[0] * fluxes[0] - geometry.face_area[-1] * fluxes[-1]
+    source_integral = np.sum(weights * sources, axis=0)
+    integrate = lambda source: np.sum(weights * source, axis=0)
+    return ConservationBalance(rhs_integral, boundary, source_integral, rhs_integral - (boundary + source_integral), integrate(area), integrate(wall), integrate(fuel), integrate(combustion))
 
 
 def _nonnegative_scalar(name: str, value: object) -> float:
