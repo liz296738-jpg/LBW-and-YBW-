@@ -6,7 +6,7 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P8 complete.** P8 completes the prescribed burned-fuel/LHV combustion heat-release model, its solver integration, and controlled formal validation; it is not a finite-rate chemical-combustion model.
+Current stage: **P9.1 complete; P9 remains in progress.** P8 completes the prescribed burned-fuel/LHV combustion heat-release model, its solver integration, and controlled formal validation; it is not a finite-rate chemical-combustion model. P9.1 adds fixed supersonic inflow and supersonic outflow support while retaining transmissive verification boundaries.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 

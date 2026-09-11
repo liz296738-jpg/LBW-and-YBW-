@@ -5,7 +5,7 @@ from typing import NamedTuple
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .boundary import transmissive_ghost_cells
+from .boundary import BoundaryConditions, boundary_interface_fluxes, transmissive_ghost_cells, validate_boundary_conditions
 from .config import GasProperties, NumericalConfig
 from .gas import speed_of_sound
 from .geometry import AreaProfile
@@ -136,13 +136,14 @@ def euler_rhs_transmissive(U: ArrayLike, dx: object, gas: GasProperties) -> NDAr
     return finite_volume_residual(interface_fluxes, spacing)
 
 
-def quasi_1d_rhs_transmissive(
+def quasi_1d_rhs(
     U: ArrayLike,
     geometry: AreaProfile,
     dx: object,
     gas: GasProperties,
     *,
     flux_scheme: object = "rusanov",
+    boundary_conditions: BoundaryConditions | None = None,
     hydraulic_diameter: object = None,
     darcy_friction_factor: object = 0.0,
     wall_heat_flux: object = 0.0,
@@ -152,7 +153,7 @@ def quasi_1d_rhs_transmissive(
     fuel_burn_rate_per_length: ArrayLike = 0.0,
     fuel_lower_heating_value: ArrayLike | None = None,
 ) -> NDArray[np.float64]:
-    """Return quasi-1D RHS with optional wall, injection, and combustion sources.
+    """Return quasi-1D RHS with selected P9.1 boundaries and optional sources.
 
     ``fuel_burn_rate_per_length`` [kg/(m s)] is a prescribed reacted-fuel
     distribution independent of P7's ``fuel_mass_flow_rate_per_length``.
@@ -174,8 +175,9 @@ def quasi_1d_rhs_transmissive(
     combustion_active = _combustion_enabled(
         states, fuel_burn_rate_per_length, fuel_lower_heating_value
     )
-    ghosted = transmissive_ghost_cells(states)
-    interface_fluxes = internal_numerical_fluxes(ghosted, gas, scheme=flux_scheme)
+    interface_fluxes = boundary_interface_fluxes(
+        states, gas, boundary_conditions, scheme=flux_scheme
+    )
     rhs = quasi_1d_residual(states, interface_fluxes, geometry, spacing, gas)
     if wall_active:
         rhs = rhs + combined_wall_source(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
@@ -186,6 +188,35 @@ def quasi_1d_rhs_transmissive(
             states, geometry, fuel_burn_rate_per_length, fuel_lower_heating_value, gas
         )
     return rhs
+
+
+def quasi_1d_rhs_transmissive(
+    U: ArrayLike,
+    geometry: AreaProfile,
+    dx: object,
+    gas: GasProperties,
+    *,
+    flux_scheme: object = "rusanov",
+    hydraulic_diameter: object = None,
+    darcy_friction_factor: object = 0.0,
+    wall_heat_flux: object = 0.0,
+    fuel_mass_flow_rate_per_length: object = 0.0,
+    fuel_axial_velocity: object = 0.0,
+    fuel_specific_total_enthalpy: object = 0.0,
+    fuel_burn_rate_per_length: ArrayLike = 0.0,
+    fuel_lower_heating_value: ArrayLike | None = None,
+) -> NDArray[np.float64]:
+    """Legacy wrapper retaining exactly transmissive boundary semantics."""
+    return quasi_1d_rhs(
+        U, geometry, dx, gas, flux_scheme=flux_scheme,
+        boundary_conditions=BoundaryConditions(), hydraulic_diameter=hydraulic_diameter,
+        darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux,
+        fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length,
+        fuel_axial_velocity=fuel_axial_velocity,
+        fuel_specific_total_enthalpy=fuel_specific_total_enthalpy,
+        fuel_burn_rate_per_length=fuel_burn_rate_per_length,
+        fuel_lower_heating_value=fuel_lower_heating_value,
+    )
 
 
 def solve_euler_1d(
@@ -248,6 +279,7 @@ def solve_quasi_1d(
     fuel_specific_total_enthalpy: object = 0.0,
     fuel_burn_rate_per_length: ArrayLike = 0.0,
     fuel_lower_heating_value: ArrayLike | None = None,
+    boundary_conditions: BoundaryConditions | None = None,
 ) -> SolverResult:
     """Advance quasi-1D flow with optional wall, injection, and combustion sources.
 
@@ -271,6 +303,7 @@ def solve_quasi_1d(
         raise ValueError("max_steps must be a positive integer")
     if flux_scheme not in ("rusanov", "steger-warming"):
         raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
+    conditions = validate_boundary_conditions(boundary_conditions, state, gas)
     wall_active = _wall_physics_enabled(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
     fuel_active = _fuel_injection_enabled(state, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
     combustion_active = _combustion_enabled(
@@ -296,13 +329,13 @@ def solve_quasi_1d(
         )
 
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
-        return quasi_1d_rhs_transmissive(
-            stage_state,
-            geometry,
-            spacing,
-            gas,
-            flux_scheme=flux_scheme,
-            **source_kwargs,
+        if boundary_conditions is None:
+            return quasi_1d_rhs_transmissive(
+                stage_state, geometry, spacing, gas, flux_scheme=flux_scheme, **source_kwargs
+            )
+        return quasi_1d_rhs(
+            stage_state, geometry, spacing, gas, flux_scheme=flux_scheme,
+            boundary_conditions=conditions, **source_kwargs,
         )
 
     while time < final_time:

@@ -44,6 +44,17 @@ P3.3 constructs the source-free semi-discrete finite-volume system `dU/dt = L(U)
 
 P3.4 applies SSP-RK3 to this semi-discrete system as numerical time discretization. P3.5 solves the source-free, constant-area 1D Euler system with transmissive boundaries; it does not yet represent a quasi-1D scramjet combustor with area or source terms.
 
+## P9.1 Physical Supersonic Boundaries
+
+Transmissive boundaries remain available primarily for verification and backward
+compatibility. For a left positive supersonic inflow, `u-a > 0`, `u > 0`, and
+`u+a > 0`, so all characteristics enter the domain and the prescribed boundary
+state provides all primitive information. The boundary flux is `F(U_in)`.
+For a right positive supersonic outflow the three characteristics leave the
+domain, so no exterior thermodynamic state is prescribed and the boundary flux
+is `F(U_N)`. These fluxes retain the existing quasi-1D face-area weighting.
+Subsonic and characteristic boundary conditions are intentionally deferred.
+
 The implemented quasi-1D formulation is
 
 `∂(A U)/∂t + ∂(A F)/∂x = [0, p dA/dx, 0]`.

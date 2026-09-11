@@ -11,9 +11,16 @@
 | P6 | Complete | Friction & heat transfer | Separate source models | Per-model validation |
 | P7 | Complete | Fuel injection | Prescribed local and distributed injection source | Formal prescribed-source model validation |
 | P8 | Complete | Combustion | Validated prescribed combustion heat-release capability | P8.1-P8.4 controlled validation complete |
-| P9 | Planned | Boundary/stability improvements | Robust boundary handling | Edge-case test suite |
+| P9 | In Progress | Boundary/stability improvements | P9.1 physical boundary foundation complete; subsonic work remains | Edge-case test suite |
 | P10 | Planned | Verification & validation | Verified cases and comparisons | Conservation, benchmark, and grid checks |
 | P11 | Planned | Parametric studies | Reproducible study workflow | Repeatable case outputs |
+
+## P9 Breakdown
+
+- P9.1 Physical Boundary Foundation — Complete
+- P9.2 Subsonic Outlet Pressure BC — Next
+- P9.3 Subsonic Inlet / Characteristic BC — Not started
+- P9.4 Convergence / Robustness — Not started
 
 ## P3 Breakdown
 
