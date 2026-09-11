@@ -1,53 +1,734 @@
 {
   "baseline_sha": "4d2df6ab08649bc8701b229561b349985c410614",
+  "head_sha": "151a91bebfc23284ebf35ff95991f41b315cf0f9",
   "cases": {
-    "V2_constant_area_nonuniform": {
-      "rusanov": {
-        "rhs_integral": [
-          -0.5887604779675826,
-          20.326030753116356,
-          295579.92850600183
-        ],
-        "boundary_flux": [
-          -0.5887604779675826,
-          20.326030753116356,
-          295579.92850600183
-        ],
-        "source_integral": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "closure_error": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "passed": true
+    "V1_uniform_constant_area": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        }
       },
-      "steger-warming": {
-        "rhs_integral": [
-          -0.5887604779675542,
-          20.32603075314546,
-          295579.92850601673
-        ],
-        "boundary_flux": [
-          -0.5887604779675542,
-          20.32603075314546,
-          295579.92850601673
-        ],
-        "source_integral": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "closure_error": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "passed": true
-      }
+      "passed": true
+    },
+    "V2_nonuniform_constant_area": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            -0.5887604779675826,
+            20.326030753116356,
+            295579.92850600183
+          ],
+          "boundary_flux": [
+            -0.5887604779675826,
+            20.326030753116356,
+            295579.92850600183
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            -0.5887604779675542,
+            20.32603075314546,
+            295579.92850601673
+          ],
+          "boundary_flux": [
+            -0.5887604779675542,
+            20.32603075314546,
+            295579.92850601673
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "V3_variable_area_geometry": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            -12.0,
+            -2399.9999999999955,
+            -3740000.0
+          ],
+          "boundary_flux": [
+            -12.0,
+            -7400.0,
+            -3740000.0
+          ],
+          "source_integral": [
+            0.0,
+            5000.000000000005,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            5000.000000000005,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            -12.0,
+            -2399.9999999999964,
+            -3740000.0
+          ],
+          "boundary_flux": [
+            -12.0,
+            -7400.0,
+            -3740000.0
+          ],
+          "source_integral": [
+            0.0,
+            5000.000000000005,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            -9.094947017729282e-13,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            5000.000000000005,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "V4_wall_source": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            0.0,
+            -384.0,
+            32000.0
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.0,
+            -384.0,
+            32000.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            -384.0,
+            32000.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            0.0,
+            -384.0,
+            32000.0
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.0,
+            -384.0,
+            32000.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            -384.0,
+            32000.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "V5_fuel_injection": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            0.00012,
+            0.012171428571428573,
+            121.71428571428574
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.00012,
+            0.012171428571428573,
+            121.71428571428574
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.00012,
+            0.012171428571428573,
+            121.71428571428574
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            0.00012,
+            0.012171428571428573,
+            121.71428571428574
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.00012,
+            0.012171428571428573,
+            121.71428571428574
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.00012,
+            0.012171428571428573,
+            121.71428571428574
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "V6_combustion_heat_release": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "boundary_flux": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "V7_combined_source_ledger": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            -11.999880000000001,
+            -2596.7878285714246,
+            -3706598.2857142854
+          ],
+          "boundary_flux": [
+            -12.0,
+            -7400.0,
+            -3740000.0
+          ],
+          "source_integral": [
+            0.00012000000000000002,
+            4803.212171428576,
+            33401.71428571429
+          ],
+          "closure_error": [
+            -1.7763568394002505e-15,
+            -4.547473508864641e-13,
+            4.656612873077393e-10
+          ],
+          "area_source_integral": [
+            0.0,
+            5000.000000000005,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            -196.8,
+            32800.0
+          ],
+          "fuel_source_integral": [
+            0.00012000000000000002,
+            0.012171428571428573,
+            121.71428571428572
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            -11.999880000000001,
+            -2596.7878285714246,
+            -3706598.2857142854
+          ],
+          "boundary_flux": [
+            -12.0,
+            -7400.0,
+            -3740000.0
+          ],
+          "source_integral": [
+            0.00012000000000000002,
+            4803.212171428576,
+            33401.71428571429
+          ],
+          "closure_error": [
+            -1.7763568394002505e-15,
+            -4.547473508864641e-13,
+            4.656612873077393e-10
+          ],
+          "area_source_integral": [
+            0.0,
+            5000.000000000005,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            -196.8,
+            32800.0
+          ],
+          "fuel_source_integral": [
+            0.00012000000000000002,
+            0.012171428571428573,
+            121.71428571428572
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            480.00000000000006
+          ],
+          "passed": true
+        }
+      },
+      "passed": true
+    },
+    "V8_physical_boundary_ledger": {
+      "schemes": {
+        "rusanov": {
+          "rhs_integral": [
+            0.0,
+            -5.820766091346741e-11,
+            -2.9802322387695312e-08
+          ],
+          "boundary_flux": [
+            0.0,
+            -5.820766091346741e-11,
+            -2.9802322387695312e-08
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        },
+        "steger-warming": {
+          "rhs_integral": [
+            2.842170943040401e-14,
+            -5.820766091346741e-11,
+            -2.9802322387695312e-08
+          ],
+          "boundary_flux": [
+            2.842170943040401e-14,
+            -5.820766091346741e-11,
+            -2.9802322387695312e-08
+          ],
+          "source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "closure_error": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "area_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "wall_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "fuel_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "combustion_source_integral": [
+            0.0,
+            0.0,
+            0.0
+          ],
+          "passed": true
+        }
+      },
+      "passed": true
     }
   },
   "all_passed": true

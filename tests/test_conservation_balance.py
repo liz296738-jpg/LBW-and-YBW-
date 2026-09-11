@@ -8,8 +8,19 @@ from scramjet1d.geometry import constant_area_profile
 from scramjet1d.geometry import AreaProfile
 from scramjet1d.state import primitive_to_conservative
 from scramjet1d.verification import quasi_1d_conservation_balance
+from scramjet1d.source_terms import combined_wall_source, distributed_combustion_heat_release_source, distributed_fuel_injection_source
 
 GAS = GasProperties()
+
+
+@pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
+def test_v1_uniform_constant_area_free_stream_is_exactly_balanced(scheme):
+    state = primitive_to_conservative(np.full(8, 1.2), np.full(8, 200.), np.full(8, 100000.), GAS)
+    balance = quasi_1d_conservation_balance(state, constant_area_profile(8), .1, GAS, flux_scheme=scheme)
+    assert_allclose(balance.rhs_integral, 0., rtol=0, atol=1e-8)
+    assert_allclose(balance.boundary_flux, 0., rtol=0, atol=1e-8)
+    assert_allclose(balance.source_integral, 0., rtol=0, atol=0)
+    assert_allclose(balance.closure_error, 0., rtol=0, atol=1e-8)
 
 
 @pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
@@ -32,9 +43,44 @@ def test_variable_area_and_combined_sources_global_balance_close(scheme):
 
 
 @pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
+def test_v3_monotonic_variable_area_has_expected_nonzero_momentum_force(scheme):
+    state = primitive_to_conservative(np.full(8, 1.2), np.full(8, 200.), np.full(8, 100000.), GAS)
+    faces = np.linspace(1., 1.05, 9); geometry = AreaProfile((faces[:-1] + faces[1:]) / 2., faces)
+    balance = quasi_1d_conservation_balance(state, geometry, .1, GAS, flux_scheme=scheme)
+    assert_allclose(balance.area_source_integral[[0, 2]], 0., rtol=0, atol=0)
+    assert_allclose(balance.area_source_integral[1], 100000. * (faces[-1] - faces[0]), rtol=0, atol=1e-10)
+    assert balance.area_source_integral[1] != 0.
+    assert_allclose(balance.closure_error, 0., rtol=0, atol=1e-8)
+
+
+@pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
+@pytest.mark.parametrize("kind", ("wall", "fuel", "combustion"))
+def test_v4_to_v6_standalone_source_ledgers_match_authoritative_helpers(scheme, kind):
+    state = primitive_to_conservative(np.full(8, 1.2), np.full(8, 200.), np.full(8, 100000.), GAS); geometry = constant_area_profile(8); kwargs = {}
+    if kind == "wall":
+        kwargs = dict(hydraulic_diameter=.1, darcy_friction_factor=.002, wall_heat_flux=1000.); expected = combined_wall_source(state, **kwargs, gas=GAS)
+    elif kind == "fuel":
+        rate = np.linspace(.0001, .0002, 8); velocity = np.linspace(90., 110., 8); enthalpy = np.linspace(9e5, 1.1e6, 8); kwargs = dict(fuel_mass_flow_rate_per_length=rate, fuel_axial_velocity=velocity, fuel_specific_total_enthalpy=enthalpy); expected = distributed_fuel_injection_source(state, geometry, rate, velocity, enthalpy, GAS)
+    else:
+        burn = np.linspace(.00001, .00002, 8); kwargs = dict(fuel_burn_rate_per_length=burn, fuel_lower_heating_value=40e6); expected = distributed_combustion_heat_release_source(state, geometry, burn, 40e6, GAS)
+    balance = quasi_1d_conservation_balance(state, geometry, .1, GAS, flux_scheme=scheme, **kwargs)
+    measured = {"wall": balance.wall_source_integral, "fuel": balance.fuel_source_integral, "combustion": balance.combustion_source_integral}[kind]
+    assert_allclose(measured, np.sum(.1 * expected, axis=0), rtol=0, atol=1e-10)
+    assert_allclose(balance.closure_error, 0., rtol=0, atol=1e-8)
+
+
+@pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
 def test_physical_subsonic_boundary_ledger_closes(scheme):
     state = primitive_to_conservative(np.full(8, 1.2), np.full(8, 200.), np.full(8, 100000.), GAS)
     q = state[0]; rho, momentum, energy = q; velocity = momentum / rho; pressure = (GAS.gamma - 1) * (energy - .5 * rho * velocity**2); temperature = pressure / (rho * GAS.R); mach = velocity / np.sqrt(GAS.gamma * GAS.R * temperature); beta = (GAS.gamma - 1) / 2
     conditions = BoundaryConditions(inlet="subsonic-total-inflow", outlet="subsonic-pressure", inlet_total_pressure=pressure * (1 + beta * mach**2) ** (GAS.gamma / (GAS.gamma - 1)), inlet_total_temperature=temperature * (1 + beta * mach**2), outlet_static_pressure=pressure)
     balance = quasi_1d_conservation_balance(state, constant_area_profile(8), .1, GAS, flux_scheme=scheme, boundary_conditions=conditions)
     assert_allclose(balance.closure_error, 0., rtol=0, atol=1e-8)
+
+
+def test_source_defaults_match_solver_and_batched_states_are_rejected():
+    state = primitive_to_conservative(np.full(8, 1.2), np.full(8, 200.), np.full(8, 100000.), GAS)
+    balance = quasi_1d_conservation_balance(state, constant_area_profile(8), .1, GAS, hydraulic_diameter=.1)
+    assert_allclose(balance.wall_source_integral, 0., rtol=0, atol=0)
+    with pytest.raises(ValueError):
+        quasi_1d_conservation_balance(np.stack((state, state)), constant_area_profile(8), .1, GAS)

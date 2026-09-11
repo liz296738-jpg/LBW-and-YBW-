@@ -52,20 +52,23 @@ def relative_l1_error(numerical: ArrayLike, reference: ArrayLike, reference_scal
     return float(np.mean(np.abs(first - second)) / require_positive_scalar("reference_scale", reference_scale))
 
 
-def quasi_1d_conservation_balance(U: ArrayLike, geometry: AreaProfile, dx: object, gas: GasProperties, *, flux_scheme: object = "rusanov", boundary_conditions: BoundaryConditions | None = None, **source_kwargs: object) -> ConservationBalance:
+def quasi_1d_conservation_balance(U: ArrayLike, geometry: AreaProfile, dx: object, gas: GasProperties, *, flux_scheme: object = "rusanov", boundary_conditions: BoundaryConditions | None = None, hydraulic_diameter: object = None, darcy_friction_factor: object = 0.0, wall_heat_flux: object = 0.0, fuel_mass_flow_rate_per_length: object = 0.0, fuel_axial_velocity: object = 0.0, fuel_specific_total_enthalpy: object = 0.0, fuel_burn_rate_per_length: object = 0.0, fuel_lower_heating_value: object = None) -> ConservationBalance:
     """Evaluate ``sum(A R dx) = A_L F_L-A_R F_R+sum(A S dx)`` in SI units."""
     states = np.asarray(U, dtype=float)
     if states.ndim != 2 or states.shape != (geometry.num_cells, 3): raise ValueError("U must have shape (N, 3); batched ledgers are unsupported")
     spacing = require_positive_scalar("dx", dx)
-    rhs = quasi_1d_rhs(states, geometry, spacing, gas, flux_scheme=flux_scheme, boundary_conditions=boundary_conditions, **source_kwargs)
+    rhs = quasi_1d_rhs(states, geometry, spacing, gas, flux_scheme=flux_scheme, boundary_conditions=boundary_conditions, hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux, fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy, fuel_burn_rate_per_length=fuel_burn_rate_per_length, fuel_lower_heating_value=fuel_lower_heating_value)
     fluxes = boundary_interface_fluxes(states, gas, boundary_conditions, scheme=flux_scheme)
     flux_part = area_weighted_flux_residual(fluxes, geometry, spacing)
     weights = geometry.cell_area[:, None] * spacing
     area = geometric_area_source(states, geometry, spacing, gas)
     zeros = np.zeros_like(states)
-    wall = combined_wall_source(states, source_kwargs["hydraulic_diameter"], source_kwargs["darcy_friction_factor"], source_kwargs["wall_heat_flux"], gas) if "hydraulic_diameter" in source_kwargs else zeros
-    fuel = distributed_fuel_injection_source(states, geometry, source_kwargs["fuel_mass_flow_rate_per_length"], source_kwargs["fuel_axial_velocity"], source_kwargs["fuel_specific_total_enthalpy"], gas) if "fuel_mass_flow_rate_per_length" in source_kwargs else zeros
-    combustion = distributed_combustion_heat_release_source(states, geometry, source_kwargs["fuel_burn_rate_per_length"], source_kwargs["fuel_lower_heating_value"], gas) if "fuel_burn_rate_per_length" in source_kwargs else zeros
+    wall_active = hydraulic_diameter is not None and (np.any(np.asarray(darcy_friction_factor) != 0.0) or np.any(np.asarray(wall_heat_flux) != 0.0))
+    fuel_active = np.any(np.asarray(fuel_mass_flow_rate_per_length) != 0.0)
+    combustion_active = np.any(np.asarray(fuel_burn_rate_per_length) != 0.0)
+    wall = combined_wall_source(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas) if wall_active else zeros
+    fuel = distributed_fuel_injection_source(states, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas) if fuel_active else zeros
+    combustion = distributed_combustion_heat_release_source(states, geometry, fuel_burn_rate_per_length, fuel_lower_heating_value, gas) if combustion_active else zeros
     sources = area + wall + fuel + combustion
     rhs_integral = np.sum(weights * rhs, axis=0)
     boundary = geometry.face_area[0] * fluxes[0] - geometry.face_area[-1] * fluxes[-1]
