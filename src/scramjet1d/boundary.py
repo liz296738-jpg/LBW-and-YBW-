@@ -95,8 +95,8 @@ def boundary_interface_fluxes(
     transmissive path deliberately retains the historical ghost-cell assembly.
     """
     states = np.asarray(U, dtype=float)
-    if states.ndim != 2 or states.shape[-1] != 3 or states.shape[0] < 2:
-        raise ValueError("U must have shape (N, 3) with N >= 2")
+    if states.ndim < 2 or states.shape[-1] != 3 or states.shape[-2] < 2:
+        raise ValueError("U must have shape (..., N, 3) with N >= 2")
     conditions = validate_boundary_conditions(boundary_conditions, states, gas)
     from .spatial import internal_numerical_fluxes
 
@@ -108,7 +108,10 @@ def boundary_interface_fluxes(
         inlet = conditions.inlet_state
         assert inlet is not None
         left = euler_flux(primitive_to_conservative(inlet.rho, inlet.u, inlet.p, gas), gas)
+        left = np.broadcast_to(np.asarray(left, dtype=float), states.shape[:-2] + (3,))
     else:
-        left = euler_flux(states[0], gas)
-    right = euler_flux(states[-1], gas)
-    return np.concatenate((np.asarray(left, dtype=float)[np.newaxis, :], internal, np.asarray(right, dtype=float)[np.newaxis, :]), axis=0)
+        left = euler_flux(states[..., 0, :], gas)
+    right = euler_flux(states[..., -1, :], gas)
+    return np.concatenate(
+        (left[..., np.newaxis, :], internal, right[..., np.newaxis, :]), axis=-2
+    )

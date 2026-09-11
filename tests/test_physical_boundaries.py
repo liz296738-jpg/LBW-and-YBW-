@@ -6,11 +6,12 @@ import numpy as np
 import pytest
 from numpy.testing import assert_allclose
 
-from scramjet1d.boundary import BoundaryConditions, PrimitiveBoundaryState
+from scramjet1d.boundary import BoundaryConditions, PrimitiveBoundaryState, boundary_interface_fluxes
 from scramjet1d.config import GasProperties, NumericalConfig
 from scramjet1d.flux import euler_flux
 from scramjet1d.geometry import constant_area_profile
 from scramjet1d.solver import quasi_1d_rhs, quasi_1d_rhs_transmissive, solve_quasi_1d
+from scramjet1d.source_terms import combined_wall_source, distributed_combustion_heat_release_source, distributed_fuel_injection_source
 from scramjet1d.state import primitive_to_conservative
 
 
@@ -101,3 +102,36 @@ def test_physical_boundaries_preserve_existing_combustion_source_and_inputs() ->
     rhs = quasi_1d_rhs(state, geometry, .1, GAS, boundary_conditions=PHYSICAL, fuel_burn_rate_per_length=.001, fuel_lower_heating_value=40e6)
     assert np.all(rhs[:, 2] > 0.0)
     assert_allclose(state, original, rtol=0.0, atol=0.0); assert_allclose(geometry.cell_area, areas, rtol=0.0, atol=0.0)
+
+
+@pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
+def test_batched_transmissive_rhs_remains_backward_compatible(scheme: str) -> None:
+    geometry = constant_area_profile(8); states = np.stack((_state(), _state(rho=.9, u=720., p=98_000.)))
+    original = states.copy(); cell_area = geometry.cell_area.copy(); face_area = geometry.face_area.copy()
+    legacy = quasi_1d_rhs_transmissive(states, geometry, .1, GAS, flux_scheme=scheme)
+    generic = quasi_1d_rhs(states, geometry, .1, GAS, flux_scheme=scheme, boundary_conditions=BoundaryConditions())
+    expected = np.stack([quasi_1d_rhs_transmissive(sample, geometry, .1, GAS, flux_scheme=scheme) for sample in states])
+    assert legacy.shape == (2, 8, 3) and np.all(np.isfinite(legacy))
+    assert_allclose(legacy, generic, rtol=0.0, atol=0.0); assert_allclose(legacy, expected, rtol=0.0, atol=0.0)
+    assert_allclose(states, original, rtol=0.0, atol=0.0); assert_allclose(geometry.cell_area, cell_area, rtol=0.0, atol=0.0); assert_allclose(geometry.face_area, face_area, rtol=0.0, atol=0.0)
+
+
+@pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
+def test_batched_physical_boundary_fluxes_preserve_per_batch_semantics(scheme: str) -> None:
+    states = np.stack((_state(), _state(rho=.9, u=720., p=98_000.)))
+    fluxes = boundary_interface_fluxes(states, GAS, PHYSICAL, scheme=scheme)
+    inlet_flux = euler_flux(primitive_to_conservative(INLET.rho, INLET.u, INLET.p, GAS), GAS)
+    assert fluxes.shape == (2, 9, 3)
+    assert_allclose(fluxes[..., 0, :], np.broadcast_to(inlet_flux, (2, 3)), rtol=0.0, atol=1e-10)
+    assert_allclose(fluxes[..., -1, :], euler_flux(states[..., -1, :], GAS), rtol=0.0, atol=1e-10)
+
+
+def test_physical_boundary_rhs_composes_wall_fuel_and_combustion_sources() -> None:
+    state = _state(); geometry = constant_area_profile(8, .02)
+    wall = dict(hydraulic_diameter=.1, darcy_friction_factor=.01, wall_heat_flux=20_000.)
+    fuel = dict(fuel_mass_flow_rate_per_length=.002, fuel_axial_velocity=100., fuel_specific_total_enthalpy=1e6)
+    burn = dict(fuel_burn_rate_per_length=.0002, fuel_lower_heating_value=40e6)
+    base = quasi_1d_rhs(state, geometry, .1, GAS, boundary_conditions=PHYSICAL)
+    actual = quasi_1d_rhs(state, geometry, .1, GAS, boundary_conditions=PHYSICAL, **wall, **fuel, **burn)
+    expected = base + combined_wall_source(state, **wall, gas=GAS) + distributed_fuel_injection_source(state, geometry, **fuel, gas=GAS) + distributed_combustion_heat_release_source(state, geometry, **burn, gas=GAS)
+    assert_allclose(actual, expected, rtol=0.0, atol=1e-10)
