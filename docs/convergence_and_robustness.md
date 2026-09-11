@@ -1,4 +1,4 @@
-# P9.4 Steady convergence and diagnostics
+# P9.4 Steady convergence and diagnostics — Complete
 
 `solve_quasi_1d_steady` is a pseudo-time wrapper around the existing complete
 quasi-1D RHS: geometry, physical boundaries, wall transfer, fuel injection,

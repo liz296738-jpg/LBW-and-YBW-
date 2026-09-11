@@ -391,8 +391,21 @@ def solve_quasi_1d_steady(
     if isinstance(max_steps, (bool, np.bool_)) or not isinstance(max_steps, (int, np.integer)) or max_steps <= 0: raise ValueError("max_steps must be a positive integer")
     if flux_scheme not in ("rusanov", "steger-warming"): raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
     conditions = validate_boundary_conditions(boundary_conditions, state, gas)
+    wall_active = _wall_physics_enabled(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
+    fuel_active = _fuel_injection_enabled(state, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
+    combustion_active = _combustion_enabled(state, fuel_burn_rate_per_length, fuel_lower_heating_value)
+    if wall_active:
+        combined_wall_source(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
+    if fuel_active:
+        distributed_fuel_injection_source(state, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
     reference: SteadyResidualReference = steady_residual_reference(state, spacing, gas)
-    source_kwargs = dict(hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux, fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy, fuel_burn_rate_per_length=fuel_burn_rate_per_length, fuel_lower_heating_value=fuel_lower_heating_value)
+    source_kwargs: dict[str, object] = {}
+    if wall_active:
+        source_kwargs.update(hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux)
+    if fuel_active:
+        source_kwargs.update(fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy)
+    if combustion_active:
+        source_kwargs.update(fuel_burn_rate_per_length=fuel_burn_rate_per_length, fuel_lower_heating_value=fuel_lower_heating_value)
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
         return quasi_1d_rhs(stage_state, geometry, spacing, gas, flux_scheme=flux_scheme, boundary_conditions=conditions, **source_kwargs)
     state = np.array(state, dtype=float, copy=True); time = 0.0; steps = 0

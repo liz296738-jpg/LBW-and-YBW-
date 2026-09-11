@@ -65,3 +65,31 @@ def test_normal_termination_reports_max_steps_and_legacy_solver_contract_is_unch
     assert not result.converged and result.termination_reason == "max-steps" and result.steps == 1
     transient = solve_quasi_1d(states, constant_area_profile(8), .1, 1e-5, GAS, NumericalConfig())
     assert len(transient) == 3 and isinstance(transient, SolverResult)
+
+
+@pytest.mark.parametrize("kwargs", (
+    dict(hydraulic_diameter=None, darcy_friction_factor=.01),
+    dict(fuel_mass_flow_rate_per_length=-.001),
+    dict(fuel_burn_rate_per_length=.001, fuel_lower_heating_value=None),
+))
+def test_invalid_initial_source_configuration_raises_value_error(kwargs):
+    with pytest.raises(ValueError):
+        solve_quasi_1d_steady(_state(), constant_area_profile(8), .1, 1e-4, GAS, NumericalConfig(), boundary_conditions=_conditions(_state()), **kwargs)
+
+
+def test_initial_residual_is_independent_of_cfl_and_result_arrays_are_read_only():
+    states = _state()
+    conditions = _conditions(_state(101000.))
+    low = solve_quasi_1d_steady(states, constant_area_profile(8), .1, 1e-6, GAS, NumericalConfig(cfl=.1, tolerance=1e-14), boundary_conditions=conditions)
+    high = solve_quasi_1d_steady(states, constant_area_profile(8), .1, 1e-6, GAS, NumericalConfig(cfl=.8, tolerance=1e-14), boundary_conditions=conditions)
+    assert_allclose(low.residual_history[0], high.residual_history[0], rtol=0, atol=0)
+    assert not low.U.flags.writeable and not low.residual_history.flags.writeable and not low.time_history.flags.writeable
+    assert low.time_history[0] == 0 and low.time_history[-1] == low.time and low.residual == low.residual_history[-1]
+
+
+def test_transient_solver_ignores_steady_tolerance():
+    states = _state(101000.)
+    loose = solve_quasi_1d(states, constant_area_profile(8), .1, 1e-4, GAS, NumericalConfig(cfl=.2, tolerance=1.))
+    strict = solve_quasi_1d(states, constant_area_profile(8), .1, 1e-4, GAS, NumericalConfig(cfl=.2, tolerance=1e-12))
+    assert loose.time == strict.time and loose.steps == strict.steps
+    assert_allclose(loose.U, strict.U, rtol=0, atol=0)

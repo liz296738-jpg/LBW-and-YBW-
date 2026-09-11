@@ -36,3 +36,22 @@ def test_runtime_failure_includes_step_time_context_and_cause(monkeypatch):
     with pytest.raises(RuntimeError, match=r"SSP-RK3.*step 0, time=") as error:
         solve_quasi_1d_steady(_state(), constant_area_profile(8), .1, 1e-4, GAS, NumericalConfig(), boundary_conditions=_conditions(_state(8) + np.array([0., 0., 1000.])))
     assert isinstance(error.value.__cause__, ValueError)
+
+
+@pytest.mark.parametrize("cap", ("max_steps", "max_time"))
+def test_convergence_wins_over_the_final_cap_step(monkeypatch, cap):
+    import scramjet1d.solver as solver
+    values = iter((1.0, 1e-8))
+    monkeypatch.setattr(solver, "normalized_steady_residual", lambda rhs, reference: next(values))
+    kwargs = dict(max_steps=1) if cap == "max_steps" else dict()
+    duration = 1.0 if cap == "max_steps" else 1e-5
+    result = solve_quasi_1d_steady(_state(), constant_area_profile(8), .1, duration, GAS, NumericalConfig(tolerance=1e-6), boundary_conditions=_conditions(_state(8) + np.array([0., 0., 1000.])), **kwargs)
+    assert result.converged and result.termination_reason == "converged" and result.steps == 1
+
+
+def test_array_source_inputs_remain_unchanged():
+    states = _state(); arrays = [np.full(8, value) for value in (.001, 1000., .0001, 100., 1e6, .00001, 40e6)]
+    original = [value.copy() for value in arrays]
+    solve_quasi_1d_steady(states, constant_area_profile(8, .02), .1, 1e-5, GAS, NumericalConfig(tolerance=1e-12), boundary_conditions=_conditions(states), hydraulic_diameter=.1, darcy_friction_factor=arrays[0], wall_heat_flux=arrays[1], fuel_mass_flow_rate_per_length=arrays[2], fuel_axial_velocity=arrays[3], fuel_specific_total_enthalpy=arrays[4], fuel_burn_rate_per_length=arrays[5], fuel_lower_heating_value=arrays[6])
+    for actual, expected in zip(arrays, original):
+        assert np.array_equal(actual, expected)
