@@ -52,6 +52,11 @@ def test_reconstruction_rejects_invalid_interior_and_reconstructed_regimes() -> 
         with pytest.raises(ValueError): subsonic_pressure_outlet_state(interior, pressure, GAS)
 
 
+def test_exact_sonic_pressure_outlet_is_rejected() -> None:
+    rho, pressure = 1.2, 100_000.; sonic = np.sqrt(GAS.gamma * pressure / rho)
+    with pytest.raises(ValueError): subsonic_pressure_outlet_state(primitive_to_conservative(rho, sonic, pressure, GAS), pressure, GAS)
+
+
 @pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
 def test_pressure_outlet_flux_uses_interior_and_reconstructed_state(scheme: str) -> None:
     states = _state(); conditions = _conditions(105_000.)
