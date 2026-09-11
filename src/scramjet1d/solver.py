@@ -1,12 +1,14 @@
 """Euler and quasi-one-dimensional solvers with optional prescribed sources."""
 
-from typing import NamedTuple
+from dataclasses import dataclass
+from typing import Literal, NamedTuple
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from .boundary import BoundaryConditions, boundary_interface_fluxes, transmissive_ghost_cells, validate_boundary_conditions
 from .config import GasProperties, NumericalConfig
+from .convergence import SteadyResidualReference, normalized_steady_residual, steady_residual_reference
 from .gas import speed_of_sound
 from .geometry import AreaProfile
 from .spatial import finite_volume_residual, internal_rusanov_fluxes, internal_numerical_fluxes, quasi_1d_residual
@@ -26,6 +28,20 @@ class SolverResult(NamedTuple):
     U: NDArray[np.float64]
     time: float
     steps: int
+
+
+@dataclass(frozen=True)
+class SteadySolverResult:
+    """Steady pseudo-time result with residual and termination diagnostics."""
+
+    U: NDArray[np.float64]
+    time: float
+    steps: int
+    converged: bool
+    termination_reason: Literal["converged", "max-time", "max-steps"]
+    residual: float
+    residual_history: NDArray[np.float64]
+    time_history: NDArray[np.float64]
 
 
 def _positive_scalar(name: str, value: object) -> float:
@@ -354,3 +370,46 @@ def solve_quasi_1d(
             time += dt
 
     return SolverResult(U=state, time=time, steps=steps)
+
+
+def solve_quasi_1d_steady(
+    U0: ArrayLike, geometry: AreaProfile, dx: object, max_time: object,
+    gas: GasProperties, numerical: NumericalConfig, max_steps: int = 100_000, *,
+    flux_scheme: object = "rusanov", hydraulic_diameter: object = None,
+    darcy_friction_factor: object = 0.0, wall_heat_flux: object = 0.0,
+    fuel_mass_flow_rate_per_length: object = 0.0, fuel_axial_velocity: object = 0.0,
+    fuel_specific_total_enthalpy: object = 0.0, fuel_burn_rate_per_length: ArrayLike = 0.0,
+    fuel_lower_heating_value: ArrayLike | None = None,
+    boundary_conditions: BoundaryConditions | None = None,
+) -> SteadySolverResult:
+    """Advance quasi-1D pseudo-time until a normalized full-RHS residual converges."""
+    state = np.asarray(U0, dtype=float)
+    if state.ndim != 2 or state.shape[-1] != 3 or state.shape[0] < 2: raise ValueError("U0 must have shape (N, 3) with N >= 2")
+    if not isinstance(geometry, AreaProfile) or geometry.num_cells != state.shape[0]: raise ValueError("geometry.num_cells must match U0 cell count")
+    conservative_to_primitive(state, gas)
+    spacing, final_time = _positive_scalar("dx", dx), _positive_scalar("max_time", max_time)
+    if isinstance(max_steps, (bool, np.bool_)) or not isinstance(max_steps, (int, np.integer)) or max_steps <= 0: raise ValueError("max_steps must be a positive integer")
+    if flux_scheme not in ("rusanov", "steger-warming"): raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
+    conditions = validate_boundary_conditions(boundary_conditions, state, gas)
+    reference: SteadyResidualReference = steady_residual_reference(state, spacing, gas)
+    source_kwargs = dict(hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux, fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy, fuel_burn_rate_per_length=fuel_burn_rate_per_length, fuel_lower_heating_value=fuel_lower_heating_value)
+    def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
+        return quasi_1d_rhs(stage_state, geometry, spacing, gas, flux_scheme=flux_scheme, boundary_conditions=conditions, **source_kwargs)
+    state = np.array(state, dtype=float, copy=True); time = 0.0; steps = 0
+    try: residual = normalized_steady_residual(rhs(state), reference)
+    except (ValueError, FloatingPointError) as error: raise RuntimeError(f"steady solve failed during initial residual at step 0, time=0: {error}") from error
+    residuals, times = [residual], [time]
+    while residual > numerical.tolerance and time < final_time and steps < max_steps:
+        try:
+            dt = min(cfl_timestep(state, spacing, gas, numerical), final_time - time)
+            state = ssp_rk3_step(state, dt, rhs)
+            conservative_to_primitive(state, gas)
+            time += dt; steps += 1; residual = normalized_steady_residual(rhs(state), reference)
+        except (ValueError, FloatingPointError) as error:
+            raise RuntimeError(f"steady solve failed during CFL/SSP-RK3/state validation at step {steps}, time={time}: {error}") from error
+        residuals.append(residual); times.append(time)
+    converged = residual <= numerical.tolerance
+    reason: Literal["converged", "max-time", "max-steps"] = "converged" if converged else ("max-time" if time >= final_time else "max-steps")
+    result_state = state.copy(); residual_history = np.asarray(residuals); time_history = np.asarray(times)
+    result_state.setflags(write=False); residual_history.setflags(write=False); time_history.setflags(write=False)
+    return SteadySolverResult(result_state, time, steps, converged, reason, residual, residual_history, time_history)

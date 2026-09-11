@@ -76,7 +76,7 @@ P5.4 controlled validation confirms the interface law `F_hat_SW = F_plus(U_L) + 
 
 ## Convergence
 
-Future steady-state convergence will use normalized residuals and/or relative state changes.
+P9.4 steady convergence uses a fixed, dimensionless normalized semi-discrete RHS residual; see `convergence_and_robustness.md`.
 
 ## Important Note
 

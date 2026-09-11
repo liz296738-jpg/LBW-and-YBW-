@@ -20,7 +20,7 @@
 - P9.1 Physical Boundary Foundation — Complete
 - P9.2 Subsonic Outlet Pressure BC — Complete
 - P9.3 Subsonic Inlet / Characteristic BC — Complete
-- P9.4 Convergence / Robustness — Next
+- P9.4 Convergence / Robustness — In progress: steady residual and diagnostic termination
 
 ## P3 Breakdown
 

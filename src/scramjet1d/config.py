@@ -31,7 +31,7 @@ class GasProperties:
 
 @dataclass(frozen=True)
 class NumericalConfig:
-    """Numerical-control parameters reserved for later solver stages."""
+    """Explicit CFL number and dimensionless steady-residual tolerance."""
 
     cfl: float = 0.5
     tolerance: float = 1.0e-4
