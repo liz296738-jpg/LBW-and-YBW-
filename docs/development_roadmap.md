@@ -18,8 +18,8 @@
 ## P9 Breakdown
 
 - P9.1 Physical Boundary Foundation — Complete
-- P9.2 Subsonic Outlet Pressure BC — Next
-- P9.3 Subsonic Inlet / Characteristic BC — Not started
+- P9.2 Subsonic Outlet Pressure BC — Complete
+- P9.3 Subsonic Inlet / Characteristic BC — Next
 - P9.4 Convergence / Robustness — Not started
 
 ## P3 Breakdown

@@ -55,6 +55,17 @@ domain, so no exterior thermodynamic state is prescribed and the boundary flux
 is `F(U_N)`. These fluxes retain the existing quasi-1D face-area weighting.
 Subsonic and characteristic boundary conditions are intentionally deferred.
 
+## P9.2 Subsonic Static-Pressure Outlet
+
+For a rightward subsonic outlet, `u-a<0`, `u>0`, and `u+a>0`: one
+characteristic enters and two leave. P9.2 therefore specifies only the static
+pressure. With `K_i=p_i/rho_i^gamma` and
+`J+_i=u_i+2a_i/(gamma-1)`, it reconstructs `p_b=p_out`,
+`rho_b=(p_out/K_i)^(1/gamma)`, `a_b=sqrt(gamma p_out/rho_b)`, and
+`u_b=J+_i-2a_b/(gamma-1)`. The existing numerical flux is evaluated between
+`U_N` and `U_b`. This assumes a constant-gamma perfect gas and isentropic
+characteristic reconstruction; it is not a fully non-reflecting outlet.
+
 The implemented quasi-1D formulation is
 
 `∂(A U)/∂t + ∂(A F)/∂x = [0, p dA/dx, 0]`.
