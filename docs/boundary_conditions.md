@@ -38,3 +38,13 @@ The model accepts only `u_i>0`, `0<M_i<1`, and a reconstructed state with
 `u_b>0`, `M_b<1`; mismatches raise `ValueError` rather than switching boundary
 models. This is a controlled characteristic static-pressure outlet, not a
 fully non-reflecting, NSCBC, reservoir, or reverse-flow treatment.
+
+## P9.3 Left Subsonic Total-Condition Inlet
+
+`inlet="subsonic-total-inflow"` requires finite positive prescribed total
+pressure `p0` and total temperature `T0`. For rightward subsonic interior
+flow it preserves `J-_i=u_i-2a_i/(gamma-1)`, then deterministically bisects
+the strict interval `0<M<1` to satisfy the perfect-gas total-condition
+relations. The left numerical flux is `Fhat(U_b,U_1)`. Invalid, sonic,
+supersonic, reverse-flow, or unbracketed reconstructions raise `ValueError`;
+this is not a choked, reservoir, mass-flow, or non-reflecting inlet model.

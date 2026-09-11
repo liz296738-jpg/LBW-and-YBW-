@@ -66,6 +66,14 @@ pressure. With `K_i=p_i/rho_i^gamma` and
 `U_N` and `U_b`. This assumes a constant-gamma perfect gas and isentropic
 characteristic reconstruction; it is not a fully non-reflecting outlet.
 
+## P9.3 Subsonic Total-Condition Inlet
+
+At a rightward left subsonic inlet, `u-a<0`, `u>0`, and `u+a>0`: two
+characteristics enter and one leaves. P9.3 prescribes `p0,T0`, preserves
+`J-=u-2a/(gamma-1)`, and solves
+`sqrt(gamma R T0/(1+beta M^2))*(M-2/(gamma-1))-J-=0` by bounded bisection on
+the strict interval `0<M<1`. The existing numerical flux uses `Fhat(U_b,U_1)`.
+
 The implemented quasi-1D formulation is
 
 `∂(A U)/∂t + ∂(A F)/∂x = [0, p dA/dx, 0]`.
