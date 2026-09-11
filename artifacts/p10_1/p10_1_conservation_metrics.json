@@ -1,6 +1,7 @@
 {
+  "artifact_kind": "exact-sha-runtime",
   "baseline_sha": "4d2df6ab08649bc8701b229561b349985c410614",
-  "head_sha": "151a91bebfc23284ebf35ff95991f41b315cf0f9",
+  "head_sha": "f4e3e747af12ec58f66d6d49c2f8adbce0653594",
   "cases": {
     "V1_uniform_constant_area": {
       "schemes": {
@@ -45,7 +46,7 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -88,8 +89,13 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         }
+      },
+      "gates": {
+        "local_rhs_zero": true,
+        "boundary_zero": true,
+        "source_zero": true
       },
       "passed": true
     },
@@ -136,7 +142,7 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -179,8 +185,11 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         }
+      },
+      "gates": {
+        "source_zero": true
       },
       "passed": true
     },
@@ -227,7 +236,7 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -270,10 +279,28 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         }
       },
-      "passed": true
+      "gates": {
+        "area_mass_zero": true,
+        "area_energy_zero": true,
+        "area_momentum_nonzero": true,
+        "area_momentum_identity": true
+      },
+      "passed": true,
+      "expected": {
+        "A_left": 1.0,
+        "A_right": 1.05,
+        "area_momentum": 5000.000000000005
+      },
+      "measured": {
+        "area_source_integral": [
+          0.0,
+          5000.000000000005,
+          0.0
+        ]
+      }
     },
     "V4_wall_source": {
       "schemes": {
@@ -318,7 +345,7 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -361,10 +388,30 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         }
       },
-      "passed": true
+      "gates": {
+        "mass_identity": true,
+        "momentum_identity": true,
+        "energy_identity": true
+      },
+      "passed": true,
+      "expected_integral": [
+        0.0,
+        -384.0,
+        32000.0
+      ],
+      "measured_integral": [
+        0.0,
+        -384.0,
+        32000.0
+      ],
+      "absolute_error": [
+        0.0,
+        0.0,
+        0.0
+      ]
     },
     "V5_fuel_injection": {
       "schemes": {
@@ -409,7 +456,7 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -452,10 +499,30 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         }
       },
-      "passed": true
+      "gates": {
+        "mass_identity": true,
+        "momentum_identity": true,
+        "energy_identity": true
+      },
+      "passed": true,
+      "expected_integral": [
+        0.00012000000000000002,
+        0.012171428571428573,
+        121.71428571428572
+      ],
+      "measured_integral": [
+        0.00012,
+        0.012171428571428573,
+        121.71428571428574
+      ],
+      "absolute_error": [
+        1.3552527156068805e-20,
+        0.0,
+        1.4210854715202004e-14
+      ]
     },
     "V6_combustion_heat_release": {
       "schemes": {
@@ -500,7 +567,7 @@
             0.0,
             480.00000000000006
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -543,10 +610,30 @@
             0.0,
             480.00000000000006
           ],
-          "passed": true
+          "global_balance_pass": true
         }
       },
-      "passed": true
+      "gates": {
+        "mass_identity": true,
+        "momentum_identity": true,
+        "energy_identity": true
+      },
+      "passed": true,
+      "expected_integral": [
+        0.0,
+        0.0,
+        480.0000000000001
+      ],
+      "measured_integral": [
+        0.0,
+        0.0,
+        480.00000000000006
+      ],
+      "absolute_error": [
+        0.0,
+        0.0,
+        5.684341886080802e-14
+      ]
     },
     "V7_combined_source_ledger": {
       "schemes": {
@@ -591,7 +678,7 @@
             0.0,
             480.00000000000006
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -634,10 +721,23 @@
             0.0,
             480.00000000000006
           ],
-          "passed": true
+          "global_balance_pass": true
         }
       },
-      "passed": true
+      "gates": {
+        "source_superposition": true
+      },
+      "passed": true,
+      "source_sum": [
+        0.00012000000000000002,
+        4803.212171428576,
+        33401.71428571428
+      ],
+      "superposition_error": [
+        0.0,
+        0.0,
+        7.275957614183426e-12
+      ]
     },
     "V8_physical_boundary_ledger": {
       "schemes": {
@@ -682,7 +782,7 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         },
         "steger-warming": {
           "rhs_integral": [
@@ -725,8 +825,11 @@
             0.0,
             0.0
           ],
-          "passed": true
+          "global_balance_pass": true
         }
+      },
+      "gates": {
+        "physical_boundary_pair": true
       },
       "passed": true
     }

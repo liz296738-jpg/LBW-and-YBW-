@@ -15,6 +15,13 @@
 | P10 | In Progress | Verification & validation | P10.1 conservation ledger and evidence matrix | Conservation, benchmark, and grid checks |
 | P11 | Planned | Parametric studies | Reproducible study workflow | Repeatable case outputs |
 
+## P10 Breakdown
+
+- P10.1 V&V Foundation + Conservation — Final closure pending exact-SHA CI
+- P10.2 Grid / Spatial Convergence — Not started
+- P10.3 CFL / Temporal / Scheme Sensitivity — Not started
+- P10.4 Integrated Evidence / Closure — Not started
+
 ## P9 Breakdown
 
 - P9.1 Physical Boundary Foundation — Complete

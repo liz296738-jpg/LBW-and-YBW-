@@ -8,7 +8,6 @@ from scramjet1d.geometry import constant_area_profile
 from scramjet1d.geometry import AreaProfile
 from scramjet1d.state import primitive_to_conservative
 from scramjet1d.verification import quasi_1d_conservation_balance
-from scramjet1d.source_terms import combined_wall_source, distributed_combustion_heat_release_source, distributed_fuel_injection_source
 
 GAS = GasProperties()
 
@@ -58,14 +57,17 @@ def test_v3_monotonic_variable_area_has_expected_nonzero_momentum_force(scheme):
 def test_v4_to_v6_standalone_source_ledgers_match_authoritative_helpers(scheme, kind):
     state = primitive_to_conservative(np.full(8, 1.2), np.full(8, 200.), np.full(8, 100000.), GAS); geometry = constant_area_profile(8); kwargs = {}
     if kind == "wall":
-        kwargs = dict(hydraulic_diameter=.1, darcy_friction_factor=.002, wall_heat_flux=1000.); expected = combined_wall_source(state, **kwargs, gas=GAS)
+        kwargs = dict(hydraulic_diameter=.1, darcy_friction_factor=.002, wall_heat_flux=1000.)
+        expected_integral = np.array([0., np.sum(-.002/(2*.1)*1.2*200.*abs(200.)*geometry.cell_area*.1), np.sum(4*1000./.1*geometry.cell_area*.1)])
     elif kind == "fuel":
-        rate = np.linspace(.0001, .0002, 8); velocity = np.linspace(90., 110., 8); enthalpy = np.linspace(9e5, 1.1e6, 8); kwargs = dict(fuel_mass_flow_rate_per_length=rate, fuel_axial_velocity=velocity, fuel_specific_total_enthalpy=enthalpy); expected = distributed_fuel_injection_source(state, geometry, rate, velocity, enthalpy, GAS)
+        rate = np.linspace(.0001, .0002, 8); velocity = np.linspace(90., 110., 8); enthalpy = np.linspace(9e5, 1.1e6, 8); kwargs = dict(fuel_mass_flow_rate_per_length=rate, fuel_axial_velocity=velocity, fuel_specific_total_enthalpy=enthalpy)
+        expected_integral = np.array([np.sum(rate*.1), np.sum(rate*velocity*.1), np.sum(rate*enthalpy*.1)])
     else:
-        burn = np.linspace(.00001, .00002, 8); kwargs = dict(fuel_burn_rate_per_length=burn, fuel_lower_heating_value=40e6); expected = distributed_combustion_heat_release_source(state, geometry, burn, 40e6, GAS)
+        burn = np.linspace(.00001, .00002, 8); kwargs = dict(fuel_burn_rate_per_length=burn, fuel_lower_heating_value=40e6)
+        expected_integral = np.array([0., 0., np.sum(burn*40e6*.1)])
     balance = quasi_1d_conservation_balance(state, geometry, .1, GAS, flux_scheme=scheme, **kwargs)
     measured = {"wall": balance.wall_source_integral, "fuel": balance.fuel_source_integral, "combustion": balance.combustion_source_integral}[kind]
-    assert_allclose(measured, np.sum(.1 * expected, axis=0), rtol=0, atol=1e-10)
+    assert_allclose(measured, expected_integral, rtol=256*np.finfo(float).eps, atol=256*np.finfo(float).eps*max(1., np.max(np.abs(expected_integral))))
     assert_allclose(balance.closure_error, 0., rtol=0, atol=1e-8)
 
 
@@ -84,3 +86,15 @@ def test_source_defaults_match_solver_and_batched_states_are_rejected():
     assert_allclose(balance.wall_source_integral, 0., rtol=0, atol=0)
     with pytest.raises(ValueError):
         quasi_1d_conservation_balance(np.stack((state, state)), constant_area_profile(8), .1, GAS)
+
+
+def test_invalid_configs_fail_cleanly_and_inputs_are_immutable():
+    state = primitive_to_conservative(np.full(8, 1.2), np.full(8, 200.), np.full(8, 100000.), GAS); original = state.copy(); geometry = constant_area_profile(8); cell_area, face_area = geometry.cell_area.copy(), geometry.face_area.copy()
+    arrays = [np.full(8, value) for value in (.002, 1000., .0001, 100., 1e6, .00001, 40e6)]; copies = [value.copy() for value in arrays]
+    quasi_1d_conservation_balance(state, geometry, .1, GAS, hydraulic_diameter=.1, darcy_friction_factor=arrays[0], wall_heat_flux=arrays[1], fuel_mass_flow_rate_per_length=arrays[2], fuel_axial_velocity=arrays[3], fuel_specific_total_enthalpy=arrays[4], fuel_burn_rate_per_length=arrays[5], fuel_lower_heating_value=arrays[6])
+    assert_allclose(state, original, rtol=0, atol=0); assert_allclose(geometry.cell_area, cell_area, rtol=0, atol=0); assert_allclose(geometry.face_area, face_area, rtol=0, atol=0)
+    for actual, expected in zip(arrays, copies): assert_allclose(actual, expected, rtol=0, atol=0)
+    for kwargs in (dict(fuel_burn_rate_per_length=.1), dict(hydraulic_diameter=None, darcy_friction_factor=.1)):
+        with pytest.raises(ValueError): quasi_1d_conservation_balance(state, geometry, .1, GAS, **kwargs)
+    with pytest.raises(ValueError): quasi_1d_conservation_balance(state, geometry, 0., GAS)
+    with pytest.raises(ValueError): quasi_1d_conservation_balance(state, geometry, .1, GAS, flux_scheme="unknown")

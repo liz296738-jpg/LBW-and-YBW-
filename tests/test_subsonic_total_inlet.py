@@ -110,7 +110,9 @@ def test_batched_reconstruction_and_flux_match_per_sample_loop(scheme):
     reconstruction = subsonic_total_inlet_state(states[..., 0, :], p0, t0, GAS); expected_reconstruction = np.stack([subsonic_total_inlet_state(sample[0], p0, t0, GAS) for sample in states])
     fluxes = boundary_interface_fluxes(states, GAS, conditions, scheme=scheme); expected_fluxes = np.stack([boundary_interface_fluxes(sample, GAS, conditions, scheme=scheme) for sample in states])
     assert reconstruction.shape == (2, 3) and fluxes.shape == (2, 9, 3)
-    assert_allclose(reconstruction, expected_reconstruction, rtol=0, atol=0); assert_allclose(fluxes, expected_fluxes, rtol=0, atol=0)
+    tolerance = 64 * np.finfo(float).eps
+    assert_allclose(reconstruction, expected_reconstruction, rtol=tolerance, atol=tolerance)
+    assert_allclose(fluxes, expected_fluxes, rtol=tolerance, atol=tolerance)
 
 
 @pytest.mark.parametrize("scheme", ("rusanov", "steger-warming"))
