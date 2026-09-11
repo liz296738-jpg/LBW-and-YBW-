@@ -189,9 +189,9 @@ def _plots(output: Path, uniform: dict[str, object], uniform_profiles: dict[str,
     for scheme in SCHEMES:
         data = cfl["schemes"][scheme]; plt.semilogy([.4,.2,.1], [data[str(level)]["p_linf"] for level in (.4,.2,.1)], marker="o", label=scheme)
     _plot(output / "cfl_sensitivity.png", "CFL sensitivity", "CFL", "Pressure relative Linf")
-    for name, label in (("rho", "Density [kg/m$^3$]"), ("u", "Velocity [m/s]"), ("p", "Pressure [Pa]"), ("T", "Temperature [K]"), ("Mach", "Mach [-]")):
+    for name, filename, label in (("rho", "rho", "Density [kg/m$^3$]"), ("u", "u", "Velocity [m/s]"), ("p", "p", "Pressure [Pa]"), ("T", "T", "Temperature [K]"), ("Mach", "mach", "Mach [-]")):
         for scheme in SCHEMES: plt.plot(profiles["x"], profiles[f"{scheme}_{name}"], label=scheme)
-        _plot(output / f"distributed_{name.lower()}.png", f"Distributed combustion {name}", "x [m]", label)
+        _plot(output / f"distributed_{filename}.png", f"Distributed combustion {name}", "x [m]", label)
     plt.plot(profiles["x"], profiles["burn"], label="prescribed burn rate")
     _plot(output / "distributed_profiles.png", "Prescribed distributed combustion profile", "x [m]", "Burn rate [kg/(m s)]")
 
