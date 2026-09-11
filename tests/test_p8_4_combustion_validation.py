@@ -26,8 +26,13 @@ def test_p8_4_validation_hard_gates_and_artifacts(tmp_path) -> None:
     assert metrics["v3"]["max_final_state_difference"] < 1.0e-8
     assert metrics["v4"]["max_scaling_error"] < 1.0e-10
     assert metrics["v5"]["all_refinement_not_materially_worse"]
+    for scheme in ("rusanov", "steger-warming"):
+        for field in ("rho", "u", "p", "T", "Mach"):
+            assert metrics["v5"]["field_refinement"][scheme][field]
     assert metrics["v6"]["both_physical"]
     assert metrics["v7"]["both_physical"]
+    assert metrics["v7"]["qualitatively_consistent"]
+    assert metrics["v7"]["max_relative_linf"] < 0.10
     assert metrics["v8"]["both_physical"] and metrics["v8"]["inputs_immutable"]
 
     for filename in (
@@ -40,7 +45,14 @@ def test_p8_4_validation_hard_gates_and_artifacts(tmp_path) -> None:
         "scheme_comparison_metrics.csv",
         "mixed_source_metrics.csv",
         "exact_uniform.png",
+        "exact_uniform_energy.png",
+        "exact_uniform_error.png",
         "cfl_sensitivity.png",
+        "distributed_rho.png",
+        "distributed_u.png",
+        "distributed_p.png",
+        "distributed_T.png",
+        "distributed_mach.png",
         "distributed_profiles.png",
     ):
         artifact = tmp_path / filename

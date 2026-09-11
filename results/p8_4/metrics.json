@@ -191,6 +191,22 @@
       }
     },
     "reference_cfl": 0.025,
+    "field_refinement": {
+      "rusanov": {
+        "rho": true,
+        "u": true,
+        "p": true,
+        "T": true,
+        "Mach": true
+      },
+      "steger-warming": {
+        "rho": true,
+        "u": true,
+        "p": true,
+        "T": true,
+        "Mach": true
+      }
+    },
     "all_refinement_not_materially_worse": true
   },
   "v6": {
@@ -248,7 +264,9 @@
         0.003977098081229156
       ]
     },
-    "both_physical": true
+    "both_physical": true,
+    "max_relative_linf": 0.005568058810839178,
+    "qualitatively_consistent": true
   },
   "v8": {
     "schemes": {

@@ -65,6 +65,11 @@ Rusanov at CFL `0.4/0.2/0.1` were `1.450e-6`, `1.782e-7`, and `2.190e-8`; the
 Steger-Warming values were `1.431e-6`, `1.757e-7`, and `2.157e-8`. This is CFL
 sensitivity, not a formal RK3-order claim.
 
+V5 all five primitive fields satisfy CFL refinement criterion. The criterion
+requires the relative Linf error at CFL `0.2` not to exceed that at `0.4`, and
+the error at `0.1` not to exceed that at `0.2`, for rho, u, p, T, and Mach in
+both schemes.
+
 At CFL `0.2`, both distributed transients reached `2e-4 s` in 36 steps and
 remained finite and positive. Rusanov minima were rho `0.897741`, p
 `87543.48 Pa`, T `337.90 K`; Steger-Warming minima were rho `0.895112`, p
@@ -72,6 +77,10 @@ remained finite and positive. Rusanov minima were rho `0.897741`, p
 T, and Mach were `0.00501`, `0.00346`, `0.00557`, `0.00111`, and `0.00398`.
 Both are physically admissible and qualitatively consistent; no universal
 scheme-superiority claim is made.
+
+V7 maximum relative Linf difference is below controlled 10% consistency
+criterion. The measured maximum is `0.0055680588` (`0.5568%`, pressure); this
+is a quantitative consistency check only and does not prove solution accuracy.
 
 ## V8 — mixed-source robustness
 

@@ -76,19 +76,20 @@ def _relative_metrics(values: np.ndarray, reference: np.ndarray) -> tuple[float,
     return float(np.mean(np.abs(delta)) / scale), float(np.sqrt(np.mean(delta**2)) / scale), float(np.max(np.abs(delta)) / scale)
 
 
-def _uniform() -> tuple[dict[str, object], list[dict[str, object]]]:
+def _uniform() -> tuple[dict[str, object], list[dict[str, object]], dict[str, np.ndarray]]:
     n, area, burn, lhv, final_time = 20, 0.02, 0.001, 40.0e6, 1.0e-4
     initial = _state(n); geometry = constant_area_profile(n, area); source = burn * lhv / area
     expected = initial + np.array([0.0, 0.0, source * final_time])
-    rows, records = [], {}
+    rows, records, profiles = [], {}, {}
     for scheme in SCHEMES:
         result = solve_quasi_1d(initial, geometry, 1.0 / n, final_time, GAS, NumericalConfig(cfl=0.2), flux_scheme=scheme, fuel_burn_rate_per_length=burn, fuel_lower_heating_value=lhv)
         primitive, primitive0 = conservative_to_primitive(result.U, GAS), conservative_to_primitive(initial, GAS)
         record = {"rho_error": float(np.max(np.abs(result.U[:, 0] - expected[:, 0]))), "rhou_error": float(np.max(np.abs(result.U[:, 1] - expected[:, 1]))), "rhoE_error": float(np.max(np.abs(result.U[:, 2] - expected[:, 2]))), "u_error": float(np.max(np.abs(primitive.u - primitive0.u))), "p_ratio": float(np.mean(primitive.p / primitive0.p)), "T_ratio": float(np.mean(primitive.T / primitive0.T)), "steps": result.steps, **_physical(result.U)}
-        records[scheme] = record; rows.append({"scheme": scheme, **record})
+        records[scheme] = record; profiles[scheme] = result.U.copy(); rows.append({"scheme": scheme, **record})
     expected_energy = final_time * n * area * source / n
     measured_energy = float(np.sum((expected[:, 2] - initial[:, 2]) * area / n))
-    return {"schemes": records, "domain_energy_expected": expected_energy, "domain_energy_measured": measured_energy, "domain_energy_relative_error": abs(measured_energy - expected_energy) / expected_energy}, rows
+    profiles["x"] = (np.arange(n) + .5) / n; profiles["exact"] = expected
+    return {"schemes": records, "domain_energy_expected": expected_energy, "domain_energy_measured": measured_energy, "domain_energy_relative_error": abs(measured_energy - expected_energy) / expected_energy}, rows, profiles
 
 
 def _source_conservation() -> tuple[dict[str, float], list[dict[str, object]]]:
@@ -144,8 +145,9 @@ def _cfl_sensitivity() -> tuple[dict[str, object], list[dict[str, object]]]:
             record = {"steps": result.steps, **{f"{name}_{suffix}": metric for name, metrics in values.items() for suffix, metric in zip(("l1", "l2", "linf"), metrics)}}
             scheme_records[str(cfl)] = record; rows.append({"scheme": scheme, "cfl": cfl, **record})
         records[scheme] = scheme_records
-    good = all(records[s]["0.2"]["p_linf"] <= records[s]["0.4"]["p_linf"] + 1e-12 and records[s]["0.1"]["p_linf"] <= records[s]["0.2"]["p_linf"] + 1e-12 for s in SCHEMES)
-    return {"schemes": records, "reference_cfl": .025, "all_refinement_not_materially_worse": good}, rows
+    field_refinement = {scheme: {field: bool(records[scheme]["0.2"][f"{field}_linf"] <= records[scheme]["0.4"][f"{field}_linf"] + 1e-12 and records[scheme]["0.1"][f"{field}_linf"] <= records[scheme]["0.2"][f"{field}_linf"] + 1e-12) for field in ("rho", "u", "p", "T", "Mach")} for scheme in SCHEMES}
+    good = all(passed for scheme in field_refinement.values() for passed in scheme.values())
+    return {"schemes": records, "reference_cfl": .025, "field_refinement": field_refinement, "all_refinement_not_materially_worse": good}, rows
 
 
 def _distributed_and_comparison() -> tuple[dict[str, object], dict[str, object], list[dict[str, object]], dict[str, np.ndarray]]:
@@ -157,7 +159,8 @@ def _distributed_and_comparison() -> tuple[dict[str, object], dict[str, object],
     profiles["x"], profiles["burn"] = x, burn
     comparison = {name: _relative_metrics(getattr(finals["rusanov"], name), getattr(finals["steger-warming"], name)) for name in ("rho", "u", "p", "T", "Mach")}
     rows = [{"scheme": scheme, **physical[scheme]} for scheme in SCHEMES]
-    return {"schemes": physical, "both_physical": all(v["physical"] and v["all_finite"] for v in physical.values())}, {"metrics": comparison, "both_physical": all(v["physical"] for v in physical.values())}, rows, profiles
+    max_relative_linf = max(metric[2] for metric in comparison.values())
+    return {"schemes": physical, "both_physical": all(v["physical"] and v["all_finite"] for v in physical.values())}, {"metrics": comparison, "both_physical": all(v["physical"] for v in physical.values()), "max_relative_linf": max_relative_linf, "qualitatively_consistent": max_relative_linf < .10}, rows, profiles
 
 
 def _mixed() -> tuple[dict[str, object], list[dict[str, object]]]:
@@ -171,15 +174,24 @@ def _mixed() -> tuple[dict[str, object], list[dict[str, object]]]:
     return {"schemes": records, "both_physical": all(v["physical"] and v["all_finite"] for v in records.values()), "inputs_immutable": immutable}, rows
 
 
-def _plots(output: Path, uniform: dict[str, object], cfl: dict[str, object], profiles: dict[str, np.ndarray]) -> None:
+def _plots(output: Path, uniform: dict[str, object], uniform_profiles: dict[str, np.ndarray], cfl: dict[str, object], profiles: dict[str, np.ndarray]) -> None:
     for scheme, record in uniform["schemes"].items(): plt.bar(scheme, record["rhoE_error"], label=scheme)
     _plot(output / "exact_uniform.png", "Exact uniform combustion energy error", "Scheme", "Maximum rhoE error")
+    plt.plot(uniform_profiles["x"], uniform_profiles["exact"][:, 2], linewidth=2, label="analytical")
+    for scheme in SCHEMES: plt.plot(uniform_profiles["x"], uniform_profiles[scheme][:, 2], marker="o", linestyle="none", label=scheme)
+    _plot(output / "exact_uniform_energy.png", "Exact uniform combustion energy", "x [m]", "rhoE [J/m$^3$]")
+    fields = ("rho", "rhou", "rhoE", "u")
+    fig, axes = plt.subplots(2, 2, figsize=(8, 6))
+    for axis, field in zip(axes.flat, fields):
+        axis.bar(SCHEMES, [uniform["schemes"][scheme][f"{field}_error"] for scheme in SCHEMES])
+        axis.set_title(f"{field} error"); axis.set_ylabel("maximum absolute error"); axis.grid(True, alpha=.3)
+    fig.suptitle("Exact uniform combustion errors"); fig.tight_layout(); fig.savefig(output / "exact_uniform_error.png", dpi=150); plt.close(fig)
     for scheme in SCHEMES:
         data = cfl["schemes"][scheme]; plt.semilogy([.4,.2,.1], [data[str(level)]["p_linf"] for level in (.4,.2,.1)], marker="o", label=scheme)
     _plot(output / "cfl_sensitivity.png", "CFL sensitivity", "CFL", "Pressure relative Linf")
-    for name, label in (("rho", "Density [kg m$^{-3}$]"), ("p", "Pressure [Pa]"), ("T", "Temperature [K]")):
+    for name, label in (("rho", "Density [kg/m$^3$]"), ("u", "Velocity [m/s]"), ("p", "Pressure [Pa]"), ("T", "Temperature [K]"), ("Mach", "Mach [-]")):
         for scheme in SCHEMES: plt.plot(profiles["x"], profiles[f"{scheme}_{name}"], label=scheme)
-        _plot(output / f"distributed_{name}.png", f"Distributed combustion {name}", "x [m]", label)
+        _plot(output / f"distributed_{name.lower()}.png", f"Distributed combustion {name}", "x [m]", label)
     plt.plot(profiles["x"], profiles["burn"], label="prescribed burn rate")
     _plot(output / "distributed_profiles.png", "Prescribed distributed combustion profile", "x [m]", "Burn rate [kg/(m s)]")
 
@@ -187,14 +199,14 @@ def _plots(output: Path, uniform: dict[str, object], cfl: dict[str, object], pro
 def run(output_directory: Path | None = None) -> dict[str, object]:
     """Run P8.4 controlled validations and write CSV, JSON, and PNG artifacts."""
     output = Path("results/p8_4") if output_directory is None else Path(output_directory); output.mkdir(parents=True, exist_ok=True)
-    v1, uniform_rows = _uniform(); v2, source_rows = _source_conservation(); v3, wall_rows = _wall_equivalence(); v4, scaling_rows = _strength_scaling(); v5, cfl_rows = _cfl_sensitivity(); v6, v7, distributed_rows, profiles = _distributed_and_comparison(); v8, mixed_rows = _mixed()
-    acceptance = {"v1": all(r["rho_error"] < 1e-12 and r["rhou_error"] < 1e-10 and r["rhoE_error"] < 1e-8 and r["u_error"] < 1e-12 and r["p_ratio"] > 1 and r["T_ratio"] > 1 and r["physical"] for r in v1["schemes"].values()), "v2": v2["relative_error"] < 1e-12 and v2["max_mass_source"] == 0 and v2["max_momentum_source"] == 0, "v3": v3["max_rhs_difference"] < 1e-9 and v3["max_final_state_difference"] < 1e-8, "v4": v4["max_scaling_error"] < 1e-10, "v5": v5["all_refinement_not_materially_worse"], "v6": v6["both_physical"], "v7": v7["both_physical"], "v8": v8["both_physical"] and v8["inputs_immutable"]}
+    v1, uniform_rows, uniform_profiles = _uniform(); v2, source_rows = _source_conservation(); v3, wall_rows = _wall_equivalence(); v4, scaling_rows = _strength_scaling(); v5, cfl_rows = _cfl_sensitivity(); v6, v7, distributed_rows, profiles = _distributed_and_comparison(); v8, mixed_rows = _mixed()
+    acceptance = {"v1": all(r["rho_error"] < 1e-12 and r["rhou_error"] < 1e-10 and r["rhoE_error"] < 1e-8 and r["u_error"] < 1e-12 and r["p_ratio"] > 1 and r["T_ratio"] > 1 and r["physical"] for r in v1["schemes"].values()), "v2": v2["relative_error"] < 1e-12 and v2["max_mass_source"] == 0 and v2["max_momentum_source"] == 0, "v3": v3["max_rhs_difference"] < 1e-9 and v3["max_final_state_difference"] < 1e-8, "v4": v4["max_scaling_error"] < 1e-10, "v5": v5["all_refinement_not_materially_worse"], "v6": v6["both_physical"], "v7": v7["both_physical"] and v7["qualitatively_consistent"], "v8": v8["both_physical"] and v8["inputs_immutable"]}
     acceptance["all_passed"] = all(acceptance.values())
     metrics = {"v1": v1, "v2": v2, "v3": v3, "v4": v4, "v5": v5, "v6": v6, "v7": v7, "v8": v8, "acceptance": acceptance}
     (output / "metrics.json").write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     for filename, rows in (("exact_uniform_metrics.csv", uniform_rows), ("source_conservation_metrics.csv", source_rows), ("wall_equivalence_metrics.csv", wall_rows), ("strength_scaling_metrics.csv", scaling_rows), ("cfl_sensitivity_metrics.csv", cfl_rows), ("scheme_comparison_metrics.csv", [{"quantity": k, "relative_l1": v[0], "relative_l2": v[1], "relative_linf": v[2]} for k,v in v7["metrics"].items()]), ("mixed_source_metrics.csv", mixed_rows)):
         _write_csv(output / filename, rows)
-    _plots(output, v1, v5, profiles)
+    _plots(output, v1, uniform_profiles, v5, profiles)
     return metrics
 
 
