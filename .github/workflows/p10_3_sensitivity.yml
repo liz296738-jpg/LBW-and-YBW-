@@ -1,0 +1,26 @@
+name: P10.3 CFL Temporal Scheme Sensitivity
+
+on:
+  workflow_dispatch:
+
+jobs:
+  formal-sensitivity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - name: Run exact-SHA P10.3 sensitivity study
+        run: python cases/verification/p10_3_cfl_temporal_scheme_sensitivity.py
+      - name: Upload P10.3 runtime evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p10-3-sensitivity-${{ github.sha }}
+          path: artifacts/p10_3/
+          if-no-files-found: warn
+          retention-days: 30
