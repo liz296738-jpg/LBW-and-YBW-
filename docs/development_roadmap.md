@@ -12,13 +12,13 @@
 | P7 | Complete | Fuel injection | Prescribed local and distributed injection source | Formal prescribed-source model validation |
 | P8 | Complete | Combustion | Validated prescribed combustion heat-release capability | P8.1-P8.4 controlled validation complete |
 | P9 | Complete | Boundary/stability improvements | Physical boundaries and steady convergence diagnostics | Edge-case and robustness test suite |
-| P10 | In Progress | Verification & validation | P10.1 conservation ledger and evidence matrix | Conservation, benchmark, and grid checks |
+| P10 | In Progress | Verification & validation | P10.2 smooth-solution grid convergence | Conservation, benchmark, and grid checks |
 | P11 | Planned | Parametric studies | Reproducible study workflow | Repeatable case outputs |
 
 ## P10 Breakdown
 
-- P10.1 V&V Foundation + Conservation — Final closure pending exact-SHA CI
-- P10.2 Grid / Spatial Convergence — Not started
+- P10.1 V&V Foundation + Conservation — Complete (accepted SHA `32eb50cd687da6e23a4cb2269bc31120fbff2b3e`, Test run `34638173666`)
+- P10.2 Grid / Spatial Convergence — In progress; implementation and lightweight gates ready, formal 12-run exact-SHA evidence pending dedicated long-run workflow
 - P10.3 CFL / Temporal / Scheme Sensitivity — Not started
 - P10.4 Integrated Evidence / Closure — Not started
 

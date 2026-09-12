@@ -6,7 +6,7 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P10.1 V&V foundation and conservation ledger in progress.** P9 supports fixed supersonic inflow, a controlled right subsonic static-pressure outlet, a controlled left subsonic total-condition inlet, and steady convergence diagnostics while retaining transmissive verification boundaries.
+Current stage: **P10.2 grid/spatial convergence evidence pending the dedicated long-run exact-SHA workflow.** P10.1 is complete and was accepted at `32eb50cd687da6e23a4cb2269bc31120fbff2b3e` by Test workflow run `34638173666`. P9 supports fixed supersonic inflow, a controlled right subsonic static-pressure outlet, a controlled left subsonic total-condition inlet, and steady convergence diagnostics while retaining transmissive verification boundaries.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 
