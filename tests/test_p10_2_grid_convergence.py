@@ -66,7 +66,7 @@ def test_formal_configuration_geometry_reference_scales_and_boundaries() -> None
         "supersonic_reference_mach": 2.0,
         "cfl": 0.2,
         "steady_tolerance": 1.0e-8,
-        "max_time": 0.05,
+        "max_time": 0.10,
         "max_steps": 200_000,
         "dense_reference_points": 2001,
     }
@@ -133,6 +133,7 @@ def test_reduced_real_path_connects_reference_boundary_solver_and_metrics() -> N
         require_convergence=False,
     )
     assert record["steps"] > 0
+    assert np.isfinite(record["initial_residual"]) and record["initial_residual"] > 0.0
     assert record["termination_reason"] in {"converged", "max-time", "max-steps"}
     assert set(record["errors"]) == set(MODULE.VARIABLES)
     assert all(np.isfinite(metric) for values in record["errors"].values() for metric in values.values())

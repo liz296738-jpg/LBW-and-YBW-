@@ -53,7 +53,7 @@ CONFIG = {
     "supersonic_reference_mach": 2.0,
     "cfl": 0.2,
     "steady_tolerance": 1.0e-8,
-    "max_time": 0.05,
+    "max_time": 0.10,
     "max_steps": 200_000,
     "dense_reference_points": 2001,
 }
@@ -240,6 +240,7 @@ def run_single_grid(
         "dx": float(CONFIG["domain_length"] / num_cells),
         "steps": int(result.steps),
         "pseudo_time": float(result.time),
+        "initial_residual": float(result.residual_history[0]),
         "final_residual": float(result.residual),
         "termination_reason": result.termination_reason,
         "converged": bool(result.converged),
