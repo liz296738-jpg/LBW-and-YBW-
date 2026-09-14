@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "case_family": "P11.2B_HEAT_RELEASE_CLOSURE_SOURCE",
+  "purpose": "Evidence ledger for a direct prescribed axial heat-release closure. It authorizes model interfaces and functional forms only; it does not freeze a formal reactive case parameter set.",
+  "sources": [
+    {
+      "source_id": "SRC07",
+      "citation": "Ruifeng Cao, Yue Lu, Daren Yu, Juntao Chang et al., Study on influencing factors of combustion mode transition boundary for a scramjet engine based on one-dimensional model, Aerospace Science and Technology 96 (2020) 105590.",
+      "doi": "10.1016/j.ast.2019.105590",
+      "url": "https://www.sciencedirect.com/science/article/pii/S1270963819308892",
+      "role": "teacher-lineage one-dimensional mode-transition context",
+      "confirmed_claims": [
+        "The study uses a one-dimensional scramjet model to investigate combustion-mode transition boundary.",
+        "Heat-release distribution in the combustor is explicitly identified as an influencing factor on the mode-transition boundary.",
+        "Combustor area profile, wall temperature/roughness, and inflow air composition are additional influencing factors."
+      ],
+      "solver_ready_formula_available_here": false
+    },
+    {
+      "source_id": "SRC08",
+      "citation": "Kaiyan Jin, Jianbin Li, Lin Zhang, Jianhan Liang, Xiaodong Cai, Experimental study on heat release distribution during supersonic combustion, Combustion and Flame 287 (2026) 114876.",
+      "doi": "10.1016/j.combustflame.2026.114876",
+      "url": "https://www.sciencedirect.com/science/article/pii/S0010218026001124",
+      "role": "direct experimental heat-release-distribution and quasi-one-dimensional closure reference",
+      "experimental_setup": {
+        "air_mass_flow_kg_s": 0.600,
+        "stagnation_pressure_Pa": 1300000.0,
+        "stagnation_temperature_K": 1650.0,
+        "Mach": 2.52,
+        "isolator_length_m": 0.315,
+        "combustor_length_m": 0.512,
+        "isolator_entrance_height_m": 0.040,
+        "isolator_entrance_width_m": 0.050,
+        "fuel": "ethylene",
+        "injector_count": 3,
+        "injector_diameter_m": 0.002,
+        "injector_location_relative_to_cavity_leading_edge_m": -0.010
+      },
+      "table_1_case_10": {
+        "injection_stagnation_pressure_Pa": 2500000.0,
+        "jet_to_freestream_momentum_ratio": 2.67,
+        "global_equivalence_ratio": 1.34,
+        "reported_heat_release_mode": "SDC"
+      },
+      "published_models": {
+        "eq6_gaussian_normalized": "Qstar(x) = Qstar_m * exp(-(x-x_m)^2/(2*delta^2))",
+        "eq7_range_parameterized_normalized": "Qstar(x) = Qstar_m * exp(-(x-x_m)^2/(x_c-x_m)^2)",
+        "eq11_total_temperature_relation": "Tt(x) = Tt0 + integral[x_i to x](Qdot_prime(s) ds)/(mdot*cp)"
+      },
+      "case_10_text_records": {
+        "x_c_raw": 98.0,
+        "x_c_units": "NOT FROZEN FROM TEXT EXTRACTION",
+        "asymmetry_k_raw": 5.6,
+        "k_units": "NOT FROZEN FROM TEXT EXTRACTION",
+        "fit_R2": 0.997,
+        "cumulative_heat_fraction_at_x_c": 0.92
+      },
+      "evidence_boundary": [
+        "Equations 6 and 7 provide a clear normalized quasi-Gaussian functional form.",
+        "Equation 11 provides the energy-to-total-temperature integral relation.",
+        "The paper explicitly states that Q_m, x_m, x_c, x_i and k depend on operating conditions and require prediction/estimation.",
+        "Figure-derived parameter values are not digitized or guessed in this repository.",
+        "The asymmetric Eq. 8 is not frozen for implementation until the exact parameter/unit convention is recovered unambiguously."
+      ]
+    }
+  ],
+  "project_decision": {
+    "direct_solver_input": "heat_release_rate_per_length [W/m]",
+    "mapping": "qdot_volumetric = heat_release_rate_per_length / A_cell",
+    "mass_added": false,
+    "momentum_added": false,
+    "chemistry_implied": false,
+    "mutual_exclusion": "Direct heat_release_rate_per_length and burned-fuel/LHV energy paths may not both be active, preventing double counting.",
+    "formal_case_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_POWER_AND_SHAPE_PARAMETERS"
+  }
+}
