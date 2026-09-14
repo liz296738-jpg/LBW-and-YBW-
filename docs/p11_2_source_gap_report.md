@@ -4,9 +4,9 @@
 
 `P11.2A FORMALLY VERIFIED — SOURCE-BACKED PUBLIC COLD-FLOW SURROGATE`
 
-`P11.2B HEAT-RELEASE INTERFACE/CLOSURE IMPLEMENTED — FORMAL HEATED CASE STILL PARAMETER-GATED`
+`P11.2B HEAT-RELEASE INTERFACE/CLOSURE IMPLEMENTED — FORMAL HEATED CASE STILL EVIDENCE-GATED`
 
-The original P11.2 blocker was an absence of enough source-grounded geometry and axial source data to construct a complete reactive baseline without inventing inputs. P11.2A solved the geometry/inflow part with a public physical-scale cold-flow surrogate. P11.2B has now solved the **software-interface and heat-release functional-form** part. The remaining blocker is narrower: one internally consistent published case must supply or support the absolute heat addition and matching axial shape parameters.
+The original P11.2 blocker was an absence of enough source-grounded geometry and axial source data to construct a complete reactive baseline without inventing inputs. P11.2A solved the geometry/inflow part with a public physical-scale cold-flow surrogate. P11.2B has now solved the **software-interface and heat-release functional-form** part. The remaining blocker is narrower: one internally consistent published case must provide either an absolute axial `Qdot'(x)` distribution or a normalized axial shape plus a matching absolute energy scale.
 
 The public surrogate does **not** replace the teacher-designated Cao Ruifeng material and must not be cited as a Cao-thesis reproduction.
 
@@ -53,11 +53,11 @@ Regression tests establish that:
 - `Qdot'/A` affects only the conservative energy source;
 - the direct path is numerically equivalent to the existing burned-fuel/LHV path when both represent the same `Qdot'(x)`;
 - invalid/nonfinite/negative profiles are rejected;
-- transient propagation of the direct path is covered.
+- transient and steady pseudo-time solver propagation of the direct path are covered.
 
-Commit `e36cfb124f9bd0a8ddb3be6d548f79a751fdf471` passed GitHub Actions run `34882069673` with `828 passed in 60.67 s` after correcting an old P10.4 test so its production-freeze gate is evaluated at the accepted P10.4 revision rather than incorrectly forbidding all later P11 production changes.
+A full-suite checkpoint at commit `72d953f42e3f1ab578701db2ec9441a8c5b2be69` passed GitHub Actions run `34884490236` with `846 passed in 43.51 s`. Later evidence-gate refinements continue to run through the same full-suite CI.
 
-The source-backed closure utilities now include:
+The source-backed closure utilities include:
 
 - Jin Eq. 7 normalized quasi-Gaussian profile;
 - Jin Eq. 8 asymmetric quasi-Gaussian profile downstream of heat-release initiation;
@@ -82,12 +82,29 @@ SRC02 still provides useful locatable records:
 
 These are evidence records, not permission to combine unrelated values into an artificial formal case.
 
+## Formal-case promotion gate
+
+`cases/studies/p11_2b_case_gate.py` separates solver capability from scientific case readiness. Every candidate must have one source/case identity, traceable locators, and an explicit source-to-solver coordinate mapping.
+
+It then accepts exactly one of two complete heat-release evidence paths:
+
+1. **normalized Eq. 8 path:** source-backed `x_i`, `x_m`, `x_c`, and `k` plus a separate source-backed total heat-release power, or stagnation-enthalpy increment plus mass flow, for that same condition;
+2. **absolute tabulated path:** a traceable `x [m]` / `Qdot'(x) [W/m]` table, which already contains both shape and absolute energy scale and therefore must not be given a second independent `absolute_energy` scale.
+
+Cross-source/cross-condition mixing is rejected. The source ledger currently has `candidate_formal_cases: []`, so the correct machine-readable status is:
+
+`BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY`
+
+`cases/studies/p11_2b_readiness.py` writes this status as deterministic JSON. Its optional `--require-ready` switch converts the scientific readiness state into a hard execution gate when a formal heated study is attempted.
+
 ## Primary remaining blocker for a formal P11.2B run
 
-The minimum missing pair is now:
+The evidence gap can now be stated precisely. The project needs **one** of the following from a single declared operating condition:
 
-1. **absolute total heat addition** (or a source-backed derivation of it), and
-2. **matching axial shape parameters** for the same operating condition and geometry.
+- a complete source-backed absolute axial heat-release profile `Qdot'(x) [W/m]`; or
+- source-backed normalized axial shape parameters together with a matching absolute heat-addition level.
+
+Both routes also require a traceable source-to-solver coordinate mapping.
 
 A formal heated case cannot be created by mixing the P11.2A geometry, a Jin shape from another apparatus, and a thermal power inferred from an unrelated fuel case while calling the result a reproduction. Such combinations may later be used only as explicitly labelled synthetic sensitivity studies, not as validation baselines.
 
@@ -109,6 +126,6 @@ These are **not** required for a minimal prescribed-energy P11.2B surrogate beca
 
 ## Next development decision
 
-Continue searching the Cao-lineage/public literature for a complete internally consistent heated case. Priority is a case that supplies geometry/inflow, an absolute exit enthalpy or total-temperature rise (or fuel/LHV/efficiency sufficient to derive it), and axial heat-release-shape parameters.
+Continue searching the Cao-lineage/public literature for a complete internally consistent heated case. Priority is either a directly tabulated absolute `Qdot'(x)` profile or a case that supplies geometry/inflow, a normalized heat-release shape, and an absolute exit enthalpy/total-temperature rise or other traceable heat-addition scale.
 
 Until that evidence is recovered, P11.2B infrastructure may be verified and improved, but no formal reactive curve will be promoted to project evidence.
