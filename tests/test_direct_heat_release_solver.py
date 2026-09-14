@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose, assert_array_equal
 
 from scramjet1d.config import GasProperties, NumericalConfig
 from scramjet1d.geometry import constant_area_profile
-from scramjet1d.solver import quasi_1d_rhs, solve_quasi_1d
+from scramjet1d.solver import quasi_1d_rhs, solve_quasi_1d, solve_quasi_1d_steady
 from scramjet1d.state import primitive_to_conservative
 
 
@@ -145,3 +145,37 @@ def test_transient_solver_propagates_direct_heat_path_without_fake_fuel() -> Non
     assert direct.steps > 0
     assert direct.time == pytest.approx(1.0e-5)
     assert_allclose(direct.U, burned.U, rtol=2.0e-14, atol=1.0e-9)
+
+
+def test_steady_solver_propagates_direct_heat_path_without_fake_fuel() -> None:
+    state = _uniform_state(8)
+    geometry = constant_area_profile(8, 0.02)
+    numerical = NumericalConfig(cfl=0.2, tolerance=1.0e-14)
+    line_heat = np.full(8, 10_000.0)
+    lhv = 42.0e6
+
+    direct = solve_quasi_1d_steady(
+        state,
+        geometry,
+        0.01,
+        1.0e-5,
+        GAS,
+        numerical,
+        heat_release_rate_per_length=line_heat,
+    )
+    burned = solve_quasi_1d_steady(
+        state,
+        geometry,
+        0.01,
+        1.0e-5,
+        GAS,
+        numerical,
+        fuel_burn_rate_per_length=line_heat / lhv,
+        fuel_lower_heating_value=lhv,
+    )
+
+    assert direct.steps > 0
+    assert direct.time == pytest.approx(1.0e-5)
+    assert direct.termination_reason == burned.termination_reason
+    assert_allclose(direct.U, burned.U, rtol=2.0e-14, atol=1.0e-9)
+    assert_allclose(direct.residual_history, burned.residual_history, rtol=2.0e-14, atol=1.0e-12)
