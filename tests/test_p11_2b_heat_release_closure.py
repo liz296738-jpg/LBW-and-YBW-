@@ -20,13 +20,33 @@ def test_source_ledger_loads_and_remains_parameter_gated() -> None:
     data = MODULE.load_heat_release_source_ledger()
 
     assert data["schema_version"] == 1
-    assert {source["source_id"] for source in data["sources"]} == {"SRC07", "SRC08", "SRC09"}
+    assert {source["source_id"] for source in data["sources"]} == {
+        "SRC07", "SRC08", "SRC09", "SRC10"
+    }
     assert (
         data["project_decision"]["formal_case_status"]
         == "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY"
     )
     assert data["project_decision"]["mass_added"] is False
     assert data["project_decision"]["momentum_added"] is False
+
+
+def test_jin_liu_validation_chain_preserves_condition_discrepancy() -> None:
+    data = MODULE.load_heat_release_source_ledger()
+    src10 = next(source for source in data["sources"] if source["source_id"] == "SRC10")
+    chain = data["candidate_validation_chains"][0]
+
+    assert src10["table_2_model_B_ethylene_phi_1_03"]["equivalence_ratio"] == 1.03
+    assert src10["table_2_model_B_ethylene_phi_1_03"]["exit_Mach_M4"] == 2.27
+    assert src10["cross_source_validation_link"]["jin_reported_condition"] == "scramjet model B with phi=1.04"
+    assert (
+        src10["cross_source_validation_link"]["condition_identity_status"]
+        == "UNRESOLVED_1.04_VS_1.03_DISCREPANCY"
+    )
+    assert chain["candidate_id"] == "JIN-LIU-MODEL-B-VALIDATION"
+    assert chain["status"] == "BLOCKED"
+    assert chain["formal_candidate"] is False
+    assert data["candidate_formal_cases"] == []
 
 
 def test_eq7_quasi_gaussian_matches_published_functional_form() -> None:
