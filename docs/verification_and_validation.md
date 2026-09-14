@@ -14,7 +14,7 @@ Verification asks whether the implementation solves its declared equations corre
 | P10.1 | conservation ledger | conservation-balance | discrete global closure | complete | exact-SHA CI, not experimental validation |
 | P10.2 | smooth isentropic nozzle | analytical solution convergence | relative L1/Linf and observed order | complete | first-order smooth benchmark only |
 | P10.3 | CFL, SSP-RK3, and flux sensitivity | converged steady comparisons and scalar ODE | CFL/spatial-error ratios and temporal order | complete | benchmark-specific claims only |
-| P10.4 | integrated evidence closure | immutable accepted-stage registry | ancestry, production freeze, regression, claim and limitation gates | formal closure pending | verification closure is not experimental validation |
+| P10.4 | integrated evidence closure | immutable accepted-stage registry | ancestry, production freeze, regression, claim and limitation gates | complete | verification closure is not experimental validation |
 
 The project currently verifies numerical identities, discretized transport, source mappings, boundary semantics, global discrete balances, and convergence diagnostics. It does not validate real scramjet combustion, LBW/YBW engine performance, chemistry, ignition, mixing, or flameholding against experiments.
 
@@ -63,4 +63,4 @@ The accepted exact-SHA study supports material pseudo-time-CFL invariance of the
 
 P10.4 adds no physics, numerical method, benchmark, grid, or sensitivity case. Its offline runner records the accepted P10.1-P10.3 revisions, proves that each is an ancestor of the checkout, verifies that `src/scramjet1d/` is unchanged from the P10.3 baseline, parses full-regression JUnit counts, and requires the analytical baseline script to pass. It emits fixed E01-E16 evidence and C01-C15 claim ledgers with referential-integrity, qualification, limitation, and scope gates.
 
-`all_passed=true` means only that the defined P10 verification evidence chain is complete. It does not mean that the physical model or a real engine has been experimentally validated. Formal P10.4 closure remains pending until both standard CI and the manually dispatched `P10.4 Integrated V&V Closure` workflow pass at the new exact SHA.
+`all_passed=true` means only that the defined P10 verification evidence chain is complete. It does not mean that the physical model or a real engine has been experimentally validated. P10.4 was accepted at SHA `cac804a30f325ddf1875ab5188353cdbbf9e5de6` by standard Test run `34832765660` and dedicated run `34833172796`, with artifact `10343052217`.

@@ -12,15 +12,22 @@
 | P7 | Complete | Fuel injection | Prescribed local and distributed injection source | Formal prescribed-source model validation |
 | P8 | Complete | Combustion | Validated prescribed combustion heat-release capability | P8.1-P8.4 controlled validation complete |
 | P9 | Complete | Boundary/stability improvements | Physical boundaries and steady convergence diagnostics | Edge-case and robustness test suite |
-| P10 | In Progress | Verification & validation | P10.4 integrated evidence closure candidate | Auditable evidence, claims, limitations, and exact-SHA gates |
-| P11 | Planned | Parametric studies | Reproducible study workflow | Repeatable case outputs |
+| P10 | Complete | Verification & validation | Accepted integrated evidence closure | Auditable evidence, claims, limitations, and exact-SHA gates |
+| P11 | In Progress | Parametric studies | P11.1 study-foundation candidate | Repeatable, traceable case outputs |
 
 ## P10 Breakdown
 
 - P10.1 V&V Foundation + Conservation — Complete (accepted SHA `32eb50cd687da6e23a4cb2269bc31120fbff2b3e`, Test run `34638173666`)
 - P10.2 Grid / Spatial Convergence — Complete (accepted SHA `ce27e3fd841362432791f45f3c8ad53a3002ecf4`, dedicated run `34686588293`, artifact `10295429740`)
 - P10.3 CFL / Temporal / Scheme Sensitivity — Complete (accepted SHA `bc9963f66cb64f043254b34532863b97432cc287`, Test run `34700186067`, dedicated run `34700559898`, artifact `10299894650`)
-- P10.4 Integrated Evidence / Closure — Formal closure pending; offline exact-SHA closure candidate implemented
+- P10.4 Integrated Evidence / Closure — Complete (accepted SHA `cac804a30f325ddf1875ab5188353cdbbf9e5de6`, dedicated run `34833172796`, artifact `10343052217`)
+
+## P11 Breakdown
+
+- P11.1 Parametric Study Foundation — Formal run pending
+- P11.2 Physical Baseline + One-Factor Sensitivities — Planned
+- P11.3 LBW/YBW Criterion + Regime Map — Planned
+- P11.4 Integrated Study Closure — Planned
 
 ## P9 Breakdown
 

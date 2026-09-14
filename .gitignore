@@ -9,6 +9,7 @@ build/
 .venv/
 venv/
 artifacts/p10_4/
+artifacts/p11_1/
 results/*
 !results/.gitkeep
 !results/p7_4/
