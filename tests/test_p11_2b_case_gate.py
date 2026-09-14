@@ -54,6 +54,20 @@ def complete_candidate() -> dict:
     }
 
 
+def absolute_tabulated_candidate() -> dict:
+    candidate = complete_candidate()
+    candidate["shape"] = {
+        "model": "tabulated_line_heat",
+        "source_id": "SRC-X",
+        "operating_condition_id": "CASE-X",
+        "source_locators": ["author supplementary absolute line-heat data"],
+        "x_m": [0.0, 0.05, 0.10],
+        "heat_release_rate_per_length_W_m": [0.0, 2.0e6, 1.0e6],
+    }
+    candidate.pop("absolute_energy")
+    return candidate
+
+
 def test_current_source_ledger_stays_formally_blocked() -> None:
     ledger = CLOSURE.load_heat_release_source_ledger()
     result = GATE.assess_ledger_formal_case_readiness(ledger)
@@ -67,6 +81,7 @@ def test_complete_same_condition_candidate_passes_gate() -> None:
     result = GATE.assess_formal_case_candidate(complete_candidate())
     assert result["formal_case_ready"] is True
     assert result["blockers"] == []
+    assert result["energy_scale_path"] == "separate_absolute_energy"
 
 
 def test_shape_and_energy_from_different_conditions_are_rejected() -> None:
@@ -103,19 +118,36 @@ def test_enthalpy_route_requires_mass_flow_and_excludes_duplicate_power() -> Non
     assert "absolute_energy must provide exactly one of total power or stagnation-enthalpy increment" in result["blockers"]
 
 
-def test_tabulated_line_heat_requires_positive_strictly_ordered_profile() -> None:
-    candidate = complete_candidate()
-    candidate["shape"] = {
-        "model": "tabulated_line_heat",
+def test_tabulated_line_heat_is_already_an_absolute_energy_path() -> None:
+    candidate = absolute_tabulated_candidate()
+    result = GATE.assess_formal_case_candidate(candidate)
+
+    assert result["formal_case_ready"] is True
+    assert result["blockers"] == []
+    assert result["energy_scale_path"] == "absolute_tabulated_line_heat"
+
+
+def test_tabulated_line_heat_rejects_a_second_absolute_energy_scale() -> None:
+    candidate = absolute_tabulated_candidate()
+    candidate["absolute_energy"] = {
         "source_id": "SRC-X",
         "operating_condition_id": "CASE-X",
-        "source_locators": ["author supplementary data"],
-        "x_m": [0.0, 0.05, 0.10],
-        "heat_release_rate_per_length_W_m": [0.0, 2.0e6, 1.0e6],
+        "source_locators": ["duplicate total-power record"],
+        "total_heat_release_power_W": 250_000.0,
     }
-    assert GATE.assess_formal_case_candidate(candidate)["formal_case_ready"] is True
+    result = GATE.assess_formal_case_candidate(candidate)
 
+    assert result["formal_case_ready"] is False
+    assert (
+        "tabulated_line_heat already contains the absolute energy scale; omit absolute_energy"
+        in result["blockers"]
+    )
+
+
+def test_tabulated_line_heat_requires_positive_strictly_ordered_profile() -> None:
+    candidate = absolute_tabulated_candidate()
     candidate["shape"]["x_m"] = [0.0, 0.05, 0.05]
     result = GATE.assess_formal_case_candidate(candidate)
+
     assert result["formal_case_ready"] is False
     assert "tabulated shape x_m must be strictly increasing" in result["blockers"]
