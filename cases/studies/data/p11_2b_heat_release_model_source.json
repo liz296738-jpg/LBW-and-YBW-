@@ -56,12 +56,22 @@
         "fit_R2": 0.997,
         "cumulative_heat_fraction_at_x_c": 0.92
       },
+      "independent_validation_record": {
+        "reference_source_id": "SRC10",
+        "reported_configuration": "Liu et al. axisymmetric scramjet model B without cavity",
+        "reported_equivalence_ratio": 1.04,
+        "heat_release_inputs": "experimental PLIF image plus measured stagnation-enthalpy increment at combustor exit",
+        "theoretical_exit_Mach": 2.24,
+        "experimental_exit_Mach": 2.27,
+        "locator": "Jin et al. (2026), validation discussion and Fig. 14"
+      },
       "evidence_boundary": [
         "Equations 6, 7, 8 and 11 are text-recoverable and their mathematical forms may be implemented independently of case-specific parameter values.",
         "The paper explicitly states that Q_m, x_m, x_c, x_i and k depend on operating conditions and require prediction/estimation.",
         "Figure-derived Q_m, x_m and x_i values are not digitized or guessed in this repository.",
         "Case-10 x_c=98 and k=5.6 remain raw text records until their coordinate/unit convention is frozen together with x_m and x_i.",
-        "A formal solver case using the normalized model still requires an absolute thermal power or an independently measured stagnation-enthalpy rise."
+        "A formal solver case using the normalized model still requires an absolute thermal power or an independently measured stagnation-enthalpy rise.",
+        "The Jin validation text labels the Liu model-B condition as phi=1.04, while Liu Table 2 lists the nearest model-B ethylene condition as phi=1.03; the repository preserves this discrepancy rather than silently equating them."
       ]
     },
     {
@@ -95,6 +105,104 @@
         "The fitted axial heat-release profiles are presented graphically rather than as a complete tabulated solver-ready distribution in the accessible text.",
         "No figure coordinates are digitized or guessed as formal inputs."
       ]
+    },
+    {
+      "source_id": "SRC10",
+      "citation": "Qili Liu, Damiano Baccarella, Brendan McGann, Tonghun Lee, Dual-Mode Operation and Transition in Axisymmetric Scramjets, AIAA Journal 57(11) (2019) 4764-4777.",
+      "doi": "10.2514/1.J058391",
+      "url": "https://www.researchgate.net/publication/334513801_Dual-Mode_Operation_and_Transition_in_Axisymmetric_Scramjets",
+      "role": "independent axisymmetric experimental validation source explicitly reused by Jin et al. (2026)",
+      "source_locators": [
+        "Fig. 2: axisymmetric scramjet models A and B dimensions",
+        "Table 1: nominal high-enthalpy air freestream",
+        "Table 2: total pressure and heat-flux/enthalpy measurements",
+        "Sec. III.B-C: model geometry and quantitative measurements"
+      ],
+      "geometry_records": {
+        "inlet_area_contraction_ratio": 1.9,
+        "inlet_lip_angle_deg": 10.0,
+        "isolator_length_m": 0.254,
+        "isolator_diameter_m": 0.035,
+        "fuel_injector_location_downstream_from_inlet_lip_m": 0.2914,
+        "injector_count": 16,
+        "injector_diameter_m": 0.00075,
+        "injector_backward_inclination_deg": 45.0,
+        "model_A_cavity_location_downstream_from_injector_m": 0.042,
+        "model_A_cavity_depth_m": 0.011,
+        "model_A_cavity_floor_length_m": 0.035,
+        "model_A_cavity_ramp_angle_deg": 22.5,
+        "diverging_combustor_cone_angle_deg": 2.0,
+        "diverging_combustor_length_m": 0.357,
+        "model_B_policy": "cavity module replaced by a constant-cross-sectional tube of the same 35 mm diameter as the isolator before the downstream diverging combustor"
+      },
+      "nominal_freestream_records": {
+        "stagnation_temperature_K": 2400.0,
+        "stagnation_pressure_kPa": 100.0,
+        "Mach": 4.5,
+        "static_temperature_K": 475.0,
+        "density_kg_m3": 0.0025,
+        "velocity_m_s": 1966.0,
+        "static_pressure_raw": 345.0,
+        "static_pressure_unit_status": "DO_NOT FREEZE FROM TEXT EXTRACTION; OCR/header rendering is ambiguous and must be checked against the original table image before use"
+      },
+      "measurement_model_records": {
+        "fuel": "ethylene for reacting cases",
+        "average_gamma_for_combustion_products": 1.31,
+        "average_cp_J_kg_K": 1255.0,
+        "flow_enthalpy_method": "exit heat-flux probe correlated to stagnation enthalpy using Sutton-Graves relation",
+        "pressure_and_Mach_method": "combustor-exit wall static pressure plus pitot measurement",
+        "axial_coordinate_origin": "center of the inlet, per source text"
+      },
+      "table_2_model_B_ethylene_phi_1_03": {
+        "gamma": 1.31,
+        "equivalence_ratio": 1.03,
+        "p0_kPa_raw": 98.6,
+        "p4_Pa": 1453.7,
+        "ps_Pa": 9891.1,
+        "exit_Mach_M4": 2.27,
+        "pt4_Pa": 17383.8,
+        "pt4_over_pt3": 0.39,
+        "Ht4_over_Ht3": 1.16,
+        "locator": "Liu et al. (2019), Table 2, model B, C2H4 row at phi=1.03"
+      },
+      "cross_source_validation_link": {
+        "jin_source_id": "SRC08",
+        "jin_reported_condition": "scramjet model B with phi=1.04",
+        "liu_nearest_table_condition": "model B C2H4 with phi=1.03",
+        "jin_theoretical_exit_Mach": 2.24,
+        "liu_experimental_exit_Mach": 2.27,
+        "jin_heat_release_inputs": "experimental PLIF image and stagnation-enthalpy increment at combustor exit",
+        "condition_identity_status": "UNRESOLVED_1.04_VS_1.03_DISCREPANCY"
+      },
+      "evidence_boundary": [
+        "The Liu model-B configuration removes the cavity and is therefore a promising independent quasi-one-dimensional validation geometry.",
+        "Table 2 supplies the measured exit Mach and the enthalpy ratio Ht4/Ht3, but the repository does not convert that ratio into a stagnation-enthalpy increment without a traceable station-3 enthalpy definition/value for the same case.",
+        "The accessible text does not provide a solver-ready tabulated Qdot-prime(x) distribution for model B.",
+        "The Jin validation labels the model-B condition as phi=1.04 while Liu Table 2 lists model-B ethylene rows including phi=1.03 but not 1.04; this discrepancy must be resolved before formal promotion.",
+        "No mass-flow or heat-release-shape value is inferred from geometry, equivalence ratio, PLIF images, or plotted curves without retained source evidence."
+      ]
+    }
+  ],
+  "candidate_validation_chains": [
+    {
+      "candidate_id": "JIN-LIU-MODEL-B-VALIDATION",
+      "source_ids": ["SRC08", "SRC10"],
+      "purpose": "independent validation candidate for the source-backed quasi-Gaussian heat-release model in a cavity-free axisymmetric combustor",
+      "reported_by_jin_condition": "model B, phi=1.04",
+      "nearest_liu_table_condition": "model B, C2H4, phi=1.03",
+      "status": "BLOCKED",
+      "positive_evidence": [
+        "Liu model B removes the cavity and is explicitly selected by Jin as closer to quasi-one-dimensional assumptions.",
+        "Jin states that the heat-release distribution can be estimated from its model using the Liu experimental PLIF image and measured exit stagnation-enthalpy increment.",
+        "Jin reports theoretical exit Mach 2.24 versus Liu experimental 2.27 and strong pressure-distribution agreement."
+      ],
+      "blockers": [
+        "resolve the phi=1.04 (Jin) versus phi=1.03 (Liu Table 2) condition identity discrepancy",
+        "recover a traceable heat-release shape or its fitted parameters for this exact validation condition",
+        "recover the absolute stagnation-enthalpy increment and mass flow needed to scale Qdot-prime, rather than inferring them from Ht4/Ht3 alone",
+        "freeze the source-to-solver axial coordinate mapping from the original Fig. 2 / validation setup"
+      ],
+      "formal_candidate": false
     }
   ],
   "candidate_formal_cases": [],
@@ -114,7 +222,8 @@
       "assuming 100 percent combustion efficiency without source evidence",
       "converting equivalence ratio to power when fuel identity/LHV or oxidizer convention is unresolved",
       "digitizing figures without a retained extraction record and coordinate convention",
-      "treating normalized CH* intensity as absolute W/m without an independent energy scale"
+      "treating normalized CH* or PLIF intensity as absolute W/m without an independent energy scale",
+      "silently treating the Jin phi=1.04 validation label and Liu phi=1.03 table row as identical"
     ]
   },
   "project_decision": {
@@ -125,6 +234,6 @@
     "chemistry_implied": false,
     "mutual_exclusion": "Direct heat_release_rate_per_length and burned-fuel/LHV energy paths may not both be active, preventing double counting.",
     "formal_case_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY",
-    "next_evidence_priority": "Recover one internally consistent published case with either an absolute tabulated Qdot-prime profile, or a normalized axial shape plus matching absolute heat-addition level; do not mix geometry/shape/power from unrelated experiments and label the result as a reproduction."
+    "next_evidence_priority": "Resolve and complete the Jin-Liu model-B validation chain first: condition identity, heat-release shape, absolute stagnation-enthalpy increment/mass flow, and coordinate mapping. This is preferable to mixing unrelated P11.2A geometry and heat-release evidence."
   }
 }
