@@ -6,7 +6,7 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver for scramjet and d
 
 ## Current Status
 
-Current stage: **P10.3 CFL, RK3 temporal, and scheme sensitivity verification in progress.** P10.2 is complete at `ce27e3fd841362432791f45f3c8ad53a3002ecf4` with dedicated workflow run `34686588293` and artifact `10295429740`; all twelve steady runs and spatial-order gates passed. P10.1 is complete and was accepted at `32eb50cd687da6e23a4cb2269bc31120fbff2b3e` by Test workflow run `34638173666`.
+Current stage: **P10.4 integrated verification and validation closure candidate; formal closure pending.** P10.3 is complete at `bc9963f66cb64f043254b34532863b97432cc287` with standard Test run `34700186067`, dedicated run `34700559898`, and artifact `10299894650`. P10.2 is complete at `ce27e3fd841362432791f45f3c8ad53a3002ecf4`; P10.1 is complete at `32eb50cd687da6e23a4cb2269bc31120fbff2b3e`.
 
 P3 is complete: ideal-gas thermodynamics, primitive/conservative conversion, Euler physical flux, Rusanov numerical flux, finite-volume spatial residual, SSP-RK3, transmissive boundaries, CFL time stepping, a transient solver loop, a Sod-type shock-tube smoke test, automated tests, and GitHub Actions CI form the constant-area baseline solver.
 

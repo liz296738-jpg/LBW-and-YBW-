@@ -1,0 +1,540 @@
+{
+  "accepted_evidence": {
+    "P10.1": {
+      "accepted_sha": "32eb50cd687da6e23a4cb2269bc31120fbff2b3e",
+      "artifact_id": null,
+      "pytest_passed": 706,
+      "stage": "P10.1",
+      "standard_ci_run": 34638173666,
+      "status": "accepted"
+    },
+    "P10.2": {
+      "accepted_sha": "ce27e3fd841362432791f45f3c8ad53a3002ecf4",
+      "artifact_id": 10295429740,
+      "dedicated_run": 34686588293,
+      "stage": "P10.2",
+      "status": "accepted"
+    },
+    "P10.3": {
+      "accepted_sha": "bc9963f66cb64f043254b34532863b97432cc287",
+      "artifact_id": 10299894650,
+      "artifact_sha256": "a5834f82789839f05a74a1dae0e6198722b14059a1d3ecef89914df73e615785",
+      "dedicated_run": 34700559898,
+      "pytest_passed": 736,
+      "stage": "P10.3",
+      "standard_ci_run": 34700186067,
+      "status": "accepted"
+    }
+  },
+  "all_passed": true,
+  "ancestry_checks": {
+    "P10.1": true,
+    "P10.2": true,
+    "P10.3": true
+  },
+  "artifact_kind": "exact-sha-integrated-vv-closure",
+  "baseline_sha": "bc9963f66cb64f043254b34532863b97432cc287",
+  "claim_ids": [
+    "C01",
+    "C02",
+    "C03",
+    "C04",
+    "C05",
+    "C06",
+    "C07",
+    "C08",
+    "C09",
+    "C10",
+    "C11",
+    "C12",
+    "C13",
+    "C14",
+    "C15"
+  ],
+  "claim_ledger": [
+    {
+      "claim": "The quasi-1D solver satisfies the tested discrete conservation identities.",
+      "claim_id": "C01",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E04",
+        "E06",
+        "E10",
+        "E16"
+      ],
+      "qualification": "",
+      "scope": "tested discrete conservation configurations",
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "The tested smooth quasi-1D solutions exhibit approximately first-order spatial convergence under grid refinement.",
+      "claim_id": "C02",
+      "evidence_ids": [
+        "E04",
+        "E11",
+        "E12",
+        "E16"
+      ],
+      "qualification": "",
+      "scope": "tested smooth quasi-1D analytical benchmark",
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "Both Rusanov and Steger-Warming pass the tested smooth subsonic and supersonic spatial-convergence protocol.",
+      "claim_id": "C03",
+      "evidence_ids": [
+        "E03",
+        "E11",
+        "E12",
+        "E16"
+      ],
+      "qualification": "",
+      "scope": "tested smooth subsonic and supersonic cases",
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "Within CFL 0.1-0.4 on the tested N=80 steady benchmarks, the converged discrete solution is materially insensitive to pseudo-time CFL.",
+      "claim_id": "C04",
+      "evidence_ids": [
+        "E12",
+        "E13",
+        "E16"
+      ],
+      "qualification": "",
+      "scope": "CFL 0.1-0.4; tested N=80 steady benchmarks",
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "The existing SSP-RK3 implementation shows approximately third-order temporal convergence on the tested smooth scalar ODE.",
+      "claim_id": "C05",
+      "evidence_ids": [
+        "E14",
+        "E16"
+      ],
+      "qualification": "not all transient CFD flows",
+      "scope": "tested scalar ODE only",
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "The physical boundary-condition implementations pass the tested rightward subsonic and supersonic regimes.",
+      "claim_id": "C06",
+      "evidence_ids": [
+        "E05",
+        "E16"
+      ],
+      "qualification": "",
+      "scope": "tested rightward-flow regimes",
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "Wall, fuel-injection, and prescribed combustion source terms pass controlled analytical/accounting verification tests.",
+      "claim_id": "C07",
+      "evidence_ids": [
+        "E07",
+        "E08",
+        "E09",
+        "E10",
+        "E16"
+      ],
+      "qualification": "",
+      "scope": "implemented prescribed source models",
+      "status": "SUPPORTED"
+    },
+    {
+      "claim": "The solver is suitable for controlled one-dimensional scramjet/ramjet engineering studies within the implemented model assumptions.",
+      "claim_id": "C08",
+      "evidence_ids": [
+        "E01",
+        "E02",
+        "E04",
+        "E05",
+        "E06",
+        "E07",
+        "E08",
+        "E09",
+        "E10",
+        "E11",
+        "E12",
+        "E13",
+        "E14",
+        "E15",
+        "E16"
+      ],
+      "qualification": "quasi-1D; perfect gas; prescribed source models; no full chemistry; no experimental engine validation",
+      "scope": "controlled studies within verified benchmark envelope",
+      "status": "QUALIFIED"
+    },
+    {
+      "claim": "Steger-Warming and Rusanov can be compared quantitatively on the implemented benchmarks.",
+      "claim_id": "C09",
+      "evidence_ids": [
+        "E03",
+        "E11",
+        "E15",
+        "E16"
+      ],
+      "qualification": "benchmark-specific; no universal winner",
+      "scope": "implemented benchmarks",
+      "status": "QUALIFIED"
+    },
+    {
+      "claim": "The complete CFD solver is third-order accurate in physical time for arbitrary transient flows.",
+      "claim_id": "C10",
+      "evidence_ids": [],
+      "qualification": "P10.3 covers only a scalar ODE",
+      "scope": "arbitrary transient CFD",
+      "status": "NOT_ESTABLISHED"
+    },
+    {
+      "claim": "CFL=0.4 is a universal stability limit.",
+      "claim_id": "C11",
+      "evidence_ids": [],
+      "qualification": "only CFL 0.1-0.4 on selected steady cases was tested",
+      "scope": "universal stability",
+      "status": "NOT_ESTABLISHED"
+    },
+    {
+      "claim": "Steger-Warming is universally more accurate than Rusanov.",
+      "claim_id": "C12",
+      "evidence_ids": [],
+      "qualification": "comparisons are benchmark-specific",
+      "scope": "all flow regimes",
+      "status": "NOT_ESTABLISHED"
+    },
+    {
+      "claim": "The combustion model predicts real flame chemistry.",
+      "claim_id": "C13",
+      "evidence_ids": [],
+      "qualification": "the model uses prescribed heat release",
+      "scope": "real reacting flow",
+      "status": "NOT_ESTABLISHED"
+    },
+    {
+      "claim": "The model has been experimentally validated against a real engine.",
+      "claim_id": "C14",
+      "evidence_ids": [],
+      "qualification": "no experimental engine validation has been performed",
+      "scope": "real engines",
+      "status": "NOT_ESTABLISHED"
+    },
+    {
+      "claim": "The current solver predicts real LBW/YBW operating maps with established experimental accuracy.",
+      "claim_id": "C15",
+      "evidence_ids": [],
+      "qualification": "P11 studies and experimental validation have not been completed",
+      "scope": "LBW/YBW operating maps",
+      "status": "NOT_ESTABLISHED"
+    }
+  ],
+  "evidence_ids": [
+    "E01",
+    "E02",
+    "E03",
+    "E04",
+    "E05",
+    "E06",
+    "E07",
+    "E08",
+    "E09",
+    "E10",
+    "E11",
+    "E12",
+    "E13",
+    "E14",
+    "E15",
+    "E16"
+  ],
+  "evidence_matrix": [
+    {
+      "category": "state algebra",
+      "evidence_id": "E01",
+      "limitations": "perfect-gas thermodynamics",
+      "method": "unit identities",
+      "reference": "P2 tests",
+      "result": "thermodynamic/state algebra identities pass",
+      "stage": "P2",
+      "status": "verified",
+      "subject": "primitive-to-conservative conversion and ideal-gas state consistency",
+      "supported_claim_ids": [
+        "C01"
+      ]
+    },
+    {
+      "category": "flux",
+      "evidence_id": "E02",
+      "limitations": "inviscid Euler model",
+      "method": "unit identities",
+      "reference": "P3 tests",
+      "result": "Euler flux identities pass",
+      "stage": "P3",
+      "status": "verified",
+      "subject": "physical Euler flux implementation",
+      "supported_claim_ids": [
+        "C01"
+      ]
+    },
+    {
+      "category": "flux",
+      "evidence_id": "E03",
+      "limitations": "does not establish a universally superior flux",
+      "method": "splitting and interface tests",
+      "reference": "P5 tests",
+      "result": "implementation verification passes",
+      "stage": "P5",
+      "status": "verified",
+      "subject": "Steger-Warming FVS with eigenvalues lambda1=u-a, lambda2=u, lambda3=u+a",
+      "supported_claim_ids": [
+        "C03",
+        "C09"
+      ]
+    },
+    {
+      "category": "geometry",
+      "evidence_id": "E04",
+      "limitations": "quasi-one-dimensional model",
+      "method": "variable-area formulation, static constant-pressure well-balanced test, constant-area reduction",
+      "reference": "P4 tests",
+      "result": "area formulation passes controlled checks",
+      "stage": "P4",
+      "status": "verified",
+      "subject": "quasi-1D area source",
+      "supported_claim_ids": [
+        "C01",
+        "C02"
+      ]
+    },
+    {
+      "category": "boundaries",
+      "evidence_id": "E05",
+      "limitations": "not arbitrary multidirectional boundary flow",
+      "method": "boundary unit and integration tests",
+      "reference": "P9 tests",
+      "result": "physical boundary contracts pass",
+      "stage": "P9",
+      "status": "verified on tested rightward regimes",
+      "subject": "supersonic inflow/outflow and subsonic total-condition inflow/static-pressure outlet",
+      "supported_claim_ids": [
+        "C06"
+      ]
+    },
+    {
+      "category": "conservation",
+      "evidence_id": "E06",
+      "limitations": "tested discrete configurations",
+      "method": "discrete conservation ledger",
+      "reference": "P10.1 accepted evidence",
+      "result": "global conservation identities close",
+      "stage": "P10.1",
+      "status": "verified",
+      "subject": "global mass, momentum, and energy balance",
+      "supported_claim_ids": [
+        "C01"
+      ]
+    },
+    {
+      "category": "source terms",
+      "evidence_id": "E07",
+      "limitations": "prescribed wall source models",
+      "method": "analytical and algebraic source checks",
+      "reference": "P6 tests",
+      "result": "wall sources pass",
+      "stage": "P6",
+      "status": "analytically / algebraically verified",
+      "subject": "wall friction and wall heat source",
+      "supported_claim_ids": [
+        "C07"
+      ]
+    },
+    {
+      "category": "source terms",
+      "evidence_id": "E08",
+      "limitations": "not physical fuel-atomization validation",
+      "method": "analytical integral and accounting tests",
+      "reference": "P7 tests",
+      "result": "source formulation passes",
+      "stage": "P7",
+      "status": "analytically verified source formulation",
+      "subject": "fuel injection mass, momentum, and energy source accounting",
+      "supported_claim_ids": [
+        "C07"
+      ]
+    },
+    {
+      "category": "source terms",
+      "evidence_id": "E09",
+      "limitations": "not chemistry, species, or flame validation",
+      "method": "controlled source-term tests",
+      "reference": "P8 tests",
+      "result": "prescribed energy mapping passes",
+      "stage": "P8",
+      "status": "controlled source-term verification",
+      "subject": "prescribed burn rate and LHV heat-release source",
+      "supported_claim_ids": [
+        "C07"
+      ]
+    },
+    {
+      "category": "source terms",
+      "evidence_id": "E10",
+      "limitations": "instantaneous prescribed-source identity",
+      "method": "combined ledger identity",
+      "reference": "P10.1 accepted evidence",
+      "result": "source sum equals combined source",
+      "stage": "P10.1",
+      "status": "verified",
+      "subject": "wall + fuel + combustion + quasi-1D source superposition",
+      "supported_claim_ids": [
+        "C01",
+        "C07"
+      ]
+    },
+    {
+      "category": "spatial convergence",
+      "evidence_id": "E11",
+      "limitations": "smooth benchmark only; no equivalent shock convergence closure",
+      "method": "grid refinement against analytical solution",
+      "reference": "P10.2 accepted evidence",
+      "result": "approximately first-order convergence",
+      "stage": "P10.2",
+      "status": "verified on tested smooth benchmark",
+      "subject": "smooth subsonic/supersonic Rusanov and Steger-Warming solutions at N=40/80/160",
+      "supported_claim_ids": [
+        "C02",
+        "C03",
+        "C09"
+      ]
+    },
+    {
+      "category": "steady convergence",
+      "evidence_id": "E12",
+      "limitations": "tested benchmarks only",
+      "method": "normalized residual gate",
+      "reference": "P10.2 and P10.3 accepted evidence",
+      "result": "residual <= 1e-8",
+      "stage": "P10.2/P10.3",
+      "status": "verified for tested benchmarks",
+      "subject": "all formal P10.2 and P10.3 steady cases",
+      "supported_claim_ids": [
+        "C02",
+        "C03",
+        "C04"
+      ]
+    },
+    {
+      "category": "CFL sensitivity",
+      "evidence_id": "E13",
+      "limitations": "does not establish a universal stability limit",
+      "method": "converged-field difference relative to spatial error",
+      "reference": "P10.3 accepted evidence",
+      "result": "converged discrete steady state materially insensitive",
+      "stage": "P10.3",
+      "status": "verified within tested CFL range",
+      "subject": "CFL=0.1, 0.2, and 0.4 at N=80",
+      "supported_claim_ids": [
+        "C04"
+      ]
+    },
+    {
+      "category": "temporal convergence",
+      "evidence_id": "E14",
+      "limitations": "not a complete transient-CFD temporal-order study",
+      "method": "dt refinement against exp(-1)",
+      "reference": "P10.3 orders 3.0578255193509354, 3.0288865949946873, 3.014435458873415",
+      "result": "approximately third-order",
+      "stage": "P10.3",
+      "status": "verified on tested scalar ODE",
+      "subject": "SSP-RK3 on y'=-y",
+      "supported_claim_ids": [
+        "C05"
+      ]
+    },
+    {
+      "category": "scheme comparison",
+      "evidence_id": "E15",
+      "limitations": "no universal winner established",
+      "method": "implemented benchmark comparison",
+      "reference": "P10.3 accepted evidence",
+      "result": "quantitative comparison complete",
+      "stage": "P10.3",
+      "status": "benchmark-specific comparison complete",
+      "subject": "Rusanov versus Steger-Warming",
+      "supported_claim_ids": [
+        "C09"
+      ]
+    },
+    {
+      "category": "reproducibility",
+      "evidence_id": "E16",
+      "limitations": "workflow evidence is tied to recorded revisions",
+      "method": "immutable registry and runtime Git gates",
+      "reference": "accepted evidence registry",
+      "result": "provenance chain is auditable",
+      "stage": "P10.1-P10.4",
+      "status": "verified",
+      "subject": "exact SHA, standard CI, dedicated workflows, and artifact provenance",
+      "supported_claim_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09"
+      ]
+    }
+  ],
+  "gates": {
+    "accepted_shas_valid": true,
+    "accepted_stage_registry_complete": true,
+    "all_accepted_stages_ancestors": true,
+    "baseline_validation_passed": true,
+    "claim_ledger_complete": true,
+    "claim_references_valid": true,
+    "closure_scope_consistent": true,
+    "evidence_matrix_complete": true,
+    "mandatory_limitations_complete": true,
+    "production_freeze_passed": true,
+    "pytest_passed": true,
+    "qualifications_complete": true
+  },
+  "head_sha": "bc9963f66cb64f043254b34532863b97432cc287",
+  "limitations": [
+    "quasi-one-dimensional model",
+    "perfect-gas thermodynamics",
+    "no species transport",
+    "no finite-rate chemistry",
+    "combustion is prescribed heat release from burn-rate input",
+    "no turbulence model",
+    "no multidimensional viscous flow",
+    "no experimental engine validation",
+    "RK3 third-order evidence applies only to tested scalar ODE",
+    "CFL study does not establish universal stability limits",
+    "spatial convergence result applies to tested smooth benchmark",
+    "shock problems have not undergone an equivalent formal grid-convergence closure in P10",
+    "scheme comparison is benchmark-specific",
+    "full LBW/YBW parametric conclusions are not yet established"
+  ],
+  "missing_claim_ids": [],
+  "missing_evidence_ids": [],
+  "production_freeze": {
+    "production_baseline_sha": "bc9963f66cb64f043254b34532863b97432cc287",
+    "production_files_changed": [],
+    "production_freeze_passed": true
+  },
+  "regression_summary": {
+    "baseline_validation_passed": true,
+    "pytest_errors": 0,
+    "pytest_failures": 0,
+    "pytest_passed": 754,
+    "pytest_skipped": 0,
+    "pytest_step_passed": true,
+    "pytest_tests": 754
+  },
+  "schema_version": 1,
+  "stage": "P10.4",
+  "unexpected_claim_ids": [],
+  "unexpected_evidence_ids": []
+}

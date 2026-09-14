@@ -1,0 +1,39 @@
+name: P10.4 Integrated V&V Closure
+
+on:
+  workflow_dispatch:
+
+jobs:
+  integrated-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e ".[dev]"
+      - name: Prepare artifact directory
+        run: mkdir -p artifacts/p10_4
+      - name: Run full regression
+        id: full_pytest
+        continue-on-error: true
+        run: pytest -q --junitxml=artifacts/p10_4/pytest.xml
+      - name: Run baseline analytical validation
+        id: baseline
+        continue-on-error: true
+        run: python cases/baseline/isentropic_area_validation.py > artifacts/p10_4/baseline_validation.txt 2>&1
+      - name: Assemble exact-SHA integrated closure
+        env:
+          P10_4_PYTEST_OUTCOME: ${{ steps.full_pytest.outcome }}
+          P10_4_BASELINE_OUTCOME: ${{ steps.baseline.outcome }}
+        run: python cases/verification/p10_4_integrated_vv_closure.py
+      - name: Upload P10.4 closure evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p10-4-vv-closure-${{ github.sha }}
+          path: artifacts/p10_4/
+          if-no-files-found: warn
+          retention-days: 30

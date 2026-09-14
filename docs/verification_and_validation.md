@@ -13,13 +13,14 @@ Verification asks whether the implementation solves its declared equations corre
 | P9 | physical boundaries and steady diagnostics | integration robustness | characteristic and residual contracts | complete | no engine experiment |
 | P10.1 | conservation ledger | conservation-balance | discrete global closure | complete | exact-SHA CI, not experimental validation |
 | P10.2 | smooth isentropic nozzle | analytical solution convergence | relative L1/Linf and observed order | complete | first-order smooth benchmark only |
-| P10.3 | CFL, SSP-RK3, and flux sensitivity | converged steady comparisons and scalar ODE | CFL/spatial-error ratios and temporal order | formal run pending | benchmark-specific claims only |
+| P10.3 | CFL, SSP-RK3, and flux sensitivity | converged steady comparisons and scalar ODE | CFL/spatial-error ratios and temporal order | complete | benchmark-specific claims only |
+| P10.4 | integrated evidence closure | immutable accepted-stage registry | ancestry, production freeze, regression, claim and limitation gates | formal closure pending | verification closure is not experimental validation |
 
 The project currently verifies numerical identities, discretized transport, source mappings, boundary semantics, global discrete balances, and convergence diagnostics. It does not validate real scramjet combustion, LBW/YBW engine performance, chemistry, ignition, mixing, or flameholding against experiments.
 
 For cell content `Q=sum(A U dx)`, the ledger uses `dQ_RHS=sum(A R dx)`, `dQ_boundary=A_L F_L-A_R F_R`, and `dQ_source=sum(A S dx)`. Its absolute closure is `dQ_RHS-(dQ_boundary+dQ_source)`. Variable-area momentum includes the discrete pressure-area source; area mass and energy sources are zero.
 
-P10.1 was formally accepted at SHA `32eb50cd687da6e23a4cb2269bc31120fbff2b3e` by Test workflow run `34638173666` (`706 passed in 35.21 s`). P10.2 was formally accepted at SHA `ce27e3fd841362432791f45f3c8ad53a3002ecf4` by dedicated workflow run `34686588293`, with artifact `10295429740`; all twelve steady runs, error-monotonicity gates, final L1/Linf order gates, and `all_passed` succeeded. P10.3 studies CFL/temporal/scheme sensitivity, and P10.4 will integrate evidence and audit claims.
+P10.1 was formally accepted at SHA `32eb50cd687da6e23a4cb2269bc31120fbff2b3e` by Test workflow run `34638173666` (`706 passed in 35.21 s`). P10.2 was formally accepted at SHA `ce27e3fd841362432791f45f3c8ad53a3002ecf4` by dedicated workflow run `34686588293`, with artifact `10295429740`; all twelve steady runs, error-monotonicity gates, final L1/Linf order gates, and `all_passed` succeeded. P10.3 was formally accepted at SHA `bc9963f66cb64f043254b34532863b97432cc287` by Test run `34700186067` and dedicated run `34700559898`, with artifact `10299894650` and recorded SHA-256 `a5834f82789839f05a74a1dae0e6198722b14059a1d3ecef89914df73e615785`. P10.4 integrates these immutable records and audits claims without rerunning either long CFD matrix.
 
 ## P10.1 V1-V8 evidence matrix
 
@@ -56,4 +57,10 @@ Preflight found no stability or budget blocker. Subsonic Steger-Warming at CFL=0
 
 Temporal verification is independent of steady CFD. The existing `ssp_rk3_step` advances `y'=-y`, `y(0)=1` to exactly `T=1` using dt 0.1, 0.05, 0.025, and 0.0125. Preflight endpoint errors were `1.660682420989712e-5`, `1.9942949323059622e-6`, `2.4434511847193363e-7`, and `3.023905215115974e-8`, giving observed orders `3.0578255193509354`, `3.0288865949946873`, and `3.014435458873415`.
 
-If the dedicated exact-SHA study passes, the supported claims are limited to material pseudo-time-CFL invariance of the converged discrete steady state over CFL 0.1–0.4 on these N=80 smooth benchmarks, and approximately third-order behavior of the existing SSP-RK3 implementation on the tested scalar ODE. This does not establish a universal CFL stability limit or third-order temporal accuracy for arbitrary transient CFD problems. Scheme comparisons remain benchmark-specific.
+The accepted exact-SHA study supports material pseudo-time-CFL invariance of the converged discrete steady state over CFL 0.1–0.4 on these N=80 smooth benchmarks, and approximately third-order behavior of the existing SSP-RK3 implementation on the tested scalar ODE. This does not establish a universal CFL stability limit or third-order temporal accuracy for arbitrary transient CFD problems. Scheme comparisons remain benchmark-specific.
+
+## P10.4 integrated closure protocol
+
+P10.4 adds no physics, numerical method, benchmark, grid, or sensitivity case. Its offline runner records the accepted P10.1-P10.3 revisions, proves that each is an ancestor of the checkout, verifies that `src/scramjet1d/` is unchanged from the P10.3 baseline, parses full-regression JUnit counts, and requires the analytical baseline script to pass. It emits fixed E01-E16 evidence and C01-C15 claim ledgers with referential-integrity, qualification, limitation, and scope gates.
+
+`all_passed=true` means only that the defined P10 verification evidence chain is complete. It does not mean that the physical model or a real engine has been experimentally validated. Formal P10.4 closure remains pending until both standard CI and the manually dispatched `P10.4 Integrated V&V Closure` workflow pass at the new exact SHA.

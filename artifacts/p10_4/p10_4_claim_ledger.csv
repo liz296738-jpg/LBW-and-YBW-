@@ -1,0 +1,16 @@
+claim_id,claim,status,evidence_ids,scope,qualification
+C01,The quasi-1D solver satisfies the tested discrete conservation identities.,SUPPORTED,E01;E02;E04;E06;E10;E16,tested discrete conservation configurations,
+C02,The tested smooth quasi-1D solutions exhibit approximately first-order spatial convergence under grid refinement.,SUPPORTED,E04;E11;E12;E16,tested smooth quasi-1D analytical benchmark,
+C03,Both Rusanov and Steger-Warming pass the tested smooth subsonic and supersonic spatial-convergence protocol.,SUPPORTED,E03;E11;E12;E16,tested smooth subsonic and supersonic cases,
+C04,"Within CFL 0.1-0.4 on the tested N=80 steady benchmarks, the converged discrete solution is materially insensitive to pseudo-time CFL.",SUPPORTED,E12;E13;E16,CFL 0.1-0.4; tested N=80 steady benchmarks,
+C05,The existing SSP-RK3 implementation shows approximately third-order temporal convergence on the tested smooth scalar ODE.,SUPPORTED,E14;E16,tested scalar ODE only,not all transient CFD flows
+C06,The physical boundary-condition implementations pass the tested rightward subsonic and supersonic regimes.,SUPPORTED,E05;E16,tested rightward-flow regimes,
+C07,"Wall, fuel-injection, and prescribed combustion source terms pass controlled analytical/accounting verification tests.",SUPPORTED,E07;E08;E09;E10;E16,implemented prescribed source models,
+C08,The solver is suitable for controlled one-dimensional scramjet/ramjet engineering studies within the implemented model assumptions.,QUALIFIED,E01;E02;E04;E05;E06;E07;E08;E09;E10;E11;E12;E13;E14;E15;E16,controlled studies within verified benchmark envelope,quasi-1D; perfect gas; prescribed source models; no full chemistry; no experimental engine validation
+C09,Steger-Warming and Rusanov can be compared quantitatively on the implemented benchmarks.,QUALIFIED,E03;E11;E15;E16,implemented benchmarks,benchmark-specific; no universal winner
+C10,The complete CFD solver is third-order accurate in physical time for arbitrary transient flows.,NOT_ESTABLISHED,,arbitrary transient CFD,P10.3 covers only a scalar ODE
+C11,CFL=0.4 is a universal stability limit.,NOT_ESTABLISHED,,universal stability,only CFL 0.1-0.4 on selected steady cases was tested
+C12,Steger-Warming is universally more accurate than Rusanov.,NOT_ESTABLISHED,,all flow regimes,comparisons are benchmark-specific
+C13,The combustion model predicts real flame chemistry.,NOT_ESTABLISHED,,real reacting flow,the model uses prescribed heat release
+C14,The model has been experimentally validated against a real engine.,NOT_ESTABLISHED,,real engines,no experimental engine validation has been performed
+C15,The current solver predicts real LBW/YBW operating maps with established experimental accuracy.,NOT_ESTABLISHED,,LBW/YBW operating maps,P11 studies and experimental validation have not been completed
