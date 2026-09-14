@@ -1,7 +1,7 @@
 """P11.2B prescribed heat-release closure utilities.
 
 This module implements only source-backed mathematical transformations needed
-for a future reactive/heat-addition surrogate.  It deliberately does not choose
+for a future reactive/heat-addition surrogate. It deliberately does not choose
 an absolute heat-release power or a formal shape parameter set: those remain
 evidence-gated in ``p11_2b_heat_release_model_source.json``.
 """
@@ -33,6 +33,19 @@ def load_heat_release_source_ledger(path: Path = SOURCE_LEDGER) -> dict:
     return data
 
 
+def _validated_coordinate_and_peak(
+    x: ArrayLike, q_peak: object
+) -> tuple[NDArray[np.float64], float]:
+    """Return a finite 1-D coordinate and nonnegative normalized peak."""
+    coordinate = np.asarray(x, dtype=float)
+    if coordinate.ndim != 1 or coordinate.size == 0 or not np.all(np.isfinite(coordinate)):
+        raise ValueError("x must be a nonempty finite one-dimensional array")
+    peak = np.asarray(q_peak, dtype=float)
+    if peak.ndim != 0 or not np.isfinite(peak) or peak < 0.0:
+        raise ValueError("q_peak must be a finite nonnegative scalar")
+    return coordinate, float(peak)
+
+
 def quasi_gaussian_eq7_normalized(
     x: ArrayLike,
     q_peak: object,
@@ -41,33 +54,77 @@ def quasi_gaussian_eq7_normalized(
 ) -> NDArray[np.float64]:
     """Return Jin et al. (2026) Eq. 7 normalized quasi-Gaussian heat release.
 
-    The implemented relation is
-
     ``Q*(x) = Q*_m exp(-(x-x_m)^2 / (x_c-x_m)^2)``.
 
-    All position arguments must use the same length unit.  This helper does not
-    assign a physical unit or an operating-condition value to ``x_m`` or
-    ``x_c``.  It reproduces the published functional form only; a formal case
-    must obtain those values from traceable evidence rather than guessing them.
+    All position arguments must use the same length unit. This helper does not
+    assign operating-condition values to the shape parameters; a formal case
+    must obtain them from traceable evidence rather than guessing them.
     """
-    coordinate = np.asarray(x, dtype=float)
-    if coordinate.ndim != 1 or coordinate.size == 0 or not np.all(np.isfinite(coordinate)):
-        raise ValueError("x must be a nonempty finite one-dimensional array")
-
-    peak = np.asarray(q_peak, dtype=float)
+    coordinate, peak = _validated_coordinate_and_peak(x, q_peak)
     x_m = np.asarray(x_peak, dtype=float)
     x_c = np.asarray(x_core_end, dtype=float)
-    for name, value in (("q_peak", peak), ("x_peak", x_m), ("x_core_end", x_c)):
+    for name, value in (("x_peak", x_m), ("x_core_end", x_c)):
         if value.ndim != 0 or not np.isfinite(value):
             raise ValueError(f"{name} must be a finite scalar")
-    if peak < 0.0:
-        raise ValueError("q_peak must be nonnegative")
     width = float(x_c - x_m)
     if width == 0.0:
         raise ValueError("x_core_end must differ from x_peak")
 
     exponent = -((coordinate - float(x_m)) ** 2) / (width**2)
-    result = float(peak) * np.exp(exponent)
+    result = peak * np.exp(exponent)
+    result.setflags(write=False)
+    return result
+
+
+def asymmetric_quasi_gaussian_eq8_normalized(
+    x: ArrayLike,
+    q_peak: object,
+    x_initiation: object,
+    x_peak: object,
+    x_core_end: object,
+    asymmetry_length: object,
+) -> NDArray[np.float64]:
+    """Return Jin et al. (2026) Eq. 8 normalized asymmetric heat release.
+
+    For ``x > x_i`` the published relation is
+
+    ``Q*(x) = Q*_m exp(-[((x-x_m)(x-x_i+k)) /
+                         ((x_c-x_m)(x-x_i))]^2)``.
+
+    ``x_i`` is the heat-release initiation coordinate. The model is therefore
+    defined as zero at and upstream of ``x_i``. The position parameters and
+    ``k`` must all use the same length unit. This helper implements the exact
+    functional form only; it does not freeze case-specific values or units.
+    """
+    coordinate, peak = _validated_coordinate_and_peak(x, q_peak)
+    parameters = {
+        "x_initiation": np.asarray(x_initiation, dtype=float),
+        "x_peak": np.asarray(x_peak, dtype=float),
+        "x_core_end": np.asarray(x_core_end, dtype=float),
+        "asymmetry_length": np.asarray(asymmetry_length, dtype=float),
+    }
+    for name, value in parameters.items():
+        if value.ndim != 0 or not np.isfinite(value):
+            raise ValueError(f"{name} must be a finite scalar")
+
+    x_i = float(parameters["x_initiation"])
+    x_m = float(parameters["x_peak"])
+    x_c = float(parameters["x_core_end"])
+    k = float(parameters["asymmetry_length"])
+    if not x_i < x_m < x_c:
+        raise ValueError("physical Eq. 8 ordering requires x_initiation < x_peak < x_core_end")
+    if k < 0.0:
+        raise ValueError("asymmetry_length must be nonnegative")
+
+    result = np.zeros_like(coordinate, dtype=float)
+    active = coordinate > x_i
+    if np.any(active):
+        x_active = coordinate[active]
+        ratio = (
+            (x_active - x_m) * (x_active - x_i + k)
+            / ((x_c - x_m) * (x_active - x_i))
+        )
+        result[active] = peak * np.exp(-(ratio**2))
     result.setflags(write=False)
     return result
 
@@ -80,7 +137,7 @@ def scale_shape_to_total_power(
     """Scale a nonnegative cell-centred shape to line heat release [W/m].
 
     The finite-volume normalization is exact for the solver convention:
-    ``sum(Qdot_prime_i * dx) == total_power``.  ``total_power`` [W] is an
+    ``sum(Qdot_prime_i * dx) == total_power``. ``total_power`` [W] is an
     externally supplied physical input; this helper does not infer it from fuel
     flow, LHV, efficiency, or equivalence ratio.
     """
