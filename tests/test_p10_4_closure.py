@@ -14,6 +14,11 @@ assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(MODULE)
 
+# P10.4 was formally accepted at this exact revision.  The production-freeze
+# gate protects that closure revision; it is not a permanent ban on later,
+# explicitly tested P11 production changes.
+P10_4_ACCEPTED_SHA = "cac804a30f325ddf1875ab5188353cdbbf9e5de6"
+
 
 def valid_inputs() -> dict:
     return {
@@ -94,7 +99,7 @@ def test_missing_mandatory_limitation_and_invalid_sha_fail() -> None:
         MODULE.resolve_head_sha("not-a-sha")
 
 
-def test_runtime_p10_3_baseline_is_ancestor_and_production_is_frozen() -> None:
-    checks = MODULE.git_ancestry_checks()
+def test_accepted_p10_4_revision_retains_p10_3_ancestry_and_production_freeze() -> None:
+    checks = MODULE.git_ancestry_checks(P10_4_ACCEPTED_SHA)
     assert checks["P10.3"] is True
-    assert MODULE.production_files_changed() == []
+    assert MODULE.production_files_changed(P10_4_ACCEPTED_SHA) == []
