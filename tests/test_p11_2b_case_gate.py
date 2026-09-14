@@ -63,7 +63,7 @@ def test_current_source_ledger_stays_formally_blocked() -> None:
     assert "no candidate_formal_cases declared" in result["blockers"]
 
 
-def test_complete_same-condition_candidate_passes_gate() -> None:
+def test_complete_same_condition_candidate_passes_gate() -> None:
     result = GATE.assess_formal_case_candidate(complete_candidate())
     assert result["formal_case_ready"] is True
     assert result["blockers"] == []
