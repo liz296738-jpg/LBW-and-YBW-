@@ -90,7 +90,23 @@ The input must be finite, nonnegative, and broadcast-compatible with the cell sh
 
 Tests require the direct path to be exactly equivalent to the legacy burned-fuel/LHV path when both represent the same line heat release. This verifies that the interface does not introduce a new energy equation.
 
-The first closure-infrastructure regression checkpoint at commit `e36cfb124f9bd0a8ddb3be6d548f79a751fdf471` passed GitHub Actions run `34882069673` with `828 passed in 60.67 s`. The subsequent Eq. 8 and evidence-ledger additions remain subject to the same full-suite gate before their final acceptance record is frozen.
+The first closure-infrastructure regression checkpoint at commit `e36cfb124f9bd0a8ddb3be6d548f79a751fdf471` passed GitHub Actions run `34882069673` with `828 passed in 60.67 s`. Later Eq. 8, evidence-ledger, and formal-case-gate additions are held to the same full-suite regression requirement before final acceptance is frozen.
+
+## Formal-case promotion gate
+
+The repository now enforces a separate scientific promotion gate in `cases/studies/p11_2b_case_gate.py`. Solver readiness and case readiness are deliberately not treated as the same thing.
+
+A formal P11.2B candidate must provide, from one internally consistent source/operating-condition chain:
+
+- source identity, operating-condition ID, and locators;
+- an explicit source-to-solver axial coordinate mapping in metres;
+- either traceable Eq. 8 shape parameters or a tabulated `x [m]` / `Qdot'(x) [W/m]` distribution;
+- exactly one absolute energy scale: total heat-release power, or stagnation-enthalpy increment plus mass flow;
+- matching source and operating-condition IDs for both the shape and absolute energy evidence.
+
+Cross-source and cross-condition mixing is rejected by tests. The current source ledger intentionally declares no formal candidate because SRC07-SRC09 do not yet provide the complete same-condition shape-plus-energy bundle in the accessible records.
+
+`cases/studies/p11_2b_readiness.py` writes an auditable JSON record to `artifacts/p11_2b/p11_2b_readiness.json`. In ordinary mode it records a scientifically correct blocked state without failing; `--require-ready` converts that state into a hard execution gate. See `docs/p11_2b_formal_case_gate.md` for the complete policy.
 
 ## What is still blocked
 
