@@ -23,7 +23,7 @@ def test_source_ledger_loads_and_remains_parameter_gated() -> None:
     assert {source["source_id"] for source in data["sources"]} == {"SRC07", "SRC08", "SRC09"}
     assert (
         data["project_decision"]["formal_case_status"]
-        == "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_POWER_AND_SHAPE_PARAMETERS"
+        == "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY"
     )
     assert data["project_decision"]["mass_added"] is False
     assert data["project_decision"]["momentum_added"] is False
