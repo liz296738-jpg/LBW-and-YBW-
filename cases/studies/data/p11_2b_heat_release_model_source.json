@@ -61,7 +61,7 @@
         "The paper explicitly states that Q_m, x_m, x_c, x_i and k depend on operating conditions and require prediction/estimation.",
         "Figure-derived Q_m, x_m and x_i values are not digitized or guessed in this repository.",
         "Case-10 x_c=98 and k=5.6 remain raw text records until their coordinate/unit convention is frozen together with x_m and x_i.",
-        "A formal solver case still requires an absolute thermal power or an independently measured stagnation-enthalpy rise."
+        "A formal solver case using the normalized model still requires an absolute thermal power or an independently measured stagnation-enthalpy rise."
       ]
     },
     {
@@ -104,12 +104,13 @@
       "source identity and operating-condition ID",
       "source locators for every promoted parameter",
       "explicit source-to-solver axial coordinate mapping in metres",
-      "solver-ready axial shape: traceable Eq. 8 parameters or tabulated line heat",
-      "absolute heat addition: positive total heat-release power or measured stagnation-enthalpy increment with mass flow",
-      "shape and absolute-energy evidence tied to the same declared operating condition"
+      "one complete heat-release evidence path: either normalized Eq. 8 shape parameters plus a separate absolute energy scale, or an absolute tabulated x/Qdot-prime profile in W/m",
+      "for the normalized Eq. 8 path, absolute heat addition must be a positive total heat-release power or a measured stagnation-enthalpy increment with mass flow",
+      "all shape and energy evidence must belong to the same declared operating condition"
     ],
     "explicitly_forbidden_shortcuts": [
       "mixing shape parameters and absolute power from unrelated operating conditions",
+      "supplying a second independent absolute-energy scale for an already absolute tabulated Qdot-prime profile",
       "assuming 100 percent combustion efficiency without source evidence",
       "converting equivalence ratio to power when fuel identity/LHV or oxidizer convention is unresolved",
       "digitizing figures without a retained extraction record and coordinate convention",
@@ -123,7 +124,7 @@
     "momentum_added": false,
     "chemistry_implied": false,
     "mutual_exclusion": "Direct heat_release_rate_per_length and burned-fuel/LHV energy paths may not both be active, preventing double counting.",
-    "formal_case_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_POWER_AND_SHAPE_PARAMETERS",
-    "next_evidence_priority": "Recover a complete absolute heat-addition level and matching axial shape parameters from one internally consistent published case; do not mix geometry/shape/power from unrelated experiments and label the result as a reproduction."
+    "formal_case_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY",
+    "next_evidence_priority": "Recover one internally consistent published case with either an absolute tabulated Qdot-prime profile, or a normalized axial shape plus matching absolute heat-addition level; do not mix geometry/shape/power from unrelated experiments and label the result as a reproduction."
   }
 }
