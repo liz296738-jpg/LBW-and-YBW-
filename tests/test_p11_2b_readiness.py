@@ -22,7 +22,10 @@ def test_current_readiness_record_is_explicitly_blocked() -> None:
     assert record["formal_case_ready"] is False
     assert record["candidate_count"] == 0
     assert record["ready_candidate_count"] == 0
-    assert record["declared_project_status"] == "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_POWER_AND_SHAPE_PARAMETERS"
+    assert (
+        record["declared_project_status"]
+        == "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY"
+    )
     assert record["blockers"] == ["no candidate_formal_cases declared"]
 
 
