@@ -4,14 +4,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from pathlib import Path
 from typing import Sequence
+
+
+ROOT = Path(__file__).resolve().parents[2]
+STUDY_DIR = ROOT / "cases" / "studies"
+if str(STUDY_DIR) not in sys.path:
+    sys.path.insert(0, str(STUDY_DIR))
 
 from p11_2b_case_gate import assess_ledger_formal_case_readiness
 
 
-ROOT = Path(__file__).resolve().parents[2]
-SOURCE_LEDGER = ROOT / "cases" / "studies" / "data" / "p11_2b_heat_release_model_source.json"
+SOURCE_LEDGER = STUDY_DIR / "data" / "p11_2b_heat_release_model_source.json"
 DEFAULT_OUTPUT = ROOT / "artifacts" / "p11_2b" / "p11_2b_readiness.json"
 
 
