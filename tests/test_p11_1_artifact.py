@@ -114,3 +114,20 @@ def test_runner_is_offline_and_runtime_artifacts_are_ignored() -> None:
     source = SCRIPT.read_text(encoding="utf-8").lower()
     assert all(token not in source for token in ("import requests", "import urllib", "gh api", "curl ", "wget "))
     assert "artifacts/p11_1/" in (ROOT / ".gitignore").read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("metric,field,value", [
+    ("x_min_Mach", "units", "1"),
+    ("minimum_sonic_margin", "units", "SI"),
+    ("sonic_crossing_count", "hard_gate", "false"),
+])
+def test_metric_metadata_integrity_rejects_semantic_mutations(metric: str, field: str, value: object) -> None:
+    definitions = copy.deepcopy(MODULE.metric_definitions())
+    next(row for row in definitions if row["metric_name"] == metric)[field] = value
+    integrity = MODULE.validate_metric_definitions(definitions)
+    assert integrity["passed"] is False
+    assert metric in integrity["invalid_metrics"]
+    artifact = MODULE.assemble_artifact(**valid_inputs(), metric_definition_rows=definitions)
+    assert artifact["gates"]["metric_schema_complete"] is False
+    assert artifact["gates"]["artifact_structural_integrity"] is False
+    assert artifact["all_passed"] is False

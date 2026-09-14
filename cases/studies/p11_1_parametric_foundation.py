@@ -63,6 +63,52 @@ REQUIRED_METRIC_NAMES = (
     "mass_flow_relative_span", "T0_in", "T0_out", "T0_min", "T0_max",
     "p0_in", "p0_out", "p0_min", "p0_max", "total_pressure_recovery",
 )
+METRIC_DEFINITION_REGISTRY = {
+    "rho_min": {"symbol": "rho_min", "units": "kg/m^3", "definition": "min_i rho_i", "interpretation": "minimum cell-centered density", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "rho_max": {"symbol": "rho_max", "units": "kg/m^3", "definition": "max_i rho_i", "interpretation": "maximum cell-centered density", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "u_min": {"symbol": "u_min", "units": "m/s", "definition": "min_i u_i", "interpretation": "minimum cell-centered velocity", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "u_max": {"symbol": "u_max", "units": "m/s", "definition": "max_i u_i", "interpretation": "maximum cell-centered velocity", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p_in": {"symbol": "p_in", "units": "Pa", "definition": "p at first cell center", "interpretation": "inlet-side first-cell-center static pressure diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p_out": {"symbol": "p_out", "units": "Pa", "definition": "p at last cell center", "interpretation": "outlet-side last-cell-center static pressure diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p_min": {"symbol": "p_min", "units": "Pa", "definition": "min_i p_i", "interpretation": "minimum cell-centered static pressure", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p_max": {"symbol": "p_max", "units": "Pa", "definition": "max_i p_i", "interpretation": "maximum cell-centered static pressure", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "exit_to_inlet_pressure_ratio": {"symbol": "p_out/p_in", "units": "1", "definition": "p_last_cell / p_first_cell", "interpretation": "outlet-to-inlet static-pressure ratio", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "max_to_inlet_pressure_ratio": {"symbol": "p_max/p_in", "units": "1", "definition": "max_i(p_i) / p_first_cell", "interpretation": "maximum-to-inlet static-pressure ratio", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "x_max_pressure": {"symbol": "x_p_max", "units": "m", "definition": "x[argmax_i(p_i)] (first occurrence)", "interpretation": "position of first maximum cell-centered static pressure", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T_in": {"symbol": "T_in", "units": "K", "definition": "T at first cell center", "interpretation": "inlet-side first-cell-center static temperature diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T_out": {"symbol": "T_out", "units": "K", "definition": "T at last cell center", "interpretation": "outlet-side last-cell-center static temperature diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T_min": {"symbol": "T_min", "units": "K", "definition": "min_i T_i", "interpretation": "minimum cell-centered static temperature", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T_max": {"symbol": "T_max", "units": "K", "definition": "max_i T_i", "interpretation": "maximum cell-centered static temperature", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "max_to_inlet_temperature_ratio": {"symbol": "T_max/T_in", "units": "1", "definition": "max_i(T_i) / T_first_cell", "interpretation": "maximum-to-inlet static-temperature ratio", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "x_max_temperature": {"symbol": "x_T_max", "units": "m", "definition": "x[argmax_i(T_i)] (first occurrence)", "interpretation": "position of first maximum cell-centered static temperature", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "Mach_in": {"symbol": "Mach_in", "units": "1", "definition": "Mach at first cell center", "interpretation": "inlet-side first-cell-center Mach diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "Mach_out": {"symbol": "Mach_out", "units": "1", "definition": "Mach at last cell center", "interpretation": "outlet-side last-cell-center Mach diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "Mach_min": {"symbol": "Mach_min", "units": "1", "definition": "min_i Mach_i", "interpretation": "minimum cell-centered Mach number", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "Mach_max": {"symbol": "Mach_max", "units": "1", "definition": "max_i Mach_i", "interpretation": "maximum cell-centered Mach number", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "Mach_mean": {"symbol": "Mach_mean", "units": "1", "definition": "(1/N) sum_i Mach_i", "interpretation": "mean cell-centered Mach number", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "subsonic_fraction": {"symbol": "f_sub", "units": "1", "definition": "count_i(Mach_i < 1) / N", "interpretation": "diagnostic fraction of subsonic cell centers; not a criterion", "hard_gate": False, "scope": "controlled P11.1 framework case; diagnostic only; not an LBW/YBW classifier"},
+    "supersonic_fraction": {"symbol": "f_sup", "units": "1", "definition": "count_i(Mach_i > 1) / N", "interpretation": "diagnostic fraction of supersonic cell centers; not a criterion", "hard_gate": False, "scope": "controlled P11.1 framework case; diagnostic only; not an LBW/YBW classifier"},
+    "sonic_fraction": {"symbol": "f_sonic", "units": "1", "definition": "count_i(Mach_i = 1) / N", "interpretation": "diagnostic fraction of sonic cell centers; not a criterion", "hard_gate": False, "scope": "controlled P11.1 framework case; diagnostic only; not an LBW/YBW classifier"},
+    "minimum_sonic_margin": {"symbol": "delta_M_sonic_min", "units": "1", "definition": "min_i abs(Mach_i - 1)", "interpretation": "diagnostic only: closest cell-centered Mach distance from sonic; not a criterion", "hard_gate": False, "scope": "controlled P11.1 framework case; diagnostic only; not an LBW/YBW classifier"},
+    "sonic_crossing_count": {"symbol": "N_cross", "units": "count", "definition": "count adjacent pairs satisfying (Mach_i - 1)(Mach_{i+1} - 1) < 0", "interpretation": "diagnostic only: adjacent-cell sonic crossing count; not a criterion", "hard_gate": False, "scope": "controlled P11.1 framework case; diagnostic only; not an LBW/YBW classifier"},
+    "x_min_Mach": {"symbol": "x_Mach_min", "units": "m", "definition": "x[argmin_i(Mach_i)] (first occurrence)", "interpretation": "diagnostic-only position of first minimum cell-centered Mach", "hard_gate": False, "scope": "controlled P11.1 framework case; diagnostic only; not an LBW/YBW classifier"},
+    "x_max_Mach": {"symbol": "x_Mach_max", "units": "m", "definition": "x[argmax_i(Mach_i)] (first occurrence)", "interpretation": "diagnostic-only position of first maximum cell-centered Mach", "hard_gate": False, "scope": "controlled P11.1 framework case; diagnostic only; not an LBW/YBW classifier"},
+    "mass_flow_in": {"symbol": "mdot_in", "units": "kg/s", "definition": "mass_flow at first cell center", "interpretation": "inlet-side first-cell-center mass-flow diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "mass_flow_out": {"symbol": "mdot_out", "units": "kg/s", "definition": "mass_flow at last cell center", "interpretation": "outlet-side last-cell-center mass-flow diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "mass_flow_mean": {"symbol": "mdot_mean", "units": "kg/s", "definition": "(1/N) sum_i mass_flow_i", "interpretation": "mean cell-centered mass flow", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "mass_flow_min": {"symbol": "mdot_min", "units": "kg/s", "definition": "min_i mass_flow_i", "interpretation": "minimum cell-centered mass flow", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "mass_flow_max": {"symbol": "mdot_max", "units": "kg/s", "definition": "max_i mass_flow_i", "interpretation": "maximum cell-centered mass flow", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "mass_flow_relative_span": {"symbol": "delta_mdot_rel", "units": "1", "definition": "(max_i mass_flow_i - min_i mass_flow_i) / mass_flow_mean", "interpretation": "relative span of cell-centered mass flow", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T0_in": {"symbol": "T0_in", "units": "K", "definition": "local total temperature at first cell center", "interpretation": "inlet-side first-cell-center local total-temperature diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T0_out": {"symbol": "T0_out", "units": "K", "definition": "local total temperature at last cell center", "interpretation": "outlet-side last-cell-center local total-temperature diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T0_min": {"symbol": "T0_min", "units": "K", "definition": "min_i T0_i", "interpretation": "minimum cell-centered local total temperature", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "T0_max": {"symbol": "T0_max", "units": "K", "definition": "max_i T0_i", "interpretation": "maximum cell-centered local total temperature", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p0_in": {"symbol": "p0_in", "units": "Pa", "definition": "local total pressure at first cell center", "interpretation": "inlet-side first-cell-center reconstructed local total-pressure diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p0_out": {"symbol": "p0_out", "units": "Pa", "definition": "local total pressure at last cell center", "interpretation": "outlet-side last-cell-center reconstructed local total-pressure diagnostic", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p0_min": {"symbol": "p0_min", "units": "Pa", "definition": "min_i p0_i", "interpretation": "minimum cell-centered reconstructed local total pressure", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "p0_max": {"symbol": "p0_max", "units": "Pa", "definition": "max_i p0_i", "interpretation": "maximum cell-centered reconstructed local total pressure", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+    "total_pressure_recovery": {"symbol": "p0_out/p0_in", "units": "1", "definition": "p0_last_cell / p0_first_cell", "interpretation": "outlet-to-inlet reconstructed local total-pressure ratio", "hard_gate": False, "scope": "controlled P11.1 framework case"},
+}
 CASE_RESULT_FIELDS = (
     "case_id", "branch", "pressure_scale", "P0", "T0", "scheme", "N", "CFL", "tolerance",
     "success", "converged", "termination_reason", "steps", "pseudo_time", "final_residual",
@@ -432,11 +478,35 @@ def assess_reproducibility(original, repeat):
 
 
 def metric_definitions():
-    definitions = []
-    for name in REQUIRED_METRIC_NAMES:
-        scope = "diagnostic only; not an LBW/YBW classifier" if name in ("subsonic_fraction", "supersonic_fraction", "sonic_fraction", "minimum_sonic_margin", "sonic_crossing_count") else "controlled P11.1 framework case"
-        definitions.append({"metric_name": name, "symbol": name, "units": "1" if "ratio" in name or "fraction" in name or "Mach" in name or "recovery" in name or "span" in name else "SI", "definition": name.replace("_", " "), "interpretation": "recorded study diagnostic", "hard_gate": "false", "scope": scope})
-    return definitions
+    return [{"metric_name": name, **dict(METRIC_DEFINITION_REGISTRY[name])} for name in REQUIRED_METRIC_NAMES]
+
+
+def validate_metric_definitions(definitions):
+    """Validate the fixed P11.1 metric metadata contract without side effects."""
+    expected_names = list(REQUIRED_METRIC_NAMES)
+    rows = definitions if isinstance(definitions, list) else []
+    names = [row.get("metric_name") if isinstance(row, dict) else None for row in rows]
+    missing = [name for name in expected_names if name not in names]
+    unexpected = [name for name in names if name not in REQUIRED_METRIC_NAMES]
+    invalid = []
+    for index, name in enumerate(expected_names):
+        if index >= len(rows) or not isinstance(rows[index], dict):
+            continue
+        row = rows[index]
+        expected = {"metric_name": name, **METRIC_DEFINITION_REGISTRY[name]}
+        fields_complete = set(row) == set(METRIC_DEFINITION_FIELDS)
+        fields_nonempty = all(isinstance(row.get(field), str) and row[field].strip() for field in METRIC_DEFINITION_FIELDS if field != "hard_gate")
+        metadata_matches = all(row.get(field) == value for field, value in expected.items())
+        if not fields_complete or not fields_nonempty or type(row.get("hard_gate")) is not bool or row.get("hard_gate") is not False or row.get("units") == "SI" or not metadata_matches:
+            invalid.append(name)
+    order_matches = names == expected_names
+    return {
+        "passed": not missing and not unexpected and not invalid and order_matches,
+        "missing_metrics": missing,
+        "unexpected_metrics": unexpected,
+        "invalid_metrics": invalid,
+        "order_matches": order_matches,
+    }
 
 
 def parse_pytest_xml(path):
@@ -448,7 +518,7 @@ def parse_pytest_xml(path):
     return {"pytest_tests": counts["tests"], "pytest_failures": counts["failures"], "pytest_errors": counts["errors"], "pytest_skipped": counts["skipped"], "pytest_passed": counts["tests"] - counts["failures"] - counts["errors"] - counts["skipped"]}
 
 
-def assemble_artifact(head_sha, case_results, similarity_results, reproducibility_results, regression_summary, p10_ancestor, production_files_changed, artifact_kind="exact-sha-p11-parametric-foundation", baseline_sha=BASELINE_SHA):
+def assemble_artifact(head_sha, case_results, similarity_results, reproducibility_results, regression_summary, p10_ancestor, production_files_changed, artifact_kind="exact-sha-p11-parametric-foundation", baseline_sha=BASELINE_SHA, metric_definition_rows=None):
     head = resolve_head_sha(head_sha)
     ids = [row.get("case_id") for row in case_results]
     by_id = {row.get("case_id"): row for row in case_results}
@@ -458,6 +528,8 @@ def assemble_artifact(head_sha, case_results, similarity_results, reproducibilit
     branches = case_set and all(row.get("framework_branch_preserved") is True for row in case_results)
     sources_zero = case_set and all(set(row.get("source_totals", {})) == set(SOURCE_TOTAL_NAMES) and all(value == 0.0 for value in row["source_totals"].values()) for row in case_results)
     metrics_complete = case_set and all(set(row.get("metrics", {})) == set(REQUIRED_METRIC_NAMES) for row in case_results)
+    definitions = metric_definitions() if metric_definition_rows is None else metric_definition_rows
+    metric_integrity = validate_metric_definitions(definitions)
     modes_undefined = case_set and all(row.get("mode_classification_status") == "not-defined" and row.get("mode_label") is None and row.get("mode_criterion_id") is None for row in case_results)
     claim_level = case_set and all(row.get("scientific_claim_level") == "framework-only" for row in case_results)
     hashes_valid = case_set and all(re.fullmatch(r"[0-9a-f]{64}", str(row.get(name, ""))) for row in case_results for name in ("physics_input_hash", "run_configuration_hash"))
@@ -484,9 +556,9 @@ def assemble_artifact(head_sha, case_results, similarity_results, reproducibilit
         "similarity_passed": similarity_passed,
         "reproducibility_passed": reproducibility_results.get("reproducibility_passed") is True,
         "input_hashes_valid": bool(hashes_valid), "repeat_hashes_identical": bool(repeat_hashes),
-        "unique_scale_hashes_distinct": bool(unique_scales), "metric_schema_complete": bool(metrics_complete),
+        "unique_scale_hashes_distinct": bool(unique_scales), "metric_schema_complete": bool(metrics_complete and metric_integrity["passed"]),
         "mode_classification_undefined": bool(modes_undefined), "scientific_claim_level_framework_only": bool(claim_level),
-        "artifact_structural_integrity": len(metric_definitions()) == len(REQUIRED_METRIC_NAMES),
+        "artifact_structural_integrity": bool(metric_integrity["passed"]),
     }
     return {
         "schema_version": 1, "stage": "P11.1", "artifact_kind": artifact_kind,
@@ -495,7 +567,7 @@ def assemble_artifact(head_sha, case_results, similarity_results, reproducibilit
         "production_freeze": {"baseline_sha": BASELINE_SHA, "production_files_changed": list(production_files_changed), "production_freeze_passed": not production_files_changed},
         "regression_summary": dict(regression_summary), "formal_case_ids": ids,
         "case_results": list(case_results), "similarity_results": list(similarity_results),
-        "reproducibility_results": dict(reproducibility_results), "metric_definitions": metric_definitions(),
+        "reproducibility_results": dict(reproducibility_results), "metric_definitions": definitions,
         "mode_policy": {"lbw_ybw_classification_defined": False, "mode_criterion_id": None, "mode_label": None},
         "scientific_claim_level": "framework-only", "scientific_limitations": list(SCIENTIFIC_LIMITATIONS),
         "gates": gates, "all_passed": all(gates.values()),

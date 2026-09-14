@@ -56,6 +56,12 @@ With geometry, total temperature, reference Mach, and gas fixed, the controlled 
 
 Candidate future physical factors include inlet total pressure, inlet total temperature, outlet static pressure, injection strength, prescribed burn/heat-release strength, wall friction, wall heat transfer, and geometry. Every range remains `NOT FROZEN`; P11.1 does not select one.
 
+## Metric Metadata Contract
+
+P11.1 writes an explicit, fixed metadata record for every reported metric: its symbol, units, definition, interpretation, hard-gate status, and scope. Units are dimensional where applicable (`m`, `Pa`, `K`, `kg/m^3`, `m/s`, and `kg/s`), `count` for sonic-crossing count, and `1` only for dimensionless metrics. Inlet and outlet values for static pressure, static temperature, Mach, mass flow, local total temperature, and reconstructed local total pressure refer to the first and last cell centers, respectively.
+
+Sonic fractions, minimum sonic margin, sonic-crossing count, and Mach-extremum positions are diagnostic only. They do not define a hard scientific gate and are not an LBW/YBW classifier.
+
 ## Limitations
 
 - Framework pilot only; not a calibrated engine case.

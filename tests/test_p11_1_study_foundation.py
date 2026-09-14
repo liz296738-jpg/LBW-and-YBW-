@@ -144,3 +144,39 @@ def test_reduced_real_solver_case_exercises_plumbing_without_convergence_require
     assert result["mode_label"] is None
     assert result["mode_classification_status"] == "not-defined"
     assert set(result["metrics"]) == set(MODULE.REQUIRED_METRIC_NAMES)
+
+
+def test_metric_registry_has_exact_required_order_and_no_generic_units() -> None:
+    definitions = MODULE.metric_definitions()
+    assert [row["metric_name"] for row in definitions] == list(MODULE.REQUIRED_METRIC_NAMES)
+    assert set(MODULE.METRIC_DEFINITION_REGISTRY) == set(MODULE.REQUIRED_METRIC_NAMES)
+    assert all(row["units"] != "SI" for row in definitions)
+    assert all(isinstance(row["hard_gate"], bool) and row["hard_gate"] is False for row in definitions)
+    assert MODULE.validate_metric_definitions(definitions)["passed"] is True
+
+
+def test_metric_registry_uses_canonical_dimensions_and_cell_center_semantics() -> None:
+    definitions = {row["metric_name"]: row for row in MODULE.metric_definitions()}
+    for name in ("x_max_pressure", "x_max_temperature", "x_min_Mach", "x_max_Mach"):
+        assert definitions[name]["units"] == "m"
+    for name in ("Mach_in", "Mach_out", "Mach_min", "Mach_max", "Mach_mean", "subsonic_fraction", "supersonic_fraction", "sonic_fraction", "minimum_sonic_margin", "mass_flow_relative_span", "exit_to_inlet_pressure_ratio", "max_to_inlet_pressure_ratio", "max_to_inlet_temperature_ratio", "total_pressure_recovery"):
+        assert definitions[name]["units"] == "1"
+    assert definitions["sonic_crossing_count"]["units"] == "count"
+    for name in ("mass_flow_in", "mass_flow_out", "mass_flow_mean", "mass_flow_min", "mass_flow_max"):
+        assert definitions[name]["units"] == "kg/s"
+    for name in ("p_in", "p_out", "p_min", "p_max", "p0_in", "p0_out", "p0_min", "p0_max"):
+        assert definitions[name]["units"] == "Pa"
+    for name in ("T_in", "T_out", "T_min", "T_max", "T0_in", "T0_out", "T0_min", "T0_max"):
+        assert definitions[name]["units"] == "K"
+    assert definitions["rho_min"]["units"] == definitions["rho_max"]["units"] == "kg/m^3"
+    assert definitions["u_min"]["units"] == definitions["u_max"]["units"] == "m/s"
+    for name in ("p_in", "p_out", "T_in", "T_out", "Mach_in", "Mach_out", "mass_flow_in", "mass_flow_out", "T0_in", "T0_out", "p0_in", "p0_out"):
+        assert "cell center" in (definitions[name]["definition"] + definitions[name]["interpretation"]).lower()
+    for name in ("subsonic_fraction", "supersonic_fraction", "sonic_fraction", "minimum_sonic_margin", "sonic_crossing_count", "x_min_Mach", "x_max_Mach"):
+        assert "not an lbw/ybw classifier" in (definitions[name]["scope"] + definitions[name]["interpretation"]).lower()
+
+
+def test_metric_registry_freezes_sonic_formula_semantics() -> None:
+    definitions = {row["metric_name"]: row for row in MODULE.metric_definitions()}
+    assert definitions["minimum_sonic_margin"]["definition"] == "min_i abs(Mach_i - 1)"
+    assert definitions["sonic_crossing_count"]["definition"] == "count adjacent pairs satisfying (Mach_i - 1)(Mach_{i+1} - 1) < 0"
