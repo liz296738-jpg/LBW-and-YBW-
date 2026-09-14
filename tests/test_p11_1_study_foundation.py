@@ -180,3 +180,9 @@ def test_metric_registry_freezes_sonic_formula_semantics() -> None:
     definitions = {row["metric_name"]: row for row in MODULE.metric_definitions()}
     assert definitions["minimum_sonic_margin"]["definition"] == "min_i abs(Mach_i - 1)"
     assert definitions["sonic_crossing_count"]["definition"] == "count adjacent pairs satisfying (Mach_i - 1)(Mach_{i+1} - 1) < 0"
+
+
+def test_metric_registry_freezes_mass_flow_relative_span_formula() -> None:
+    definitions = {row["metric_name"]: row for row in MODULE.metric_definitions()}
+    assert definitions["mass_flow_relative_span"]["units"] == "1"
+    assert definitions["mass_flow_relative_span"]["definition"] == "(max_i mass_flow_i - min_i mass_flow_i) / abs(mean_i mass_flow_i)"
