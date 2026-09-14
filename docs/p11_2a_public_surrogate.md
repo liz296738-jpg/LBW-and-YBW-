@@ -2,53 +2,51 @@
 
 ## Status
 
-`IMPLEMENTED — FORMAL RUN / CI VERIFICATION PENDING`
+`IMPLEMENTED AND FORMALLY VERIFIED`
 
 P11.2A is the first project study that combines literature-backed physical scale and inflow conditions with the accepted quasi-one-dimensional solver. It is deliberately **non-reactive**. It is not a Cao Ruifeng thesis reproduction, an experimental validation, or an LBW/YBW classifier.
 
-## Purpose
+Formal evidence is frozen at:
 
-The purpose of this stage is to move from P11.1's framework-only similarity experiment to a traceable physical-scale surrogate while preserving strict evidence boundaries. The case uses dimensions and inflow conditions reported by Li et al. (2025), together with the project's reduced quasi-1D calorically-perfect-gas model.
+- code SHA: `9032d5e8304ac6022ba7c4f185b170c6ba9cddd2`
+- standard Test workflow: run `34880624298`, `801 passed in 47.01 s`
+- dedicated P11.2A workflow: run `34880624357`, success
+- runtime artifact: `10362683519`
+- artifact SHA-256: `364ea31e3395e0080ad7a426f20e4fc53dc438efb4b53147ed3dcc3fcb759789`
+- tracked evidence record: `artifacts/p11_2a/p11_2a_formal_evidence.json`
+
+## Source and evidence boundary
 
 Primary reference:
 
 > Fan Li, Mingjiang Liu, Mingbo Sun, Guoyan Zhao, Guangwei Ma, Chenxiang Zhao. *Sensitive factors of ethylene combustion heat release under different combustion modes in scramjet engine*. Acta Aeronautica et Astronautica Sinica, 2025, 46(4):130944. DOI: 10.7527/S1000-6893.2024.30944.
 
-Tracked machine-readable source ledger:
+Tracked source ledger:
 
 `cases/studies/data/p11_2_public_surrogate_source.json`
 
-## Evidence ledger
+The paper provides the inlet total state and Mach number, vitiated-air composition, dimensioned geometry, total ethylene operating points, and published geometry/injection changes. P11.2A uses only the parts that can be mapped without inventing reactive closure data.
 
-| Quantity | Value | Units | Status | Source / locator | Transformation / solver use |
-| --- | ---: | --- | --- | --- | --- |
-| Inflow Mach | 2.52 | 1 | SOURCE | Li et al., Table 1 | Converted with total conditions to primitive inlet |
-| Inflow total temperature | 1650 | K | SOURCE | Li et al., Table 1 | Perfect-gas total-to-static relation |
-| Inflow total pressure | 1.34e6 | Pa | SOURCE | Li et al., Table 1 | Perfect-gas total-to-static relation |
-| Inflow composition | O2 0.2338, H2O 0.0622, CO2 0.1016, N2 0.6024 | mass fraction | SOURCE | Li et al., Table 1 | Retained as metadata; current single-gas solver does not transport species |
-| Baseline isolator length L1 | 0.560 | m | SOURCE | Li et al., Table 2 | Axial domain |
-| Pre-cavity length L2 | 0.140 | m | SOURCE | Li et al., Table 2 | Axial domain |
-| Combustor length L3 | 0.490 | m | SOURCE | Li et al., Table 2 | Axial domain |
-| Width W | 0.050 | m | SOURCE | Li et al., Table 2 | `A = W H` |
-| H1 | 0.035 | m | SOURCE | Li et al., Table 2 | Core-flow height endpoint |
-| H2 | 0.042 | m | SOURCE | Li et al., Table 2 | Core-flow height endpoint |
-| Cavity dimensions | Lc=0.070, Dc=0.021, Hc=0.021 | m | SOURCE | Li et al., Table 2 | Metadata only in P11.2A |
-| Short-isolator level | 0.280 | m | SOURCE | Li et al., Table 4 | OFAT alternate level |
-| `gamma` | 1.4 | 1 | MODEL ASSUMPTION | existing project gas model | Perfect-gas conversion and CFD |
-| `R` | 287 | J/(kg K) | MODEL ASSUMPTION | existing project gas model | Perfect-gas conversion and CFD |
-| Static `T,p,rho,u` | computed | SI | DERIVED | Table 1 + project gas assumption | Supersonic primitive inlet |
-| Main-passage `A(x)` | computed | m2 | MODEL ASSUMPTION / DERIVED | Table 2 endpoints | See geometry mapping below |
-| Grid `N, dx` | computed | count, m | NUMERICAL CONTROL | study layer | Approximately constant target `dx` |
-| CFL | 0.2 | 1 | NUMERICAL CONTROL | accepted study policy | Explicit pseudo-time advancement |
-| Residual tolerance | 1e-8 | 1 | NUMERICAL CONTROL | accepted study policy | Steady convergence gate |
-| Fuel-source profile | unavailable | — | DEFERRED | not provided | P7 disabled |
-| Fuel axial velocity | unavailable | — | DEFERRED | not provided | P7 disabled |
-| Fuel total enthalpy | unavailable | — | DEFERRED | not provided | P7 disabled |
-| Burn / heat-release profile | unavailable | — | DEFERRED | not provided | P8 disabled |
+| Quantity | Value | Units | Status | Locator / use |
+| --- | ---: | --- | --- | --- |
+| Inflow Mach | 2.52 | 1 | SOURCE | Table 1 |
+| Inflow total temperature | 1650 | K | SOURCE | Table 1 |
+| Inflow total pressure | 1.34e6 | Pa | SOURCE | Table 1 |
+| Baseline isolator length `L1` | 0.560 | m | SOURCE | Table 2 |
+| Pre-cavity length `L2` | 0.140 | m | SOURCE | Table 2 |
+| Combustor length `L3` | 0.490 | m | SOURCE | Table 2 |
+| Width `W` | 0.050 | m | SOURCE | Table 2 |
+| Heights `H1`, `H2` | 0.035, 0.042 | m | SOURCE | Table 2 |
+| Short-isolator level | 0.280 | m | SOURCE | Table 4 |
+| `gamma` | 1.4 | 1 | MODEL ASSUMPTION | existing gas model |
+| `R` | 287 | J/(kg K) | MODEL ASSUMPTION | existing gas model |
+| Static inlet `T,p,rho,u` | computed | SI | DERIVED | source total state + perfect-gas model |
+| Core-flow `A(x)` | computed | m2 | MODEL ASSUMPTION / DERIVED | mapping below |
+| Fuel/source profiles | unavailable | — | DEFERRED | P7/P8 reactive closure not activated |
 
-## Total-to-static inlet derivation
+## Inlet derivation
 
-The source reports total conditions and Mach number. The existing boundary implementation for `supersonic-inflow` requires a primitive state. P11.2A therefore computes, rather than hard-codes, the inlet using the project's calorically perfect gas:
+The source reports total conditions while the existing `supersonic-inflow` boundary requires a primitive state. The study therefore computes
 
 \[
 T = \frac{T_0}{1 + \frac{\gamma-1}{2}M^2},
@@ -60,98 +58,92 @@ p = \frac{P_0}{\left(1 + \frac{\gamma-1}{2}M^2\right)^{\gamma/(\gamma-1)}},
 
 \[
 \rho = \frac{p}{RT}, \qquad
-u = M\sqrt{\gamma RT}.
+u_{x} = M\sqrt{\gamma RT}.
 \]
 
-For `M=2.52`, `T0=1650 K`, `P0=1.34 MPa`, `gamma=1.4`, and `R=287 J/(kg K)`, the expected values are approximately `T=726.85 K`, `p=76.0 kPa`, `rho=0.364 kg/m3`, and `u=1362 m/s`. These are **model-derived inputs**, not measured static values from the paper.
+For the frozen inputs this gives approximately `T=726.85 K`, `p=76.03 kPa`, `rho=0.36445 kg/m3`, and `u=1361.84 m/s`. These are **model-derived**, not measured static quantities from the paper.
 
 ## Reduced-order geometry mapping
 
-The source directly provides `L1`, `L2`, `L3`, `W`, `H1`, `H2`, and cavity dimensions. It does not provide a solver-ready quasi-1D station table and it does not define how cavity recirculation volume should be mapped into a one-dimensional core-flow area.
+The source does not provide a solver-ready quasi-1D station table or a one-dimensional representation of cavity recirculation. The explicit P11.2A mapping is therefore:
 
-P11.2A therefore uses one explicit and reviewable reduced-order mapping:
+1. `H=H1` through the isolator and pre-cavity main-flow passage;
+2. `H` varies linearly from `H1` to `H2` over `L3`;
+3. width remains `W`;
+4. `A(x)=W H(x)`;
+5. cavity depth/volume is retained as source metadata and is **not** added to core-flow area.
 
-1. The isolator and pre-cavity main-flow passage use height `H1`.
-2. Across `L3`, the main-passage height varies linearly from `H1` to `H2`.
-3. The width is constant at `W`.
-4. `A(x) = W H(x)`.
-5. Cavity depth and cavity volume are **not added** to the quasi-1D core-flow area.
+This is a documented reduced-order assumption, not a digitization of Fig. 2.
 
-This mapping is a model assumption built from source-backed endpoints. It must not be cited as a direct digitization of Figure 2. If a future authoritative station table or dimensioned wall-line definition becomes available, this mapping should be replaced and the formal baseline rerun.
+## Physics and numerical controls
 
-## Boundary conditions
+The case uses `supersonic-inflow`, `supersonic-outflow`, Steger-Warming, CFL `0.2`, residual tolerance `1e-8`, `dx≈0.005 m`, and the existing steady SSP-RK3 path. Darcy friction, wall heat transfer, fuel injection, and prescribed combustion are all disabled. No clipping, smoothing, automatic boundary switching, or hidden source term is used.
 
-The source inflow Mach is supersonic, so the study uses:
+## Formal baseline result
 
-- inlet: `supersonic-inflow`, with primitive state derived from the total conditions;
-- outlet: `supersonic-outflow`, provided the formal solution remains rightward and supersonic at the outlet.
+Case `P11A-PUBLIC-COLD-BASE` (`L1=0.560 m`) formally converged:
 
-The study does not silently switch outlet boundary type. If the formal solution violates the applicability condition, the case is a boundary-applicability failure and must be reviewed.
+| Metric | Result |
+| --- | ---: |
+| cells | 238 |
+| steps | 1779 |
+| final pseudo-time | 9.28605e-4 s |
+| final residual | 9.83971e-9 |
+| Mach in / out | 2.5200 / 2.71312 |
+| pressure in / out | 76.026 / 56.388 kPa |
+| temperature in / out | 726.847 / 667.421 K |
+| mass flow in / out | 0.868562 / 0.867824 kg/s |
+| mass-flow relative span | 1.01872e-3 |
 
-## Disabled physical models
+The solution stays rightward and supersonic, so the selected outlet boundary remains applicable. Pressure and temperature decrease while Mach increases through the expanding core-flow mapping, which is qualitatively consistent with the declared inviscid supersonic-area model.
 
-P11.2A intentionally sets:
+The roughly `0.10%` cell-centred mass-flow span is recorded as a discretization diagnostic, not hidden behind a new acceptance threshold. P10 already establishes the solver's conservation and grid-convergence properties; P11.2A does not redefine those gates.
 
-- Darcy friction factor = 0;
-- wall heat flux = 0;
-- fuel mass-flow source = 0;
-- fuel axial velocity = 0;
-- fuel total enthalpy = 0;
-- burned-fuel source = 0;
-- fuel LHV = `None`.
+## Isolator-length OFAT result and model-scope finding
 
-The published total ethylene flow in Table 3 is not converted into an arbitrary uniform `d(mdot_f)/dx`, and the active injector-module labels are not converted into an unreported per-module split. Those operations require a separately approved reduced-order closure.
+Case `P11A-ISO-L280` (`L1=0.280 m`) also formally converged in 1772 steps with residual `9.65361e-9`. Its outlet state is effectively the same as the baseline.
 
-## Formal cases
+After shifting the baseline axial coordinate by `0.280 m` and comparing the overlapping fields, maximum relative differences are approximately:
 
-The study script defines:
+- density: `6.50e-11`
+- velocity: `2.96e-11`
+- pressure: `8.35e-11`
+- temperature: `2.94e-11`
+- Mach: `4.56e-11`
+- mass flow: `5.08e-11`
 
-- `P11A-PUBLIC-COLD-BASE`: `L1 = 0.560 m`;
-- `P11A-ISO-L280`: `L1 = 0.280 m`.
+This near-identity is **expected from the current model**, not a failed calculation. In an inviscid, source-free, constant-area isolator, changing only the length adds or removes uniform duct before the same downstream area variation. The present P11.2A equations therefore contain no mechanism by which isolator length alone can reproduce the experimental reactive sensitivity reported in Table 4.
 
-The second case is a source-backed one-factor-at-a-time isolator-length variation from Table 4. The grid policy targets approximately constant axial `dx`, so `N` changes when total length changes.
+This is an important negative result: the experiment's isolator-length sensitivity cannot be interpreted with the current cold-flow idealization. Friction, boundary-layer/shock-train interaction, combustion heat release, and other omitted mechanisms are precisely the physics that P11.2A does not claim to represent.
 
-Other Table 4 factors are deferred unless they have an unambiguous mapping into the current non-reactive quasi-1D equations:
+Accordingly, `L1=560 -> 280 mm` is retained as a **source-backed geometry OFAT and model-scope diagnostic**, not as a validated prediction of the paper's combustion trend.
 
-- injection distance: deferred because P7 injection is inactive;
-- cavity depth: deferred because a one-dimensional cavity-area closure is not defined;
-- throat size: source-backed values exist, but the exact reduced-order core-flow mapping must be reviewed before it is promoted to a formal second OFAT factor.
+## Deferred Table-4 factors
+
+- injection distance is not meaningful while P7 injection is disabled;
+- cavity depth has no approved one-dimensional cavity-area closure;
+- throat-size values are source-backed, but the exact local core-flow mapping must be frozen before a formal second geometry OFAT is allowed.
+
+The project deliberately does not manufacture a second sensitivity result merely to increase case count.
 
 ## Reproducibility
 
-The tracked entry point is:
+Run:
 
 ```bash
 python cases/studies/p11_2a_public_surrogate.py --formal
 ```
 
-Formal outputs are written below:
-
-`results/p11_2a_public_surrogate/`
-
-Each completed case writes:
-
-- `case_summary.json`;
-- `profile.csv`;
-- `residual.csv`;
-- pressure, temperature, Mach, and mass-flow PNG profiles.
-
-A non-converged formal case raises an error instead of being silently accepted.
+The dedicated workflow `.github/workflows/p11_2a_public_surrogate.yml` executes focused tests, both formal cases, and uploads runtime results. Per-case artifacts include `case_summary.json`, `profile.csv`, `residual.csv`, and pressure/temperature/Mach/mass-flow plots.
 
 ## Validity scope
 
-The highest permitted scientific claim for this stage is:
+The highest permitted claim is:
 
 > **Physical-scale public surrogate, non-reactive reduced-order quasi-one-dimensional calculation using source-backed dimensions and inflow total conditions.**
 
-It is not an experimental validation, a reactive-engine reproduction, a Cao-thesis reproduction, or an LBW/YBW mode prediction.
+It is not experimental validation, a reactive-engine reproduction, a Cao-thesis reproduction, or an LBW/YBW mode prediction.
 
 ## Remaining blockers for P11.2B
 
-The reactive baseline remains evidence-gated because the current solver interfaces require quantities not supplied by the public paper as solver-ready axial inputs:
-
-- axial fuel mass-source distribution;
-- fuel axial velocity;
-- fuel specific total enthalpy;
-- burned-fuel or heat-release axial distribution;
-- an approved closure connecting total injected fuel to reacted-fuel distribution.
+A stronger reactive baseline still requires an evidence-backed or explicitly approved closure for at least the axial heat-release / burned-fuel distribution. A full mass-addition treatment additionally requires axial fuel mass-source distribution, fuel axial velocity, and fuel specific total enthalpy. These quantities must not be invented merely to obtain a reactive curve.
