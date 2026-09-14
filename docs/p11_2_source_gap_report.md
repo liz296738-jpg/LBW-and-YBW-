@@ -2,173 +2,91 @@
 
 ## Status
 
-`P11.2A UNBLOCKED — SOURCE-BACKED PUBLIC SURROGATE AVAILABLE`
+`P11.2A FORMALLY VERIFIED — SOURCE-BACKED PUBLIC COLD-FLOW SURROGATE`
 
-`P11.2B REACTIVE CAO-THESIS REPRODUCTION STILL BLOCKED — AXIAL SOURCE PROFILE REQUIRED`
+`P11.2B REACTIVE / HEAT-RELEASE BASELINE STILL EVIDENCE-GATED`
 
-The earlier report concluded that the project-designated Cao Ruifeng material did
-not expose enough source-grounded geometry and axial source data to construct a
-complete reactive baseline without inventing inputs. A targeted web search has
-now identified a publicly accessible, dimensioned scramjet experiment that can
-serve as an explicitly labelled **surrogate physical baseline** for P11.2A.
+The original P11.2 blocker was an absence of enough source-grounded geometry and axial source data to construct a complete reactive baseline without inventing inputs. That all-or-nothing blocker has now been split into two tracks. P11.2A has been completed with a publicly accessible, dimensioned experiment; P11.2B remains gated by the reactive closure.
 
-This does **not** replace the teacher-designated Cao papers and must not be cited
-as a reproduction of their cases. It provides a defensible way to continue the
-physical-baseline and one-factor study infrastructure while keeping the missing
-reactive closure visible.
+The public surrogate does **not** replace the teacher-designated Cao Ruifeng material and must not be cited as a Cao-thesis reproduction.
 
-The machine-readable source ledger is:
+## Source inventory
+
+| ID | Source | Authority / role | Current use |
+| --- | --- | --- | --- |
+| SRC01 | teacher instruction screenshots | project instruction | establishes that the Cao Ruifeng material is the ultimate teacher-designated reference |
+| SRC02 | Cao Ruifeng doctoral thesis (2016) | project-designated thesis | candidate inlet records, kerosene LHV, combustion-mode research context |
+| SRC03 | Cao Ruifeng master's thesis (2011), *面向控制的超燃冲压发动机一维建模研究* | project-designated modelling reference | one-dimensional modelling context; no complete solver-ready case frozen yet |
+| SRC04 | *Theory and Application of Hypersonic Aerodynamic Layout*, Ch. 11 | project-provided technical reference | generalized one-dimensional source-term semantics |
+| SRC05 | repository solver / P3–P10 verification evidence | implementation authority | accepted numerical capability |
+| SRC06 | Li et al. (2025), DOI `10.7527/S1000-6893.2024.30944` | peer-reviewed public experiment | P11.2A geometry, inflow, operating points, and Table-4 factor levels |
+
+Machine-readable SRC06 ledger:
 
 `cases/studies/data/p11_2_public_surrogate_source.json`
 
-## Source Inventory
+## P11.2A closure
 
-| source_id | title | type | locator | project authority | usable now | notes |
-| --- | --- | --- | --- | --- | --- | --- |
-| SRC01 | Teacher instruction record | screenshot | local project screenshots | Teacher/project instruction | Yes, for source selection | Confirms modelling should ultimately be grounded in the group-provided Cao Ruifeng papers. No numerical physical input. |
-| SRC02 | *Research on Combustion Mode Transition and Its Control Method for Scramjet Engines* | doctoral thesis, Cao Ruifeng, 2016 | local PDF | Project-designated thesis | Partial | Table 2-1 supplies an idealized inlet; Table 3-2 supplies kerosene LHV; Table 5-1 supplies candidate ground-test inlet conditions. |
-| SRC03 | *Research on One-Dimensional Modeling of Scramjet Engine for Control* | master's thesis, Cao Ruifeng | local PDF | Project-designated thesis | Partial | Establishes one-dimensional modelling context but no complete solver-ready baseline was located. |
-| SRC04 | *Theory and Application of Hypersonic Aerodynamic Layout*, Chapter 11 | photographed textbook pages | local images | Project-provided reference | Partial | Supports generalized one-dimensional source-term semantics, not a complete numerical case. |
-| SRC05 | Project solver and verification records | code/docs | repository | Project implementation record | Yes | Provides accepted numerical capability, not external physical inputs. |
-| SRC06 | Li et al., *Sensitive factors of ethylene combustion heat release under different combustion modes in scramjet engine*, Acta Aeronautica et Astronautica Sinica 46(4), 2025, 130944, DOI 10.7527/S1000-6893.2024.30944 | peer-reviewed experimental paper | public article page, Tables 1–4 and Fig. 2 | External surrogate source | **Yes for P11.2A** | Supplies dimensioned geometry, inflow total conditions, fuel-flow operating points, injector-module selection, and four published one-factor geometry/injection changes. |
+SRC06 supplies:
 
-## Confirmed Cao-thesis numerical records
+- Table 1: `Ma=2.52`, `T0=1650 K`, `P0=1.34 MPa`, and vitiated-air composition;
+- Fig. 2 / Table 2: `L1=560 mm`, `L2=140 mm`, `L3=490 mm`, `W=50 mm`, `H1=35 mm`, `H2=42 mm`, cavity and injector dimensions;
+- Table 3: total ethylene flow, injector total pressure, equivalence ratio, and active injector-module sets;
+- Table 4: isolator-length, injection-distance, cavity-depth, and throat-size variations.
 
-The following values remain useful evidence records from `SRC02`:
+P11.2A freezes an explicit reduced-order core-flow mapping from the dimensioned main passage and keeps cavity recirculation outside `A(x)`. It converts the source total inlet state to a primitive supersonic inlet with the existing perfect-gas assumptions `gamma=1.4` and `R=287 J/(kg K)`. Fuel, burn, wall-friction, and wall-heat source terms remain disabled.
 
-- Chapter 2, Table 2-1: `Ma2 = 2`, `rho2 = 0.7736 kg/m^3`,
-  `p2 = 156.522 kPa`, `T2 = 705 K`, `u2 = 1038 m/s`, `k = 1.33`, and
-  `phi = 0.3` for an idealized case.
-- Chapter 3, Table 3-2: `gamma = 1.4` and kerosene `Hf = 42,000 kJ/kg`
-  for that cycle-analysis model.
-- Chapter 5, Table 5-1: isolator-entry Mach, pressure, total temperature,
-  and air mass flow for ground-test flight-Mach settings 4–7.
+Formal acceptance:
 
-These remain evidence records only. They are not permission to invent the
-missing geometry or axial fuel/burn distributions for a Cao-thesis reproduction.
+- source/code SHA: `9032d5e8304ac6022ba7c4f185b170c6ba9cddd2`
+- standard Test run `34880624298`: `801 passed in 47.01 s`
+- dedicated formal run `34880624357`: success
+- runtime artifact `10362683519`
+- artifact SHA-256 `364ea31e3395e0080ad7a426f20e4fc53dc438efb4b53147ed3dcc3fcb759789`
+- tracked evidence: `artifacts/p11_2a/p11_2a_formal_evidence.json`
 
-## Public surrogate baseline evidence (SRC06)
+Baseline `P11A-PUBLIC-COLD-BASE` converged to `9.83971e-9`; the short-isolator case `P11A-ISO-L280` converged to `9.65361e-9`. Both remain fully supersonic.
 
-The public experimental source provides the following directly locatable inputs.
-All dimensional values below are stored in SI units in the JSON source ledger.
+## Important P11.2A scientific finding
 
-### Inflow — Table 1
+The source-backed `L1=560 -> 280 mm` variation produces no material change in the overlapping cold-flow solution after the expected `0.280 m` coordinate shift: field differences are about `1e-10` relative.
 
-- Mach number: `2.52`
-- Total temperature: `1650 K`
-- Total pressure: `1.34 MPa`
-- Vitiated-air mass fractions: `O2=23.38%`, `H2O=6.22%`, `CO2=10.16%`,
-  `N2=60.24%`
+This is not experimental agreement. It shows that the current inviscid, source-free, constant-area isolator contains no mechanism for the experimentally observed reactive isolator-length sensitivity. The missing sensitivity can only emerge after relevant physics such as heat release, friction/boundary-layer/shock-train interaction, or another justified closure is represented.
 
-For the repository's current calorically-perfect single-gas model, composition
-is recorded as evidence but is not yet represented by species transport. If the
-existing model assumption `gamma=1.4`, `R=287 J/(kg K)` is retained, the
-isentropic conversion of the Table-1 total state at Mach 2.52 gives an initial
-single-gas approximation of approximately:
+Therefore P11.2A is complete as a physical-scale **cold-flow surrogate and model-scope diagnostic**, but it cannot answer the teacher's reactive LBW/YBW question by itself.
 
-- `T = 726.85 K`
-- `p = 76.03 kPa`
-- `rho = 0.36445 kg/m^3`
-- `u = 1361.84 m/s`
+## Confirmed Cao-thesis evidence retained
 
-These four values are **derived model inputs**, not measured Table-1 quantities,
-and must be tagged as such in any generated artifact.
+SRC02 still provides useful, locatable numerical records:
 
-### Geometry — Fig. 2 / Table 2
+- Chapter 2, Table 2-1: `Ma2=2`, `rho2=0.7736 kg/m^3`, `p2=156.522 kPa`, `T2=705 K`, `u2=1038 m/s`, `k=1.33`, `phi=0.3` for an idealized case;
+- Chapter 3, Table 3-2: `gamma=1.4` and kerosene `Hf=42,000 kJ/kg` for that cycle-analysis model;
+- Chapter 5, Table 5-1: isolator-entry Mach, pressure, total temperature, and air mass flow for ground-test flight-Mach settings 4–7.
 
-The source provides a dimensioned baseline configuration, including:
+They remain evidence records, not permission to invent missing axial geometry or source profiles.
 
-- `L1 = 560 mm`
-- `L2 = 140 mm`
-- `L3 = 490 mm`
-- width `W = 50 mm`
-- heights `H1 = 35 mm`, `H2 = 42 mm`
-- cavity length `Lc = 70 mm`
-- cavity depth `Dc = 21 mm`
-- cavity/ramp dimension `Hc = 21 mm`
-- injection distances `d1 = 42 mm`, `d2 = 21 mm`, `d3 = 14 mm`
-- cavity ramp angle `45 deg`
+## Primary remaining blocker for P11.2B
 
-The repository is quasi-one-dimensional and therefore cannot represent the
-cavity recirculation volume directly. A future P11.2A case may map the external
-core-flow channel to `A(x)=W*H(x)` only where Fig. 2 unambiguously defines the
-local channel height. Any cavity-volume treatment beyond that is a modelling
-choice and must be documented separately rather than presented as source data.
+The **minimum** missing element for a prescribed-energy reactive surrogate is a defensible axial heat-release / burned-fuel distribution or an explicit source-backed reduced-order law from which it can be derived.
 
-### Operating points — Table 3
+If P7 fuel mass addition is also activated, the model additionally requires:
 
-The experiment reports total ethylene mass flow and injector module selections
-for equivalence ratios `0`, `0.13`, `0.15`, `0.19`, `0.27`, `0.35`, and `0.41`.
-For example, the source gives `6.1 g/s` at `phi=0.13` using `J1/J2`, and
-`19.1 g/s` at `phi=0.41` using `J2/J3`.
+- axial fuel mass-source distribution;
+- fuel axial velocity;
+- fuel specific total enthalpy.
 
-These are valuable physical records, but they are **not yet sufficient to turn
-on the repository's P7/P8 source terms** because the current solver also needs:
+Total fuel flow alone is insufficient. The project will not silently replace it with a uniform `d(mdot_f)/dx`, equal per-injector split, zero fuel velocity, or arbitrary fuel enthalpy.
 
-- an axial mass-source distribution, not only total fuel flow,
-- fuel axial velocity,
-- fuel specific total enthalpy,
-- and an independently prescribed burned-fuel or heat-release distribution.
+## Additional deferred physics / mapping issues
 
-The source therefore supports a documented fuel-flow target and operating point,
-but not an invented source-profile shape.
+- cavity depth cannot be promoted to a quasi-1D area change without a documented reduced-order cavity closure;
+- injection-distance sensitivity is meaningless while injection is inactive;
+- the Table-4 throat-size variation is source-backed, but its exact local one-dimensional passage mapping must be frozen before formal use;
+- wall friction / heat transfer require sourced or explicitly approved closure values if enabled;
+- P11.3 still requires a literature/teacher-backed LBW/YBW discrimination criterion.
 
-### Published one-factor variations — Table 4
+## Next development decision
 
-SRC06 directly closes the earlier OFAT-level gap for several physical factors:
+P11.2B should first target the smallest scientifically defensible energy-addition closure. A prescribed total-temperature / heat-release law from a traceable one-dimensional scramjet modelling source is acceptable only if its formula, parameters, range, transformation into the existing P8 source semantics, and limitations are all recorded. It must be labelled a reduced-order prescribed-heat-release surrogate rather than detailed chemistry or exact experiment reproduction.
 
-- isolator length: `560 -> 280 mm`, at `phi = 0.13, 0.19, 0.27`
-- injection distance: `21 -> 42 mm`, at `phi = 0.13, 0.19, 0.27`
-- cavity depth: `21 -> 10 mm`, at `phi = 0.13, 0.19, 0.27, 0.35, 0.41`
-- throat size: `Hc 21 -> 16.8 mm`, with corresponding `H 35 -> 39.2 mm`,
-  at `phi = 0.13, 0.19, 0.27, 0.35, 0.41`
-
-Thus at least two source-supported non-baseline physical factor levels are now
-available without arbitrary numerical ranges.
-
-## What is now unblocked
-
-P11.2 may proceed in two explicitly separated tracks:
-
-1. **P11.2A — source-backed physical cold-flow / geometry surrogate**
-   - freeze SRC06 geometry and inflow data,
-   - construct a reproducible quasi-1D core-flow geometry only from dimensions
-     that can be mapped unambiguously,
-   - keep fuel injection, prescribed combustion, wall friction, and wall heat
-     transfer disabled unless separately sourced,
-   - run geometry/inflow OFAT cases using published Table-4 levels where the
-     quasi-1D mapping is physically meaningful,
-   - label all outputs `surrogate`, not `Cao thesis reproduction`.
-
-2. **P11.2B — reactive source-backed case**
-   - remains blocked until a defensible axial fuel-source and burned-fuel or
-     heat-release profile is supplied or derived from an explicitly approved
-     closure.
-
-This separation is deliberate: it allows the project to continue with a real,
-dimensioned physical configuration without silently changing the accepted
-source-term equations or inventing combustion physics.
-
-## Remaining blocking evidence for P11.2B
-
-The following input families still require evidence or an explicitly approved
-closure before a formal reactive run:
-
-- exact quasi-1D mapping of the Fig. 2 channel-height changes where the figure
-  alone is ambiguous,
-- per-module or axial distribution of total fuel mass flow,
-- fuel axial velocity,
-- fuel specific total enthalpy,
-- axial burned-fuel distribution or heat-release distribution,
-- any wall-friction or wall-heat-transfer inputs if those models are enabled,
-- a literature/teacher-approved LBW/YBW discrimination criterion for P11.3.
-
-## Decision rule
-
-Do not substitute guesses for any remaining reactive input. A new value may
-enter a formal case only when its source ID, table/figure/page/section locator,
-raw value, units, conversion, and any derivation are recorded.
-
-The previous all-or-nothing `P11.2 BLOCKED` state is therefore superseded:
-P11.2A can continue immediately using SRC06, while exact Cao-thesis reactive
-reproduction and P11.2B remain evidence-gated.
+No formal reactive curve will be created until that closure passes this evidence rule.
