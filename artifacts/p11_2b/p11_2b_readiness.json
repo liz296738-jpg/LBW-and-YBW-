@@ -1,0 +1,14 @@
+{
+  "artifact_kind": "formal-case-readiness",
+  "blockers": [
+    "no candidate_formal_cases declared"
+  ],
+  "candidate_assessments": [],
+  "candidate_count": 0,
+  "declared_project_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_POWER_AND_SHAPE_PARAMETERS",
+  "formal_case_ready": false,
+  "ready_candidate_count": 0,
+  "schema_version": 1,
+  "source_ledger": "cases/studies/data/p11_2b_heat_release_model_source.json",
+  "stage": "P11.2B"
+}
