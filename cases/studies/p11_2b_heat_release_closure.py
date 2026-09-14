@@ -28,8 +28,9 @@ def load_heat_release_source_ledger(path: Path = SOURCE_LEDGER) -> dict:
     if data.get("case_family") != "P11.2B_HEAT_RELEASE_CLOSURE_SOURCE":
         raise ValueError("unexpected P11.2B source-ledger case_family")
     source_ids = {entry.get("source_id") for entry in data.get("sources", [])}
-    if not {"SRC07", "SRC08"}.issubset(source_ids):
-        raise ValueError("P11.2B source ledger must retain SRC07 and SRC08")
+    required = {"SRC07", "SRC08", "SRC09", "SRC10"}
+    if not required.issubset(source_ids):
+        raise ValueError("P11.2B source ledger must retain SRC07 through SRC10")
     return data
 
 
