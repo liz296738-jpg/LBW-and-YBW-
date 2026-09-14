@@ -88,34 +88,31 @@ The production solver accepts optional `heat_release_rate_per_length` in:
 
 The input must be finite, nonnegative, and broadcast-compatible with the cell shape. A zero profile preserves the legacy path. A nonzero direct profile is mutually exclusive with a nonzero `fuel_burn_rate_per_length`/LHV path.
 
-Tests require the direct path to be exactly equivalent to the legacy burned-fuel/LHV path when both represent the same line heat release. This verifies that the interface does not introduce a new energy equation.
+Tests require the direct path to be exactly equivalent to the legacy burned-fuel/LHV path when both represent the same line heat release, including transient and steady pseudo-time solver propagation. This verifies that the interface does not introduce a new energy equation.
 
-The first closure-infrastructure regression checkpoint at commit `e36cfb124f9bd0a8ddb3be6d548f79a751fdf471` passed GitHub Actions run `34882069673` with `828 passed in 60.67 s`. Later Eq. 8, evidence-ledger, and formal-case-gate additions are held to the same full-suite regression requirement before final acceptance is frozen.
+The first closure-infrastructure regression checkpoint at commit `e36cfb124f9bd0a8ddb3be6d548f79a751fdf471` passed GitHub Actions run `34882069673` with `828 passed in 60.67 s`. A later full-suite checkpoint at commit `72d953f42e3f1ab578701db2ec9441a8c5b2be69` passed run `34884490236` with `846 passed in 43.51 s`. Subsequent evidence-gate refinements remain subject to the same full-suite requirement before final acceptance is frozen.
 
 ## Formal-case promotion gate
 
-The repository now enforces a separate scientific promotion gate in `cases/studies/p11_2b_case_gate.py`. Solver readiness and case readiness are deliberately not treated as the same thing.
+The repository enforces a separate scientific promotion gate in `cases/studies/p11_2b_case_gate.py`. Solver readiness and case readiness are deliberately not treated as the same thing.
 
-A formal P11.2B candidate must provide, from one internally consistent source/operating-condition chain:
+Every candidate must provide source/case identity, locators, and an explicit source-to-solver axial coordinate mapping. It must then satisfy exactly one of two heat-release evidence paths:
 
-- source identity, operating-condition ID, and locators;
-- an explicit source-to-solver axial coordinate mapping in metres;
-- either traceable Eq. 8 shape parameters or a tabulated `x [m]` / `Qdot'(x) [W/m]` distribution;
-- exactly one absolute energy scale: total heat-release power, or stagnation-enthalpy increment plus mass flow;
-- matching source and operating-condition IDs for both the shape and absolute energy evidence.
+- **normalized Eq. 8 path:** traceable `x_i`, `x_m`, `x_c`, and `k` for one operating condition, plus a separate source-backed absolute energy scale (total heat-release power, or stagnation-enthalpy increment plus mass flow) for that same condition;
+- **absolute tabulated path:** a traceable `x [m]` / `Qdot'(x) [W/m]` table. Because this already contains both axial shape and absolute energy scale, a second `absolute_energy` block is rejected instead of used to rescale it.
 
-Cross-source and cross-condition mixing is rejected by tests. The current source ledger intentionally declares no formal candidate because SRC07-SRC09 do not yet provide the complete same-condition shape-plus-energy bundle in the accessible records.
+Cross-source and cross-condition mixing is rejected by tests. The current source ledger intentionally declares no formal candidate because SRC07-SRC09 do not yet provide either complete path in the accessible records.
 
 `cases/studies/p11_2b_readiness.py` writes an auditable JSON record to `artifacts/p11_2b/p11_2b_readiness.json`. In ordinary mode it records a scientifically correct blocked state without failing; `--require-ready` converts that state into a hard execution gate. See `docs/p11_2b_formal_case_gate.md` for the complete policy.
 
 ## What is still blocked
 
-No formal P11.2B heated engine case is authorized yet. The remaining minimum evidence pair is:
+No formal P11.2B heated engine case is authorized yet. The remaining evidence can be satisfied in either of two ways:
 
-- absolute total heat-release power, or a source-backed way to derive it;
-- matching axial shape parameters for the same geometry and operating condition.
+- recover an absolute, source-backed tabulated `Qdot'(x)` profile for one declared operating condition; or
+- recover matching normalized axial shape parameters **and** an absolute heat-addition scale for the same geometry and operating condition.
 
-The project will not manufacture these by assuming 100% combustion efficiency, uniformly smearing total fuel, reading untraceable values off a plot, or combining geometry, heat-release shape, and thermal power from unrelated experiments while calling the result a reproduction.
+The project will not manufacture these by assuming 100% combustion efficiency, uniformly smearing total fuel, reading untraceable values off a plot, adding a second arbitrary scale to absolute line-heat data, or combining geometry, heat-release shape, and thermal power from unrelated experiments while calling the result a reproduction.
 
 A separate literature-validation case is acceptable if all its inputs can be frozen from one internally consistent source chain. It must remain distinct from the P11.2A Li et al. geometry unless a documented transformation justifies the connection.
 
@@ -123,6 +120,6 @@ A separate literature-validation case is acceptable if all its inputs can be fro
 
 At this stage the project may claim:
 
-> The solver supports a directly prescribed conservative axial heat-addition profile, and the repository implements source-backed normalized symmetric/asymmetric quasi-Gaussian heat-release closure forms plus an energy-integral diagnostic, all regression-tested without introducing fictitious fuel mass or chemistry.
+> The solver supports a directly prescribed conservative axial heat-addition profile, and the repository implements source-backed normalized symmetric/asymmetric quasi-Gaussian heat-release closure forms plus an energy-integral diagnostic and a machine-readable evidence gate, all regression-tested without introducing fictitious fuel mass or chemistry.
 
 It may **not** yet claim a validated reactive P11.2B engine case, detailed combustion chemistry, a Cao-thesis reproduction, or an LBW/YBW prediction.
