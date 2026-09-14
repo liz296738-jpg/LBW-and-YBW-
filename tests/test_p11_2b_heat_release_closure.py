@@ -70,6 +70,83 @@ def test_eq7_rejects_invalid_inputs(x, q_peak, x_peak, x_core_end) -> None:
         MODULE.quasi_gaussian_eq7_normalized(x, q_peak, x_peak, x_core_end)
 
 
+def test_eq8_asymmetric_form_matches_published_expression_downstream() -> None:
+    x = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    q_peak = 0.9
+    x_i, x_m, x_c, k = 0.5, 2.0, 4.0, 0.4
+
+    actual = MODULE.asymmetric_quasi_gaussian_eq8_normalized(
+        x,
+        q_peak=q_peak,
+        x_initiation=x_i,
+        x_peak=x_m,
+        x_core_end=x_c,
+        asymmetry_length=k,
+    )
+    expected = np.zeros_like(x)
+    active = x > x_i
+    ratio = ((x[active] - x_m) * (x[active] - x_i + k)) / (
+        (x_c - x_m) * (x[active] - x_i)
+    )
+    expected[active] = q_peak * np.exp(-(ratio**2))
+
+    assert_allclose(actual, expected, rtol=0.0, atol=1.0e-15)
+    assert actual[2] == pytest.approx(q_peak)
+    assert actual.flags.writeable is False
+
+
+def test_eq8_is_zero_upstream_and_at_heat_release_initiation() -> None:
+    x = np.array([-1.0, 0.0, 0.25, 0.5, 1.0])
+    actual = MODULE.asymmetric_quasi_gaussian_eq8_normalized(
+        x,
+        q_peak=1.0,
+        x_initiation=0.5,
+        x_peak=1.0,
+        x_core_end=2.0,
+        asymmetry_length=0.1,
+    )
+    assert_array_equal(actual[:4], np.zeros(4))
+    assert actual[4] == pytest.approx(1.0)
+
+
+def test_eq8_is_unit_invariant_when_all_length_parameters_scale_together() -> None:
+    x_m = np.linspace(0.0, 0.2, 21)
+    metres = MODULE.asymmetric_quasi_gaussian_eq8_normalized(
+        x_m,
+        q_peak=1.0,
+        x_initiation=0.02,
+        x_peak=0.08,
+        x_core_end=0.16,
+        asymmetry_length=0.0056,
+    )
+    millimetres = MODULE.asymmetric_quasi_gaussian_eq8_normalized(
+        x_m * 1000.0,
+        q_peak=1.0,
+        x_initiation=20.0,
+        x_peak=80.0,
+        x_core_end=160.0,
+        asymmetry_length=5.6,
+    )
+    assert_allclose(metres, millimetres, rtol=0.0, atol=5.0e-15)
+
+
+@pytest.mark.parametrize(
+    ("x_i", "x_m", "x_c", "k"),
+    [
+        (1.0, 1.0, 2.0, 0.1),
+        (1.0, 0.5, 2.0, 0.1),
+        (0.0, 2.0, 1.0, 0.1),
+        (0.0, 1.0, 2.0, -0.1),
+        (0.0, 1.0, np.inf, 0.1),
+    ],
+)
+def test_eq8_rejects_invalid_parameter_order_or_values(x_i, x_m, x_c, k) -> None:
+    with pytest.raises(ValueError):
+        MODULE.asymmetric_quasi_gaussian_eq8_normalized(
+            np.linspace(0.0, 3.0, 10), 1.0, x_i, x_m, x_c, k
+        )
+
+
 def test_shape_scaling_preserves_requested_total_power_exactly() -> None:
     shape = np.array([0.1, 0.3, 1.0, 0.5, 0.2])
     dx = 0.02
