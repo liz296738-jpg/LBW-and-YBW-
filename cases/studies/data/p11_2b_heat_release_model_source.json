@@ -97,6 +97,25 @@
       ]
     }
   ],
+  "candidate_formal_cases": [],
+  "formal_case_gate": {
+    "implementation": "cases/studies/p11_2b_case_gate.py",
+    "required_same_case_evidence": [
+      "source identity and operating-condition ID",
+      "source locators for every promoted parameter",
+      "explicit source-to-solver axial coordinate mapping in metres",
+      "solver-ready axial shape: traceable Eq. 8 parameters or tabulated line heat",
+      "absolute heat addition: positive total heat-release power or measured stagnation-enthalpy increment with mass flow",
+      "shape and absolute-energy evidence tied to the same declared operating condition"
+    ],
+    "explicitly_forbidden_shortcuts": [
+      "mixing shape parameters and absolute power from unrelated operating conditions",
+      "assuming 100 percent combustion efficiency without source evidence",
+      "converting equivalence ratio to power when fuel identity/LHV or oxidizer convention is unresolved",
+      "digitizing figures without a retained extraction record and coordinate convention",
+      "treating normalized CH* intensity as absolute W/m without an independent energy scale"
+    ]
+  },
   "project_decision": {
     "direct_solver_input": "heat_release_rate_per_length [W/m]",
     "mapping": "qdot_volumetric = heat_release_rate_per_length / A_cell",
