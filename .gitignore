@@ -8,6 +8,7 @@ build/
 *.egg-info/
 .venv/
 venv/
+artifacts/p10_4/
 results/*
 !results/.gitkeep
 !results/p7_4/
