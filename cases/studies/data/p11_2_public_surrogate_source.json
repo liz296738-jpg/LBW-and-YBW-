@@ -1,0 +1,90 @@
+{
+  "schema_version": 1,
+  "case_family": "P11.2_PUBLIC_SURROGATE_SOURCE",
+  "purpose": "Source ledger for a literature-informed, reproducible P11.2 surrogate. This is not a reconstruction of the Cao Ruifeng thesis case.",
+  "primary_source": {
+    "citation": "Fan Li, Mingjiang Liu, Mingbo Sun, Guoyan Zhao, Guangwei Ma, Chenxiang Zhao, Sensitive factors of ethylene combustion heat release under different combustion modes in scramjet engine, Acta Aeronautica et Astronautica Sinica, 2025, 46(4):130944.",
+    "doi": "10.7527/S1000-6893.2024.30944",
+    "url": "https://hkxb.buaa.edu.cn/CN/Y2025/V46/I4/130944",
+    "locators": {
+      "inflow": "Table 1",
+      "geometry": "Figure 2 and Table 2",
+      "operating_conditions": "Table 3",
+      "ofat_levels": "Table 4"
+    }
+  },
+  "inflow_total_conditions_si": {
+    "Mach": 2.52,
+    "T0_K": 1650.0,
+    "P0_Pa": 1340000.0,
+    "mass_fractions": {
+      "O2": 0.2338,
+      "H2O": 0.0622,
+      "CO2": 0.1016,
+      "N2": 0.6024
+    }
+  },
+  "geometry_si": {
+    "L1_isolator_m": 0.560,
+    "L2_pre_cavity_m": 0.140,
+    "L3_combustor_m": 0.490,
+    "width_W_m": 0.050,
+    "height_H1_m": 0.035,
+    "height_H2_m": 0.042,
+    "cavity_length_Lc_m": 0.070,
+    "cavity_depth_Dc_m": 0.021,
+    "cavity_ramp_height_Hc_m": 0.021,
+    "injector_distance_d1_m": 0.042,
+    "injector_distance_d2_m": 0.021,
+    "injector_distance_d3_m": 0.014,
+    "cavity_ramp_angle_deg": 45.0
+  },
+  "operating_conditions": [
+    {"equivalence_ratio": 0.00, "injector_total_pressure_Pa": 0.0, "ethylene_mass_flow_kg_s": 0.0, "active_injector_modules": []},
+    {"equivalence_ratio": 0.13, "injector_total_pressure_Pa": 1300000.0, "ethylene_mass_flow_kg_s": 0.0061, "active_injector_modules": ["J1", "J2"]},
+    {"equivalence_ratio": 0.15, "injector_total_pressure_Pa": 1630000.0, "ethylene_mass_flow_kg_s": 0.0068, "active_injector_modules": ["J1", "J2"]},
+    {"equivalence_ratio": 0.19, "injector_total_pressure_Pa": 2350000.0, "ethylene_mass_flow_kg_s": 0.0089, "active_injector_modules": ["J1", "J2"]},
+    {"equivalence_ratio": 0.27, "injector_total_pressure_Pa": 3630000.0, "ethylene_mass_flow_kg_s": 0.0126, "active_injector_modules": ["J1", "J2"]},
+    {"equivalence_ratio": 0.35, "injector_total_pressure_Pa": 2240000.0, "ethylene_mass_flow_kg_s": 0.0163, "active_injector_modules": ["J2", "J3"]},
+    {"equivalence_ratio": 0.41, "injector_total_pressure_Pa": 2720000.0, "ethylene_mass_flow_kg_s": 0.0191, "active_injector_modules": ["J2", "J3"]}
+  ],
+  "published_ofat_levels": {
+    "isolator_length": {
+      "baseline_m": 0.560,
+      "alternate_m": 0.280,
+      "reported_equivalence_ratios": [0.13, 0.19, 0.27]
+    },
+    "injection_distance": {
+      "baseline_m": 0.021,
+      "alternate_m": 0.042,
+      "reported_equivalence_ratios": [0.13, 0.19, 0.27]
+    },
+    "cavity_depth": {
+      "baseline_m": 0.021,
+      "alternate_m": 0.010,
+      "reported_equivalence_ratios": [0.13, 0.19, 0.27, 0.35, 0.41]
+    },
+    "throat_size": {
+      "baseline_Hc_m": 0.021,
+      "alternate_Hc_m": 0.0168,
+      "corresponding_baseline_H_m": 0.035,
+      "corresponding_alternate_H_m": 0.0392,
+      "reported_equivalence_ratios": [0.13, 0.19, 0.27, 0.35, 0.41]
+    }
+  },
+  "evidence_boundaries": {
+    "source_backed": [
+      "inflow Mach, total temperature, total pressure, and vitiated-air composition",
+      "dimensioned geometry in Figure 2/Table 2",
+      "total ethylene mass flow, injector total pressure, equivalence ratio, and active module set in Table 3",
+      "four published one-factor geometry/injection variations in Table 4"
+    ],
+    "not_provided_by_primary_source": [
+      "per-module split of total ethylene mass flow",
+      "fuel axial injection velocity for the quasi-1D source term",
+      "fuel specific total enthalpy for the quasi-1D source term",
+      "absolute axial burned-fuel or volumetric heat-release profile",
+      "a direct mapping of cavity recirculation volume to quasi-1D core area"
+    ]
+  }
+}
