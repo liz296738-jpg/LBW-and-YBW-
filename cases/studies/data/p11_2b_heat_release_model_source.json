@@ -45,6 +45,7 @@
       "published_models": {
         "eq6_gaussian_normalized": "Qstar(x) = Qstar_m * exp(-(x-x_m)^2/(2*delta^2))",
         "eq7_range_parameterized_normalized": "Qstar(x) = Qstar_m * exp(-(x-x_m)^2/(x_c-x_m)^2)",
+        "eq8_asymmetric_normalized": "Qstar(x) = Qstar_m * exp(-(((x-x_m)*(x-x_i+k))/((x_c-x_m)*(x-x_i)))^2), applied downstream of x_i",
         "eq11_total_temperature_relation": "Tt(x) = Tt0 + integral[x_i to x](Qdot_prime(s) ds)/(mdot*cp)"
       },
       "case_10_text_records": {
@@ -56,11 +57,43 @@
         "cumulative_heat_fraction_at_x_c": 0.92
       },
       "evidence_boundary": [
-        "Equations 6 and 7 provide a clear normalized quasi-Gaussian functional form.",
-        "Equation 11 provides the energy-to-total-temperature integral relation.",
+        "Equations 6, 7, 8 and 11 are text-recoverable and their mathematical forms may be implemented independently of case-specific parameter values.",
         "The paper explicitly states that Q_m, x_m, x_c, x_i and k depend on operating conditions and require prediction/estimation.",
-        "Figure-derived parameter values are not digitized or guessed in this repository.",
-        "The asymmetric Eq. 8 is not frozen for implementation until the exact parameter/unit convention is recovered unambiguously."
+        "Figure-derived Q_m, x_m and x_i values are not digitized or guessed in this repository.",
+        "Case-10 x_c=98 and k=5.6 remain raw text records until their coordinate/unit convention is frozen together with x_m and x_i.",
+        "A formal solver case still requires an absolute thermal power or an independently measured stagnation-enthalpy rise."
+      ]
+    },
+    {
+      "source_id": "SRC09",
+      "citation": "Lu Tian, Lihong Chen, Qiang Chen, Fei Li, Xinyu Chang, Modeling and Measurements of Heat Release Distributions in Dual-mode Scramjet Combustor, 18th AIAA/3AF International Space Planes and Hypersonic Systems and Technologies Conference, 2012, AIAA 2012-5833.",
+      "doi": "10.2514/6.2012-5833",
+      "url": "https://www.researchgate.net/publication/268553882_Modeling_and_Measurements_of_Heat_Release_Distributions_in_Dual-mode_Scramjet_Combustor",
+      "role": "independent modified quasi-one-dimensional heat-release inference and TDLAS validation reference",
+      "facility_records": {
+        "isolator_cross_section_width_m": 0.085,
+        "isolator_cross_section_height_m": 0.040,
+        "downstream_divergence_angles_deg": [1.5, 3.0],
+        "multiport_injector": "7 x 1.2 mm sonic ports, 60 mm upstream of each cavity leading edge",
+        "single_port_diameter_m": 0.003,
+        "single_port_location_from_isolator_entry_m": 0.550
+      },
+      "table_1_cases": [
+        {"case": 1, "injections": "Jet1 Jet3", "equivalence_ratio": 0.52, "Mach": 2.5, "total_temperature_K": 1370.0, "air_mass_flow_kg_s": 1.2, "combustion_efficiency": 0.661},
+        {"case": 2, "injections": "Jet2 Jet3", "equivalence_ratio": 0.52, "Mach": 2.5, "total_temperature_K": 1370.0, "air_mass_flow_kg_s": 1.2, "combustion_efficiency": 0.821},
+        {"case": 3, "injections": "Jet2 Jet3", "equivalence_ratio": 0.56, "Mach": 1.8, "total_temperature_K": 1000.0, "air_mass_flow_kg_s": 1.6, "combustion_efficiency": 0.576},
+        {"case": 4, "injections": "single-port Jet3", "equivalence_ratio": 0.75, "Mach": 2.5, "total_temperature_K": 1650.0, "air_mass_flow_kg_s": 1.2, "combustion_efficiency": 0.80}
+      ],
+      "confirmed_claims": [
+        "The modified one-dimensional method inferred axial heat release by matching calculated pressure to measured pressure.",
+        "TDLAS temperature and velocity measurements were used as independent checks of the inferred heat-release distributions.",
+        "For the single-port case, the one-dimensional model neglects the cavity and agreement at combustor entry/exit is described as more reliable than inside the cavity region.",
+        "The paper reports ram-scram transition near the downstream end of the large heat-release region in its modeled cases."
+      ],
+      "evidence_boundary": [
+        "The accessible text does not explicitly identify the fuel chemical species or its LHV for these cases, so combustion efficiency and equivalence ratio are not converted into absolute thermal power here.",
+        "The fitted axial heat-release profiles are presented graphically rather than as a complete tabulated solver-ready distribution in the accessible text.",
+        "No figure coordinates are digitized or guessed as formal inputs."
       ]
     }
   ],
@@ -71,6 +104,7 @@
     "momentum_added": false,
     "chemistry_implied": false,
     "mutual_exclusion": "Direct heat_release_rate_per_length and burned-fuel/LHV energy paths may not both be active, preventing double counting.",
-    "formal_case_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_POWER_AND_SHAPE_PARAMETERS"
+    "formal_case_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_POWER_AND_SHAPE_PARAMETERS",
+    "next_evidence_priority": "Recover a complete absolute heat-addition level and matching axial shape parameters from one internally consistent published case; do not mix geometry/shape/power from unrelated experiments and label the result as a reproduction."
   }
 }
