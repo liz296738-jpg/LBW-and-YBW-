@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-variable-thermo-time-march-readiness",
+  "stage": "P11.3B",
+  "status": "FIXED_COMPOSITION_SSP_RK3_TIME_MARCH_IMPLEMENTED_REACTION_CLOSURE_PENDING",
+  "purpose": "Verify source-free fixed-composition variable-thermochemistry time marching with the teacher-compatible SSP-RK3 structure and local variable-property CFL control before adding reacting composition closures.",
+  "implemented": [
+    "local variable-property CFL timestep CFL*dx/max(|u|+sqrt(gamma*R*T))",
+    "one-step SSP-RK3 wrapper over the variable quasi-one-dimensional Rusanov RHS",
+    "transient source-free fixed-composition quasi-one-dimensional solver",
+    "post-step thermodynamic admissibility validation"
+  ],
+  "verification": {
+    "constant_property_cfl_limit": true,
+    "constant_property_one_step_rk3_limit": true,
+    "uniform_real_mixture_preservation": true,
+    "constant_property_short_transient_solver_limit": true,
+    "real_mixture_finite_source_valid_transient": true,
+    "max_steps_guard": true,
+    "input_geometry_validation": true
+  },
+  "scientific_boundaries": [
+    "Composition is fixed in space and time in this stage.",
+    "No fuel injection, reaction, wall heat, or friction source is connected to the variable-thermo time march yet.",
+    "Rusanov is the compatibility numerical flux; teacher variable-property Steger-Warming remains separately gated.",
+    "Transmissive boundaries are verification semantics and not the final teacher inlet/outlet adapter.",
+    "The existing constant-gamma production solver remains unchanged.",
+    "No direct chemical Qdot source is added while absolute species enthalpy composition chemistry is not yet implemented."
+  ],
+  "readiness": {
+    "fixed_composition_variable_state_ready": true,
+    "fixed_composition_variable_euler_operator_ready": true,
+    "local_variable_cfl_ready": true,
+    "fixed_composition_ssp_rk3_time_march_ready": true,
+    "teacher_boundary_case_adapter_ready": false,
+    "teacher_steger_warming_variable_thermo_ready": false,
+    "teacher_mixing_reaction_closure_ready": false,
+    "variable_composition_solver_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Freeze and implement the teacher Eqs. 11.19-11.29 mixing efficiency, mixing length, equivalence-ratio, stoichiometric, and fuel-specific composition closures as isolated tested functions before coupling variable composition to the time-marching solver."
+}
