@@ -38,6 +38,18 @@ def test_jin_liu_condition_conflict_remains_explicitly_unresolved() -> None:
     assert liu_phi["Ht4_over_Ht3"] == 1.29
 
 
+def test_contextual_les_record_does_not_resolve_primary_source_conflict() -> None:
+    record = _load()
+    contextual = record["sources"]["liu_yao_2021_context_phi_1_04"]
+
+    assert contextual["source_id"] == "SRC12"
+    assert contextual["doi"] == "10.2514/6.2021-3536"
+    assert contextual["equivalence_ratio"] == 1.04
+    assert "cavity-present" in contextual["configuration"]
+    assert "does not resolve" in contextual["role"]
+    assert record["status"] == "UNRESOLVED_CROSS_MODEL_EQUIVALENCE_RATIO_CONFLICT"
+
+
 def test_discrepancy_record_forbids_silent_rounding_or_cross_model_promotion() -> None:
     record = _load()
     boundary = record["inference_boundary"]
@@ -45,3 +57,4 @@ def test_discrepancy_record_forbids_silent_rounding_or_cross_model_promotion() -
     assert any("model A" in statement for statement in boundary["confirmed"])
     assert any("typographical or rounding error" in statement for statement in boundary["not_resolved"])
     assert "Do not promote" in boundary["promotion_policy"]
+    assert "not sufficient" in boundary["promotion_policy"]
