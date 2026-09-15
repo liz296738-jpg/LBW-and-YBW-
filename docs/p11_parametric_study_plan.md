@@ -55,10 +55,12 @@ The heat-release source ledger `cases/studies/data/p11_2b_heat_release_model_sou
 - **SRC09 — Tian et al. (2012):** modified quasi-one-dimensional heat-release inference checked with pressure and TDLAS measurements;
 - **SRC10 — Liu et al. (2019):** primary axisymmetric model-A/model-B experiment explicitly reused by Jin.
 
-Supporting records keep geometry and cross-source conflicts separate from the heat-release formula ledger:
+Supporting records keep geometry, source interpretation, and cross-source conflicts separate from the heat-release formula ledger:
 
 - `cases/studies/data/p11_2b_jin_liu_condition_discrepancy.json` — freezes the Jin/Liu model/phi conflict;
-- `cases/studies/data/p11_2b_liu_model_b_geometry_source.json` — freezes the source-backed model-B axial geometry and coordinate transform using SRC10, SRC11, and SRC12.
+- `cases/studies/data/p11_2b_liu_model_b_geometry_source.json` — freezes the source-backed model-B axial geometry and coordinate transform;
+- `cases/studies/data/p11_2b_liu_angle_convention_source.json` — records the evidence for the study-layer wall-angle interpretation;
+- `cases/studies/data/p11_2b_jin_friction_convention_source.json` — records the source-derived mapping between Jin's `Cf` convention and the repository Darcy factor.
 
 Study utilities implement the source-backed mathematical transforms without assigning unsupported operating-condition values:
 
@@ -74,9 +76,9 @@ The Eq. 8 formula itself is unambiguous. Its case-specific parameters are not: t
 
 This is the preferred independent validation path because Jin explicitly chooses Liu's cavity-free circular model B as closer to quasi-one-dimensional assumptions.
 
-### Axial geometry already closed
+### Axial geometry and area law
 
-The repository no longer treats source-to-solver axial mapping as a blocker.
+The repository no longer treats source-to-solver axial mapping or the study-layer radial area law as open blockers.
 
 SRC10 places station 3 / the most-upstream injector at `291.4 mm` downstream of the inlet lip. SRC12 independently gives an inlet length of `37.43 mm`; adding the SRC10 `254 mm` isolator yields `291.43 mm`, a `0.03 mm` closure residual. SRC12's `296 mm` constant-diameter run to the cavity leading edge also equals `254 + 42 mm` exactly.
 
@@ -91,17 +93,21 @@ Thus the model-B replacement tube corresponding to the cavity module is `61.5563
 - divergence start `x=0.10355635 m`;
 - combustor exit `x=0.46055635 m`.
 
-Independent total-length reconstructions close SRC11's approximately `752 mm` model within `0.044 mm` and SRC12's `752.43 mm` reconstruction within `0.444 mm`. These are retained as consistency checks, not fit parameters.
+Independent total-length reconstructions close the approximately `752 mm` records to sub-millimetre residuals. These are consistency checks, not fitted corrections.
 
-### Remaining geometry ambiguity
+The primary source describes a `2 deg cone angle` without literally defining half-angle versus full included angle. Same-program primary evidence plus a peer-reviewed terminology cross-check support interpreting this parameter as the **wall divergent angle**. The P11.2B study layer therefore uses `2 deg` as the wall angle measured from the centerline and records this as `SOURCE_CORROBORATED_INTERPRETATION`, not as a verbatim primary-source definition. The derived axisymmetric area law gives `A_exit/A_inlet ≈ 2.9323`. A higher-authority primary figure or author dataset must override this interpretation if contradictory.
 
-The downstream combustor is described as having a `2 deg cone angle`, but the recovered authoritative wording does not yet define whether this is the wall half-angle or full included angle. Because the two interpretations produce materially different area relief, the radial `A(x)` law remains blocked until this convention is source-resolved.
+### Friction convention
+
+Jin Eqs. (9)-(10) use `4 Cf dx/D` and cite Shapiro. With `Cf` defined as wall shear divided by dynamic head, matching the repository wall-momentum source gives the derived convention mapping
+
+`f_D = 4 Cf`.
+
+This closes the coefficient-definition ambiguity. The **numerical value** of `Cf` used in the target Fig. 14 validation case remains source-gated.
 
 ### Validation-condition identity remains unresolved
 
-Jin states **model B, `phi=1.04`, experimental `M4=2.27`**. Liu Table 2 gives **model B, `phi=1.03`, `M4=2.27`**, while its exact `phi=1.04` ethylene row is **model A** with `M4=1.76`. A later same-geometry LES study uses the cavity-present configuration at `phi=1.04`; this is only contextual corroboration and is explicitly forbidden from overriding the primary-source conflict.
-
-No automatic rounding, typo correction, or cross-model substitution is allowed.
+Jin states **model B, `phi=1.04`, experimental `M4=2.27`**. Liu Table 2 gives **model B, `phi=1.03`, `M4=2.27`**, while its exact `phi=1.04` ethylene row is **model A** with `M4=1.76`. No automatic rounding, typo correction, or cross-model substitution is allowed.
 
 ## P11.2B formal-case evidence paths
 
@@ -116,18 +122,19 @@ The current ledger declares no formal candidate. The machine-readable readiness 
 
 | Required input | P11.2A status | P11.2B status |
 | --- | --- | --- |
-| Physical axial scale / main-passage geometry | FROZEN surrogate mapping | **model-B axial stations FROZEN; radial area growth still gated on 2-deg convention** |
+| Physical axial scale / main-passage geometry | FROZEN surrogate mapping | **model-B axial geometry and study-layer radial area law RESOLVED** |
 | Source-to-solver axial coordinate mapping | P11.2A-specific mapping | **Jin–Liu model-B mapping FROZEN** |
-| Inlet total conditions and Mach | SOURCE + DERIVED primitive state | available for several source cases; exact validation station-3 state still case-specific |
+| Inlet total conditions and Mach | SOURCE + DERIVED primitive state | available for several sources; **exact Fig. 14 station-3 state NOT FROZEN** |
 | Direct solver energy-source interface | NOT USED | **IMPLEMENTED + TESTED** |
 | Normalized axial heat-release functional form | NOT USED | **SOURCE-BACKED Eq. 7 / Eq. 8 IMPLEMENTED** |
 | Absolute tabulated `Qdot'(x)` profile | NOT USED | **ALTERNATIVE FORMAL PATH; NOT YET RECOVERED** |
 | Absolute heat-addition scale for normalized model | NOT USED | **REQUIRED WITH Eq. 8; NOT YET FROZEN** |
 | Matching case-specific `x_i`, `x_m`, `x_c`, `k` | NOT USED | **REQUIRED FOR Eq. 8 PATH; NOT YET FROZEN** |
 | Validation condition identity | NOT APPLICABLE | **BLOCKED: Jin B/1.04 vs Liu B/1.03 and A/1.04 conflict** |
+| Wall-friction convention | DISABLED | **RESOLVED: `f_D = 4 Cf`** |
+| Numerical Fig. 14 wall-friction coefficient | NOT USED | **NOT FROZEN, unless direct evidence shows friction was neglected** |
 | Axial fuel mass-source distribution | NOT USED | not required for direct heat-only surrogate; required for stronger P7 model |
 | Fuel axial velocity / total enthalpy | NOT USED | not required for direct heat-only surrogate; required for stronger P7 model |
-| Wall friction / heat transfer | DISABLED | optional; source/closure required if enabled |
 | Isolator-length factor | FORMALLY EXECUTED; inert in cold-flow model | potentially meaningful after heat addition / additional physics |
 | Injection-distance factor | DEFERRED | requires injection representation |
 | Cavity-depth factor | DEFERRED | requires reduced-order cavity closure |
@@ -149,14 +156,14 @@ A stronger case including fuel mass and momentum additionally needs axial fuel d
 
 ## Remaining P11.2B blockers
 
-For the preferred Jin–Liu model-B validation, four bounded items remain:
+The machine-readable authority is `artifacts/p11_2b/p11_2b_readiness.json`. For the preferred Jin–Liu model-B validation, four bounded evidence items remain:
 
-1. resolve the model/`phi` identity conflict;
-2. recover Jin Fig. 14's exact axial heat-release shape or fitted parameters with traceable coordinates;
-3. recover the corresponding absolute stagnation-enthalpy increment plus mass flow / station-3 absolute enthalpy, or an absolute `Qdot'(x)` profile;
-4. resolve the `2 deg cone angle` convention before freezing radial area growth.
+1. resolve the Jin model-B `phi=1.04` versus Liu model-B `phi=1.03` / model-A `phi=1.04` condition identity;
+2. recover the complete Fig. 14 station-3 / combustor-inlet state;
+3. recover the numerical wall-friction coefficient `Cf` used by Jin for Fig. 14, or direct evidence that it was neglected;
+4. recover a same-condition heat-release evidence chain: either an absolute `Qdot'(x)` profile, or the exact normalized shape/fit parameters plus matching absolute energy scale.
 
-The station-3 absolute x coordinate and axial divergence-start position are no longer open blockers and must not be reintroduced as such.
+The axial coordinate mapping, divergence-start position, study-layer radial area law, and `Cf`-to-Darcy convention mapping are resolved and must not be reintroduced as open blockers.
 
 ## Mode-classification policy
 
@@ -171,6 +178,6 @@ Each formal study must report symbol, units, definition, interpretation, scope, 
 - quasi-one-dimensional calorically perfect gas;
 - experimental vitiated-air composition is not species-resolved;
 - no explicit transverse-jet mixing, cavity recirculation, finite-rate chemistry, ignition, or species transport;
-- shock-train / separation physics is not yet integrated into the P11.2A geometry study;
+- shock-train / separation physics is not resolved by the present reduced-order study model;
 - a direct heat-addition interface is not itself a validated combustion model;
 - no authoritative LBW/YBW discrimination criterion has yet been frozen.
