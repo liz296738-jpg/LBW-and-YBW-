@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "record_kind": "public-asset-acquisition-manifest",
+  "acquisition_date": "2026-09-15",
+  "acquisition_method": "GitHub Actions direct HTTPS download from official NASA Glenn validation archive",
+  "workflow_run_id": 34951670961,
+  "workflow_artifact_id": 10389039980,
+  "workflow_artifact_name": "p11-2b-nasa-bk-public-assets",
+  "source_base_url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02",
+  "assets": [
+    {
+      "filename": "exp.tar",
+      "source_url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/exp.tar",
+      "sha256": "8e3a60293b4a16aa821ac839bee8c890871ef415040029c4f573c743f6b9dc89",
+      "size_bytes": 10240,
+      "role": "experimental exit-profile archive",
+      "archive_members": [
+        "bkh2.dat",
+        "bkh2o.dat",
+        "bkmach.dat",
+        "bktemp.dat"
+      ]
+    },
+    {
+      "filename": "str_run.dat",
+      "source_url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.dat",
+      "sha256": "4ec41f3a4b034839fcd137f7c382528910db16c5db923cff363844fc14abcac2",
+      "size_bytes": 1834,
+      "role": "Wind-US source input deck"
+    },
+    {
+      "filename": "str_run.cgd",
+      "source_url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.cgd",
+      "sha256": "255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91",
+      "size_bytes": 987136,
+      "role": "Wind-US structured grid / geometry source"
+    },
+    {
+      "filename": "str_run.cfl",
+      "source_url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.cfl",
+      "sha256": "e0d9c3c89c40b947934c6ab6a5aa0df1e9f32b22dc7919f81dd9ad391f08e602",
+      "size_bytes": 4902912,
+      "role": "NASA Wind-US computational reference solution"
+    }
+  ],
+  "extracted_experimental_members": [
+    {
+      "filename": "bkmach.dat",
+      "sha256": "df035b0c838050fabf740434d2ea2b7c09ed00781deb04eafc6c011893d02e02",
+      "quantity": "Mach",
+      "point_count": 14
+    },
+    {
+      "filename": "bktemp.dat",
+      "sha256": "15bf580d931c4ecd09b32ec150d97ce071a00369c365aecca98eea3e75b97c3f",
+      "quantity": "total_temperature_K",
+      "point_count": 16
+    },
+    {
+      "filename": "bkh2.dat",
+      "sha256": "e7671b72303afcb929e961e6e3ae220a00ac4a5e3a54be22bd65362e409512f1",
+      "quantity": "H2_mole_fraction",
+      "point_count": 27
+    },
+    {
+      "filename": "bkh2o.dat",
+      "sha256": "c6dd89382774022b7c551506a681a6d3611f403a562355e375ec64b310eb480b",
+      "quantity": "H2O_mole_fraction",
+      "point_count": 28
+    }
+  ],
+  "provenance_policy": {
+    "experimental_members": "EXPERIMENT_MEASURED_PUBLIC_NASA",
+    "wind_us_solution": "NASA_REFERENCE_SOLUTION",
+    "future_1d_fields_derived_from_wind_us": "NASA_REFERENCE_SOLUTION_DERIVED",
+    "forbidden_relabel": "No quantity derived from str_run.cfl may be relabelled as experimentally measured."
+  }
+}
