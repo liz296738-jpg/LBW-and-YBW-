@@ -20,16 +20,17 @@ def test_teacher_closure_ledger_freezes_primary_source_and_equation_scope() -> N
     assert record["schema_version"] == 1
     assert record["stage"] == "P11.3C"
     assert record["status"] == (
-        "TEACHER_CH11_MIXING_AND_LEAN_COMPOSITION_CLOSURES_TRANSCRIBED_SOLVER_COUPLING_GATED"
+        "TEACHER_CH11_MIXING_LEAN_COMPOSITION_AND_EFFICIENCY_POLICY_VERIFIED_VARIABLE_COMPOSITION_COUPLING_GATED"
     )
 
     source = record["primary_source"]
     assert "高超声速气动布局理论及应用" in source["identity"]
-    assert source["page_range"] == "256-258"
-    assert len(source["local_evidence"]) == 3
+    assert source["page_range"] == "255-258"
+    assert len(source["local_evidence"]) == 4
 
     equations = record["equations"]
-    assert set(equations) == {"11.19", "11.20", "11.21-11.24", "11.27-11.29"}
+    assert set(equations) == {"11.18", "11.19", "11.20", "11.21-11.24", "11.27-11.29"}
+    assert equations["11.18"]["physical_interval"] == [0.0, 1.0]
     assert equations["11.19"]["implementation_policy"] == (
         "RETURN_RAW_EMPIRICAL_CORRELATION_WITHOUT_SILENT_CLIPPING"
     )
@@ -40,12 +41,20 @@ def test_teacher_closure_ledger_freezes_primary_source_and_equation_scope() -> N
     }
 
 
-def test_teacher_closure_ledger_preserves_scientific_gates() -> None:
+def test_teacher_closure_ledger_freezes_explicit_efficiency_policy_and_remaining_gates() -> None:
     record = _load()
+    policy = record["project_adapter_policy"]
+    assert policy["identity"] == "EXPLICIT_MIXING_TO_COMBUSTION_EFFICIENCY_SATURATION"
+    assert policy["formula"] == "eta = min(eta_m_raw, 1.0)"
+    assert policy["classification"] == "PROJECT_POLICY_NOT_A_MODIFICATION_OF_EQ_11_19"
+
     boundaries = record["scientific_boundaries"]
     assert boundaries["raw_mixing_efficiency_can_exceed_one"] is True
+    assert boundaries["raw_mixing_correlation_remains_unmodified"] is True
     assert boundaries["reaction_efficiency_requires_unit_interval"] is True
-    assert boundaries["raw_to_reaction_efficiency_policy"] == "UNRESOLVED_FOR_SOLVER_COUPLING"
+    assert boundaries["raw_to_reaction_efficiency_policy"] == (
+        "EXPLICIT_SATURATION_AT_ONE_IN_SEPARATE_ADAPTER"
+    )
     assert boundaries["prescribed_Qdot_double_counting_forbidden"] is True
 
     coverage = record["thermochemistry_coverage"]
@@ -56,5 +65,6 @@ def test_teacher_closure_ledger_preserves_scientific_gates() -> None:
     readiness = record["readiness"]
     assert readiness["source_transcription_ready"] is True
     assert readiness["isolated_closure_verification_ready"] is True
+    assert readiness["combustion_efficiency_policy_ready"] is True
     assert readiness["variable_composition_solver_coupling_ready"] is False
     assert readiness["production_solver_replacement_ready"] is False
