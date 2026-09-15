@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-variable-thermo-state-recovery-readiness",
+  "stage": "P11.3B",
+  "status": "ISOLATED_STATE_RECOVERY_IMPLEMENTED_SOLVER_INTEGRATION_PENDING",
+  "purpose": "Freeze the admissible fixed-composition conservative/primitive conversion layer required before production variable-thermochemistry solver integration.",
+  "equations": {
+    "primitive_to_conservative": [
+      "e = h(T,Y) - R(Y) T",
+      "E = e + u^2/2",
+      "U = [rho, rho*u, rho*E]"
+    ],
+    "conservative_to_primitive": [
+      "u = rho_u / rho",
+      "e = rho_E/rho - u^2/2",
+      "T = bounded inverse of e(T,Y) over the common source-valid species interval",
+      "p = rho R(Y) T",
+      "a = sqrt(gamma(T,Y) R(Y) T)",
+      "M = u/a"
+    ]
+  },
+  "scientific_boundaries": [
+    "Composition is fixed for one supplied state array in this stage; cell-wise composition evolution belongs to the later teacher mixing/reaction closure.",
+    "Absolute chemical-energy enthalpy is retained; rhoE is not required to be positive solely because the chosen thermochemical datum can be negative.",
+    "No temperature clipping or polynomial extrapolation is allowed.",
+    "No mass-fraction renormalization is allowed.",
+    "The constant-gamma production state path remains accepted and unchanged until variable-state integration is independently promoted."
+  ],
+  "verification": {
+    "scalar_round_trip": true,
+    "vector_round_trip": true,
+    "low_high_interval_crossing": true,
+    "exact_1000K_switch_neighborhood": true,
+    "H2_branch_round_trip": true,
+    "C2H4_branch_round_trip": true,
+    "absolute_negative_energy_datum": true,
+    "invalid_temperature_rejection": true,
+    "invalid_composition_rejection": true,
+    "local_gamma_sound_speed_mach": true
+  },
+  "readiness": {
+    "piecewise_species_data_ready": true,
+    "fixed_composition_state_recovery_ready": true,
+    "production_solver_integration_ready": false,
+    "cellwise_species_transport_ready": false,
+    "teacher_mixing_reaction_closure_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Add a deliberately separate variable-thermo Euler flux/RHS compatibility path using fixed composition, verify conservation and constant-property limiting behavior, then integrate with source terms only after that gate passes."
+}
