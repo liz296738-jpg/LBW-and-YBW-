@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "record_kind": "validation-friction-convention",
+  "candidate_id": "JIN-LIU-MODEL-B-VALIDATION",
+  "sources": [
+    {
+      "source_id": "SRC08",
+      "citation": "Kaiyan Jin, Jianbin Li, Lin Zhang, Jianhan Liang, Xiaodong Cai, Experimental study on heat release distribution during supersonic combustion, Combustion and Flame 287 (2026) 114876.",
+      "doi": "10.1016/j.combustflame.2026.114876",
+      "locators": [
+        "Sec. 3.2.3, Eqs. (9)-(10): friction appears as 4 Cf dx / D",
+        "Sec. 3.2.3 immediately after Eq. (11): Cf is identified as the wall friction coefficient",
+        "Ref. [51]: A.H. Shapiro, The Dynamics and Thermodynamics of Compressible Fluid Flow, Vol. 1, Wiley, 1953"
+      ]
+    },
+    {
+      "source_id": "SRC15",
+      "citation": "A.H. Shapiro, The Dynamics and Thermodynamics of Compressible Fluid Flow, Vol. 1, Wiley, 1953.",
+      "role": "the source explicitly cited by Jin et al. for Eqs. (9)-(10)",
+      "locators": [
+        "Chapter 6, Sec. 6.2, Definition of Friction Coefficient",
+        "Chapter 6, Eq. (6.8) and surrounding derivation"
+      ],
+      "confirmed_definition": "Shapiro defines the duct friction coefficient f as the ratio of wall shearing stress to the dynamic head of the stream, i.e. f = tau_w / (0.5 rho u^2), and uses the differential friction parameter 4 f dx / D."
+    }
+  ],
+  "repository_convention": {
+    "implementation": "src/scramjet1d/source_terms.py::wall_friction_source",
+    "parameter_name": "darcy_friction_factor",
+    "momentum_source": "S_momentum = -0.5 f_D rho u |u| / D_h",
+    "classification": "PRODUCTION_IMPLEMENTATION"
+  },
+  "source_convention": {
+    "jin_symbol": "Cf",
+    "jin_equation_term": "4 Cf dx / D",
+    "shapiro_definition": "Cf = tau_w / (0.5 rho u^2)",
+    "classification": "SOURCE_DEFINITION_VIA_JIN_REF_51"
+  },
+  "derived_mapping": {
+    "geometry": "circular / hydraulic-diameter wall-force identity",
+    "wall_force_per_volume": "S_momentum = -(perimeter/area) tau_w = -4 tau_w / D_h",
+    "substitution": "tau_w = Cf * 0.5 rho u |u|",
+    "source_form": "S_momentum = -2 Cf rho u |u| / D_h",
+    "repository_form": "S_momentum = -0.5 f_D rho u |u| / D_h",
+    "result": "f_D = 4 Cf",
+    "classification": "DERIVED_CONVENTION_MAPPING",
+    "status": "RESOLVED"
+  },
+  "evidence_boundary": [
+    "The factor-of-four conversion is no longer inferred from the letter Cf alone. It follows from Jin explicitly sourcing the equations to Shapiro [51], Shapiro's wall-shear/dynamic-head definition, the common 4 f dx/D form, and the repository's explicit Darcy-friction source definition.",
+    "This record resolves only the coefficient convention. It does not provide the numerical Cf value used by Jin for Fig. 14.",
+    "Liu et al.'s separate negligible-wall-friction analysis is not used to set Jin's Cf to zero.",
+    "If an author-provided Fig. 14 dataset later defines Cf differently for that calculation, the higher-specificity source must override this mapping and the evidence record must be revised."
+  ],
+  "formal_case_effect": {
+    "cf_convention_mapping": "RESOLVED_DERIVED_FROM_SOURCE_DEFINITION",
+    "fig14_numeric_cf": "STILL_NOT_FROZEN",
+    "formal_case_ready": false
+  }
+}
