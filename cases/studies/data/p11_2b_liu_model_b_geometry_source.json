@@ -33,14 +33,33 @@
     "downstream_diverging_combustor_cone_angle_deg": 2.0,
     "downstream_diverging_combustor_length_m_from_SRC10": 0.357
   },
+  "derived_geometry_consistency": {
+    "derivation_status": "SOURCE_BACKED_GEOMETRIC_DERIVATION",
+    "cavity_ramp_axial_projection_formula": "L_ramp = cavity_depth / tan(cavity_ramp_angle)",
+    "cavity_ramp_axial_projection_m": 0.026556349186104045,
+    "cavity_leading_edge_to_closeout_m": 0.061556349186104045,
+    "formula_cavity_leading_edge_to_closeout": "0.035 + 0.011/tan(22.5 deg)",
+    "injector_to_divergence_start_m": 0.10355634918610404,
+    "formula_injector_to_divergence_start": "0.042 + 0.035 + 0.011/tan(22.5 deg)",
+    "divergence_start_downstream_from_inlet_lip_m": 0.394956349186104,
+    "formula_divergence_start_from_inlet_lip": "0.2914 + 0.042 + 0.035 + 0.011/tan(22.5 deg)",
+    "reconstructed_total_length_m": 0.751956349186104,
+    "formula_reconstructed_total_length": "0.2914 + 0.042 + 0.035 + 0.011/tan(22.5 deg) + 0.357",
+    "source_reported_total_length_m": 0.752,
+    "absolute_closure_residual_m": 0.000043650813896,
+    "closure_residual_mm": 0.043650813896,
+    "interpretation": "The independently reported 752 mm overall length closes to within 0.044 mm when the 11 mm cavity depth and 22.5 deg closeout ramp are converted to their axial projection. This strongly fixes the cavity-module/replacement-tube axial extent without reading coordinates from the figure."
+  },
   "model_B_corollary": {
     "SRC10_statement": "model B replaces the cavity flameholder by a constant-cross-sectional tube with the same diameter as the isolator",
     "SRC11_statement": "parallel experiments replace the cavity flameholder by a constant-area cross-section tube with the same length dimensions as the cavity",
     "confirmed_constant_diameter_m": 0.035,
     "constant_section_from_injector_to_cavity_leading_edge_m": 0.042,
-    "exact_replacement_tube_axial_length_m": null,
-    "diverging_start_downstream_from_injector_m": null,
-    "status": "PARTIALLY_FROZEN_GEOMETRY_TRANSITION_LOCATION_UNRESOLVED"
+    "derived_replacement_tube_axial_length_m": 0.061556349186104045,
+    "derived_diverging_start_downstream_from_injector_m": 0.10355634918610404,
+    "derived_diverging_start_downstream_from_inlet_lip_m": 0.394956349186104,
+    "axial_transition_status": "FROZEN_BY_SOURCE_BACKED_GEOMETRIC_CLOSURE",
+    "area_profile_status": "BLOCKED_ONLY_ON_2_DEG_CONE_ANGLE_CONVENTION"
   },
   "coordinate_records": {
     "SRC10_source_axis_origin": "center of the inlet",
@@ -48,15 +67,17 @@
     "station_4_definition": "combustor exit",
     "preferred_solver_origin": "station 3 / injector plane",
     "preferred_solver_origin_status": "PROJECT_COORDINATE_CONVENTION_ALLOWED",
+    "divergence_start_in_solver_coordinates_m": 0.10355634918610404,
+    "combustor_exit_in_solver_coordinates_m": 0.46055634918610404,
     "source_to_solver_absolute_offset_m": null,
     "absolute_offset_status": "NOT_REQUIRED_IF_ALL_RECOVERED_VALIDATION_SHAPE_COORDINATES_ARE_REBASED_TO_STATION_3_WITH_TRACEABLE_SOURCE_LOCATORS"
   },
   "evidence_boundary": [
     "The model-B constant-area replacement and its 35 mm diameter are source-backed.",
     "The 42 mm injector-to-cavity-leading-edge distance is source-backed and remains constant-area in the corresponding model-B location.",
-    "The phrase 'same length dimensions as the cavity' is not converted into a numerical replacement-tube length without an unambiguous Fig. 1/Fig. 2 dimensional interpretation.",
-    "The 2 degree cone angle is retained as a raw source descriptor; whether it is a wall half-angle or included cone angle must be frozen from the original geometry figure before constructing a formal area profile.",
-    "No formal validation geometry is promoted until the transition from the 35 mm constant tube to the 2 degree diverging section is unambiguously located."
+    "The model-B replacement-tube axial extent is derived from source-stated cavity floor/depth/ramp dimensions and independently cross-checked by the source-reported 752 mm overall model length and 357 mm diverging-section length; the closure residual is only about 0.044 mm.",
+    "The 2 degree cone angle is still retained as a raw source descriptor; whether it denotes the wall half-angle or included cone angle is not silently assumed.",
+    "A formal area profile remains blocked only on the 2 degree cone-angle convention, not on the axial location of the divergence start."
   ],
-  "next_geometry_evidence_priority": "Recover the original dimensioned model-B geometry figure at sufficient resolution to freeze replacement-tube axial extent, divergence start, and 2-degree angle convention."
+  "next_geometry_evidence_priority": "Resolve the 2-degree cone-angle convention from the original dimensioned figure, a source-defined outlet radius/diameter, or an authoritative same-geometry description; do not guess half-angle versus included angle."
 }
