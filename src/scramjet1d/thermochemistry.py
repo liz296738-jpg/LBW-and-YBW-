@@ -2,9 +2,9 @@
 
 This module implements the temperature/composition-dependent ideal-gas mixture
 relations used by the teacher-provided Chapter 11 and corroborated by Cao
-Ruifeng's one-dimensional scramjet model.  It is intentionally independent of
-the production Euler state conversion for now: P11.3B first verifies the
-thermochemical closure in isolation before changing solver thermodynamics.
+Ruifeng's one-dimensional scramjet model. It remains independent of the
+production Euler state conversion until the source-backed coefficient database
+and state-recovery path are independently verified.
 
 Conventions
 -----------
@@ -12,28 +12,26 @@ Conventions
 * ``R_u`` is the universal gas constant [J/(kmol K)].
 * mass fractions ``Y_i`` are dimensionless and sum to one.
 * the six stored polynomial coefficients correspond to the Chapter 11 / CHEMKIN
-  form used for ``cp`` and ``h``; entropy coefficient(s) are outside the current
-  model because the teacher equations do not require them here.
+  form used for ``cp`` and ``h``; the seventh NASA/CHEMKIN entropy coefficient is
+  not required by the current teacher equations.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import isfinite
+from math import isclose, isfinite
 from typing import Mapping
 
 
-# Central physical constant. With molecular weight in kg/kmol this yields species
-# gas constants in J/(kg K). Keep it here rather than scattering a rounded value.
 UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K = 8314.46261815324
 
 
 @dataclass(frozen=True)
 class SpeciesThermoPolynomial:
-    """Six-coefficient CHEMKIN/NASA-style ``cp``/``h`` polynomial for one species.
+    """Six-coefficient CHEMKIN/NASA-style ``cp``/``h`` interval for one species.
 
-    ``coefficients`` stores ``(a1, a2, a3, a4, a5, a6)`` from the teacher
-    reference.  Over the declared temperature interval,
+    ``coefficients`` stores ``(a1, a2, a3, a4, a5, a6)``. Over the declared
+    temperature interval,
 
     ``cp = R_u/W * (a1 + a2*T + a3*T^2 + a4*T^3 + a5*T^4)``
 
@@ -64,7 +62,9 @@ class SpeciesThermoPolynomial:
             or self.temperature_max_K <= self.temperature_min_K
         ):
             raise ValueError("temperature_max_K must exceed temperature_min_K")
-        if len(self.coefficients) != 6 or not all(isfinite(value) for value in self.coefficients):
+        if len(self.coefficients) != 6 or not all(
+            isfinite(value) for value in self.coefficients
+        ):
             raise ValueError("coefficients must contain six finite values")
 
     def _temperature(self, temperature_K: float) -> float:
@@ -78,13 +78,22 @@ class SpeciesThermoPolynomial:
             )
         return T
 
-    def gas_constant(self, universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K) -> float:
+    def gas_constant(
+        self,
+        universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
+    ) -> float:
         """Return species specific gas constant [J/(kg K)]."""
+
         R_u = _positive("universal_gas_constant", universal_gas_constant)
         return R_u / self.molecular_weight_kg_per_kmol
 
-    def cp(self, temperature_K: float, universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K) -> float:
+    def cp(
+        self,
+        temperature_K: float,
+        universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
+    ) -> float:
         """Return species constant-pressure specific heat [J/(kg K)]."""
+
         T = self._temperature(temperature_K)
         a1, a2, a3, a4, a5, _ = self.coefficients
         polynomial = a1 + a2 * T + a3 * T**2 + a4 * T**3 + a5 * T**4
@@ -93,8 +102,13 @@ class SpeciesThermoPolynomial:
             raise ValueError(f"derived cp for {self.name} must be finite and positive")
         return cp
 
-    def h(self, temperature_K: float, universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K) -> float:
-        """Return species specific enthalpy [J/kg], including the polynomial constant term."""
+    def h(
+        self,
+        temperature_K: float,
+        universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
+    ) -> float:
+        """Return species absolute specific enthalpy [J/kg]."""
+
         T = self._temperature(temperature_K)
         a1, a2, a3, a4, a5, a6 = self.coefficients
         polynomial = (
@@ -109,6 +123,93 @@ class SpeciesThermoPolynomial:
         if not isfinite(enthalpy):
             raise ValueError(f"derived h for {self.name} must be finite")
         return enthalpy
+
+
+@dataclass(frozen=True)
+class PiecewiseSpeciesThermo:
+    """Two-interval CHEMKIN/NASA thermo model with one explicit switch temperature.
+
+    The classic CHEMKIN NASA7 records used by the teacher-lineage data provide a
+    low- and high-temperature polynomial. Only the first six coefficients from
+    each interval are needed for Chapter 11 ``cp`` and absolute ``h``. No
+    extrapolation outside the two source intervals is permitted.
+    """
+
+    low: SpeciesThermoPolynomial
+    high: SpeciesThermoPolynomial
+    switch_temperature_K: float
+
+    def __post_init__(self) -> None:
+        if self.low.name != self.high.name:
+            raise ValueError("piecewise thermo intervals must describe the same species")
+        if not isclose(
+            self.low.molecular_weight_kg_per_kmol,
+            self.high.molecular_weight_kg_per_kmol,
+            rel_tol=0.0,
+            abs_tol=1.0e-12,
+        ):
+            raise ValueError("piecewise thermo intervals must use the same molecular weight")
+        switch = _positive("switch_temperature_K", self.switch_temperature_K)
+        if not isclose(self.low.temperature_max_K, switch, rel_tol=0.0, abs_tol=1.0e-12):
+            raise ValueError("low interval must end at switch_temperature_K")
+        if not isclose(self.high.temperature_min_K, switch, rel_tol=0.0, abs_tol=1.0e-12):
+            raise ValueError("high interval must begin at switch_temperature_K")
+        if self.high.temperature_max_K <= self.low.temperature_min_K:
+            raise ValueError("piecewise thermo temperature range is invalid")
+
+    @property
+    def name(self) -> str:
+        return self.low.name
+
+    @property
+    def molecular_weight_kg_per_kmol(self) -> float:
+        return self.low.molecular_weight_kg_per_kmol
+
+    @property
+    def temperature_min_K(self) -> float:
+        return self.low.temperature_min_K
+
+    @property
+    def temperature_max_K(self) -> float:
+        return self.high.temperature_max_K
+
+    def _interval(self, temperature_K: float) -> SpeciesThermoPolynomial:
+        T = float(temperature_K)
+        if not isfinite(T):
+            raise ValueError("temperature_K must be finite")
+        if not self.temperature_min_K <= T <= self.temperature_max_K:
+            raise ValueError(
+                f"temperature_K={T} is outside {self.name} validity range "
+                f"[{self.temperature_min_K}, {self.temperature_max_K}]"
+            )
+        return self.low if T <= self.switch_temperature_K else self.high
+
+    def gas_constant(
+        self,
+        universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
+    ) -> float:
+        return self.low.gas_constant(universal_gas_constant)
+
+    def cp(
+        self,
+        temperature_K: float,
+        universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
+    ) -> float:
+        return self._interval(temperature_K).cp(
+            temperature_K, universal_gas_constant
+        )
+
+    def h(
+        self,
+        temperature_K: float,
+        universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
+    ) -> float:
+        return self._interval(temperature_K).h(
+            temperature_K, universal_gas_constant
+        )
+
+
+SpeciesThermoModel = SpeciesThermoPolynomial | PiecewiseSpeciesThermo
 
 
 @dataclass(frozen=True)
@@ -134,11 +235,11 @@ def _positive(name: str, value: object) -> float:
 
 def normalized_mass_fractions(
     mass_fractions: Mapping[str, float],
-    species: Mapping[str, SpeciesThermoPolynomial],
+    species: Mapping[str, SpeciesThermoModel],
     *,
     sum_tolerance: float = 1.0e-10,
 ) -> dict[str, float]:
-    """Validate a complete mass-fraction mapping without silently renormalizing it."""
+    """Validate mass fractions without silently renormalizing them."""
 
     if not mass_fractions:
         raise ValueError("mass_fractions must not be empty")
@@ -167,7 +268,7 @@ def normalized_mass_fractions(
 
 def mixture_molecular_weight(
     mass_fractions: Mapping[str, float],
-    species: Mapping[str, SpeciesThermoPolynomial],
+    species: Mapping[str, SpeciesThermoModel],
 ) -> float:
     """Return mixture molecular weight [kg/kmol] from ``1/W=sum(Y_i/W_i)``."""
 
@@ -184,7 +285,7 @@ def mixture_molecular_weight(
 def mixture_thermo_state(
     temperature_K: float,
     mass_fractions: Mapping[str, float],
-    species: Mapping[str, SpeciesThermoPolynomial],
+    species: Mapping[str, SpeciesThermoModel],
     *,
     universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
 ) -> MixtureThermoState:
@@ -229,7 +330,7 @@ def mixture_pressure(
     density_kg_per_m3: float,
     temperature_K: float,
     mass_fractions: Mapping[str, float],
-    species: Mapping[str, SpeciesThermoPolynomial],
+    species: Mapping[str, SpeciesThermoModel],
     *,
     universal_gas_constant: float = UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K,
 ) -> float:
@@ -248,7 +349,7 @@ def mixture_pressure(
 def temperature_from_specific_internal_energy(
     target_internal_energy_J_per_kg: float,
     mass_fractions: Mapping[str, float],
-    species: Mapping[str, SpeciesThermoPolynomial],
+    species: Mapping[str, SpeciesThermoModel],
     *,
     temperature_min_K: float,
     temperature_max_K: float,
@@ -258,9 +359,9 @@ def temperature_from_specific_internal_energy(
 ) -> float:
     """Invert ``e(T,Y)`` by bounded bisection for future conservative-state use.
 
-    The composition is fixed during the inversion.  The caller must provide a
-    bracket contained within every active species polynomial validity interval.
-    No extrapolation or clipping is performed.
+    The composition is fixed during the inversion. The caller must provide a
+    bracket contained within every active species model validity interval. No
+    extrapolation or clipping is performed.
     """
 
     target = float(target_internal_energy_J_per_kg)
@@ -271,7 +372,11 @@ def temperature_from_specific_internal_energy(
     if hi <= lo:
         raise ValueError("temperature_max_K must exceed temperature_min_K")
     tolerance = _positive("temperature_tolerance_K", temperature_tolerance_K)
-    if not isinstance(max_iterations, int) or isinstance(max_iterations, bool) or max_iterations < 1:
+    if (
+        not isinstance(max_iterations, int)
+        or isinstance(max_iterations, bool)
+        or max_iterations < 1
+    ):
         raise ValueError("max_iterations must be a positive integer")
 
     def energy(T: float) -> float:
@@ -287,9 +392,7 @@ def temperature_from_specific_internal_energy(
     if e_hi <= e_lo:
         raise ValueError("internal energy must increase across the supplied temperature bracket")
     if not e_lo <= target <= e_hi:
-        raise ValueError(
-            "target internal energy is outside the supplied temperature bracket"
-        )
+        raise ValueError("target internal energy is outside the supplied temperature bracket")
 
     for _ in range(max_iterations):
         mid = 0.5 * (lo + hi)
