@@ -37,12 +37,18 @@ def test_source_requires_supersonic_separation_free_simple_validation() -> None:
     assert "does not resolve a physical shock train" in policy["shock_train_gate"]
 
 
-def test_inlet_and_friction_inputs_remain_explicitly_unresolved() -> None:
+def test_inlet_and_numeric_friction_inputs_remain_unresolved_but_convention_is_closed() -> None:
     record = _load()
     unresolved = {item["item"]: item for item in record["unresolved_reproduction_inputs"]}
+    resolved = {item["item"]: item for item in record["resolved_reproduction_inputs"]}
 
     assert unresolved["Fig. 14 station-3 / combustor-inlet boundary state"]["status"] == "NOT_FROZEN"
     assert unresolved["Fig. 14 wall-friction coefficient Cf"]["status"] == "NOT_FROZEN"
-    assert unresolved["Cf convention to repository Darcy friction factor"]["status"] == "NOT_FROZEN"
+    assert "Cf convention to repository Darcy friction factor" not in unresolved
+
+    convention = resolved["Cf convention to repository Darcy friction factor"]
+    assert convention["status"] == "RESOLVED_DERIVED_FROM_SOURCE_DEFINITION"
+    assert convention["mapping"] == "f_D = 4 Cf"
+    assert record["friction_convention_closure"]["mapping"] == "f_D = 4 Cf"
     assert "does not disable friction" in record["cross_source_boundary"]["not_authorized"]
-    assert "would not by itself" in record["formal_case_effect"]
+    assert "still not fully specify" in record["formal_case_effect"]
