@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "stage": "P11.3C",
+  "status": "TEACHER_CH11_MIXING_AND_LEAN_COMPOSITION_CLOSURES_TRANSCRIBED_SOLVER_COUPLING_GATED",
+  "primary_source": {
+    "identity": "高超声速气动布局理论及应用, 第11章 双模态冲压发动机一维数值模拟",
+    "page_range": "256-258",
+    "local_evidence": [
+      "乔老师项目/IMG_2464.HEIC.JPG",
+      "乔老师项目/IMG_2465.HEIC.JPG",
+      "乔老师项目/IMG_2466.HEIC.JPG"
+    ]
+  },
+  "equations": {
+    "11.19": {
+      "topic": "mixing efficiency correlations",
+      "branches": ["parallel injection", "normal injection", "strut injection"],
+      "source_ranges": {
+        "alpha": [0.17, 0.25],
+        "A": [1.77, 3.4]
+      },
+      "implementation_policy": "RETURN_RAW_EMPIRICAL_CORRELATION_WITHOUT_SILENT_CLIPPING"
+    },
+    "11.20": {
+      "topic": "complete-mixing length",
+      "source_range_C_m": [25.0, 60.0],
+      "branch_condition": "phi0 <= 1 versus phi0 > 1"
+    },
+    "11.21-11.24": {
+      "topic": "complete-combustion stoichiometry and equivalence ratio",
+      "stoichiometric_fuel_air_ratio_formula": "(36*x + 3*y) / (103*(4*x + y))",
+      "textbook_reference_values": {
+        "H2": 0.0291,
+        "C2H4": 0.068,
+        "C10H22": 0.0667
+      }
+    },
+    "11.27-11.29": {
+      "topic": "lean-mixture composition with combustion efficiency",
+      "validity": "phi <= 1",
+      "air_molar_basis_per_O2": {
+        "N2": 3.7274,
+        "AR": 0.04592
+      },
+      "fuel_branches": ["H2", "C10H22", "C2H4"]
+    }
+  },
+  "scientific_boundaries": {
+    "raw_mixing_efficiency_can_exceed_one": true,
+    "reaction_efficiency_requires_unit_interval": true,
+    "raw_to_reaction_efficiency_policy": "UNRESOLVED_FOR_SOLVER_COUPLING",
+    "rich_composition_branch": "NOT_PROVIDED_BY_THE_TRANSCRIBED_SOURCE_SECTION",
+    "chemical_energy_source": "NOT_ADDED_IN_THIS_CLOSURE_MODULE",
+    "prescribed_Qdot_double_counting_forbidden": true
+  },
+  "thermochemistry_coverage": {
+    "H2": "CORE_THERMO_DATABASE_AVAILABLE",
+    "C2H4": "CORE_THERMO_DATABASE_AVAILABLE",
+    "C10H22": "REACTION_STOICHIOMETRY_TRANSCRIBED_THERMO_POLYNOMIALS_STILL_BLOCKED"
+  },
+  "readiness": {
+    "source_transcription_ready": true,
+    "isolated_closure_verification_ready": true,
+    "variable_composition_solver_coupling_ready": false,
+    "production_solver_replacement_ready": false
+  },
+  "next_gate": "Freeze an explicit raw-mixing-to-combustion-efficiency saturation policy and then couple source-backed H2/C2H4 composition evolution to the already verified variable-thermochemistry state/time-marching path without chemical-energy double counting."
+}
