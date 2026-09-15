@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "record_kind": "nasa-reference-solution-derived-conservative-exit-moment-target",
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "status": "FROZEN_CONSERVATIVE_MOMENT_MATCHED_EXIT_TARGET",
+  "source_class": "NASA_REFERENCE_SOLUTION_DERIVED",
+  "purpose": "Define the physically consistent one-dimensional exit target implied by the same frozen NASA Wind-US conservative moments used to construct the reduced-domain inlet and signed source closures. This target is a computational-reference-derived moment match, not an experimental measurement and not a fit to the experimental exit profiles.",
+  "source_integral_targets": {
+    "area_exit_m2": 0.0053448,
+    "mass_flow_kg_s": 1.9853071417940482,
+    "axial_momentum_flux_N": 3985.9836315385616,
+    "specific_total_enthalpy_J_per_kg": 3485491.7505284785
+  },
+  "derivation": {
+    "mass_relation": "mdot = rho*u*A",
+    "momentum_relation": "J = (rho*u^2 + p)*A",
+    "energy_relation": "h0 = cp*T + u^2/2",
+    "equation_of_state": "p = rho*R*T",
+    "branch_policy": "Solve the resulting quadratic for u and select the unique positive supersonic branch for the effective gas. The alternate positive subsonic root is retained only as a mathematical diagnostic and is not selected.",
+    "reference_effective_gas": {
+      "R_J_per_kg_K": 329.4821420180208,
+      "gamma": 1.2779315953440815,
+      "cp_J_per_kg_K": 1514.9614021579816
+    },
+    "reference_gamma_supersonic_state": {
+      "rho_kg_per_m3": 0.20950282544618182,
+      "u_m_per_s": 1772.9903086754182,
+      "p_Pa": 87197.52084149444,
+      "T_K": 1263.229829138864,
+      "Mach": 2.4310586214846666
+    },
+    "reference_gamma_alternate_subsonic_root": {
+      "u_m_per_s": 479.7168077771741,
+      "Mach": 0.4956481287412839
+    }
+  },
+  "provenance": {
+    "inlet_record": "cases/studies/data/p11_2b_nasa_bk_reference_inlet_reduction.json",
+    "energy_record": "cases/studies/data/p11_2b_nasa_bk_reference_energy_reduction.json",
+    "momentum_record": "cases/studies/data/p11_2b_nasa_bk_reference_momentum_reduction.json",
+    "geometry_record": "cases/studies/data/p11_2b_nasa_bk_geometry_source.json",
+    "J_exit_locator": "reference_momentum_reduction.section_reduction.reference_flux_diagnostics.J_exit_N",
+    "h0_exit_derivation": "h0_exit = h0_inlet_frozen + delta_h0_eff_exit_frozen"
+  },
+  "claim_boundary": [
+    "This exit target is derived from the NASA Wind-US computational reference solution, not from the Burrows-Kurkov experimental probe profiles.",
+    "Mass-flux-weighted Mach, area-weighted pressure, and mass-flux-weighted temperature from a nonuniform two-dimensional section are not thermodynamically equivalent to a single one-dimensional primitive state and therefore are diagnostic-only comparisons.",
+    "The conservative moment-matched exit state is the correct internal consistency target for the reduced-order solver driven by the same reference-derived integral closures.",
+    "Agreement with this target verifies the reduction/solver consistency; it does not independently validate finite-rate chemistry or species transport."
+  ]
+}
