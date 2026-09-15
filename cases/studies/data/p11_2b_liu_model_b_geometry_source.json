@@ -14,12 +14,21 @@
       "citation": "Qili Liu, Damiano Baccarella, Gyu-Sub Lee, Tonghun Lee, Influences of Cavity on Combustion Stabilization in an Axisymmetric Scramjet, AIAA SciTech Forum (2019), AIAA 2019-1681.",
       "doi": "10.2514/6.2019-1681",
       "role": "earlier same-program geometry/diagnostic description"
+    },
+    {
+      "source_id": "SRC12",
+      "citation": "Hang Liu, Wei Yao, LES investigation of nonequilibrium flow in a cavity-flameholding axisymmetric scramjet, AIAA Propulsion and Energy Forum 2021, AIAA 2021-3536.",
+      "doi": "10.2514/6.2021-3536",
+      "role": "independent full-scale reconstruction of the Liu axisymmetric geometry; used for dimensional cross-checks only"
     }
   ],
   "confirmed_geometry_records": {
     "overall_model_length_m_from_SRC11": 0.752,
+    "overall_model_length_m_from_SRC12": 0.75243,
+    "inlet_length_m_from_SRC12": 0.03743,
     "isolator_diameter_m": 0.035,
     "isolator_length_m_from_SRC10": 0.254,
+    "constant_diameter_length_from_inlet_end_to_cavity_leading_edge_m_from_SRC12": 0.296,
     "inlet_area_contraction_ratio": 1.9,
     "inlet_internal_lip_angle_deg": 10.0,
     "injector_location_downstream_from_inlet_lip_m": 0.2914,
@@ -35,6 +44,14 @@
   },
   "derived_geometry_consistency": {
     "derivation_status": "SOURCE_BACKED_GEOMETRIC_DERIVATION",
+    "station3_from_inlet_formula": "inlet_length + isolator_length = 0.03743 + 0.254",
+    "station3_from_inlet_m": 0.29143,
+    "source_reported_injector_from_inlet_lip_m": 0.2914,
+    "station3_axial_closure_residual_m": 0.00003,
+    "station3_axial_closure_residual_mm": 0.03,
+    "constant_section_to_cavity_formula": "isolator_length + injector_to_cavity = 0.254 + 0.042",
+    "constant_section_to_cavity_m": 0.296,
+    "SRC12_reported_constant_section_to_cavity_m": 0.296,
     "cavity_ramp_axial_projection_formula": "L_ramp = cavity_depth / tan(cavity_ramp_angle)",
     "cavity_ramp_axial_projection_m": 0.026556349186104045,
     "cavity_leading_edge_to_closeout_m": 0.061556349186104045,
@@ -43,12 +60,15 @@
     "formula_injector_to_divergence_start": "0.042 + 0.035 + 0.011/tan(22.5 deg)",
     "divergence_start_downstream_from_inlet_lip_m": 0.394956349186104,
     "formula_divergence_start_from_inlet_lip": "0.2914 + 0.042 + 0.035 + 0.011/tan(22.5 deg)",
-    "reconstructed_total_length_m": 0.751956349186104,
-    "formula_reconstructed_total_length": "0.2914 + 0.042 + 0.035 + 0.011/tan(22.5 deg) + 0.357",
-    "source_reported_total_length_m": 0.752,
-    "absolute_closure_residual_m": 0.000043650813896,
-    "closure_residual_mm": 0.043650813896,
-    "interpretation": "The independently reported 752 mm overall length closes to within 0.044 mm when the 11 mm cavity depth and 22.5 deg closeout ramp are converted to their axial projection. This strongly fixes the cavity-module/replacement-tube axial extent without reading coordinates from the figure."
+    "reconstructed_total_length_m_using_SRC10_lip_reference": 0.751956349186104,
+    "formula_reconstructed_total_length_using_SRC10": "0.2914 + 0.042 + 0.035 + 0.011/tan(22.5 deg) + 0.357",
+    "source_reported_total_length_m_SRC11": 0.752,
+    "closure_residual_to_SRC11_mm": 0.043650813896,
+    "reconstructed_total_length_m_using_SRC12_inlet_and_constant_section": 0.751986349186104,
+    "formula_reconstructed_total_length_using_SRC12": "0.03743 + 0.296 + 0.035 + 0.011/tan(22.5 deg) + 0.357",
+    "source_reported_total_length_m_SRC12": 0.75243,
+    "closure_residual_to_SRC12_mm": 0.443650813896,
+    "interpretation": "Three independent dimensional identities close consistently: 37.43 mm inlet + 254 mm isolator gives the 291.4 mm injector station to 0.03 mm; 254 mm + 42 mm gives the independently reported 296 mm constant-diameter run to the cavity leading edge exactly; and the cavity-floor/ramp projection plus 357 mm diverging section reconstructs the reported overall length to sub-millimetre residuals. These are rounding-level residuals, not free fitting parameters."
   },
   "model_B_corollary": {
     "SRC10_statement": "model B replaces the cavity flameholder by a constant-cross-sectional tube with the same diameter as the isolator",
@@ -67,17 +87,22 @@
     "station_4_definition": "combustor exit",
     "preferred_solver_origin": "station 3 / injector plane",
     "preferred_solver_origin_status": "PROJECT_COORDINATE_CONVENTION_ALLOWED",
+    "source_station3_coordinate_m_from_SRC10": 0.2914,
+    "source_station3_coordinate_m_crosscheck_from_SRC12": 0.29143,
+    "solver_coordinate_transform": "x_solver = x_source - x_station3; use 0.2914 m when source x is referenced to the SRC10 inlet plane, retaining the 0.03 mm SRC12 dimensional cross-check residual",
     "divergence_start_in_solver_coordinates_m": 0.10355634918610404,
     "combustor_exit_in_solver_coordinates_m": 0.46055634918610404,
-    "source_to_solver_absolute_offset_m": null,
-    "absolute_offset_status": "NOT_REQUIRED_IF_ALL_RECOVERED_VALIDATION_SHAPE_COORDINATES_ARE_REBASED_TO_STATION_3_WITH_TRACEABLE_SOURCE_LOCATORS"
+    "source_to_solver_absolute_offset_m": 0.2914,
+    "absolute_offset_status": "FROZEN_FROM_SRC10_AND_INDEPENDENTLY_CLOSED_BY_SRC12_DIMENSIONS"
   },
   "evidence_boundary": [
     "The model-B constant-area replacement and its 35 mm diameter are source-backed.",
     "The 42 mm injector-to-cavity-leading-edge distance is source-backed and remains constant-area in the corresponding model-B location.",
-    "The model-B replacement-tube axial extent is derived from source-stated cavity floor/depth/ramp dimensions and independently cross-checked by the source-reported 752 mm overall model length and 357 mm diverging-section length; the closure residual is only about 0.044 mm.",
+    "SRC12 independently closes the station-3 location: its 37.43 mm inlet plus 254 mm isolator gives 291.43 mm, matching the SRC10 injector coordinate 291.4 mm within 0.03 mm.",
+    "SRC12's 296 mm constant-diameter run from inlet end to cavity leading edge equals 254 mm isolator plus 42 mm injector-to-cavity distance exactly, clarifying that these lengths use different endpoints rather than conflicting geometries.",
+    "The model-B replacement-tube axial extent is derived from source-stated cavity floor/depth/ramp dimensions and independently cross-checked by two reported overall model lengths; no figure-coordinate digitization is used.",
     "The 2 degree cone angle is still retained as a raw source descriptor; whether it denotes the wall half-angle or included cone angle is not silently assumed.",
-    "A formal area profile remains blocked only on the 2 degree cone-angle convention, not on the axial location of the divergence start."
+    "A formal area profile remains blocked only on the 2 degree cone-angle convention, not on the station-3 coordinate, divergence-start location, or combustor-exit axial location."
   ],
-  "next_geometry_evidence_priority": "Resolve the 2-degree cone-angle convention from the original dimensioned figure, a source-defined outlet radius/diameter, or an authoritative same-geometry description; do not guess half-angle versus included angle."
+  "next_geometry_evidence_priority": "Resolve the 2-degree cone-angle convention from an authoritative geometry definition, source-defined outlet radius/diameter, or an unambiguous original dimensioned figure; do not infer half-angle versus included angle from nomenclature alone."
 }
