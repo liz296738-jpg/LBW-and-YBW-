@@ -31,7 +31,7 @@ def test_source_ledger_loads_and_remains_parameter_gated() -> None:
     assert data["project_decision"]["momentum_added"] is False
 
 
-def test_jin_liu_validation_chain_preserves_condition_discrepancy() -> None:
+def test_jin_liu_validation_chain_preserves_condition_conflict_and_closed_axial_mapping() -> None:
     data = MODULE.load_heat_release_source_ledger()
     src10 = next(source for source in data["sources"] if source["source_id"] == "SRC10")
     chain = data["candidate_validation_chains"][0]
@@ -41,11 +41,15 @@ def test_jin_liu_validation_chain_preserves_condition_discrepancy() -> None:
     assert src10["cross_source_validation_link"]["jin_reported_condition"] == "scramjet model B with phi=1.04"
     assert (
         src10["cross_source_validation_link"]["condition_identity_status"]
-        == "UNRESOLVED_1.04_VS_1.03_DISCREPANCY"
+        == "UNRESOLVED_CROSS_MODEL_EQUIVALENCE_RATIO_CONFLICT"
     )
     assert chain["candidate_id"] == "JIN-LIU-MODEL-B-VALIDATION"
     assert chain["status"] == "BLOCKED"
     assert chain["formal_candidate"] is False
+    assert chain["supporting_source_ids"] == ["SRC11", "SRC12"]
+    assert any("x_solver = x_source - 0.2914 m" in item for item in chain["resolved_requirements"])
+    assert not any("freeze the source-to-solver axial coordinate mapping" in item for item in chain["blockers"])
+    assert any("2 degree cone angle" in item for item in chain["blockers"])
     assert data["candidate_formal_cases"] == []
 
 
