@@ -5,19 +5,18 @@ The teacher governing equation is written for ``q = A*u_conservative`` as
 ``d(Au)/dt + d(Af)/dx = S``.
 
 The existing quasi-one-dimensional operator already contains the geometric
-``p*dA/dx`` term.  This module therefore supplies only the remaining Eq. (11.38)
+``p*dA/dx`` term. This module therefore supplies only the remaining Eq. (11.38)
 terms after division by local cell area:
 
 * injected mass ``(d mdot_s/dx)/A``;
 * injected axial momentum ``u_sx (d mdot_s/dx)/A``;
 * teacher wall friction ``-0.5 rho u^2 (4 f / D_e)``;
-* wall heat ``rho u d(delta q)/dx`` when an explicit dimensional gradient is
-  supplied;
+* wall heat ``rho u d(delta q)/dx`` when an explicit dimensional gradient is supplied;
 * injected total enthalpy ``h_ts (d mdot_s/dx)/A``.
 
 The empirical Eq. (11.26) wall-heat coefficient is **not** converted here to
 ``d(delta q)/dx`` because that dimensional adapter is not frozen by the current
-source evidence.  Chemical reaction heat is also not added separately: the
+source evidence. Chemical reaction heat is also not added separately: the
 teacher variable-composition path carries reaction energy through absolute
 species energy.
 """
@@ -32,15 +31,9 @@ from numpy.typing import ArrayLike, NDArray
 
 from .geometry import AreaProfile
 from .teacher_combustion import TeacherFuel
-from .teacher_wall import (
-    darcy_friction_factor_from_teacher_f,
-    friction_coefficient_raw,
-)
+from .teacher_wall import darcy_friction_factor_from_teacher_f, friction_coefficient_raw
 from .thermochemistry import SpeciesThermoModel
-from .variable_composition import (
-    TeacherCompositionField,
-    variable_composition_conservative_to_primitive,
-)
+from .variable_composition import TeacherCompositionField, variable_composition_conservative_to_primitive
 
 
 def _positive_scalar(name: str, value: object) -> float:
@@ -61,11 +54,7 @@ def _finite_cell_profile(name: str, value: ArrayLike, num_cells: int) -> NDArray
     return np.asarray(profile, dtype=float)
 
 
-def _nonnegative_cell_profile(
-    name: str,
-    value: ArrayLike,
-    num_cells: int,
-) -> NDArray[np.float64]:
+def _nonnegative_cell_profile(name: str, value: ArrayLike, num_cells: int) -> NDArray[np.float64]:
     profile = _finite_cell_profile(name, value, num_cells)
     if np.any(profile < 0.0):
         raise ValueError(f"{name} must be nonnegative")
@@ -80,14 +69,10 @@ def localized_injector_mass_flow_gradient(
 ) -> NDArray[np.float64]:
     """Return finite-volume ``d(mdot_s)/dx`` for one localized injector cell.
 
-    The teacher source describes the discrete addition as ``Delta mdot_s / Delta
-    x``.  This adapter places the prescribed total mass-flow addition in exactly
-    one finite-volume cell, so
-
-    ``sum((dmdot/dx)_i * dx) == injected_fuel_mass_flow_rate``.
-
-    No sub-cell injection-position model or distributed cumulative-flow rule is
-    implied.
+    The teacher source describes the discrete addition as ``Delta mdot_s / Delta x``.
+    This adapter places the prescribed total mass-flow addition in exactly one
+    finite-volume cell, so ``sum((dmdot/dx)_i * dx) == injected mass flow``.
+    No sub-cell injection-position model or distributed cumulative-flow rule is implied.
     """
 
     if isinstance(num_cells, bool) or not isinstance(num_cells, (int, np.integer)) or num_cells < 1:
@@ -97,10 +82,7 @@ def localized_injector_mass_flow_gradient(
     index = int(injector_cell)
     if index < 0 or index >= int(num_cells):
         raise IndexError("injector_cell is outside the finite-volume domain")
-    fuel_flow = _positive_scalar(
-        "injected_fuel_mass_flow_rate_kg_per_s",
-        injected_fuel_mass_flow_rate_kg_per_s,
-    )
+    fuel_flow = _positive_scalar("injected_fuel_mass_flow_rate_kg_per_s", injected_fuel_mass_flow_rate_kg_per_s)
     dx = _positive_scalar("dx_m", dx_m)
     gradient = np.zeros(int(num_cells), dtype=float)
     gradient[index] = fuel_flow / dx
@@ -116,7 +98,7 @@ def injected_fuel_specific_total_enthalpy(
     """Return teacher ``h_ts`` [J/kg] for a pure H2/C2H4 injected stream.
 
     ``h_ts = h_s(T_s) + u_sx^2/2`` uses the same absolute source-backed species
-    enthalpy convention as the variable-composition flow model.  Only axial
+    enthalpy convention as the variable-composition flow model. Only axial
     injection kinetic energy is represented because Eq. (11.38) supplies the
     axial velocity component ``u_sx``.
     """
@@ -132,8 +114,7 @@ def injected_fuel_specific_total_enthalpy(
     velocity = float(axial_velocity_m_per_s)
     if not isfinite(velocity):
         raise ValueError("axial_velocity_m_per_s must be finite")
-    sensible_and_chemical_enthalpy = float(species[fuel].h(temperature))
-    return sensible_and_chemical_enthalpy + 0.5 * velocity**2
+    return float(species[fuel].h(temperature)) + 0.5 * velocity**2
 
 
 def teacher_eq_11_38_non_geometric_source(
@@ -145,18 +126,17 @@ def teacher_eq_11_38_non_geometric_source(
     phi: ArrayLike,
     eta: ArrayLike,
     hydraulic_diameter_m: ArrayLike,
-    fuel_mass_flow_gradient_kg_per_s_per_m: ArrayLike = 0.0,
-    fuel_axial_velocity_m_per_s: ArrayLike = 0.0,
-    fuel_specific_total_enthalpy_J_per_kg: ArrayLike = 0.0,
-    wall_specific_heat_gain_gradient_J_per_kg_per_m: ArrayLike = 0.0,
+    fuel_mass_flow_gradient_kg_per_s_per_m: ArrayLike,
+    fuel_axial_velocity_m_per_s: ArrayLike,
+    fuel_specific_total_enthalpy_J_per_kg: ArrayLike,
+    wall_specific_heat_gain_gradient_J_per_kg_per_m: ArrayLike,
 ) -> NDArray[np.float64]:
     """Return Eq. (11.38) non-geometric contribution to ``dU/dt``.
 
-    The returned array has shape ``(N,3)`` and units matching the conservative
-    flow RHS after the teacher source vector is divided by local area.
-
-    ``wall_specific_heat_gain_gradient_J_per_kg_per_m`` is the *dimensional*
-    ``d(delta q)/dx`` appearing in Eq. (11.38).  This function does not derive it
+    All source channels are explicit arguments, including zeros. This prevents
+    a caller from silently omitting injected enthalpy or wall heat by relying on
+    defaults. ``wall_specific_heat_gain_gradient_J_per_kg_per_m`` is the
+    dimensional ``d(delta q)/dx`` appearing in Eq. (11.38); it is not derived
     from the empirical Eq. (11.26) coefficient.
     """
 
@@ -174,9 +154,7 @@ def teacher_eq_11_38_non_geometric_source(
 
     primitive = variable_composition_conservative_to_primitive(states, field, species)
     if np.any(primitive.u < 0.0):
-        raise ValueError(
-            "teacher Eq.11.38 friction adapter currently supports forward axial flow u >= 0 only"
-        )
+        raise ValueError("teacher Eq.11.38 friction adapter currently supports forward axial flow u >= 0 only")
 
     num_cells = field.num_cells
     phi_profile = _nonnegative_cell_profile("phi", phi, num_cells)
@@ -188,19 +166,13 @@ def teacher_eq_11_38_non_geometric_source(
         raise ValueError("hydraulic_diameter_m must be strictly positive")
 
     mass_gradient = _nonnegative_cell_profile(
-        "fuel_mass_flow_gradient_kg_per_s_per_m",
-        fuel_mass_flow_gradient_kg_per_s_per_m,
-        num_cells,
+        "fuel_mass_flow_gradient_kg_per_s_per_m", fuel_mass_flow_gradient_kg_per_s_per_m, num_cells
     )
     injection_velocity = _finite_cell_profile(
-        "fuel_axial_velocity_m_per_s",
-        fuel_axial_velocity_m_per_s,
-        num_cells,
+        "fuel_axial_velocity_m_per_s", fuel_axial_velocity_m_per_s, num_cells
     )
     injection_total_enthalpy = _finite_cell_profile(
-        "fuel_specific_total_enthalpy_J_per_kg",
-        fuel_specific_total_enthalpy_J_per_kg,
-        num_cells,
+        "fuel_specific_total_enthalpy_J_per_kg", fuel_specific_total_enthalpy_J_per_kg, num_cells
     )
     wall_heat_gradient = _finite_cell_profile(
         "wall_specific_heat_gain_gradient_J_per_kg_per_m",
