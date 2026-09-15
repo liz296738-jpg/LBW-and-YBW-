@@ -1,0 +1,92 @@
+name: P11.2B NASA BK Heated Candidate
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/p11_2b_nasa_bk_heated_candidate.yml"
+      - "cases/studies/p11_2b_nasa_bk_heated_candidate.py"
+      - "cases/studies/p11_2b_nasa_bk_energy_reduction.py"
+      - "cases/studies/data/p11_2b_nasa_bk_reference_delta_h0.csv"
+      - "cases/studies/data/p11_2b_nasa_bk_reference_energy_reduction.json"
+      - "src/scramjet1d/net_energy.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  run-heated-candidate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project
+        run: pip install -e ".[dev]"
+
+      - name: Run reference-gamma candidate
+        run: |
+          python cases/studies/p11_2b_nasa_bk_heated_candidate.py \
+            --output-dir nasa_bk_heated/reference_gamma \
+            --cells 80
+
+      - name: Run lower-gamma sensitivity candidate
+        run: |
+          python cases/studies/p11_2b_nasa_bk_heated_candidate.py \
+            --output-dir nasa_bk_heated/lower_gamma \
+            --cells 80 \
+            --gamma 1.246731797999899
+
+      - name: Validate candidate scope and convergence
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          summaries = {}
+          for name in ("reference_gamma", "lower_gamma"):
+              path = Path("nasa_bk_heated") / name / "summary.json"
+              data = json.loads(path.read_text(encoding="utf-8"))
+              summaries[name] = data
+              assert data["source_class"] == "NASA_REFERENCE_SOLUTION_DERIVED"
+              assert data["solver"]["converged"], (name, data["solver"])
+              assert data["solver"]["termination_reason"] == "converged"
+              assert data["flow_scope"]["minimum_Mach"] > 1.0, (name, data["flow_scope"])
+              assert data["energy_closure"]["absolute_mismatch_W"] < 1.0e-8
+
+          compact = {
+              name: {
+                  "gamma": data["gas"]["gamma"],
+                  "steps": data["solver"]["steps"],
+                  "residual": data["solver"]["final_residual"],
+                  "min_Mach": data["flow_scope"]["minimum_Mach"],
+                  "exit_Mach": data["flow_scope"]["exit_Mach"],
+                  "exit_T_K": data["flow_scope"]["exit_temperature_K"],
+                  "exit_T0_K": data["flow_scope"]["exit_total_temperature_K"],
+                  "specific_energy_error_J_per_kg": data["energy_closure"]["specific_energy_error_J_per_kg"],
+              }
+              for name, data in summaries.items()
+          }
+          Path("nasa_bk_heated/comparison.json").write_text(
+              json.dumps(compact, indent=2, sort_keys=True), encoding="utf-8"
+          )
+          print(json.dumps(compact, indent=2, sort_keys=True))
+          PY
+
+      - name: Hash candidate outputs
+        run: |
+          find nasa_bk_heated -type f -print0 | sort -z | xargs -0 sha256sum \
+            > nasa_bk_heated/SHA256SUMS.txt
+
+      - name: Upload candidate artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p11-2b-nasa-bk-heated-candidate
+          path: nasa_bk_heated/
+          retention-days: 14
+          if-no-files-found: error
