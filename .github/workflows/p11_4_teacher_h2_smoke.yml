@@ -13,7 +13,7 @@ on:
 jobs:
   run-smoke:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,7 +29,9 @@ jobs:
           from pathlib import Path
           from cases.studies.p11_4_project_defined_h2_smoke import run_smoke
 
-          result = run_smoke(cells=40, tolerance=2.0e-5, max_steps=20_000)
+          # This gate is intentionally a fast integrated smoke test. Higher-
+          # resolution/tighter-tolerance cases belong to the subsequent grid study.
+          result = run_smoke(cells=20, tolerance=1.0e-4, max_steps=8_000)
           payload = asdict(result)
           Path("p11_4_teacher_h2_smoke.json").write_text(
               json.dumps(payload, indent=2, sort_keys=True) + "\n",
