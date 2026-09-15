@@ -45,7 +45,7 @@ See `docs/teacher_reference_alignment.md` and `cases/studies/data/teacher_refere
 
 ### Numerical compatibility
 
-Already present:
+Already present/completed:
 
 - conservative quasi-one-dimensional formulation;
 - variable-area finite-volume solver;
@@ -53,11 +53,11 @@ Already present:
 - raw Steger-Warming FVS;
 - SSP/TVD RK3;
 - CFL stepping;
-- compatible physical/transmissive boundaries.
+- compatible physical/transmissive boundaries;
+- Chapter 11 Eq. 11.46 maximum relative-density iteration-change diagnostic, added alongside the existing normalized steady-residual gate.
 
-Required closeout:
+Remaining closeout:
 
-- Chapter 11 Eq. 11.46 maximum relative-density iteration-change diagnostic;
 - source-frozen policy for Eq. 11.44 near-sonic eigenvalue smoothing;
 - teacher-reference case adapter for inlet/output semantics where needed.
 
