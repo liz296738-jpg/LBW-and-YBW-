@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-prescribed-composition-time-march-readiness",
+  "stage": "P11.3G",
+  "status": "PRESCRIBED_COMPOSITION_SSP_RK3_IMPLEMENTED_DYNAMIC_CLOSURE_PENDING",
+  "purpose": "Verify CFL-controlled SSP-RK3 time advancement of the three quasi-one-dimensional flow equations when a source-backed H2/C2H4 composition field is prescribed and held fixed during all RK stages, before allowing phi/eta/composition to evolve with the flow.",
+  "implemented": [
+    "cell-wise variable-composition CFL estimate CFL*dx/max(|u|+sqrt(gamma*R*T))",
+    "one-step SSP-RK3 wrapper using the P11.3F variable-composition quasi-1D Rusanov RHS",
+    "transient source-free prescribed-composition solver",
+    "post-step thermochemical admissibility validation"
+  ],
+  "verification": {
+    "uniform_composition_cfl_reduces_to_fixed_composition_solver": true,
+    "uniform_composition_one_step_reduces_to_fixed_composition_solver": true,
+    "uniform_composition_short_transient_reduces_to_fixed_composition_solver": true,
+    "varying_composition_short_transient_is_finite_and_thermochemically_valid": true,
+    "uniform_flow_preserved_for_uniform_composition": true,
+    "geometry_and_max_step_guards": true
+  },
+  "scientific_boundaries": [
+    "The composition field is immutable during the entire transient; this is not yet dynamic combustion closure coupling.",
+    "No species-transport PDE or conservative species flux is added.",
+    "No fuel injection, wall friction, wall heat transfer, or teacher reaction update is connected in this stage.",
+    "No independent teacher chemical Qdot source is added; chemical energy remains embedded in absolute composition-dependent species energy.",
+    "Rusanov and transmissive boundaries remain compatibility choices; teacher variable-composition Steger-Warming and final inlet/outlet semantics remain pending."
+  ],
+  "readiness": {
+    "variable_composition_state_ready": true,
+    "variable_composition_euler_operator_ready": true,
+    "variable_composition_cfl_ready": true,
+    "prescribed_composition_ssp_rk3_ready": true,
+    "dynamic_phi_eta_composition_update_ready": false,
+    "teacher_fuel_source_coupling_ready": false,
+    "teacher_wall_source_coupling_ready": false,
+    "teacher_variable_composition_steger_warming_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Define and verify the dynamic algebraic update contract that maps source-backed fuel/air flow, injection location, mixing efficiency and combustion efficiency into phi(x), eta(x), and Y_i(x) without chemical-energy double counting, before coupling wall/fuel sources into a formal teacher case."
+}
