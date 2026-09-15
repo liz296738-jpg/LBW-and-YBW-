@@ -13,6 +13,7 @@ MODULE_PATH = ROOT / "cases" / "studies" / "p11_2b_nasa_bk_readiness.py"
 SOURCE_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_public_source.json"
 MANIFEST_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_asset_manifest.json"
 PROFILES_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_exp_exit_profiles.csv"
+GEOMETRY_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_geometry_source.json"
 
 
 def _load_module():
@@ -26,7 +27,6 @@ def _load_module():
 def test_source_ledger_loads_and_preserves_exact_si_conversions():
     module = _load_module()
     source = module.load_nasa_bk_source()
-
     raw = source["source_conditions_raw"]
     si = source["source_conditions_si"]
 
@@ -50,7 +50,6 @@ def test_source_ledger_loads_and_preserves_exact_si_conversions():
 def test_nasa_assets_are_official_public_routes():
     module = _load_module()
     source = module.load_nasa_bk_source()
-
     assert source["primary_experiment"]["distribution_limits"] == "Public"
     assert source["primary_experiment"]["ntrs_url"].startswith("https://ntrs.nasa.gov/")
 
@@ -81,6 +80,20 @@ def test_checksum_tracked_experimental_archive_is_ingested():
     assert ingestion["profiles_path"] == "cases/studies/data/p11_2b_nasa_bk_exp_exit_profiles.csv"
 
 
+def test_source_backed_geometry_is_resolved_in_readiness():
+    module = _load_module()
+    geometry = module.load_geometry_evidence()
+
+    assert geometry["geometry_path"] == "cases/studies/data/p11_2b_nasa_bk_geometry_source.json"
+    assert geometry["x_start_m"] == pytest.approx(0.0)
+    assert geometry["x_exit_m"] == pytest.approx(0.356)
+    assert geometry["width_m"] == pytest.approx(0.051)
+    assert geometry["height_start_m"] == pytest.approx(0.0938)
+    assert geometry["height_exit_m"] == pytest.approx(0.1048)
+    assert geometry["area_start_m2"] == pytest.approx(0.0047838)
+    assert geometry["area_exit_m2"] == pytest.approx(0.0053448)
+
+
 def test_current_nasa_candidate_stays_formally_blocked_and_scoped():
     module = _load_module()
     source = module.load_nasa_bk_source()
@@ -88,6 +101,7 @@ def test_current_nasa_candidate_stays_formally_blocked_and_scoped():
 
     assert readiness["public_source_route_ready"] is True
     assert readiness["experimental_archive_ingested"] is True
+    assert readiness["source_backed_geometry_ready"] is True
     assert readiness["formal_case_ready"] is False
     assert readiness["lbw_ybw_classification_authorized"] is False
     assert readiness["finite_rate_chemistry_validation_authorized"] is False
@@ -95,13 +109,13 @@ def test_current_nasa_candidate_stays_formally_blocked_and_scoped():
 
     open_requirements = {item["requirement"] for item in readiness["open_requirements"]}
     assert open_requirements == {
-        "quasi_1d_geometry_mapping",
         "effective_gas_thermodynamic_reduction",
         "non_circular_line_heat_release_closure",
         "species_validation_scope",
     }
     resolved_requirements = {item["requirement"] for item in readiness["resolved_requirements"]}
     assert "experimental_archive_ingestion" in resolved_requirements
+    assert "quasi_1d_geometry_mapping" in resolved_requirements
 
 
 def test_experimental_targets_separate_thermal_flow_from_species_scope():
@@ -129,7 +143,6 @@ def test_tampered_si_conversion_is_rejected(tmp_path: Path):
     source["source_conditions_si"]["freestream"]["pressure_Pa"] += 1.0
     tampered = tmp_path / "tampered.json"
     tampered.write_text(json.dumps(source), encoding="utf-8")
-
     with pytest.raises(ValueError, match="exact conversion"):
         module.load_nasa_bk_source(tampered)
 
@@ -140,7 +153,6 @@ def test_source_mass_fraction_drift_is_rejected(tmp_path: Path):
     source["source_conditions_raw"]["freestream"]["mass_fractions"]["N2"] = 0.40
     tampered = tmp_path / "tampered.json"
     tampered.write_text(json.dumps(source), encoding="utf-8")
-
     with pytest.raises(ValueError, match="sum to 1"):
         module.load_nasa_bk_source(tampered)
 
@@ -152,7 +164,6 @@ def test_manifest_checksum_drift_is_rejected(tmp_path: Path):
     exp["sha256"] = "0" * 64
     tampered = tmp_path / "manifest.json"
     tampered.write_text(json.dumps(manifest), encoding="utf-8")
-
     with pytest.raises(ValueError, match="unexpected exp.tar checksum"):
         module.load_experimental_ingestion(manifest_path=tampered, profiles_path=PROFILES_PATH)
 
@@ -162,9 +173,18 @@ def test_experimental_profile_point_count_drift_is_rejected(tmp_path: Path):
     lines = PROFILES_PATH.read_text(encoding="utf-8").splitlines()
     tampered = tmp_path / "profiles.csv"
     tampered.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
-
     with pytest.raises(ValueError, match="point count"):
         module.load_experimental_ingestion(manifest_path=MANIFEST_PATH, profiles_path=tampered)
+
+
+def test_geometry_derived_value_drift_is_rejected(tmp_path: Path):
+    module = _load_module()
+    geometry = json.loads(GEOMETRY_PATH.read_text(encoding="utf-8"))
+    geometry["derived_geometry"]["area_start_m2"] += 1.0e-5
+    tampered = tmp_path / "geometry.json"
+    tampered.write_text(json.dumps(geometry), encoding="utf-8")
+    with pytest.raises(ValueError, match="area_start_m2"):
+        module.load_geometry_evidence(tampered)
 
 
 def test_readiness_record_uses_repository_relative_posix_source_path():
@@ -174,4 +194,5 @@ def test_readiness_record_uses_repository_relative_posix_source_path():
     assert record["source_ledger"] == "cases/studies/data/p11_2b_nasa_bk_public_source.json"
     assert "\\" not in record["source_ledger"]
     assert record["experimental_archive_ingested"] is True
+    assert record["source_backed_geometry_ready"] is True
     assert record["formal_case_ready"] is False
