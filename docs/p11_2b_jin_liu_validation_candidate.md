@@ -150,6 +150,11 @@ The project will not:
 
 Publisher supplementary material or author-provided data remains the preferred route for the four missing evidence families above.
 
+The latest bounded public-access attempt is recorded in
+`docs/p11_2b_evidence_recovery_log.md`. It preserves the publisher access
+boundary and the exact original files needed for the next recovery round; it
+does not alter the machine-readable readiness result.
+
 ## Scientific claim if completed
 
 A completed case would be a **prescribed-heat-release quasi-one-dimensional validation against an independent cavity-free experiment**. It would not be detailed finite-rate chemistry validation and would not, by itself, establish LBW/YBW classification.
