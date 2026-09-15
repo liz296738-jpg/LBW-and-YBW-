@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-variable-composition-euler-compatibility",
+  "stage": "P11.3F",
+  "status": "VARIABLE_COMPOSITION_EULER_RUSANOV_COMPATIBILITY_IMPLEMENTED_TIME_MARCH_PENDING",
+  "purpose": "Verify three-equation Euler/Rusanov interface fluxes when adjacent finite-volume cells use different teacher-source-backed H2/C2H4 algebraic compositions, before adding variable-composition SSP-RK3 time advancement.",
+  "implemented": [
+    "cell-wise physical Euler flux using local Y_i",
+    "single-interface Rusanov flux with independent left/right thermochemical recovery",
+    "internal variable-composition interface flux assembly",
+    "transmissive compatibility boundary fluxes copying both state and composition",
+    "quasi-one-dimensional geometric pressure source using cell-wise composition",
+    "source-free area-weighted quasi-one-dimensional RHS"
+  ],
+  "verification": {
+    "cell_flux_uses_local_composition": true,
+    "uniform_composition_pair_flux_reduces_to_fixed_composition_operator": true,
+    "uniform_composition_internal_fluxes_reduce_to_fixed_composition_operator": true,
+    "uniform_composition_quasi_1d_rhs_reduces_to_fixed_composition_operator": true,
+    "transmissive_boundary_physical_flux_identity": true,
+    "constant_area_global_flow_conservation": true,
+    "variable_composition_geometric_pressure_source_identity": true,
+    "shape_and_geometry_guards": true
+  },
+  "scientific_boundaries": [
+    "The numerical state remains only [rho, rho*u, rho*E]; no species transport PDE is introduced.",
+    "Composition is an externally/algebraically prescribed cell field during this compatibility step.",
+    "The Rusanov dissipative jump acts on the three conservative flow variables only. No claim is made that this is a conservative species-mixing discretization.",
+    "No teacher reaction-energy Qdot source is added; composition-dependent absolute species energy remains the chemical-energy representation.",
+    "Transmissive faces are verification boundaries, not the final teacher inlet/outlet adapter.",
+    "Steger-Warming with variable composition remains a later numerical-method task; Rusanov is retained first as the unambiguous compatibility flux."
+  ],
+  "readiness": {
+    "variable_composition_state_recovery_ready": true,
+    "variable_composition_physical_flux_ready": true,
+    "variable_composition_rusanov_ready": true,
+    "variable_composition_quasi_1d_operator_ready": true,
+    "variable_composition_time_march_ready": false,
+    "teacher_source_coupling_ready": false,
+    "teacher_steger_warming_variable_composition_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Add a narrow prescribed-composition SSP-RK3/CFL compatibility march and prove uniform-composition reduction and conservation before coupling the teacher eta/phi field update and wall/fuel source terms."
+}

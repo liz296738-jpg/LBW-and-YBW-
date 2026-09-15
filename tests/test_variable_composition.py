@@ -160,9 +160,9 @@ def test_field_and_state_shape_validation_rejects_mismatch() -> None:
     field = build_lean_teacher_composition_field(
         "H2", np.array([0.4, 0.6]), np.array([0.3, 0.7]), SPECIES
     )
-    with pytest.raises(ValueError, match="shape \(2, 3\)"):
+    with pytest.raises(ValueError, match=r"shape \(2, 3\)"):
         variable_composition_conservative_to_primitive(np.ones((3, 3)), field, SPECIES)
-    with pytest.raises(ValueError, match="broadcast to \(2,\)"):
+    with pytest.raises(ValueError, match=r"broadcast to \(2,\)"):
         variable_composition_primitive_to_conservative(
             np.ones(3), 1000.0, 900.0, field, SPECIES
         )
