@@ -41,7 +41,7 @@ jobs:
             -DCGNS_ENABLE_HDF5=ON \
             -DCGNS_ENABLE_LEGACY=ON \
             -DCGNS_ENABLE_64BIT=OFF \
-            -DCGNS_BUILD_CGNSTOOLS=ON \
+            -DCGNS_BUILD_CGNSTOOLS=OFF \
             -DCGNS_ENABLE_TESTS=OFF
           cmake --build nasa_bk_cgns/toolchain/build --parallel 2
           cmake --install nasa_bk_cgns/toolchain/build
