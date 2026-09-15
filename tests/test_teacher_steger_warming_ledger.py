@@ -22,17 +22,23 @@ def test_teacher_steger_warming_formulas_are_frozen_but_epsilon_value_is_not() -
     assert record["equations"]["11.44"]["epsilon_numeric_value_in_current_source"] == "NOT_SPECIFIED"
 
 
-def test_no_default_epsilon_or_premature_formal_case_claim() -> None:
+def test_no_default_epsilon_and_energy_compatibility_block_remain_explicit() -> None:
     record = _load()
     readiness = record["readiness"]
+    verification = record["verification"]
     boundaries = " ".join(record["scientific_boundaries"]).lower()
     assert "no default epsilon" in boundaries
     assert "epsilon=0" in boundaries
-    assert readiness["isolated_variable_property_split_flux_ready"] is True
-    assert readiness["variable_composition_internal_fvs_ready"] is True
+    assert readiness["literal_source_split_operator_implemented"] is True
+    assert verification["literal_variable_thermochemistry_mass_flux_identity"] is True
+    assert verification["literal_variable_thermochemistry_momentum_flux_identity"] is True
+    assert verification["literal_variable_thermochemistry_energy_flux_identity"] is False
+    assert verification["variable_energy_compatibility_blocker_detected"] is True
+    assert readiness["variable_thermochemistry_energy_flux_compatibility_ready"] is False
     assert readiness["teacher_boundary_fvs_integration_ready"] is False
     assert readiness["source_enabled_steger_warming_solver_ready"] is False
     assert readiness["formal_teacher_steger_warming_case_ready"] is False
+    assert readiness["rusanov_integrated_compatibility_path_remains_accepted"] is True
 
 
 def test_area_weighting_convention_is_explicit() -> None:
