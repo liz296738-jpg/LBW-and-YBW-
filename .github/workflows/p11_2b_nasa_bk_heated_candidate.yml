@@ -6,8 +6,11 @@ on:
       - ".github/workflows/p11_2b_nasa_bk_heated_candidate.yml"
       - "cases/studies/p11_2b_nasa_bk_heated_candidate.py"
       - "cases/studies/p11_2b_nasa_bk_energy_reduction.py"
+      - "cases/studies/p11_2b_nasa_bk_momentum_reduction.py"
       - "cases/studies/data/p11_2b_nasa_bk_reference_delta_h0.csv"
       - "cases/studies/data/p11_2b_nasa_bk_reference_energy_reduction.json"
+      - "cases/studies/data/p11_2b_nasa_bk_reference_delta_momentum.csv"
+      - "cases/studies/data/p11_2b_nasa_bk_reference_momentum_reduction.json"
       - "src/scramjet1d/net_energy.py"
   workflow_dispatch:
 
@@ -57,6 +60,9 @@ jobs:
               assert data["solver"]["termination_reason"] == "converged"
               assert data["flow_scope"]["minimum_Mach"] > 1.0, (name, data["flow_scope"])
               assert data["energy_closure"]["absolute_mismatch_W"] < 1.0e-8
+              assert data["momentum_closure"]["absolute_mismatch_N"] < 1.0e-10
+              assert data["reference_solution_exit_diagnostic"]["classification"] == "NASA_REFERENCE_SOLUTION_DERIVED_NOT_EXPERIMENT"
+              assert data["reference_solution_exit_diagnostic"]["acceptance_role"] == "diagnostic_only_not_tuned_acceptance_target"
 
           compact = {
               name: {
@@ -66,8 +72,13 @@ jobs:
                   "min_Mach": data["flow_scope"]["minimum_Mach"],
                   "exit_Mach": data["flow_scope"]["exit_Mach"],
                   "exit_T_K": data["flow_scope"]["exit_temperature_K"],
+                  "exit_p_Pa": data["flow_scope"]["exit_pressure_Pa"],
                   "exit_T0_K": data["flow_scope"]["exit_total_temperature_K"],
                   "specific_energy_error_J_per_kg": data["energy_closure"]["specific_energy_error_J_per_kg"],
+                  "net_force_N": data["momentum_closure"]["expected_net_force_N"],
+                  "exit_Mach_minus_reference": data["reference_solution_exit_diagnostic"]["candidate_minus_reference_Mach"],
+                  "exit_T_minus_reference_K": data["reference_solution_exit_diagnostic"]["candidate_minus_reference_static_temperature_K"],
+                  "exit_p_minus_reference_Pa": data["reference_solution_exit_diagnostic"]["candidate_minus_reference_static_pressure_Pa"],
               }
               for name, data in summaries.items()
           }
