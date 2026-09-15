@@ -212,3 +212,81 @@ def cumulative_total_temperature_from_line_heat(
     result = float(scalars["inlet_total_temperature"]) + delta_temperature
     result.setflags(write=False)
     return result
+
+
+def total_power_from_enthalpy_ratio(
+    mass_flow_rate: object,
+    inlet_specific_total_enthalpy: object,
+    outlet_to_inlet_enthalpy_ratio: object,
+) -> float:
+    """Convert a measured total-enthalpy ratio to heat power when scale is known.
+
+    Energy conservation gives
+
+    ``Qdot_total = mdot * h_t,in * (h_t,out / h_t,in - 1)``.
+
+    The ratio alone is dimensionless evidence and is intentionally insufficient:
+    both mass flow [kg/s] and inlet specific total enthalpy [J/kg] must be
+    supplied independently. This is useful for a future Liu model-B chain where
+    ``Ht4/Ht3`` is measured but the absolute station-3 scale remains gated.
+    """
+    mass_flow = np.asarray(mass_flow_rate, dtype=float)
+    inlet_enthalpy = np.asarray(inlet_specific_total_enthalpy, dtype=float)
+    ratio = np.asarray(outlet_to_inlet_enthalpy_ratio, dtype=float)
+    for name, value in (
+        ("mass_flow_rate", mass_flow),
+        ("inlet_specific_total_enthalpy", inlet_enthalpy),
+        ("outlet_to_inlet_enthalpy_ratio", ratio),
+    ):
+        if value.ndim != 0 or not np.isfinite(value):
+            raise ValueError(f"{name} must be a finite scalar")
+    if mass_flow <= 0.0:
+        raise ValueError("mass_flow_rate must be strictly positive")
+    if inlet_enthalpy <= 0.0:
+        raise ValueError("inlet_specific_total_enthalpy must be strictly positive")
+    if ratio < 1.0:
+        raise ValueError("outlet_to_inlet_enthalpy_ratio must be >= 1 for a nonnegative heat-addition path")
+    return float(mass_flow * inlet_enthalpy * (ratio - 1.0))
+
+
+def total_enthalpy_ratio_from_line_heat(
+    heat_release_rate_per_length: ArrayLike,
+    dx: object,
+    mass_flow_rate: object,
+    inlet_specific_total_enthalpy: object,
+) -> float:
+    """Return ``h_t,out/h_t,in`` implied by a nonnegative line-heat profile.
+
+    This is the inverse diagnostic of :func:`total_power_from_enthalpy_ratio`:
+
+    ``h_t,out/h_t,in = 1 + integral(Qdot'(x) dx)/(mdot * h_t,in)``.
+
+    It permits direct comparison with a measured dimensionless enthalpy ratio
+    without pretending that the ratio itself supplies a missing mass flow or
+    absolute inlet enthalpy.
+    """
+    line_heat = np.asarray(heat_release_rate_per_length, dtype=float)
+    if line_heat.ndim != 1 or line_heat.size == 0:
+        raise ValueError("heat_release_rate_per_length must be a nonempty 1-D array")
+    if not np.all(np.isfinite(line_heat) & (line_heat >= 0.0)):
+        raise ValueError("heat_release_rate_per_length must be finite and nonnegative")
+
+    spacing = np.asarray(dx, dtype=float)
+    mass_flow = np.asarray(mass_flow_rate, dtype=float)
+    inlet_enthalpy = np.asarray(inlet_specific_total_enthalpy, dtype=float)
+    for name, value in (
+        ("dx", spacing),
+        ("mass_flow_rate", mass_flow),
+        ("inlet_specific_total_enthalpy", inlet_enthalpy),
+    ):
+        if value.ndim != 0 or not np.isfinite(value):
+            raise ValueError(f"{name} must be a finite scalar")
+    if spacing <= 0.0:
+        raise ValueError("dx must be strictly positive")
+    if mass_flow <= 0.0:
+        raise ValueError("mass_flow_rate must be strictly positive")
+    if inlet_enthalpy <= 0.0:
+        raise ValueError("inlet_specific_total_enthalpy must be strictly positive")
+
+    total_power = float(np.sum(line_heat) * float(spacing))
+    return 1.0 + total_power / (float(mass_flow) * float(inlet_enthalpy))
