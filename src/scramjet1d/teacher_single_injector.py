@@ -3,7 +3,7 @@
 This module freezes the spatial contract needed before coupling the verified
 teacher composition closure to the verified Eq. (11.38) source vector:
 
-* cells upstream of the injector are air-only;
+* at least one cell upstream of the injector is air-only;
 * the injector cell receives the prescribed fuel mass/momentum/enthalpy source
   exactly once;
 * the injector cell and downstream cells use the source-backed algebraic
@@ -57,8 +57,8 @@ class TeacherSingleInjectorMapping:
 
     def __post_init__(self) -> None:
         n = self.composition.num_cells
-        if self.injector_cell < 0 or self.injector_cell >= n:
-            raise ValueError("injector_cell must lie inside the composition field")
+        if self.injector_cell <= 0 or self.injector_cell >= n:
+            raise ValueError("injector_cell must leave at least one air-only upstream cell")
         arrays = (
             self.x_cell_m,
             self.equivalence_ratio,
@@ -124,10 +124,11 @@ def build_teacher_single_injector_mapping(
 
     The cell-centre grid must be uniformly spaced by ``dx_m`` because the
     current finite-volume compatibility solver uses one scalar spacing.  The
-    injector is located at the centre of ``injector_cell``.  Upstream cells are
-    assigned the exact ``phi=eta=0`` air-only composition from the same teacher
-    species basis.  From the injector cell downstream, the existing verified
-    spatial closure is evaluated with ``x_from_injector = x - x_injector``.
+    injector is located at the centre of ``injector_cell`` and must have at
+    least one upstream physical cell. Upstream cells are assigned the exact
+    ``phi=eta=0`` air-only composition from the same teacher species basis.
+    From the injector cell downstream, the existing verified spatial closure is
+    evaluated with ``x_from_injector = x - x_injector``.
 
     The localized conservative source is nonzero only at the injector cell.
     The composition field is *not* another source term.
@@ -149,8 +150,8 @@ def build_teacher_single_injector_mapping(
     if isinstance(injector_cell, bool) or not isinstance(injector_cell, (int, np.integer)):
         raise TypeError("injector_cell must be an integer")
     injector = int(injector_cell)
-    if injector < 0 or injector >= x.size:
-        raise IndexError("injector_cell is outside x_cell_m")
+    if injector <= 0 or injector >= x.size:
+        raise IndexError("injector_cell must leave at least one air-only upstream cell")
 
     fuel_flow = _positive_scalar(
         "injected_fuel_mass_flow_rate_kg_per_s", injected_fuel_mass_flow_rate_kg_per_s
@@ -177,21 +178,17 @@ def build_teacher_single_injector_mapping(
         A=A,
     )
 
-    if injector > 0:
-        upstream = build_lean_teacher_composition_field(
-            fuel,
-            np.zeros(injector, dtype=float),
-            np.zeros(injector, dtype=float),
-            species,
-        )
-        if upstream.species_names != downstream.composition.species_names:
-            raise RuntimeError("upstream/downstream teacher composition species ordering differs")
-        mass_fractions = np.vstack(
-            (upstream.mass_fractions, downstream.composition.mass_fractions)
-        )
-    else:
-        mass_fractions = np.array(downstream.composition.mass_fractions, copy=True)
-
+    upstream = build_lean_teacher_composition_field(
+        fuel,
+        np.zeros(injector, dtype=float),
+        np.zeros(injector, dtype=float),
+        species,
+    )
+    if upstream.species_names != downstream.composition.species_names:
+        raise RuntimeError("upstream/downstream teacher composition species ordering differs")
+    mass_fractions = np.vstack(
+        (upstream.mass_fractions, downstream.composition.mass_fractions)
+    )
     full_composition = TeacherCompositionField(
         downstream.composition.species_names,
         mass_fractions,
