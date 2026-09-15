@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-spatial-algebraic-composition-closure",
+  "stage": "P11.3H",
+  "status": "SINGLE_INJECTOR_LEAN_SPATIAL_COMPOSITION_CLOSURE_IMPLEMENTED_SOURCE_COUPLING_PENDING",
+  "primary_source": {
+    "identity": "高超声速气动布局理论及应用, 第11章 双模态冲压发动机一维数值模拟",
+    "page_range": "255-258",
+    "equations": ["11.18", "11.19", "11.20", "11.23", "11.27", "11.29"]
+  },
+  "source_alignment_decision": {
+    "model_interpretation": "STATIC_SPATIAL_ALGEBRAIC_CLOSURE_DURING_PSEUDO_TIME",
+    "rationale": [
+      "The teacher model advances the three quasi-one-dimensional flow equations and closes local mixture composition algebraically from equivalence ratio and combustion efficiency.",
+      "Eq.11.23 defines phi from prescribed fuel and incoming-air mass flow rates.",
+      "Eq.11.19 defines mixing efficiency from axial distance to an injection point and Eq.11.20 defines the associated complete-mixing length.",
+      "The transcribed source does not introduce a species-transport PDE system or a time-evolution equation for phi, eta, or Y_i."
+    ],
+    "correction_to_prior_planning_language": "Earlier planning language described the next step as a dynamic phi/eta/Y_i update. P11.3H replaces that implementation plan with a source-aligned spatial closure held fixed during pseudo-time unless later teacher evidence explicitly requires time-dependent composition evolution."
+  },
+  "implemented_chain": [
+    "Eq.11.23 scalar downstream equivalence ratio from injected fuel and incoming-air mass flow",
+    "Eq.11.20 local mixing length from phi and local combustor height",
+    "Eq.11.19 raw mixing efficiency versus distance from one injection station",
+    "explicit project adapter eta=min(eta_m_raw,1) without modifying the raw correlation",
+    "Eq.11.18 residual-fuel consistency identity",
+    "Eq.11.27 H2 or Eq.11.29 C2H4 lean composition field",
+    "direct compatibility with the accepted prescribed-composition SSP-RK3 solver"
+  ],
+  "scientific_boundaries": [
+    "Current closure is for one prescribed injection station; distributed d(mdot_f)/dx is not silently converted into a cumulative fuel-flow profile.",
+    "Current source-backed thermochemical composition branch requires phi <= 1.",
+    "H2 and C2H4 are thermochemistry-ready; C10H22 remains blocked by missing source-backed thermo polynomials.",
+    "No species-transport PDE or finite-rate chemistry is introduced.",
+    "No independent chemical Qdot is added for teacher reaction energy.",
+    "Fuel mass/momentum/enthalpy source coupling and wall-source coupling remain separate next steps."
+  ],
+  "readiness": {
+    "teacher_phi_profile_ready": true,
+    "teacher_mixing_length_profile_ready": true,
+    "teacher_raw_mixing_efficiency_profile_ready": true,
+    "teacher_physical_combustion_efficiency_profile_ready": true,
+    "teacher_H2_C2H4_composition_field_ready": true,
+    "prescribed_composition_solver_compatibility_ready": true,
+    "distributed_fuel_injection_adapter_ready": false,
+    "teacher_fuel_source_coupling_ready": false,
+    "teacher_wall_source_coupling_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Couple a source-backed single-injector fuel mass/momentum/enthalpy source to the P11.3H composition field and teacher friction adapter, while keeping wall-heat conversion gated until its dimensional relation is frozen."
+}
