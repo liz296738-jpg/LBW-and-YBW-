@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-variable-composition-steger-warming-readiness",
+  "stage": "P11.3M",
+  "status": "SOURCE_FORMULA_AND_ISOLATED_OPERATOR_IMPLEMENTED_EPSILON_NUMERIC_VALUE_CASE_GATED",
+  "primary_source": {
+    "identity": "高超声速气动布局理论及应用, 第11章 双模态冲压发动机一维数值模拟",
+    "page_range": "260-261",
+    "local_evidence": [
+      "乔老师项目/IMG_2468.HEIC.JPG",
+      "乔老师项目/IMG_2469.HEIC.JPG"
+    ]
+  },
+  "equations": {
+    "11.42": {
+      "topic": "Steger-Warming split flux",
+      "teacher_eigenvalue_order": ["u", "u-c", "u+c"],
+      "implementation_convention": "return per-unit-area flux because the repository finite-volume residual multiplies by face area separately"
+    },
+    "11.43": {
+      "topic": "raw eigenvalue split",
+      "formula": "lambda_pm = 0.5*(lambda +/- abs(lambda))"
+    },
+    "11.44": {
+      "topic": "near-zero eigenvalue smoothing",
+      "formula": "lambda_pm = 0.5*(lambda +/- sqrt(lambda^2 + epsilon^2))",
+      "epsilon_numeric_value_in_current_source": "NOT_SPECIFIED"
+    }
+  },
+  "implemented": [
+    "local variable-property characteristic speeds [u,u-c,u+c]",
+    "Eq.11.44 explicit-epsilon eigenvalue splitting with Eq.11.43 epsilon=0 limit",
+    "variable-thermochemistry Eq.11.42 split flux using local gamma, sound speed and total enthalpy",
+    "left/right first-order Steger-Warming FVS interface flux",
+    "cell-wise variable-composition internal interface assembly"
+  ],
+  "verification": {
+    "split_sum_preserves_original_eigenvalue": true,
+    "epsilon_zero_reduces_to_raw_eq_11_43": true,
+    "split_flux_sum_reconstructs_physical_euler_flux": true,
+    "constant_property_limit_reduces_to_existing_steger_warming": true,
+    "variable_composition_internal_flux_ready": true,
+    "near_sonic_smoothing_finite": true
+  },
+  "scientific_boundaries": [
+    "The source freezes the Eq.11.44 smoothing formula but the current photographed evidence does not provide a numerical epsilon value.",
+    "No default epsilon is introduced. Every split/flux call requires epsilon_m_per_s explicitly.",
+    "epsilon=0 is accepted only as the exact Eq.11.43 raw-split limit and as a regression case; it is not promoted as the teacher production epsilon.",
+    "A formal teacher case using nonzero smoothing must record the provenance or declared modeling status of its epsilon value.",
+    "This stage verifies internal FVS interfaces only; accepted teacher inlet/outlet boundary semantics and the source-enabled solver remain unchanged until a separate integration gate.",
+    "The per-area implementation divides the textbook area-weighted Eq.11.42 by A because the repository residual multiplies numerical face fluxes by area already."
+  ],
+  "readiness": {
+    "eq_11_42_formula_frozen": true,
+    "eq_11_43_formula_frozen": true,
+    "eq_11_44_formula_frozen": true,
+    "epsilon_numeric_value_frozen": false,
+    "isolated_variable_property_split_flux_ready": true,
+    "variable_composition_internal_fvs_ready": true,
+    "teacher_boundary_fvs_integration_ready": false,
+    "source_enabled_steger_warming_solver_ready": false,
+    "formal_teacher_steger_warming_case_ready": false
+  },
+  "next_step": "After CI acceptance, integrate the verified internal Steger-Warming FVS with the already accepted teacher static inlet/extrapolated outlet path without changing the boundary semantics. Keep epsilon an explicit case parameter with no guessed default and retain the accepted Rusanov path as a reference comparator."
+}
