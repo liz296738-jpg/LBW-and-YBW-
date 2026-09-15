@@ -14,6 +14,7 @@ from typing import Any
 
 
 SUPPORTED_SHAPE_MODELS = {"eq8_asymmetric", "tabulated_line_heat"}
+SUPPORTED_FRICTION_MODES = {"disabled_source_backed", "darcy_scalar_source_backed"}
 
 
 def _positive_number(value: object) -> bool:
@@ -47,10 +48,141 @@ def _nonempty_locators(value: object) -> bool:
     )
 
 
+def _resolved_cross_source_link(candidate: Mapping[str, Any], blockers: list[str]) -> set[str]:
+    """Return explicitly authorized component sources for a resolved cross-source chain.
+
+    A different paper may legitimately provide a closure fitted to an identified
+    experiment (for example Jin fitting a Liu experiment), but arbitrary source
+    mixing remains prohibited. Cross-source use is therefore allowed only when
+    the candidate carries an explicit, traceable, *resolved* identity link.
+    """
+    link = candidate.get("cross_source_link")
+    if link is None:
+        return set()
+    if not isinstance(link, Mapping):
+        blockers.append("cross_source_link must be a mapping")
+        return set()
+    if link.get("status") != "RESOLVED":
+        blockers.append("cross_source_link.status must be 'RESOLVED' before cross-source promotion")
+        return set()
+    if link.get("operating_condition_id") != candidate.get("operating_condition_id"):
+        blockers.append("cross_source_link operating condition does not match candidate")
+    if not _nonempty_locators(link.get("source_locators")):
+        blockers.append("missing cross_source_link.source_locators")
+    if not _nonempty_text(link.get("link_description")):
+        blockers.append("missing cross_source_link.link_description")
+
+    source_ids = link.get("source_ids")
+    if not (
+        isinstance(source_ids, Sequence)
+        and not isinstance(source_ids, (str, bytes))
+        and len(source_ids) >= 2
+        and all(_nonempty_text(item) for item in source_ids)
+    ):
+        blockers.append("cross_source_link.source_ids must list at least two nonempty source IDs")
+        return set()
+    allowed = {str(item) for item in source_ids}
+    if candidate.get("source_id") not in allowed:
+        blockers.append("candidate source_id must be included in cross_source_link.source_ids")
+    return allowed
+
+
+def _validate_component_identity(
+    component_name: str,
+    component: Mapping[str, Any],
+    source_id: object,
+    condition_id: object,
+    allowed_cross_sources: set[str],
+    blockers: list[str],
+) -> None:
+    component_source = component.get("source_id")
+    if component_source != source_id and component_source not in allowed_cross_sources:
+        blockers.append(
+            f"{component_name}.source_id must match candidate source_id or be authorized by a resolved cross_source_link"
+        )
+    if component.get("operating_condition_id") != condition_id:
+        blockers.append(f"{component_name} operating condition does not match candidate")
+    if not _nonempty_locators(component.get("source_locators")):
+        blockers.append(f"missing {component_name}.source_locators")
+
+
+def _validate_geometry(
+    geometry: object,
+    source_id: object,
+    condition_id: object,
+    allowed_cross_sources: set[str],
+    blockers: list[str],
+) -> None:
+    if not isinstance(geometry, Mapping):
+        blockers.append("missing geometry")
+        return
+    _validate_component_identity(
+        "geometry", geometry, source_id, condition_id, allowed_cross_sources, blockers
+    )
+    if geometry.get("area_profile_status") != "FROZEN":
+        blockers.append("geometry.area_profile_status must be 'FROZEN'")
+    if not _positive_number(geometry.get("domain_length_m")):
+        blockers.append("geometry.domain_length_m must be positive")
+    if not _nonempty_text(geometry.get("area_model_description")):
+        blockers.append("missing geometry.area_model_description")
+
+
+def _validate_inlet_state(
+    inlet: object,
+    source_id: object,
+    condition_id: object,
+    allowed_cross_sources: set[str],
+    blockers: list[str],
+) -> None:
+    if not isinstance(inlet, Mapping):
+        blockers.append("missing inlet_state")
+        return
+    _validate_component_identity(
+        "inlet_state", inlet, source_id, condition_id, allowed_cross_sources, blockers
+    )
+    if inlet.get("boundary_type") != "supersonic-inflow":
+        blockers.append("inlet_state.boundary_type must be 'supersonic-inflow' for the current formal P11.2B path")
+    for key in ("rho_kg_m3", "u_m_s", "p_Pa"):
+        if not _positive_number(inlet.get(key)):
+            blockers.append(f"inlet_state.{key} must be positive")
+
+
+def _validate_wall_friction(
+    friction: object,
+    source_id: object,
+    condition_id: object,
+    allowed_cross_sources: set[str],
+    blockers: list[str],
+) -> None:
+    if not isinstance(friction, Mapping):
+        blockers.append("missing wall_friction")
+        return
+    _validate_component_identity(
+        "wall_friction", friction, source_id, condition_id, allowed_cross_sources, blockers
+    )
+    mode = friction.get("mode")
+    if mode not in SUPPORTED_FRICTION_MODES:
+        blockers.append("wall_friction.mode is not supported")
+        return
+    if not _nonempty_text(friction.get("convention")):
+        blockers.append("missing wall_friction.convention")
+    if mode == "disabled_source_backed":
+        if friction.get("darcy_friction_factor") not in (0, 0.0):
+            blockers.append("disabled_source_backed wall friction requires darcy_friction_factor=0")
+    elif mode == "darcy_scalar_source_backed":
+        if not _nonnegative_number(friction.get("darcy_friction_factor")):
+            blockers.append("wall_friction.darcy_friction_factor must be finite and nonnegative")
+        if not _positive_number(friction.get("hydraulic_diameter_m")):
+            blockers.append("wall_friction.hydraulic_diameter_m must be positive")
+        if friction.get("convention") != "Darcy":
+            blockers.append("darcy_scalar_source_backed requires wall_friction.convention='Darcy'")
+
+
 def _validate_absolute_energy(
     energy: object,
     source_id: object,
     condition_id: object,
+    allowed_cross_sources: set[str],
     blockers: list[str],
 ) -> None:
     """Validate a separate absolute energy scale for normalized shape models."""
@@ -58,13 +190,9 @@ def _validate_absolute_energy(
         blockers.append("missing absolute_energy")
         return
 
-    if energy.get("source_id") != source_id:
-        blockers.append("absolute_energy.source_id must match candidate source_id")
-    if energy.get("operating_condition_id") != condition_id:
-        blockers.append("absolute-energy operating condition does not match candidate")
-    if not _nonempty_locators(energy.get("source_locators")):
-        blockers.append("missing absolute_energy.source_locators")
-
+    _validate_component_identity(
+        "absolute_energy", energy, source_id, condition_id, allowed_cross_sources, blockers
+    )
     has_power = _positive_number(energy.get("total_heat_release_power_W"))
     has_enthalpy = _positive_number(energy.get("stagnation_enthalpy_increment_J_kg"))
     if has_power == has_enthalpy:
@@ -78,18 +206,10 @@ def _validate_absolute_energy(
 def assess_formal_case_candidate(candidate: Mapping[str, Any]) -> dict[str, object]:
     """Return machine-readable readiness and blockers for one candidate case.
 
-    Shape, energy addition, coordinate mapping, and operating condition must be
-    traceable to the same declared case. Two evidence paths are supported:
-
-    - ``eq8_asymmetric`` is a normalized shape and therefore requires a separate
-      absolute-energy scale;
-    - ``tabulated_line_heat`` contains absolute ``Qdot'(x)`` values in W/m and
-      therefore already carries its energy scale. Supplying a second
-      ``absolute_energy`` block is rejected to avoid two potentially
-      inconsistent absolute scales.
-
-    Passing this gate is permission to *run* a formal reduced-order case, not
-    evidence that the model has been experimentally validated.
+    Passing this gate means only that the case has enough traceable inputs to be
+    *run* as a formal reduced-order P11.2B case. It is not evidence that the
+    result is converged, experimentally validated, or applicable outside the
+    assumptions of the cited source.
     """
     blockers: list[str] = []
 
@@ -102,10 +222,20 @@ def assess_formal_case_candidate(candidate: Mapping[str, Any]) -> dict[str, obje
     if not _nonempty_locators(candidate.get("source_locators")):
         blockers.append("missing source_locators")
 
+    allowed_cross_sources = _resolved_cross_source_link(candidate, blockers)
+
     coordinate = candidate.get("coordinate_mapping")
     if not isinstance(coordinate, Mapping):
         blockers.append("missing coordinate_mapping")
     else:
+        _validate_component_identity(
+            "coordinate_mapping",
+            coordinate,
+            source_id,
+            condition_id,
+            allowed_cross_sources,
+            blockers,
+        )
         if coordinate.get("length_unit") != "m":
             blockers.append("coordinate_mapping.length_unit must be 'm'")
         if not _nonempty_text(coordinate.get("source_origin_description")):
@@ -121,8 +251,16 @@ def assess_formal_case_candidate(candidate: Mapping[str, Any]) -> dict[str, obje
             or not isfinite(float(offset))
         ):
             blockers.append("coordinate_mapping.offset_m must be finite")
-        if not _nonempty_locators(coordinate.get("source_locators")):
-            blockers.append("missing coordinate_mapping.source_locators")
+
+    _validate_geometry(
+        candidate.get("geometry"), source_id, condition_id, allowed_cross_sources, blockers
+    )
+    _validate_inlet_state(
+        candidate.get("inlet_state"), source_id, condition_id, allowed_cross_sources, blockers
+    )
+    _validate_wall_friction(
+        candidate.get("wall_friction"), source_id, condition_id, allowed_cross_sources, blockers
+    )
 
     shape = candidate.get("shape")
     model = None
@@ -132,28 +270,19 @@ def assess_formal_case_candidate(candidate: Mapping[str, Any]) -> dict[str, obje
         model = shape.get("model")
         if model not in SUPPORTED_SHAPE_MODELS:
             blockers.append("shape.model is not supported")
-        if shape.get("source_id") != source_id:
-            blockers.append("shape.source_id must match candidate source_id")
-        if shape.get("operating_condition_id") != condition_id:
-            blockers.append("shape operating condition does not match candidate")
-        if not _nonempty_locators(shape.get("source_locators")):
-            blockers.append("missing shape.source_locators")
+        _validate_component_identity(
+            "shape", shape, source_id, condition_id, allowed_cross_sources, blockers
+        )
 
         if model == "eq8_asymmetric":
             x_i = shape.get("x_initiation_m")
             x_m = shape.get("x_peak_m")
             x_c = shape.get("x_core_end_m")
             k = shape.get("asymmetry_length_m")
-            if not all(
-                _nonnegative_number(value) for value in (x_i, x_m, x_c, k)
-            ):
-                blockers.append(
-                    "Eq. 8 shape parameters must be finite nonnegative metres"
-                )
+            if not all(_nonnegative_number(value) for value in (x_i, x_m, x_c, k)):
+                blockers.append("Eq. 8 shape parameters must be finite nonnegative metres")
             elif not float(x_i) < float(x_m) < float(x_c):
-                blockers.append(
-                    "Eq. 8 requires x_initiation_m < x_peak_m < x_core_end_m"
-                )
+                blockers.append("Eq. 8 requires x_initiation_m < x_peak_m < x_core_end_m")
         elif model == "tabulated_line_heat":
             x_values = shape.get("x_m")
             q_values = shape.get("heat_release_rate_per_length_W_m")
@@ -170,29 +299,26 @@ def assess_formal_case_candidate(candidate: Mapping[str, Any]) -> dict[str, obje
                 blockers.append(
                     "tabulated line heat requires matching finite nonnegative x_m and W/m arrays"
                 )
-            elif any(
-                float(b) <= float(a) for a, b in zip(x_values, x_values[1:])
-            ):
+            elif any(float(b) <= float(a) for a, b in zip(x_values, x_values[1:])):
                 blockers.append("tabulated shape x_m must be strictly increasing")
             elif not any(float(value) > 0.0 for value in q_values):
-                blockers.append(
-                    "tabulated heat-release profile must contain positive heat addition"
-                )
+                blockers.append("tabulated heat-release profile must contain positive heat addition")
 
     if model == "eq8_asymmetric":
         _validate_absolute_energy(
-            candidate.get("absolute_energy"), source_id, condition_id, blockers
+            candidate.get("absolute_energy"),
+            source_id,
+            condition_id,
+            allowed_cross_sources,
+            blockers,
         )
     elif model == "tabulated_line_heat":
         if candidate.get("absolute_energy") is not None:
             blockers.append(
                 "tabulated_line_heat already contains the absolute energy scale; omit absolute_energy"
             )
-    else:
-        # Preserve an explicit missing-energy diagnostic when the shape itself
-        # is absent or unsupported, without attempting to guess its semantics.
-        if candidate.get("absolute_energy") is not None:
-            blockers.append("absolute_energy cannot be assessed for unsupported shape.model")
+    elif candidate.get("absolute_energy") is not None:
+        blockers.append("absolute_energy cannot be assessed for unsupported shape.model")
 
     return {
         "formal_case_ready": not blockers,
@@ -206,6 +332,7 @@ def assess_formal_case_candidate(candidate: Mapping[str, Any]) -> dict[str, obje
             if model == "tabulated_line_heat"
             else None
         ),
+        "cross_source_authorized": bool(allowed_cross_sources),
     }
 
 
