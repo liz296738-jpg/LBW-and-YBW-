@@ -2,8 +2,8 @@
   "schema_version": 1,
   "case_family": "P11_2B_NASA_BK_PUBLIC_VALIDATION",
   "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
-  "status": "PUBLIC_SOURCE_ROUTE_DISCOVERED_REDUCED_ORDER_CASE_NOT_READY",
-  "purpose": "Public, reproducible evidence ledger for evaluating the NASA Burrows-Kurkov supersonic hydrogen-combustion benchmark as a P11.2B reduced-order heated-flow validation candidate. This ledger freezes only values directly exposed by NASA sources or exact unit conversions. It does not create an experimental Qdot-prime profile or claim finite-rate chemistry validation for the present solver.",
+  "status": "PUBLIC_EXPERIMENT_AND_GEOMETRY_READY_REDUCED_ORDER_CASE_NOT_READY",
+  "purpose": "Public, reproducible evidence ledger for evaluating the NASA Burrows-Kurkov supersonic hydrogen-combustion benchmark as a P11.2B reduced-order heated-flow validation candidate. The public experiment, checksum-tracked exit data, source inlet/wall conditions, and source-backed quasi-one-dimensional main-duct geometry are available. A formal case remains blocked on a defensible thermodynamic reduction and prescribed line-energy closure; no finite-rate chemistry or species validation is claimed.",
   "primary_experiment": {
     "source_id": "NASA-BK-EXP-1973",
     "citation": "Marshall C. Burrows and Anatole P. Kurkov, Analytical and Experimental Study of Supersonic Combustion of Hydrogen in a Vitiated Airstream, NASA-TM-X-2828, September 1973.",
@@ -30,7 +30,7 @@
         "asset_id": "NASA-BK-EXP-TAR",
         "kind": "experimental-data-archive",
         "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/exp.tar",
-        "repository_policy": "Do not commit a fetched binary blindly; ingest through a manifest and retain checksum/provenance."
+        "repository_policy": "Checksum-tracked acquisition and normalized data are recorded in cases/studies/data/p11_2b_nasa_bk_asset_manifest.json and p11_2b_nasa_bk_exp_exit_profiles.csv."
       },
       {
         "asset_id": "NASA-BK-RUN-DAT",
@@ -41,13 +41,13 @@
         "asset_id": "NASA-BK-RUN-CGD",
         "kind": "Wind-US-structured-grid",
         "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.cgd",
-        "repository_policy": "Use as authoritative computational geometry source after deterministic extraction; do not hand-copy dimensions from a plot."
+        "repository_policy": "Retained as a checksum-tracked geometry/reference asset. The formal main-duct area law is independently source-backed by NASA-TM-74094 and may be cross-checked against this grid."
       },
       {
         "asset_id": "NASA-BK-RUN-CFL",
         "kind": "Wind-US-reference-solution",
         "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.cfl",
-        "repository_policy": "Any one-dimensional field or heat-release quantity derived from this file must be labelled NASA_REFERENCE_SOLUTION_DERIVED, never EXPERIMENT_MEASURED."
+        "repository_policy": "Any one-dimensional field or effective-energy quantity derived from this file must be labelled NASA_REFERENCE_SOLUTION_DERIVED, never EXPERIMENT_MEASURED."
       },
       {
         "asset_id": "NASA-BK-RUN-LIS",
@@ -114,7 +114,24 @@
     ],
     "ignition_onset_m_for_2286_R_case": 0.18,
     "source_locator": "NASA Glenn Study #2 comparison discussion",
-    "scope_note": "The current repository solver can potentially compare reduced-order thermal/flow quantities such as Mach and total-temperature-related diagnostics after an admissible model reduction. It cannot claim validation of H2/H2O species profiles without species transport and chemistry."
+    "ingestion_status": "RESOLVED_CHECKSUM_TRACKED_PUBLIC_NASA_DATA",
+    "normalized_data_path": "cases/studies/data/p11_2b_nasa_bk_exp_exit_profiles.csv",
+    "asset_manifest_path": "cases/studies/data/p11_2b_nasa_bk_asset_manifest.json",
+    "scope_note": "The current repository solver may compare reduced-order thermal/flow quantities such as Mach and total-temperature-related diagnostics after an admissible model reduction. It cannot claim validation of H2/H2O species profiles without species transport and chemistry."
+  },
+  "geometry_record": {
+    "status": "RESOLVED_SOURCE_BACKED_LINEAR_RECTANGULAR_DUCT",
+    "path": "cases/studies/data/p11_2b_nasa_bk_geometry_source.json",
+    "implementation": "cases/studies/p11_2b_nasa_bk_geometry.py",
+    "x_start_m": 0.0,
+    "x_exit_m": 0.356,
+    "width_m": 0.051,
+    "height_start_m": 0.0938,
+    "height_exit_m": 0.1048,
+    "area_start_m2": 0.0047838,
+    "area_exit_m2": 0.0053448,
+    "area_ratio_exit_over_start": 1.1172707889125801,
+    "evidence_class": "DERIVED_EXACTLY_FROM_SOURCE_DIMENSIONS"
   },
   "nasa_reference_solution_record": {
     "turbulent_Prandtl_reported_good_match": 0.7,
@@ -135,11 +152,15 @@
       "silent replacement of the vitiated mixture with air properties",
       "tuning heat release solely to force agreement with the exit Mach or temperature profile"
     ],
+    "resolved_before_formal_case": [
+      "public primary experiment identity",
+      "checksum-tracked experimental exit targets",
+      "source inlet/wall conditions and exact SI conversions",
+      "source-backed quasi-one-dimensional main-duct geometry mapping"
+    ],
     "required_before_formal_case": [
-      "deterministic quasi-one-dimensional geometry mapping from the public NASA geometry/grid",
       "explicit effective-gas or thermodynamic reduction policy compatible with the calorically perfect-gas solver",
-      "a non-circular prescribed line-heat-release closure with provenance, preferably derived from the public NASA reference solution and independently checked against experimental observables",
-      "ingested experimental exit targets with checksum and coordinate/units metadata",
+      "a non-circular prescribed line-energy closure with provenance, preferably derived from the public NASA reference solution and independently checked against experimental observables",
       "formal statement that species comparisons remain outside solver capability"
     ]
   }
