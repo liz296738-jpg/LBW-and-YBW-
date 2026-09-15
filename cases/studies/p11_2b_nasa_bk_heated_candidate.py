@@ -1,10 +1,11 @@
 """Executable NASA Burrows-Kurkov reduced-order heated candidate case.
 
-This case is intentionally labelled a *candidate* until convergence,
-supersonic-flow scope, discrete energy and momentum closure, gamma sensitivity,
-and the comparison to independent public observations have been reviewed.
-Both signed source histories are derived from the public NASA Wind-US reference
-solution; experimental exit profiles are not used to tune either source.
+The reduced domain begins at the hydrogen-injection station x=0, so its inlet
+is a conservative moment match to the NASA reference section there rather than
+a silent reuse of the upstream freestream.  Signed energy and momentum histories
+are derived only from the public NASA Wind-US reference solution.  Experimental
+exit profiles remain independent benchmark observations and are never used to
+tune these sources or the inlet state.
 """
 
 from __future__ import annotations
@@ -12,7 +13,6 @@ from __future__ import annotations
 import argparse
 import csv
 import json
-import math
 from pathlib import Path
 from typing import Any
 
@@ -29,7 +29,7 @@ from cases.studies.p11_2b_nasa_bk_momentum_reduction import (
     conservation_diagnostic as momentum_conservation_diagnostic,
     load_momentum_reduction,
 )
-from cases.studies.p11_2b_nasa_bk_readiness import load_nasa_bk_source
+from cases.studies.p11_2b_nasa_bk_reference_inlet import effective_inlet_for_gas
 from cases.studies.p11_2b_nasa_bk_thermo import reference_effective_gas
 from scramjet1d.boundary import BoundaryConditions, PrimitiveBoundaryState
 from scramjet1d.config import GasProperties, NumericalConfig
@@ -50,7 +50,6 @@ def _build_case(num_cells: int, gamma: float | None) -> dict[str, Any]:
     if not isinstance(num_cells, int) or isinstance(num_cells, bool) or num_cells < 20:
         raise ValueError("num_cells must be an integer >= 20")
 
-    source = load_nasa_bk_source()
     thermo = reference_effective_gas()
     gamma_run = thermo.gamma if gamma is None else float(gamma)
     gas = GasProperties(gamma=gamma_run, R=thermo.R_J_per_kg_K)
@@ -61,14 +60,13 @@ def _build_case(num_cells: int, gamma: float | None) -> dict[str, Any]:
     x_cell = mesh["x_cell_m"]
     dx = float(x_face[1] - x_face[0])
 
-    inlet = source["source_conditions_si"]["freestream"]
-    T_in = float(inlet["temperature_K"])
-    p_in = float(inlet["pressure_Pa"])
-    M_in = float(inlet["Mach"])
-    rho_in = p_in / (gas.R * T_in)
-    a_in = math.sqrt(gas.gamma * gas.R * T_in)
-    u_in = M_in * a_in
-    mass_flow = rho_in * u_in * geometry.face_area[0]
+    inlet = effective_inlet_for_gas(gas)
+    rho_in = inlet.rho_kg_per_m3
+    u_in = inlet.u_m_per_s
+    p_in = inlet.p_Pa
+    T_in = inlet.T_K
+    M_in = inlet.Mach
+    mass_flow = inlet.mass_flow_kg_s
 
     state0 = primitive_to_conservative(
         np.full(num_cells, rho_in),
@@ -87,7 +85,6 @@ def _build_case(num_cells: int, gamma: float | None) -> dict[str, Any]:
     momentum_check = momentum_conservation_diagnostic(x_face, mass_flow)
 
     return {
-        "source": source,
         "gas": gas,
         "geometry": geometry,
         "x_face": x_face,
@@ -99,6 +96,7 @@ def _build_case(num_cells: int, gamma: float | None) -> dict[str, Any]:
         "T_in": T_in,
         "M_in": M_in,
         "mass_flow": mass_flow,
+        "inlet_h0": inlet.specific_total_enthalpy_J_per_kg,
         "state0": state0,
         "boundaries": boundaries,
         "line_energy": line_energy,
@@ -140,8 +138,7 @@ def run_candidate(
         1.0 + 0.5 * (gas.gamma - 1.0) * primitive.Mach**2
     )
     h0 = gas.cp * primitive.T + 0.5 * primitive.u**2
-    inlet_h0 = gas.cp * case["T_in"] + 0.5 * case["u_in"] ** 2
-    predicted_delta_h0 = float(h0[-1] - inlet_h0)
+    predicted_delta_h0 = float(h0[-1] - case["inlet_h0"])
     reference_delta_h0 = float(load_energy_reduction()["delta_h0_J_per_kg"][-1])
     reference_delta_momentum = float(
         load_momentum_reduction()["delta_specific_momentum_m_per_s"][-1]
@@ -168,17 +165,21 @@ def run_candidate(
         )
 
     summary = {
-        "schema_version": 2,
+        "schema_version": 3,
         "case_id": "P11.2B-NASA-BK-HEATED-CANDIDATE",
         "status": "CANDIDATE_NOT_FORMAL_UNTIL_REVIEWED",
         "source_class": "NASA_REFERENCE_SOLUTION_DERIVED",
         "num_cells": num_cells,
         "gas": {"gamma": gas.gamma, "R_J_per_kg_K": gas.R, "cp_J_per_kg_K": gas.cp},
-        "inlet": {
+        "reduced_domain_inlet": {
+            "classification": "NASA_REFERENCE_SOLUTION_DERIVED_CONSERVATIVE_MOMENT_MATCH",
             "Mach": case["M_in"],
             "temperature_K": case["T_in"],
             "pressure_Pa": case["p_in"],
+            "density_kg_per_m3": case["rho_in"],
+            "velocity_m_per_s": case["u_in"],
             "mass_flow_kg_s": case["mass_flow"],
+            "specific_total_enthalpy_J_per_kg": case["inlet_h0"],
         },
         "solver": {
             "cfl": cfl,
@@ -218,10 +219,11 @@ def run_candidate(
             "acceptance_role": "diagnostic_only_not_tuned_acceptance_target",
         },
         "claim_boundary": [
-            "This is a reduced-order thermal/flow candidate driven by NASA_REFERENCE_SOLUTION_DERIVED signed net energy and axial momentum residuals.",
-            "The momentum residual is added independently of the net-energy source; no extra u*F energy term is added because the energy history is already prescribed independently from the same reference solution.",
+            "The reduced domain starts at x=0, so its inlet is a NASA_REFERENCE_SOLUTION_DERIVED conservative moment match rather than the upstream freestream state.",
+            "Signed net energy and axial momentum residuals are both NASA_REFERENCE_SOLUTION_DERIVED.",
+            "The momentum residual is added independently of the net-energy source; no extra u*F energy term is added because the energy history is prescribed independently from the same reference solution.",
             "It is not finite-rate chemistry validation and does not validate species profiles.",
-            "Experimental exit profiles are not used to tune either source and remain independent benchmark context.",
+            "Experimental exit profiles are not used to tune the inlet or either source and remain independent benchmark context.",
             "Burrows-Kurkov does not authorize LBW/YBW classification."
         ],
     }
