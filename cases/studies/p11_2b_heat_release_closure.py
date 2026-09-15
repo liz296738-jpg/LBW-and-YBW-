@@ -90,7 +90,7 @@ def asymmetric_quasi_gaussian_eq8_normalized(
     For ``x > x_i`` the published relation is
 
     ``Q*(x) = Q*_m exp(-[((x-x_m)(x-x_i+k)) /
-                         ((x_c-x_m)(x-x_i))]^2)``.
+                         ((x_c-x_m)(x-x_i)))^2)``.
 
     ``x_i`` is the heat-release initiation coordinate. The model is therefore
     defined as zero at and upstream of ``x_i``. The position parameters and
@@ -290,3 +290,39 @@ def total_enthalpy_ratio_from_line_heat(
 
     total_power = float(np.sum(line_heat) * float(spacing))
     return 1.0 + total_power / (float(mass_flow) * float(inlet_enthalpy))
+
+
+def assess_jin_supersonic_applicability(mach: ArrayLike) -> dict[str, object]:
+    """Assess the explicit ``M>1`` assumption used in Jin's simple validation.
+
+    Jin et al. (2026), Sec. 3.2.3, state that their quasi-one-dimensional
+    pressure/Mach demonstration assumes the compared flow remains supersonic
+    and free from separation so the ``M=1`` singular point, shock-train effects,
+    and separation-induced area uncertainty can be ignored.
+
+    A one-dimensional Mach profile can test only the *supersonic* part of that
+    applicability statement. It cannot prove that boundary-layer separation or
+    a physical shock train is absent. The latter assumptions therefore remain
+    explicitly outside this numerical diagnostic.
+
+    The scientific gate is exactly ``min(M) > 1``. No undocumented safety
+    margin is introduced; ``sonic_margin`` reports ``min(M)-1`` directly.
+    """
+    values = np.asarray(mach, dtype=float)
+    if values.ndim != 1 or values.size == 0:
+        raise ValueError("mach must be a nonempty one-dimensional array")
+    if not np.all(np.isfinite(values) & (values > 0.0)):
+        raise ValueError("mach must be finite and strictly positive")
+
+    minimum = float(np.min(values))
+    maximum = float(np.max(values))
+    margin = minimum - 1.0
+    return {
+        "all_supersonic": bool(minimum > 1.0),
+        "minimum_mach": minimum,
+        "maximum_mach": maximum,
+        "sonic_margin": margin,
+        "scientific_gate": "min(M)>1",
+        "flow_separation_assumption": "NOT_ASSESSABLE_FROM_1D_MACH_PROFILE",
+        "shock_train_assumption": "NOT_ASSESSABLE_FROM_1D_MACH_PROFILE",
+    }
