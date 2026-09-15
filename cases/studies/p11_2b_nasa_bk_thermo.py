@@ -7,8 +7,6 @@ heated-range sensitivity values that must accompany a formal reduced-order
 study.
 """
 
-from __future__ import annotations
-
 import json
 import math
 from dataclasses import dataclass
