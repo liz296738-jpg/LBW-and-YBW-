@@ -8,7 +8,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_PATH = ROOT / "cases" / "studies" / "data" / "p11_3_mode_definition_source.json"
+OBSERVABLE_PATH = ROOT / "cases" / "studies" / "data" / "p11_3_solver_observable_mapping.json"
 EXPECTED_STATUS = "GENERAL_MODE_TAXONOMY_FROZEN_PROJECT_LABEL_MAPPING_PENDING"
+EXPECTED_OBSERVABLE_STATUS = "CAPABILITY_AUDIT_COMPLETE_CLASSIFIER_MAPPING_PENDING"
 
 
 def load_mode_definition_source(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
@@ -87,19 +89,70 @@ def load_mode_definition_source(path: Path | str = SOURCE_PATH) -> dict[str, Any
     return record
 
 
-def build_readiness(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
+def load_observable_capability(path: Path | str = OBSERVABLE_PATH) -> dict[str, Any]:
+    """Load and validate the current solver-observable capability audit."""
+
+    with Path(path).open("r", encoding="utf-8") as stream:
+        record = json.load(stream)
+    if record.get("schema_version") != 1 or record.get("stage") != "P11.3":
+        raise ValueError("unsupported P11.3 observable-mapping schema")
+    if record.get("status") != EXPECTED_OBSERVABLE_STATUS:
+        raise ValueError("P11.3 observable capability status drifted")
+
+    native = {entry["observable_id"]: entry for entry in record.get("native_solver_observables", [])}
+    required_native = {
+        "AXIAL_MACH_PROFILE",
+        "AXIAL_STATIC_PRESSURE_PROFILE",
+        "AXIAL_TEMPERATURE_PROFILE",
+        "AREA_PROFILE",
+        "PRESCRIBED_SOURCE_HISTORY",
+        "STEADY_CONVERGENCE_AND_TERMINATION",
+    }
+    if not required_native.issubset(native):
+        raise ValueError("P11.3 native observable audit is incomplete")
+
+    missing = {entry["observable_id"]: entry for entry in record.get("not_natively_resolved", [])}
+    required_missing = {
+        "PRECOMBUSTION_SHOCK_TRAIN_PRESENCE",
+        "SHOCK_TRAIN_LENGTH",
+        "BOUNDARY_LAYER_SEPARATION_REATTACHMENT",
+        "FLAME_POSITION_OR_OPTICAL_STRUCTURE",
+        "SPECIES_PROFILE",
+    }
+    if not required_missing.issubset(missing):
+        raise ValueError("P11.3 missing-observable audit is incomplete")
+
+    policy = record.get("classification_policy", {})
+    for key in (
+        "can_implement_general_literature_classifier_now",
+        "can_implement_lbw_ybw_classifier_now",
+        "can_generate_lbw_ybw_regime_map_now",
+    ):
+        if policy.get(key) is not False:
+            raise ValueError(f"P11.3 capability policy {key} must remain false")
+    return record
+
+
+def build_readiness(
+    path: Path | str = SOURCE_PATH,
+    observable_path: Path | str = OBSERVABLE_PATH,
+) -> dict[str, Any]:
     """Return compact machine-readable P11.3 promotion readiness."""
 
     record = load_mode_definition_source(path)
+    capability = load_observable_capability(observable_path)
     readiness = record["classifier_readiness"]
     return {
         "stage": "P11.3",
         "definition_evidence_ready": True,
         "general_mode_taxonomy_ready": bool(readiness["general_mode_taxonomy_ready"]),
+        "solver_observable_capability_audit_ready": True,
         "lbw_ybw_label_mapping_ready": bool(readiness["lbw_ybw_label_mapping_ready"]),
         "solver_observable_mapping_ready": bool(readiness["solver_observable_mapping_ready"]),
         "classifier_ready": bool(readiness["classifier_ready"]),
         "regime_map_ready": bool(readiness["regime_map_ready"]),
+        "native_observable_count": len(capability["native_solver_observables"]),
+        "unresolved_observable_count": len(capability["not_natively_resolved"]),
         "blocking_items": list(readiness["blocking_items"]),
         "promotion_policy": "Do not implement or promote LBW/YBW classification until project labels and solver observables are source-backed."
     }
