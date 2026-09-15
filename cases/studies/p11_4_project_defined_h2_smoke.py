@@ -14,7 +14,7 @@ import numpy as np
 
 from cases.studies.teacher_thermochemistry_database import build_species_database
 from scramjet1d.config import NumericalConfig
-from scramjet1d.geometry import constant_area_profile
+from scramjet1d.geometry import AreaProfile
 from scramjet1d.teacher_boundaries import (
     TeacherStaticInletState,
     teacher_static_inlet_conservative_state,
@@ -37,14 +37,14 @@ NOT_A_SOURCE_REPRODUCTION = True
 
 # PROJECT-DEFINED controls, not Cao Case 2 inputs.
 LENGTH_M = 0.40
-AREA_M2 = 0.020
-HYDRAULIC_DIAMETER_M = 0.040
+INLET_AREA_M2 = 0.0040
+EXIT_AREA_M2 = 0.0050
+COMBUSTOR_HEIGHT_M = 0.040
 INLET_PRESSURE_PA = 55_000.0
 INLET_TEMPERATURE_K = 800.0
 INLET_VELOCITY_M_PER_S = 1250.0
 EQUIVALENCE_RATIO = 0.20
 INJECTOR_X_M = 0.08
-COMBUSTOR_HEIGHT_M = 0.040
 MIXING_C_M = 30.0
 INJECTION_MODE = "parallel"
 FUEL_TEMPERATURE_K = 450.0
@@ -70,19 +70,35 @@ class SmokeResult:
     max_mach: float
 
 
-def project_inlet_air_mass_flow(species) -> float:
-    """Derive inlet air mass flow from the frozen p/T/u/area controls.
+def project_geometry(cells: int) -> tuple[AreaProfile, np.ndarray]:
+    """Return a mild linear-divergence rectangular project geometry.
 
-    This avoids an inconsistent extra mass-flow control. The dry-air composition
-    is the exact phi=eta=0 teacher H2 branch used by the upstream mapping.
+    The fixed 40 mm height and linearly increasing area imply a cell-wise width
+    and therefore a self-consistent rectangular hydraulic diameter. These are
+    project-defined smoke controls, not source-reproduced dimensions.
     """
+
+    if cells < 1:
+        raise ValueError("cells must be positive")
+    face_area = np.linspace(INLET_AREA_M2, EXIT_AREA_M2, cells + 1)
+    cell_area = 0.5 * (face_area[:-1] + face_area[1:])
+    geometry = AreaProfile(cell_area=cell_area, face_area=face_area)
+    width = cell_area / COMBUSTOR_HEIGHT_M
+    hydraulic_diameter = (
+        2.0 * COMBUSTOR_HEIGHT_M * width / (COMBUSTOR_HEIGHT_M + width)
+    )
+    return geometry, np.asarray(hydraulic_diameter, dtype=float)
+
+
+def project_inlet_air_mass_flow(species) -> float:
+    """Derive inlet air mass flow from the frozen p/T/u/inlet-area controls."""
 
     dry_air = lean_reaction_mass_fractions("H2", 0.0, 0.0, species)
     thermo = mixture_thermo_state(INLET_TEMPERATURE_K, dry_air, species)
     rho = INLET_PRESSURE_PA / (
         thermo.gas_constant_J_per_kg_K * INLET_TEMPERATURE_K
     )
-    return float(rho * INLET_VELOCITY_M_PER_S * AREA_M2)
+    return float(rho * INLET_VELOCITY_M_PER_S * INLET_AREA_M2)
 
 
 def build_case(cells: int):
@@ -95,11 +111,7 @@ def build_case(cells: int):
     injector_cell = max(1, min(injector_cell, cells - 1))
 
     air_mdot = project_inlet_air_mass_flow(species)
-    fuel_mdot = (
-        EQUIVALENCE_RATIO
-        * fuel_stoichiometric_ratio("H2")
-        * air_mdot
-    )
+    fuel_mdot = EQUIVALENCE_RATIO * fuel_stoichiometric_ratio("H2") * air_mdot
     mapping = build_teacher_single_injector_mapping(
         fuel="H2",
         injected_fuel_mass_flow_rate_kg_per_s=fuel_mdot,
@@ -114,7 +126,7 @@ def build_case(cells: int):
         injected_fuel_axial_velocity_m_per_s=FUEL_AXIAL_VELOCITY_M_PER_S,
         species=species,
     )
-    geometry = constant_area_profile(cells, area=AREA_M2)
+    geometry, hydraulic_diameter = project_geometry(cells)
     inlet = TeacherStaticInletState(
         INLET_PRESSURE_PA,
         INLET_TEMPERATURE_K,
@@ -143,7 +155,16 @@ def build_case(cells: int):
             )
         )
     U0 = np.vstack(rows)
-    return species, dx, mapping, geometry, inlet, U0, inlet_primitive
+    return (
+        species,
+        dx,
+        mapping,
+        geometry,
+        hydraulic_diameter,
+        inlet,
+        U0,
+        inlet_primitive,
+    )
 
 
 def run_smoke(
@@ -152,7 +173,16 @@ def run_smoke(
     tolerance: float = 2.0e-5,
     max_steps: int = 20_000,
 ) -> SmokeResult:
-    species, dx, mapping, geometry, inlet, U0, inlet_primitive = build_case(cells)
+    (
+        species,
+        dx,
+        mapping,
+        geometry,
+        hydraulic_diameter,
+        inlet,
+        U0,
+        inlet_primitive,
+    ) = build_case(cells)
     result = solve_teacher_boundary_steady(
         U0,
         mapping,
@@ -161,7 +191,7 @@ def run_smoke(
         NumericalConfig(cfl=0.5, tolerance=tolerance),
         inlet,
         species,
-        hydraulic_diameter_m=HYDRAULIC_DIAMETER_M,
+        hydraulic_diameter_m=hydraulic_diameter,
         wall_specific_heat_gain_gradient_J_per_kg_per_m=(
             WALL_HEAT_GRADIENT_J_PER_KG_PER_M
         ),
@@ -174,7 +204,7 @@ def run_smoke(
         np.sum(mapping.fuel_mass_flow_gradient_kg_per_s_per_m) * dx
     )
     inlet_air_mdot = float(
-        inlet_primitive.rho * INLET_VELOCITY_M_PER_S * AREA_M2
+        inlet_primitive.rho * INLET_VELOCITY_M_PER_S * INLET_AREA_M2
     )
     return SmokeResult(
         cells=cells,
