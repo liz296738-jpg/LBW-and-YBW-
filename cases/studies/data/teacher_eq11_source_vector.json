@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-eq11-38-source-vector-adapter",
+  "stage": "P11.3I",
+  "status": "EQ11_38_NON_GEOMETRIC_SOURCE_ADAPTERS_VERIFIED_INTEGRATED_CASE_PENDING",
+  "primary_source": {
+    "identity": "高超声速气动布局理论及应用, 第11章 双模态冲压发动机一维数值模拟",
+    "pages": [254, 255, 260],
+    "equations": ["11.12", "11.15", "11.16", "11.38"]
+  },
+  "implemented": [
+    "localized finite-volume Delta(mdot_s)/Delta x injector adapter",
+    "source-backed H2/C2H4 injected total enthalpy h_ts = h_s(T_s) + u_sx^2/2",
+    "mass source (dmdot_s/dx)/A",
+    "axial injected momentum source u_sx(dmdot_s/dx)/A",
+    "teacher wall-friction source -0.5 rho u^2 (4f/D_e)",
+    "explicit-dimensional wall heat channel rho u d(delta q)/dx",
+    "injected total-enthalpy source h_ts(dmdot_s/dx)/A"
+  ],
+  "source_partition": {
+    "geometric_p_dA_dx": "ALREADY_HANDLED_BY_EXISTING_QUASI_1D_GEOMETRIC_SOURCE_NOT_DUPLICATED",
+    "chemical_reaction_energy": "ALREADY_EMBEDDED_IN_ABSOLUTE_COMPOSITION_DEPENDENT_SPECIES_ENERGY_NO_EXTRA_QDOT",
+    "wall_heat_eq_11_26_adapter": "NOT_FROZEN_ONLY_EXPLICIT_DIMENSIONAL_D_DELTA_Q_DX_MAY_BE_SUPPLIED"
+  },
+  "verification": {
+    "localized_injector_integrates_to_prescribed_mdot": true,
+    "h_ts_uses_absolute_species_enthalpy_plus_axial_kinetic_energy": true,
+    "integrated_mass_momentum_energy_injection_identity": true,
+    "teacher_forward_flow_friction_identity": true,
+    "explicit_wall_heat_gradient_energy_identity": true,
+    "reverse_flow_friction_rejected": true,
+    "C10H22_injected_enthalpy_remains_gated": true
+  },
+  "readiness": {
+    "teacher_fuel_mass_source_ready": true,
+    "teacher_fuel_axial_momentum_source_ready": true,
+    "teacher_fuel_total_enthalpy_source_ready": true,
+    "teacher_friction_source_ready": true,
+    "explicit_dimensional_wall_heat_source_ready": true,
+    "eq_11_26_to_dimensional_wall_heat_adapter_ready": false,
+    "teacher_boundary_adapter_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Build a narrow integrated H2/C2H4 teacher case only after the domain/inlet treatment around the injector is frozen; do not use a fuel-containing transmissive inlet plus an injector source because that would double-count incoming fuel."
+}
