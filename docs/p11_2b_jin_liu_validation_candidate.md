@@ -73,47 +73,56 @@ The complete reconstruction closes independent total-length records to sub-milli
 
 ## Area-law interpretation
 
-The primary source says `2 deg cone angle` but the recovered wording does not explicitly define half-angle versus full included angle. This distinction is kept visible.
-
-Same-program primary evidence plus a peer-reviewed terminology cross-check support treating the parameter as **wall divergent angle**. The study layer therefore uses `2 deg` as the wall angle measured from the centerline, classified as:
-
-`SOURCE_CORROBORATED_INTERPRETATION`.
+The primary source says `2 deg cone angle` but the recovered wording does not explicitly define half-angle versus full included angle. Same-program primary evidence plus a peer-reviewed terminology cross-check support treating the parameter as **wall divergent angle**. The study layer therefore uses `2 deg` as the wall angle measured from the centerline, classified as `SOURCE_CORROBORATED_INTERPRETATION`.
 
 The resulting radius / area law is `DERIVED`. For the source-backed `35 mm` diameter and `357 mm` length, this gives `A_exit/A_inlet ≈ 2.9323`. A higher-authority primary figure or author dataset must override this interpretation if contradictory.
 
-## Friction-coefficient convention is now closed
+## Friction-coefficient convention
 
-Jin Eqs. (9)–(10) use the differential friction term `4 Cf dx / D` and explicitly cite A.H. Shapiro's *The Dynamics and Thermodynamics of Compressible Fluid Flow* as the equation source.
-
-Shapiro defines the duct friction coefficient as wall shear stress divided by dynamic head:
-
-`Cf = tau_w / (0.5 rho u^2)`.
-
-For a circular / hydraulic-diameter duct,
-
-`S_m = -4 tau_w / D_h = -2 Cf rho u|u| / D_h`.
-
-The repository production wall source is explicitly
-
-`S_m = -0.5 f_D rho u|u| / D_h`,
-
-where `f_D` is the Darcy friction factor. Equating the same wall force gives the derived mapping
+Jin Eqs. (9)–(10) use the differential friction term `4 Cf dx / D` and cite A.H. Shapiro. Matching Shapiro's wall-shear definition to the repository wall source gives the derived convention mapping
 
 `f_D = 4 Cf`.
 
-This mapping is stored in `cases/studies/data/p11_2b_jin_friction_convention_source.json` and implemented in `cases/studies/p11_2b_friction_convention.py`. It is classified `DERIVED_CONVENTION_MAPPING`, not inferred from notation alone.
+This resolves the **coefficient convention** only. The actual numerical `Cf` used in Jin Fig. 14 remains unknown.
 
-This resolves the **coefficient convention** only. The actual numerical `Cf` used in Jin Fig. 14 remains unknown and is still an active blocker.
+A fresh primary-source check also confirms that Liu's own quasi-one-dimensional pressure and Mach analyses explicitly neglect or treat wall friction as negligible around Eqs. (3) and (5). That is useful context, but it does **not** establish that Jin set `Cf=0` in the separate Fig. 14 calculation. The project therefore continues to block an exact Fig. 14 reproduction on Jin's numerical `Cf` unless direct evidence shows that it was neglected.
+
+## Bounded public-source recovery
+
+`cases/studies/data/p11_2b_liu_primary_recovery.json` now separates exact source algebra from exploratory modelling bridges. `cases/studies/p11_2b_public_evidence_recovery.py` reproduces the calculations and deliberately leaves `formal_case_ready=false`.
+
+### Exact same-row constraint
+
+For Liu model B at `phi=1.03`, Table 2 gives both `pt4=17383.8 Pa` and `pt4/pt3=0.39`. Therefore the station-3 total pressure for **that Liu row** is algebraically constrained by
+
+`pt3 = pt4 / (pt4/pt3) = 44573.846... Pa`.
+
+This is classified `DERIVED_FROM_SAME_ROW_SOURCE_VALUES`. It is useful evidence, but it does not prove that Jin's labelled `phi=1.04` Fig. 14 case is identical to the Liu `phi=1.03` row.
+
+### Exploratory energy/mass-flow bridge
+
+The same ledger records, but does not formally promote, a reproducible estimate based on three explicit assumptions:
+
+1. station-3 stagnation temperature is bridged from the nominal `Tt=2400 K` freestream by adiabatic no-work stagnation-enthalpy conservation;
+2. nominal captured air mass flow is estimated from the reported freestream `rho=0.0025 kg/m3`, `u=1966 m/s`, inlet area-contraction ratio `1.9`, and `35 mm` isolator diameter, assuming uniform full capture with no spillage correction;
+3. Liu's source-reported average `cp=1255 J/(kg K)` is used with `Ht4/Ht3=1.16`.
+
+These give approximately:
+
+- nominal full-capture air mass flow `8.985e-3 kg/s`;
+- candidate stagnation-enthalpy increment `4.8192e5 J/kg`;
+- candidate total heat power `4.330 kW`.
+
+Those numbers are **diagnostic bounds, not formal Fig. 14 inputs**. They are intentionally prevented from closing the formal gate because neither the exact Jin condition identity nor its measured mass-flow/initial-state chain has been recovered.
 
 ## Current formal-case blockers
 
-Five bounded evidence gaps remain:
+The authoritative readiness artifact combines shape and absolute energy into one evidence-chain requirement, leaving **four** bounded blockers:
 
 1. **condition identity** — resolve Jin model-B `phi=1.04` versus Liu model-B `phi=1.03` / model-A `phi=1.04`;
-2. **heat-release shape** — recover the exact Fig. 14 profile or fitted `Q_m, x_i, x_m, x_c, k` with traceable coordinates;
-3. **absolute energy scale** — recover the measured exit stagnation-enthalpy increment and matching mass flow / station-3 absolute enthalpy, or an already-absolute `Qdot'(x) [W/m]` table;
-4. **station-3 boundary state** — recover the complete primitive / total state used to initialize the external model-B calculation;
-5. **numerical wall-friction coefficient** — recover Jin's actual Fig. 14 `Cf`, or direct evidence that it was neglected.
+2. **station-3 boundary state** — recover the complete primitive / total state used to initialize the external Fig. 14 model-B calculation;
+3. **numerical wall-friction coefficient** — recover Jin's actual Fig. 14 `Cf`, or direct evidence that it was neglected;
+4. **heat-release evidence chain** — recover either an already-absolute `Qdot'(x) [W/m]` profile, or the exact Fig. 14 shape / fitted `Q_m, x_i, x_m, x_c, k` together with its matching absolute energy scale.
 
 The following are **not** active blockers anymore:
 
@@ -131,16 +140,15 @@ This candidate remains in `candidate_validation_chains`, not `candidate_formal_c
 
 The project will not:
 
-- infer absolute heat from `Ht4/Ht3` alone;
-- infer the validation mass flow from nominal geometry;
+- promote the exploratory `Tt3`, mass-flow, or heat-power bridge as measured data;
 - silently replace `phi=1.04` with `1.03`;
 - substitute model A for model B;
-- invent the station-3 boundary state;
+- invent the station-3 primitive state;
 - assume Jin's missing numerical `Cf`;
 - use untracked plot digitization as formal input;
 - transplant this heat-release distribution into the unrelated P11.2A geometry and call it validation.
 
-Publisher supplementary material or an author-provided data table remains the preferred route for the five missing inputs above.
+Publisher supplementary material or author-provided data remains the preferred route for the four missing evidence families above.
 
 ## Scientific claim if completed
 
