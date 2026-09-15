@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "record_kind": "nasa-reference-solution-derived-axial-momentum-reduction",
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "status": "FROZEN_NON_CIRCULAR_REFERENCE_DERIVATION",
+  "source_class": "NASA_REFERENCE_SOLUTION_DERIVED",
+  "purpose": "Freeze a deterministic one-dimensional axial-momentum residual curve derived only from the checksum-tracked NASA Wind-US reference solution. Experimental exit Mach, pressure, and temperature data are not used in the derivation and remain independent benchmark observations.",
+  "source_assets": {
+    "nasa_cfl_sha256": "e0d9c3c89c40b947934c6ab6a5aa0df1e9f32b22dc7919f81dd9ad391f08e602",
+    "nasa_cgd_sha256": "255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91",
+    "extraction_workflow_run_id": 34963725967,
+    "extraction_artifact_id": 10394114156,
+    "extraction_artifact_digest": "sha256:ee4acdefec947b03e49e848c1ac2d305d8470d58aa566a9b3ed34bff1ce6c2b5",
+    "raw_momentum_section_csv_sha256": "7b9b7135c972cc1fe73270d86f83ce30b21bdf20baf336ec0f9b640d2c1e514c",
+    "raw_section_record_count": 127,
+    "unique_axial_station_count": 121
+  },
+  "section_reduction": {
+    "duct_width_m": 0.051,
+    "reference_inlet_mass_flow_kg_s": 1.9853071417940482,
+    "axial_momentum_flux_definition": "J(x) = width * integral[rho*u^2 + p] dy",
+    "geometry_pressure_term_definition": "dJ_geometry = p_bar * dA, where p_bar is the arithmetic average of adjacent area-weighted section pressures and dA is the source-backed quasi-1D area change",
+    "cumulative_residual_definition": "C(x_0)=0; C(x_{i+1})=C(x_i)+[J(x_{i+1})-J(x_i)]-0.5*[p_bar(x_i)+p_bar(x_{i+1})]*[A(x_{i+1})-A(x_i)]",
+    "specific_momentum_definition": "I(x) = C(x) / mdot_ref",
+    "reference_flux_diagnostics": {
+      "J_inlet_N": 3950.7507118555595,
+      "J_exit_N": 3985.9836315385616,
+      "delta_J_N": 35.23291968300212,
+      "integrated_geometry_pressure_contribution_N": 58.75404976105232,
+      "cumulative_residual_force_exit_N": -23.5211300780502,
+      "specific_momentum_exit_m_per_s": -11.8476014832952,
+      "specific_momentum_min_m_per_s": -17.2878669122249,
+      "specific_momentum_max_m_per_s": 0.0778436978436713
+    },
+    "note": "The residual is what remains after subtracting the source-backed quasi-one-dimensional pressure-area momentum contribution from the exact NASA reference axial momentum-flux change. It is therefore a reference-derived effective axial force closure, not a Darcy friction coefficient or experimentally measured wall shear."
+  },
+  "normalization": {
+    "duplicate_policy": "Axial stations duplicated at adjacent zone interfaces are grouped by x rounded to 12 decimal places and arithmetic-averaged before J, p_bar, and the cumulative residual are formed.",
+    "endpoint_policy": "The first station is frozen at x=0 m and the final station at the source-backed geometry exit x=0.356 m; the raw extracted exit coordinate differs only by approximately 4.57e-8 m.",
+    "frozen_curve_path": "cases/studies/data/p11_2b_nasa_bk_reference_delta_momentum.csv",
+    "frozen_curve_sha256": "c387ca87c5a14c2cd2c9622c6ae55652c70eb443ea2354a37a1d1086c7cb0c08"
+  },
+  "line_momentum_closure": {
+    "formula": "Fprime_mom_net(cell) = mdot_1d * [I(x_right) - I(x_left)] / (x_right - x_left)",
+    "interpolation": "piecewise-linear interpolation of the frozen I(x) curve at solver cell faces",
+    "conservation_property": "The discrete integral sum(Fprime_mom_net * dx) equals mdot_1d * [I(x_exit)-I(x_start)] up to floating-point roundoff.",
+    "mass_flow_policy": "mdot_1d is computed from the one-dimensional inlet state and inlet area. The closure preserves the NASA reference solution's specific axial-momentum residual while avoiding a forced match to the two-dimensional reference mass flow.",
+    "sign_semantics": "Signed axial line force: positive adds streamwise momentum to the gas; negative removes streamwise momentum."
+  },
+  "independence_and_claim_boundary": [
+    "No experimental exit Mach, pressure, or temperature point is used to construct I(x) or Fprime_mom_net.",
+    "The closure is computational-reference-derived and may support a reduced-order thermal/flow benchmark only.",
+    "It is not a measured friction coefficient, wall-shear distribution, chemistry model, species model, or LBW/YBW criterion."
+  ]
+}
