@@ -24,15 +24,17 @@ In the validation discussion around Fig. 14, Jin et al. state that:
 
 The article explicitly states that supplementary material exists online and that supporting data are available from the corresponding author upon reasonable request. The publicly indexed article text recovered so far does **not** expose the exact model-B validation shape parameters or the absolute stagnation-enthalpy increment used for Fig. 14. Those quantities therefore remain evidence-gated rather than reconstructed by guesswork.
 
-### SRC10 — Liu et al. (2019)
+### SRC10 / SRC11 — Liu geometry and validation experiment
 
-Qili Liu, Damiano Baccarella, Brendan McGann, Tonghun Lee, *Dual-Mode Operation and Transition in Axisymmetric Scramjets*, AIAA Journal 57(11) (2019) 4764–4777, DOI `10.2514/1.J058391`.
+SRC10 is Qili Liu, Damiano Baccarella, Brendan McGann, Tonghun Lee, *Dual-Mode Operation and Transition in Axisymmetric Scramjets*, AIAA Journal 57(11) (2019) 4764–4777, DOI `10.2514/1.J058391`.
+
+SRC11 is the earlier same-program AIAA SciTech paper, *Influences of Cavity on Combustion Stabilization in an Axisymmetric Scramjet*, DOI `10.2514/6.2019-1681`. It independently records the `752 mm` overall model length and states that the cavity is replaced in the parallel configuration by a constant-area tube with the same length dimensions as the cavity.
 
 The experiment provides a cavity-free model B with a simple axisymmetric geometry and direct exit measurements of pressure, Mach number, and stagnation enthalpy.
 
 ## Geometry evidence
 
-The source text and Fig. 2 provide:
+The sources provide:
 
 - circular inlet area contraction ratio `1.9`;
 - inlet lip angle `10 deg`;
@@ -40,11 +42,38 @@ The source text and Fig. 2 provide:
 - isolator inner diameter `35 mm`;
 - fuel injector at `291.4 mm` downstream of the inlet lip;
 - sixteen sonic injectors, each `0.75 mm` diameter and inclined `45 deg` backward;
+- model-A cavity leading edge `42 mm` downstream of the injector;
+- cavity floor length `35 mm`, depth `11 mm`, closeout ramp `22.5 deg`;
 - downstream diverging combustor cone angle `2 deg`;
 - diverging combustor length `357 mm`;
-- model B replaces the model-A cavity module with a constant-cross-sectional tube of the same `35 mm` diameter before the downstream diverging combustor.
+- overall model length `752 mm` in SRC11;
+- model B replaces the cavity module with a constant-cross-sectional tube of the same `35 mm` diameter and same axial length dimensions.
 
-The source also states that the x-axis follows the engine centerline and that its origin is at the center of the inlet. Station 3 is both the isolator exit / combustor inlet and the location of the most-upstream fuel injection; station 4 is the combustor exit. This makes a future source-to-solver axial mapping substantially more defensible than a geometry reconstructed from an unlabeled heat-release plot.
+### Axial transition location is now source-backed by geometric closure
+
+The model-B replacement-tube extent no longer needs to be read from a low-resolution figure. The source-stated cavity geometry gives the axial projection of the closeout ramp as
+
+`L_ramp = 11 mm / tan(22.5 deg) = 26.55635 mm`.
+
+Therefore the cavity-module / model-B replacement-tube axial extent is
+
+`35 + 26.55635 = 61.55635 mm`.
+
+With the cavity leading-edge location `42 mm` downstream of the injector, the diverging section begins
+
+`42 + 61.55635 = 103.55635 mm`
+
+downstream of station 3 / the injector plane. Adding the source values from the inlet lip gives
+
+`291.4 + 42 + 35 + 11/tan(22.5 deg) + 357 = 751.95635 mm`,
+
+which closes the independently reported `752 mm` total model length to within about `0.044 mm`. That near-exact independent closure makes the axial transition position a source-backed derived quantity rather than a visual estimate.
+
+For the quasi-one-dimensional validation geometry, the preferred solver coordinate is therefore `x=0` at station 3 / injector plane, with the start of divergence at `x=0.10355635 m` and the combustor exit at `x=0.46055635 m`.
+
+One geometry ambiguity remains: the papers call the downstream section a `2 deg cone angle`, but the accessible text does not unambiguously define whether this is a wall half-angle or a full included cone angle. Because the two interpretations would produce substantially different area relief, the formal area profile remains gated on that convention instead of guessing it. The machine-readable derivation and evidence boundary are stored in `cases/studies/data/p11_2b_liu_model_b_geometry_source.json`.
+
+The source also states that the x-axis follows the engine centerline and that its origin is at the center of the inlet. Station 3 is both the isolator exit / combustor inlet and the location of the most-upstream fuel injection; station 4 is the combustor exit. Re-basing all validation data to station 3 avoids needing an arbitrary absolute offset, provided every recovered heat-release coordinate is traced to the same source geometry.
 
 ## Thermodynamic / measurement evidence
 
@@ -61,7 +90,7 @@ The accessible text extraction renders the static-pressure unit/value ambiguousl
 
 For ethylene reacting-flow analysis, Liu et al. use average `gamma=1.31` and `cp=1255 J/(kg K)`. Exit stagnation enthalpy is evaluated using a heat-flux probe and a Sutton–Graves relation; exit Mach is obtained from wall static pressure and pitot measurements. The paper states that fuel mass flow is derived from fuel total pressure and the total choked injector-throat area with about 5% uncertainty, but the accessible text does not provide the exact fuel-total-pressure/mass-flow value needed to reconstruct the Jin validation run.
 
-Liu also defines `Ht4/Ht3` as the combustor-exit to combustor-inlet total-flow-enthalpy ratio and uses it together with `pt4/pt3` in the one-dimensional mode-transition analysis. This ratio is a valuable **dimensionless validation constraint**, but by itself it is not an absolute `J/kg` increment and therefore is not silently converted into total thermal power.
+Liu also defines `Ht4/Ht3` as the combustor-exit to combustor-inlet total-flow-enthalpy ratio and uses it together with `pt4/pt3` in the one-dimensional mode-transition analysis. This ratio is a valuable **dimensionless validation constraint**, but by itself it is not an absolute `J/kg` increment and therefore is not silently converted into total thermal power. The repository contains explicit inverse diagnostics showing that a mass-flow scale and station-3 absolute total enthalpy are both required before `Ht4/Ht3` can determine heat power.
 
 ## Table-2 model-B record nearest to the Jin validation
 
@@ -89,12 +118,12 @@ Plausible explanations include a typographical/rounding error in Jin or a distin
 
 ## Why the case is still blocked
 
-The current public record is not yet sufficient to execute the exact Jin–Liu validation without introducing hidden assumptions. Four items remain:
+The current public record is not yet sufficient to execute the exact Jin–Liu validation without introducing hidden assumptions. The remaining blockers are now narrower:
 
 1. resolve the model/condition identity conflict described above;
 2. recover the axial heat-release shape used in the Jin validation, or the fitted quasi-Gaussian parameters for that exact case, with a retained source/figure extraction record;
-3. recover the **absolute stagnation-enthalpy increment** used by Jin and the mass flow needed by Eq. 11. The table ratio `Ht4/Ht3=1.16` is retained as a dimensionless constraint but is not converted into an absolute increment without a source-backed station-3 enthalpy/mass-flow chain;
-4. freeze the exact source-to-solver x-coordinate mapping over the model-B combustor.
+3. recover the **absolute stagnation-enthalpy increment** used by Jin and the mass flow / station-3 absolute enthalpy needed to scale Eq. 11. The table ratio `Ht4/Ht3=1.16` is retained as a dimensionless constraint but is not converted into an absolute increment by itself;
+4. resolve whether the source's `2 deg cone angle` is a wall half-angle or an included cone angle. The axial divergence-start location itself is now frozen by geometric closure.
 
 The ACT-II facility paper shows that the arc heater was operated over several mass-flow rates (`7.3`, `13.3`, and `22.2 g/s` in facility characterization), but the repository does not assign any one of those values to the Liu 2019 validation run without direct evidence.
 
@@ -117,6 +146,7 @@ Promotion is allowed only when the missing chain is recovered from traceable evi
 - digitize PLIF/enthalpy plots without recording the coordinate/calibration procedure;
 - silently replace Jin's model-B `phi=1.04` label with Liu's model-B `phi=1.03` row;
 - accidentally use Liu's model-A `phi=1.04` row to satisfy Jin's model-B label;
+- interpret the `2 deg cone angle` without source evidence for the angle convention;
 - transplant the Liu/Jin heat-release distribution into the P11.2A Li geometry and call that validation.
 
 ## Scientific value if completed
