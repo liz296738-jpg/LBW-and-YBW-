@@ -53,7 +53,8 @@ Strongly aligned already:
 - first-order spatial discretization;
 - third-order TVD/SSP RK;
 - CFL-controlled stepping;
-- compatible supersonic inflow / zero-gradient-like outflow capability.
+- compatible supersonic inflow / zero-gradient-like outflow capability;
+- teacher Chapter 11 Eq. 11.46 maximum relative-density iteration-change diagnostic, implemented alongside the existing normalized residual criterion.
 
 Main gaps to close:
 
@@ -63,8 +64,6 @@ Main gaps to close:
 4. teacher empirical friction and wall-heat closures as optional models;
 5. near-sonic Steger-Warming eigenvalue smoothing once its epsilon policy is source-frozen;
 6. integrated teacher-reference case and regression evidence.
-
-A compatibility implementation of the teacher's relative-density steady criterion (Chapter 11 Eq. 11.46) is being added alongside—not in place of—the existing normalized residual criterion.
 
 ## Energy-Accounting Rule
 
