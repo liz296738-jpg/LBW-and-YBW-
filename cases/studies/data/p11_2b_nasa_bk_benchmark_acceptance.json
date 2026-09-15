@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "record_kind": "p11-2b-nasa-bk-reduced-order-benchmark-acceptance",
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "status": "FORMAL_REDUCED_ORDER_REFERENCE_BENCHMARK_ACCEPTED",
+  "benchmark_ready": true,
+  "formal_experimental_validation_ready": false,
+  "source_class": "NASA_REFERENCE_SOLUTION_DERIVED",
+  "accepted_scope": "Reduced-order heated-flow solver/reduction consistency benchmark against the public NASA Wind-US computational reference, with public Burrows-Kurkov experimental profiles retained as independent qualitative/contextual evidence only.",
+  "workflow_evidence": {
+    "head_sha": "52aa3f8eae9f1fd1a38788b8e5c89de2b6b11afc",
+    "pytest": {
+      "run_id": 34969751494,
+      "conclusion": "success",
+      "passed": 964,
+      "runtime_s": 47.14
+    },
+    "public_asset_intake": {
+      "run_id": 34969751520,
+      "conclusion": "success"
+    },
+    "common_file_extraction": {
+      "run_id": 34969751529,
+      "conclusion": "success"
+    },
+    "heated_candidate": {
+      "run_id": 34969751567,
+      "artifact_id": 10397220650,
+      "artifact_digest": "sha256:a2d8e3e9e9df50af5e3c89796aa613070297a47b5dcf1fb14f174511e2a5f337",
+      "conclusion": "success"
+    },
+    "grid_convergence": {
+      "run_id": 34969751723,
+      "artifact_id": 10397081121,
+      "artifact_digest": "sha256:7065492f0b9b07b80e4bca8c8ebc32e85c4d9b46135d381404e7b3eea51f013b",
+      "conclusion": "success"
+    }
+  },
+  "reference_gamma_result": {
+    "gamma": 1.2779315953440815,
+    "R_J_per_kg_K": 329.4821420180208,
+    "cells_primary": 80,
+    "solver_converged": true,
+    "minimum_Mach": 2.4065321992355675,
+    "exit_Mach": 2.417196005989836,
+    "exit_pressure_Pa": 87923.32982530197,
+    "exit_temperature_K": 1269.7412128491528,
+    "energy_integral_mismatch_W": 1.4551915228366852e-11,
+    "momentum_integral_mismatch_N": 0.0
+  },
+  "conservative_exit_target": {
+    "classification": "NASA_REFERENCE_SOLUTION_DERIVED_CONSERVATIVE_MOMENT_MATCH",
+    "Mach": 2.4310586214846666,
+    "pressure_Pa": 87197.52084149444,
+    "temperature_K": 1263.229829138864
+  },
+  "grid_convergence": {
+    "cell_counts": [40, 80, 160, 320],
+    "all_converged": true,
+    "all_supersonic": true,
+    "finest_grid_cells": 320,
+    "finest_grid_exit_Mach": 2.417278604382191,
+    "finest_grid_exit_pressure_Pa": 87918.97874375581,
+    "finest_grid_exit_temperature_K": 1269.7023308631628,
+    "finest_grid_relative_errors_vs_conservative_target": {
+      "Mach": -0.0056683195463464375,
+      "pressure": 0.008273835027635993,
+      "temperature": 0.005123772076147911
+    },
+    "finest_vs_previous_relative_changes": {
+      "Mach": 1.1457315689317985e-05,
+      "pressure": 1.659373770061365e-05,
+      "temperature": 1.02678406371068e-05
+    },
+    "acceptance_gate": "Absolute conservative-target errors < 2% and 160-to-320 refinement changes < 0.5% for Mach, static pressure, and static temperature."
+  },
+  "thermodynamic_sensitivity": {
+    "lower_gamma": 1.246731797999899,
+    "status": "CONVERGED_SUPERSONIC_SENSITIVITY_ONLY",
+    "interpretation": "The substantial output shift under lower gamma confirms that the benchmark claim is conditional on the frozen calorically-perfect effective-gas reduction. It must not be generalized to finite-rate chemistry or variable-composition thermodynamics."
+  },
+  "experimental_context": {
+    "archive_ingested": true,
+    "formal_acceptance_role": "NOT_USED_AS_A_SCALAR_FIT_OR_TUNING_TARGET",
+    "reason": "The public experiment supplies nonuniform exit probe profiles whereas the present solver produces a single cross-sectionally reduced state. Unsupported averaging or profile fitting would create a misleading experimental-validation claim.",
+    "permitted_statement": "The public Burrows-Kurkov profiles remain independent context demonstrating the strongly nonuniform reacting exit field; they are not used to construct the computational-reference-derived inlet, energy source, momentum source, or conservative exit target."
+  },
+  "claim_boundaries": [
+    "Accepted: numerical/reduction consistency of the quasi-one-dimensional heated-flow model under NASA-reference-derived signed energy and momentum closures.",
+    "Accepted: reproducible public-data provenance, conservative inlet/exit moment matching, grid convergence, and gamma sensitivity reporting.",
+    "Not accepted: independent experimental validation of a one-dimensional bulk Mach or temperature scalar.",
+    "Not accepted: finite-rate chemistry validation, H2/H2O species validation, measured chemical heat-release reconstruction, or wall-friction identification.",
+    "Not accepted: LBW/YBW classification. P11.3 requires a separate authoritative mode definition and observable/threshold evidence."
+  ],
+  "next_stage": {
+    "stage": "P11.3",
+    "authorized": true,
+    "scope": "Research and freeze authoritative LBW/YBW definitions, observables, thresholds, applicability limits, and uncertainty before any regime classifier or map is promoted."
+  }
+}
