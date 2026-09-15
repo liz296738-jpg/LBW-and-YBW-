@@ -1,9 +1,9 @@
 """Build a machine-readable P11.2B formal-case readiness record.
 
-The formal-case gate remains authoritative for promotion.  This module also
-summarizes the dedicated evidence records so the tracked readiness artifact does
-not lag behind requirements that have already been resolved elsewhere (for
-example the Liu model-B axial coordinate mapping and study-layer area law).
+The formal-case gate remains authoritative for promotion. This module also
+summarizes dedicated evidence records so the tracked readiness artifact does
+not lag behind requirements already resolved elsewhere (geometry, coordinate
+mapping, area-law interpretation, and coefficient conventions).
 """
 
 from __future__ import annotations
@@ -29,6 +29,7 @@ CONDITION_RECORD = DATA_DIR / "p11_2b_jin_liu_condition_discrepancy.json"
 GEOMETRY_RECORD = DATA_DIR / "p11_2b_liu_model_b_geometry_source.json"
 ANGLE_RECORD = DATA_DIR / "p11_2b_liu_angle_convention_source.json"
 APPLICABILITY_RECORD = DATA_DIR / "p11_2b_jin_validation_applicability.json"
+FRICTION_RECORD = DATA_DIR / "p11_2b_jin_friction_convention_source.json"
 DEFAULT_OUTPUT = ROOT / "artifacts" / "p11_2b" / "p11_2b_readiness.json"
 CANDIDATE_ID = "JIN-LIU-MODEL-B-VALIDATION"
 
@@ -55,16 +56,11 @@ def build_evidence_gate_summary(
     geometry_record: Path = GEOMETRY_RECORD,
     angle_record: Path = ANGLE_RECORD,
     applicability_record: Path = APPLICABILITY_RECORD,
+    friction_record: Path = FRICTION_RECORD,
     declared_project_status: object = None,
     formal_case_ready: bool = False,
 ) -> dict[str, object]:
-    """Summarize resolved and open evidence requirements without guessing.
-
-    Dedicated evidence records are later/more specific than the coarse formal
-    promotion ledger.  This summary therefore records exactly which geometric
-    requirements are already closed and which reproduction inputs remain open.
-    It does not promote a formal case and does not manufacture missing values.
-    """
+    """Summarize resolved and open evidence requirements without guessing."""
 
     condition = _load_json_record(
         condition_record,
@@ -81,6 +77,10 @@ def build_evidence_gate_summary(
     applicability = _load_json_record(
         applicability_record,
         expected_kind="validation-model-applicability",
+    )
+    friction = _load_json_record(
+        friction_record,
+        expected_kind="validation-friction-convention",
     )
 
     resolved_requirements: list[dict[str, object]] = []
@@ -150,6 +150,36 @@ def build_evidence_gate_summary(
             }
         )
 
+    friction_mapping = friction.get("derived_mapping", {})
+    if (
+        friction_mapping.get("status") == "RESOLVED"
+        and friction_mapping.get("result") == "f_D = 4 Cf"
+        and friction_mapping.get("classification") == "DERIVED_CONVENTION_MAPPING"
+    ):
+        resolved_requirements.append(
+            {
+                "requirement": "Cf convention to repository Darcy friction factor",
+                "status": "RESOLVED_DERIVED_FROM_SOURCE_DEFINITION",
+                "classification": friction_mapping.get("classification"),
+                "evidence_record": _repo_relative(friction_record),
+                "mapping": friction_mapping.get("result"),
+                "basis": (
+                    "Jin Eqs. (9)-(10) use 4 Cf dx/D and explicitly cite "
+                    "Shapiro [51]; Shapiro defines the duct friction coefficient "
+                    "as wall shear divided by dynamic head. Equating that wall "
+                    "force to the repository Darcy source yields f_D=4 Cf."
+                ),
+            }
+        )
+    else:
+        open_requirements.append(
+            {
+                "requirement": "Cf convention to repository Darcy friction factor",
+                "status": "NOT_FROZEN",
+                "evidence_record": _repo_relative(friction_record),
+            }
+        )
+
     condition_status = condition.get("status")
     if condition_status == "RESOLVED":
         resolved_requirements.append(
@@ -182,9 +212,20 @@ def build_evidence_gate_summary(
         status = item.get("status")
         if status in {None, "RESOLVED"}:
             continue
+        requirement = str(item.get("item"))
+        # Requirements closed by a later dedicated evidence record must not be
+        # duplicated as open merely because an older coarse ledger once listed
+        # them. The current applicability record no longer lists the friction
+        # convention, but this guard keeps readiness deterministic under stale
+        # external copies.
+        if requirement == "Cf convention to repository Darcy friction factor" and any(
+            resolved.get("requirement") == requirement
+            for resolved in resolved_requirements
+        ):
+            continue
         open_requirements.append(
             {
-                "requirement": str(item.get("item")),
+                "requirement": requirement,
                 "status": status,
                 "evidence_record": _repo_relative(applicability_record),
                 "reason": item.get("reason"),
