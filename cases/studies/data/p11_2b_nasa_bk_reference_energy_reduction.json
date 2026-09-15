@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "record_kind": "nasa-reference-solution-derived-specific-total-enthalpy-reduction",
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "status": "FROZEN_NON_CIRCULAR_REFERENCE_DERIVATION",
+  "source_class": "NASA_REFERENCE_SOLUTION_DERIVED",
+  "purpose": "Freeze a deterministic one-dimensional specific-total-enthalpy-change curve derived only from the checksum-tracked NASA Wind-US reference solution. Experimental exit Mach and total-temperature profiles are not used in the derivation and remain independent benchmark observations.",
+  "source_assets": {
+    "nasa_cfl_sha256": "e0d9c3c89c40b947934c6ab6a5aa0df1e9f32b22dc7919f81dd9ad391f08e602",
+    "nasa_cgd_sha256": "255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91",
+    "extraction_workflow_run_id": 34960321717,
+    "extraction_artifact_id": 10393022680,
+    "extraction_artifact_digest": "sha256:591f9741715e82c59c9c1ed75318c7e8e0a12d201caf133d616463a4152541cd",
+    "raw_section_csv_sha256": "a77a519027fe316e205d848c8fe80059967ddc821556879ea20a295d7dd0341e",
+    "raw_section_record_count": 127,
+    "unique_axial_station_count": 121
+  },
+  "thermodynamic_reduction": {
+    "source_record": "cases/studies/data/p11_2b_nasa_bk_thermo_reduction.json",
+    "cp_eff_J_per_kg_K": 1514.961402157982,
+    "classification": "MODEL_REDUCTION_WITH_SOURCE_BACKED_REFERENCE_PROPERTIES",
+    "formula": "h0_eff(x) = cp_eff * [integral rho*u*T dy / integral rho*u dy] + [integral rho*u*0.5*(u^2+v^2) dy / integral rho*u dy]",
+    "note": "The same constant-cp reduction used by the one-dimensional solver is applied to the NASA reference fields. Chemical formation enthalpies and variable-composition cp are not silently imported into the reduced-order solver."
+  },
+  "normalization": {
+    "zone_scope": "main combustor duct Wind-US zones 2 through 8",
+    "duplicate_policy": "Axial stations duplicated at adjacent zone interfaces are grouped by x rounded to 12 decimal places and arithmetic-averaged before h0_eff is formed.",
+    "endpoint_policy": "The first station is frozen at x=0 m and the final station is frozen at the source-backed geometry exit x=0.356 m; the raw extracted exit coordinate differs only by approximately 4.57e-8 m.",
+    "delta_definition": "delta_h0_eff(x) = h0_eff(x) - h0_eff(0)",
+    "frozen_curve_path": "cases/studies/data/p11_2b_nasa_bk_reference_delta_h0.csv",
+    "frozen_curve_sha256": "e6d72379f089250d32b4075ded80f37cbe18f8371a6c2647a79c655740a981ea"
+  },
+  "line_energy_closure": {
+    "formula": "Qdot_net_prime(cell) = mdot_1d * [Delta h0_eff(x_right) - Delta h0_eff(x_left)] / (x_right - x_left)",
+    "interpolation": "piecewise-linear interpolation of the frozen Delta h0_eff curve at solver cell faces",
+    "conservation_property": "The discrete integral sum(Qdot_net_prime * dx) equals mdot_1d * [Delta h0_eff(x_exit) - Delta h0_eff(x_start)] up to floating-point roundoff.",
+    "mass_flow_policy": "mdot_1d is computed from the one-dimensional inlet state and inlet area. The closure therefore preserves the NASA reference solution's source-backed specific-energy change without forcing the one-dimensional mass flow to equal the two-dimensional reference mass flow.",
+    "sign_semantics": "Signed net energy: positive adds energy to the gas; negative removes energy. It is not relabelled chemical heat release or measured Qdot-prime."
+  },
+  "independence_and_claim_boundary": [
+    "No experimental exit Mach point is used to construct Delta h0_eff or Qdot_net_prime.",
+    "No experimental exit total-temperature point is used to construct Delta h0_eff or Qdot_net_prime.",
+    "The closure is computational-reference-derived and may verify a reduced-order thermal/flow model only.",
+    "It does not validate finite-rate chemistry, species transport, or LBW/YBW classification."
+  ]
+}
