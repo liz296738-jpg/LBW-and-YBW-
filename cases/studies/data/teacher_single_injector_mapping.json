@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-single-injector-domain-mapping",
+  "stage": "P11.3J",
+  "status": "SINGLE_INJECTOR_DOMAIN_MAPPING_IMPLEMENTED_SOURCE_ENABLED_SOLVER_PENDING",
+  "purpose": "Freeze a source-consistent finite-volume domain contract in which the inlet/upstream region is air-only, one interior cell receives the prescribed fuel source exactly once, and the verified teacher algebraic composition closure begins at that injector cell and continues downstream.",
+  "implemented": [
+    "uniform cell-centre grid and interior injector-cell contract",
+    "at least one air-only upstream cell",
+    "upstream phi=eta=0 composition on the same teacher species basis",
+    "downstream verified phi-to-Lm-to-eta-to-Y composition closure",
+    "localized Delta(mdot_f)/Delta x source at exactly one cell",
+    "injector-only axial-velocity and total-enthalpy source profiles",
+    "full-domain immutable source/composition profiles"
+  ],
+  "verification": {
+    "inlet_and_upstream_are_exact_air_only": true,
+    "downstream_matches_verified_spatial_closure": true,
+    "fuel_source_nonzero_at_exactly_one_cell": true,
+    "integrated_fuel_source_equals_prescribed_mdot": true,
+    "eq11_38_integrated_mass_momentum_enthalpy_identity": true,
+    "raw_mixing_and_saturated_eta_remain_separate": true,
+    "mapping_profiles_are_immutable": true,
+    "inlet_injector_nonuniform_grid_rich_case_and_C10H22_are_gated": true
+  },
+  "scientific_boundaries": [
+    "The composition field is an algebraic thermodynamic closure and is not a second conservative mass source.",
+    "An injector at the first physical cell is rejected so the current mapping always contains an air-only upstream/inlet region.",
+    "The mapping remains H2/C2H4 and lean-branch only; C10H22 thermochemistry is still source-gated.",
+    "No Eq.11.26-to-dimensional-wall-heat conversion is introduced.",
+    "No species transport PDE, finite-rate chemistry, or independent chemical Qdot source is introduced.",
+    "Final teacher inlet/outlet boundary semantics and a source-enabled SSP-RK3 solver remain separate gates."
+  ],
+  "readiness": {
+    "air_only_upstream_mapping_ready": true,
+    "single_cell_fuel_source_mapping_ready": true,
+    "downstream_algebraic_composition_mapping_ready": true,
+    "double_counting_guard_ready": true,
+    "source_enabled_variable_composition_rhs_ready": false,
+    "teacher_boundary_adapter_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Add a narrow source-enabled variable-composition quasi-1D RHS/SSP-RK3 compatibility solver that recomputes Eq.11.38 state-dependent friction at every RK stage while keeping the frozen single-injector mapping fixed; retain the current air-only inlet mapping and do not yet claim final teacher boundary semantics."
+}
