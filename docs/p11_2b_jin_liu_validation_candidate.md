@@ -22,6 +22,8 @@ In the validation discussion around Fig. 14, Jin et al. state that:
 - the theoretical exit Mach is `2.24`, close to the experimental `2.27`;
 - the text identifies the validation condition as scramjet model B with `phi=1.04`.
 
+The article explicitly states that supplementary material exists online and that supporting data are available from the corresponding author upon reasonable request. The publicly indexed article text recovered so far does **not** expose the exact model-B validation shape parameters or the absolute stagnation-enthalpy increment used for Fig. 14. Those quantities therefore remain evidence-gated rather than reconstructed by guesswork.
+
 ### SRC10 — Liu et al. (2019)
 
 Qili Liu, Damiano Baccarella, Brendan McGann, Tonghun Lee, *Dual-Mode Operation and Transition in Axisymmetric Scramjets*, AIAA Journal 57(11) (2019) 4764–4777, DOI `10.2514/1.J058391`.
@@ -42,7 +44,7 @@ The source text and Fig. 2 provide:
 - diverging combustor length `357 mm`;
 - model B replaces the model-A cavity module with a constant-cross-sectional tube of the same `35 mm` diameter before the downstream diverging combustor.
 
-The source also states that the x-axis follows the engine centerline and that its origin is at the center of the inlet. This makes a future source-to-solver axial mapping substantially more defensible than a geometry reconstructed from an unlabeled heat-release plot.
+The source also states that the x-axis follows the engine centerline and that its origin is at the center of the inlet. Station 3 is both the isolator exit / combustor inlet and the location of the most-upstream fuel injection; station 4 is the combustor exit. This makes a future source-to-solver axial mapping substantially more defensible than a geometry reconstructed from an unlabeled heat-release plot.
 
 ## Thermodynamic / measurement evidence
 
@@ -57,7 +59,9 @@ The nominal freestream table reports:
 
 The accessible text extraction renders the static-pressure unit/value ambiguously, so that quantity is deliberately not frozen for a formal case.
 
-For ethylene reacting-flow analysis, Liu et al. use average `gamma=1.31` and `cp=1255 J/(kg K)`. Exit stagnation enthalpy is evaluated using a heat-flux probe and a Sutton–Graves relation; exit Mach is obtained from wall static pressure and pitot measurements.
+For ethylene reacting-flow analysis, Liu et al. use average `gamma=1.31` and `cp=1255 J/(kg K)`. Exit stagnation enthalpy is evaluated using a heat-flux probe and a Sutton–Graves relation; exit Mach is obtained from wall static pressure and pitot measurements. The paper states that fuel mass flow is derived from fuel total pressure and the total choked injector-throat area with about 5% uncertainty, but the accessible text does not provide the exact fuel-total-pressure/mass-flow value needed to reconstruct the Jin validation run.
+
+Liu also defines `Ht4/Ht3` as the combustor-exit to combustor-inlet total-flow-enthalpy ratio and uses it together with `pt4/pt3` in the one-dimensional mode-transition analysis. This ratio is a valuable **dimensionless validation constraint**, but by itself it is not an absolute `J/kg` increment and therefore is not silently converted into total thermal power.
 
 ## Table-2 model-B record nearest to the Jin validation
 
@@ -71,18 +75,36 @@ Liu Table 2 contains a model-B ethylene row at `phi=1.03` with:
 
 The `M4=2.27` value exactly matches the experimental exit Mach cited by Jin et al. in the model-B validation discussion. This makes the row a very strong candidate for the underlying validation condition.
 
-However, Jin labels the validation condition `phi=1.04`, while Liu Table 2 labels this model-B ethylene row `phi=1.03`. The repository therefore treats the identity as **unresolved**, not as an automatic rounding equivalence.
+## The phi discrepancy is a cross-model conflict, not merely a decimal mismatch
+
+The source comparison can now be stated more strongly than `1.03 versus 1.04`:
+
+- Jin explicitly describes **model B, `phi=1.04`, experimental `M4=2.27`**;
+- Liu Table 2 gives **model B, `phi=1.03`, `M4=2.27`, `Ht4/Ht3=1.16`**;
+- Liu Table 2 also contains a row at **exactly `phi=1.04`**, but that row belongs to **model A**, with `M4=1.76` and `Ht4/Ht3=1.29`.
+
+Therefore an automatic `1.03 -> 1.04` rounding assumption is not admissible: matching Jin by equivalence ratio would switch engine configurations, while matching by experimental exit Mach points to the Liu model-B `phi=1.03` row. The dedicated machine-readable record `cases/studies/data/p11_2b_jin_liu_condition_discrepancy.json` freezes this conflict and deliberately leaves its interpretation unresolved.
+
+Plausible explanations include a typographical/rounding error in Jin or a distinct model-B run absent from the accessible Liu table, but the repository does not choose between them without traceable evidence.
 
 ## Why the case is still blocked
 
 The current public record is not yet sufficient to execute the exact Jin–Liu validation without introducing hidden assumptions. Four items remain:
 
-1. resolve whether Jin's `phi=1.04` and Liu's model-B `phi=1.03` row are the same experimental condition or a distinct run/rounding convention;
+1. resolve the model/condition identity conflict described above;
 2. recover the axial heat-release shape used in the Jin validation, or the fitted quasi-Gaussian parameters for that exact case, with a retained source/figure extraction record;
-3. recover the **absolute stagnation-enthalpy increment** used by Jin and the mass flow needed by Eq. 11. The table ratio `Ht4/Ht3=1.16` is not converted into an absolute increment without a source-backed station-3 enthalpy value;
+3. recover the **absolute stagnation-enthalpy increment** used by Jin and the mass flow needed by Eq. 11. The table ratio `Ht4/Ht3=1.16` is retained as a dimensionless constraint but is not converted into an absolute increment without a source-backed station-3 enthalpy/mass-flow chain;
 4. freeze the exact source-to-solver x-coordinate mapping over the model-B combustor.
 
 The ACT-II facility paper shows that the arc heater was operated over several mass-flow rates (`7.3`, `13.3`, and `22.2 g/s` in facility characterization), but the repository does not assign any one of those values to the Liu 2019 validation run without direct evidence.
+
+## Supplement / author-data recovery priority
+
+Jin explicitly points readers to supplementary material and states that supporting data can be requested from the corresponding author. Public web indexing confirms the supplement exists, but the exact supplementary file containing the Fig. 14 validation inputs has not yet been recovered in a traceable form. The next evidence priority is therefore:
+
+1. recover the publisher supplementary material or an author-hosted copy;
+2. inspect it specifically for the Liu model-B validation condition, fitted `Q_m/x_m/x_i/x_c/k`, PLIF coordinate extraction, exit stagnation-enthalpy increment, and mass flow;
+3. if the supplement still omits these values, treat an author-provided data table as the preferred source rather than digitizing an unlabeled figure.
 
 ## Promotion rule
 
@@ -93,11 +115,12 @@ Promotion is allowed only when the missing chain is recovered from traceable evi
 - infer air mass flow from the inlet geometry and nominal density/velocity;
 - infer absolute combustion heat from `Ht4/Ht3` alone;
 - digitize PLIF/enthalpy plots without recording the coordinate/calibration procedure;
-- silently replace `phi=1.04` with `phi=1.03`;
+- silently replace Jin's model-B `phi=1.04` label with Liu's model-B `phi=1.03` row;
+- accidentally use Liu's model-A `phi=1.04` row to satisfy Jin's model-B label;
 - transplant the Liu/Jin heat-release distribution into the P11.2A Li geometry and call that validation.
 
 ## Scientific value if completed
 
-A completed Jin–Liu model-B case would provide a substantially stronger P11.2B milestone than a synthetic heat-addition sweep. It would test the direct `Qdot'(x)` interface against an independent cavity-free experiment for which both pressure distribution and exit Mach are available, while remaining close to the quasi-one-dimensional assumptions of the current solver.
+A completed Jin–Liu model-B case would provide a substantially stronger P11.2B milestone than a synthetic heat-addition sweep. It would test the direct `Qdot'(x)` interface against an independent cavity-free experiment for which pressure distribution, exit Mach, total-pressure ratio, and total-enthalpy ratio are available, while remaining close to the quasi-one-dimensional assumptions of the current solver.
 
 It would still be a prescribed-heat-release validation, not finite-rate chemistry validation and not an LBW/YBW classification result.
