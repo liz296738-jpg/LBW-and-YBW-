@@ -40,19 +40,19 @@ Detailed matrix: `docs/teacher_reference_alignment.md`.
 
 ### P11.3A Numerical compatibility — In Progress
 
-Already aligned:
+Already aligned/completed:
 
 - unsteady quasi-1D conservation form;
 - first-order finite-volume/upwind treatment;
 - Steger-Warming FVS;
 - third-order TVD/SSP-RK3;
 - CFL stepping;
-- compatible physical/transmissive boundary infrastructure.
+- compatible physical/transmissive boundary infrastructure;
+- Chapter 11 Eq. 11.46 maximum relative-density iteration change as an additional compatibility diagnostic, while retaining the normalized residual gate.
 
-Closeout items:
+Remaining closeout items:
 
-- add Chapter 11 Eq. 11.46 maximum relative-density iteration change as a compatibility diagnostic while retaining the stronger normalized residual gate;
-- preserve the teacher's inlet `p/T/u` and first-order extrapolation semantics through case adapters/configuration;
+- preserve the teacher's inlet `p/T/u` and first-order extrapolation semantics through case adapters/configuration where needed;
 - add Eq. 11.44 near-sonic Steger-Warming smoothing only after the smoothing parameter policy is explicitly source-frozen. Do not guess `epsilon`.
 
 ### P11.3B Variable thermochemistry — Planned next
