@@ -17,6 +17,7 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from .thermochemistry import (
+    PiecewiseSpeciesThermo,
     SpeciesThermoModel,
     mixture_thermo_state,
     normalized_mass_fractions,
@@ -74,6 +75,61 @@ def _broadcast_primitive_inputs(
     if not np.all(np.isfinite(temperature)):
         raise ValueError("temperature_K must be finite")
     return density, velocity, temperature
+
+
+def _recover_temperature(
+    target_internal_energy_J_per_kg: float,
+    mass_fractions: Mapping[str, float],
+    species: Mapping[str, SpeciesThermoModel],
+    *,
+    temperature_min_K: float,
+    temperature_max_K: float,
+    temperature_tolerance_K: float,
+    max_iterations: int,
+) -> float:
+    """Invert mixture internal energy with deterministic source-switch handling.
+
+    CHEMKIN/NASA low/high polynomial records are fitted independently and are
+    only continuous to finite tabulation precision at their switch temperature.
+    A state generated *exactly* at a source switch can therefore otherwise be
+    inverted to a temperature a tiny distance on the high-temperature branch.
+
+    Before the generic bounded inversion, this helper checks whether the target
+    energy is the round-off-equivalent of the mixture energy evaluated exactly
+    at any active piecewise switch. If so, it returns that source switch
+    temperature. This is not clipping: only machine-roundoff-equivalent values
+    are locked, and no finite energy gap is interpolated or hidden.
+    """
+
+    target = float(target_internal_energy_J_per_kg)
+    active_switches = sorted(
+        {
+            float(model.switch_temperature_K)
+            for name, fraction in mass_fractions.items()
+            if fraction > 0.0
+            for model in (species[name],)
+            if isinstance(model, PiecewiseSpeciesThermo)
+            and temperature_min_K <= model.switch_temperature_K <= temperature_max_K
+        }
+    )
+    for switch in active_switches:
+        switch_energy = mixture_thermo_state(
+            switch, mass_fractions, species
+        ).specific_internal_energy_J_per_kg
+        scale = max(abs(target), abs(switch_energy), 1.0)
+        roundoff_tolerance = 64.0 * np.finfo(float).eps * scale
+        if abs(target - switch_energy) <= roundoff_tolerance:
+            return switch
+
+    return temperature_from_specific_internal_energy(
+        target,
+        mass_fractions,
+        species,
+        temperature_min_K=temperature_min_K,
+        temperature_max_K=temperature_max_K,
+        temperature_tolerance_K=temperature_tolerance_K,
+        max_iterations=max_iterations,
+    )
 
 
 def variable_primitive_to_conservative(
@@ -151,7 +207,7 @@ def variable_conservative_to_primitive(
     h = np.empty_like(rho, dtype=float)
 
     for index in np.ndindex(rho.shape):
-        recovered_temperature = temperature_from_specific_internal_energy(
+        recovered_temperature = _recover_temperature(
             float(target_internal_energy[index]),
             fractions,
             species,
