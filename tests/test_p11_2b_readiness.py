@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "cases" / "studies" / "p11_2b_readiness.py"
+TRACKED_ARTIFACT = ROOT / "artifacts" / "p11_2b" / "p11_2b_readiness.json"
 SPEC = importlib.util.spec_from_file_location("p11_2b_readiness", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
@@ -76,6 +77,11 @@ def test_evidence_summary_retains_all_current_non_geometry_blockers() -> None:
     assert open_requirements[
         "heat_release_shape_and_absolute_energy_chain"
     ]["status"] == "NOT_PROMOTED_TO_FORMAL_CASE"
+
+
+def test_tracked_readiness_artifact_matches_current_evidence() -> None:
+    tracked = json.loads(TRACKED_ARTIFACT.read_text(encoding="utf-8"))
+    assert tracked == MODULE.build_readiness_record()
 
 
 def test_readiness_record_round_trips_as_canonical_json(tmp_path: Path) -> None:
