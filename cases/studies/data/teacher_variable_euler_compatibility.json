@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-variable-thermo-euler-compatibility",
+  "stage": "P11.3B",
+  "status": "FIXED_COMPOSITION_EULER_COMPATIBILITY_IMPLEMENTED_SOLVER_TIME_MARCH_PENDING",
+  "purpose": "Verify the Euler flux, Rusanov interface flux, quasi-one-dimensional area operator, and transmissive compatibility boundary path using the source-backed variable thermochemistry before production time-marching integration.",
+  "implemented": [
+    "variable-thermo physical Euler flux",
+    "variable-thermo Rusanov flux with local sound speed sqrt(gamma*R*T)",
+    "internal and transmissive interface flux assembly",
+    "uniform-grid conservative finite-volume residual",
+    "area-weighted quasi-one-dimensional flux residual",
+    "variable-thermo geometric area momentum source",
+    "source-free quasi-one-dimensional RHS with transmissive faces"
+  ],
+  "verification": {
+    "constant_property_state_energy_limit": true,
+    "constant_property_physical_flux_limit": true,
+    "constant_property_rusanov_limit": true,
+    "identical_state_consistency": true,
+    "uniform_constant_area_preservation": true,
+    "global_constant_area_conservation": true,
+    "constant_area_weighted_reduction": true,
+    "variable_area_pressure_source_identity": true,
+    "transmissive_boundary_flux_consistency": true
+  },
+  "scientific_boundaries": [
+    "Composition remains fixed; no species transport or teacher mixing/reaction closure is implied.",
+    "This compatibility path uses Rusanov first because it is thermodynamically unambiguous with local sound speed; teacher Steger-Warming variable-property integration remains a separate numerical task.",
+    "Transmissive boundaries are used only for operator verification and are not the final teacher inlet p/T/u and outlet extrapolation case semantics.",
+    "No prescribed chemical Qdot source is introduced here, avoiding reaction-energy double counting before composition closure exists.",
+    "The accepted constant-gamma production solver remains unchanged."
+  ],
+  "readiness": {
+    "variable_state_recovery_ready": true,
+    "variable_physical_flux_ready": true,
+    "variable_rusanov_ready": true,
+    "variable_quasi_1d_operator_ready": true,
+    "fixed_composition_time_march_ready": false,
+    "teacher_steger_warming_variable_thermo_ready": false,
+    "teacher_boundary_case_adapter_ready": false,
+    "teacher_mixing_reaction_closure_ready": false,
+    "integrated_teacher_case_ready": false
+  },
+  "next_step": "Build a fixed-composition variable-thermo transient/steady compatibility solver using SSP-RK3 and a local variable-property CFL estimate, then verify uniform-flow preservation, conservation, convergence behavior, and constant-property limiting equivalence before adding teacher mixing/reaction closures."
+}
