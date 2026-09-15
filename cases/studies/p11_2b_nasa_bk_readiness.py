@@ -1,13 +1,9 @@
 """Readiness gate for the public NASA Burrows-Kurkov P11.2B candidate.
 
-This module separates four evidence classes:
-
-1. experiment/source values exposed by NASA;
-2. exact unit conversions derived from those values;
-3. normalized experimental profiles parsed from the checksum-tracked NASA archive;
-4. future reduced-order quantities derived from NASA computational assets.
-
-Passing this module never implies finite-rate chemistry or species validation.
+The gate separates source values, exact conversions, checksum-tracked public
+experimental data, source-backed geometry, and future reduced-order quantities
+derived from NASA computational assets. Passing it never implies finite-rate
+chemistry, species, or LBW/YBW validation.
 """
 
 from __future__ import annotations
@@ -24,6 +20,7 @@ DATA_DIR = ROOT / "cases" / "studies" / "data"
 SOURCE_PATH = DATA_DIR / "p11_2b_nasa_bk_public_source.json"
 ASSET_MANIFEST_PATH = DATA_DIR / "p11_2b_nasa_bk_asset_manifest.json"
 EXPERIMENTAL_PROFILES_PATH = DATA_DIR / "p11_2b_nasa_bk_exp_exit_profiles.csv"
+GEOMETRY_SOURCE_PATH = DATA_DIR / "p11_2b_nasa_bk_geometry_source.json"
 EXPECTED_SCHEMA_VERSION = 1
 EXPECTED_CASE_FAMILY = "P11_2B_NASA_BK_PUBLIC_VALIDATION"
 EXPECTED_CANDIDATE_ID = "NASA-BURROWS-KURKOV-REACTING-VALIDATION"
@@ -38,6 +35,10 @@ def _finite_positive(name: str, value: object) -> float:
     if not math.isfinite(scalar) or scalar <= 0.0:
         raise ValueError(f"{name} must be finite and positive")
     return scalar
+
+
+def _repo_relative(path: Path | str) -> str:
+    return Path(path).resolve().relative_to(ROOT.resolve()).as_posix()
 
 
 def _validate_mass_fractions(name: str, fractions: object) -> None:
@@ -58,12 +59,10 @@ def _validate_mass_fractions(name: str, fractions: object) -> None:
 
 
 def load_nasa_bk_source(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
-    """Load and validate the NASA public-source ledger."""
+    """Load and validate the public NASA source ledger."""
 
-    source_path = Path(path)
-    with source_path.open("r", encoding="utf-8") as stream:
+    with Path(path).open("r", encoding="utf-8") as stream:
         source = json.load(stream)
-
     if source.get("schema_version") != EXPECTED_SCHEMA_VERSION:
         raise ValueError("unsupported NASA-BK source schema_version")
     if source.get("case_family") != EXPECTED_CASE_FAMILY:
@@ -79,7 +78,6 @@ def load_nasa_bk_source(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
     policy = source.get("reduced_order_promotion_policy")
     if not all(isinstance(item, dict) for item in (primary, archive, raw, si, targets, policy)):
         raise ValueError("NASA-BK ledger is missing required mappings")
-
     if primary.get("distribution_limits") != "Public":
         raise ValueError("primary experiment must retain NASA public-distribution status")
     if not str(primary.get("ntrs_url", "")).startswith("https://ntrs.nasa.gov/"):
@@ -88,14 +86,14 @@ def load_nasa_bk_source(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
     assets = archive.get("public_assets")
     if not isinstance(assets, list) or not assets:
         raise ValueError("NASA validation archive must declare public assets")
-    required_asset_ids = {
+    required_ids = {
         "NASA-BK-EXP-TAR",
         "NASA-BK-RUN-DAT",
         "NASA-BK-RUN-CGD",
         "NASA-BK-RUN-CFL",
     }
-    declared_asset_ids = {item.get("asset_id") for item in assets if isinstance(item, dict)}
-    if not required_asset_ids.issubset(declared_asset_ids):
+    declared_ids = {item.get("asset_id") for item in assets if isinstance(item, dict)}
+    if not required_ids.issubset(declared_ids):
         raise ValueError("NASA validation archive is missing required public assets")
     for item in assets:
         if not isinstance(item, dict):
@@ -110,7 +108,6 @@ def load_nasa_bk_source(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
     si_h2 = si.get("hydrogen")
     if not all(isinstance(item, dict) for item in (raw_free, raw_h2, si_free, si_h2)):
         raise ValueError("NASA-BK inlet condition records are incomplete")
-
     _validate_mass_fractions("raw.freestream", raw_free.get("mass_fractions"))
     _validate_mass_fractions("raw.hydrogen", raw_h2.get("mass_fractions"))
     _validate_mass_fractions("si.freestream", si_free.get("mass_fractions"))
@@ -153,14 +150,10 @@ def load_nasa_bk_source(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
     quantities = targets.get("exit_profile_quantities")
     if not isinstance(quantities, list) or "Mach" not in quantities or "total_temperature" not in quantities:
         raise ValueError("experimental targets must retain Mach and total-temperature profiles")
-
-    forbidden = policy.get("forbidden_claims")
-    required = policy.get("required_before_formal_case")
-    if not isinstance(forbidden, list) or not forbidden:
+    if not isinstance(policy.get("forbidden_claims"), list) or not policy["forbidden_claims"]:
         raise ValueError("reduced-order policy must retain forbidden claims")
-    if not isinstance(required, list) or not required:
+    if not isinstance(policy.get("required_before_formal_case"), list) or not policy["required_before_formal_case"]:
         raise ValueError("reduced-order policy must retain formal-case prerequisites")
-
     return source
 
 
@@ -183,19 +176,15 @@ def load_experimental_ingestion(
     exp_tar = assets.get("exp.tar")
     if not isinstance(exp_tar, dict):
         raise ValueError("asset manifest must contain exp.tar")
-    if exp_tar.get("sha256") != "8e3a60293b4a16aa821ac839bee8c890871ef415040029c4f573c743f6b9dc89":
+    expected_archive_sha = "8e3a60293b4a16aa821ac839bee8c890871ef415040029c4f573c743f6b9dc89"
+    if exp_tar.get("sha256") != expected_archive_sha:
         raise ValueError("unexpected exp.tar checksum")
 
-    member_records = manifest.get("extracted_experimental_members")
-    if not isinstance(member_records, list) or len(member_records) != 4:
+    records = manifest.get("extracted_experimental_members")
+    if not isinstance(records, list) or len(records) != 4:
         raise ValueError("asset manifest must retain four experimental members")
-    by_quantity = {item.get("quantity"): item for item in member_records if isinstance(item, dict)}
-    expected_quantities = {
-        "Mach",
-        "total_temperature_K",
-        "H2_mole_fraction",
-        "H2O_mole_fraction",
-    }
+    by_quantity = {item.get("quantity"): item for item in records if isinstance(item, dict)}
+    expected_quantities = {"Mach", "total_temperature_K", "H2_mole_fraction", "H2O_mole_fraction"}
     if set(by_quantity) != expected_quantities:
         raise ValueError("experimental member quantity set drifted")
 
@@ -217,44 +206,88 @@ def load_experimental_ingestion(
                 raise ValueError(f"{profile} must remain within [0, 1]")
             if profile in {"Mach", "total_temperature_K"} and value <= 0.0:
                 raise ValueError(f"{profile} values must be positive")
-            source_file = row["source_file"]
-            if source_file != by_quantity[profile].get("filename"):
+            if row["source_file"] != by_quantity[profile].get("filename"):
                 raise ValueError(f"{profile} source_file does not match checksum manifest")
-            rows.append(
-                {
-                    "profile": profile,
-                    "y_m": y_m,
-                    "value": value,
-                    "units": row["units"],
-                    "source_file": source_file,
-                }
-            )
+            rows.append({"profile": profile, "y_m": y_m, "value": value})
 
     counts = Counter(row["profile"] for row in rows)
     for profile, record in by_quantity.items():
         if counts[profile] != record.get("point_count"):
             raise ValueError(f"{profile} point count does not match checksum manifest")
-
     return {
-        "archive_sha256": exp_tar["sha256"],
+        "archive_sha256": expected_archive_sha,
         "workflow_run_id": manifest.get("workflow_run_id"),
         "workflow_artifact_id": manifest.get("workflow_artifact_id"),
         "profile_counts": dict(sorted(counts.items())),
         "row_count": len(rows),
-        "profiles_path": Path(profiles_path).resolve().relative_to(ROOT.resolve()).as_posix(),
-        "manifest_path": Path(manifest_path).resolve().relative_to(ROOT.resolve()).as_posix(),
+        "profiles_path": _repo_relative(profiles_path),
+        "manifest_path": _repo_relative(manifest_path),
+    }
+
+
+def load_geometry_evidence(path: Path | str = GEOMETRY_SOURCE_PATH) -> dict[str, Any]:
+    """Validate the source-backed rectangular linear-expansion area mapping."""
+
+    with Path(path).open("r", encoding="utf-8") as stream:
+        record = json.load(stream)
+    if record.get("schema_version") != 1:
+        raise ValueError("unsupported NASA-BK geometry schema")
+    if record.get("record_kind") != "validation-geometry-source":
+        raise ValueError("unexpected NASA-BK geometry record_kind")
+    if record.get("candidate_id") != EXPECTED_CANDIDATE_ID:
+        raise ValueError("NASA-BK geometry candidate_id mismatch")
+    if record.get("status") != "GEOMETRY_FROZEN_SOURCE_BACKED":
+        raise ValueError("NASA-BK geometry is not frozen")
+
+    source = record.get("source_geometry_si")
+    derived = record.get("derived_geometry")
+    if not isinstance(source, dict) or not isinstance(derived, dict):
+        raise ValueError("NASA-BK geometry record is incomplete")
+    x0 = float(source.get("x_start_m"))
+    x1 = _finite_positive("geometry.x_exit_m", source.get("x_exit_m"))
+    width = _finite_positive("geometry.width_m", source.get("width_m"))
+    h0 = _finite_positive("geometry.height_start_m", source.get("height_start_m"))
+    h1 = _finite_positive("geometry.height_exit_m", source.get("height_exit_m"))
+    if x0 != 0.0 or x1 <= x0:
+        raise ValueError("NASA-BK geometry origin/domain drifted")
+    if source.get("expansion_type") != "linear-height rectangular duct":
+        raise ValueError("NASA-BK expansion type drifted")
+
+    area0 = width * h0
+    area1 = width * h1
+    ratio = area1 / area0
+    expected = {
+        "area_start_m2": area0,
+        "area_exit_m2": area1,
+        "area_ratio_exit_over_start": ratio,
+    }
+    for key, value in expected.items():
+        if not math.isclose(float(derived.get(key)), value, rel_tol=0.0, abs_tol=1.0e-14):
+            raise ValueError(f"{key} is inconsistent with source geometry")
+    if derived.get("derivation_class") != "DERIVED_EXACTLY_FROM_SOURCE_DIMENSIONS":
+        raise ValueError("NASA-BK geometry derivation class drifted")
+    return {
+        "geometry_path": _repo_relative(path),
+        "x_start_m": x0,
+        "x_exit_m": x1,
+        "width_m": width,
+        "height_start_m": h0,
+        "height_exit_m": h1,
+        "area_start_m2": area0,
+        "area_exit_m2": area1,
+        "area_ratio_exit_over_start": ratio,
     }
 
 
 def assess_nasa_bk_readiness(
     source: dict[str, Any],
     ingestion: dict[str, Any] | None = None,
+    geometry: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return the current public-data and reduced-order readiness state."""
 
-    if ingestion is None:
-        ingestion = load_experimental_ingestion()
-
+    ingestion = ingestion or load_experimental_ingestion()
+    geometry = geometry or load_geometry_evidence()
     archive = source["nasa_validation_archive"]
     targets = source["experimental_targets"]
     assets = {item["asset_id"]: item for item in archive["public_assets"]}
@@ -289,28 +322,28 @@ def assess_nasa_bk_readiness(
             "manifest_path": ingestion["manifest_path"],
             "profiles_path": ingestion["profiles_path"],
         },
+        {
+            "requirement": "quasi_1d_geometry_mapping",
+            "status": "RESOLVED_SOURCE_BACKED_LINEAR_RECTANGULAR_DUCT",
+            **geometry,
+        },
     ]
 
     blockers = [
         {
-            "requirement": "quasi_1d_geometry_mapping",
-            "status": "NOT_YET_DERIVED",
-            "detail": "Derive and regression-test A(x) from the public NASA grid/geometry rather than hand-copying a plot.",
-        },
-        {
             "requirement": "effective_gas_thermodynamic_reduction",
             "status": "NOT_YET_FROZEN",
-            "detail": "The present solver is calorically perfect gas while the NASA benchmark uses a reacting vitiated mixture; an explicit reduced-order gamma/R/cp policy is required.",
+            "detail": "The solver is calorically perfect gas while the NASA benchmark uses a reacting vitiated mixture; an explicit reduced-order gamma/R/cp policy is required.",
         },
         {
             "requirement": "non_circular_line_heat_release_closure",
             "status": "NOT_YET_DERIVED",
-            "detail": "No experimentally measured Qdot-prime is claimed. A future profile may be derived from the NASA Wind-US reference solution only with provenance and must be independently checked against experimental observables.",
+            "detail": "The experiment supplies exit profiles, not measured axial Qdot-prime. Any effective line-energy profile derived from the NASA Wind-US reference solution must retain computational provenance and independent experimental validation targets.",
         },
         {
             "requirement": "species_validation_scope",
             "status": "OUTSIDE_CURRENT_SOLVER_CAPABILITY",
-            "detail": "H2/H2O exit profiles are retained as public benchmark context but cannot be claimed as validated without species transport and chemistry.",
+            "detail": "H2/H2O profiles are public benchmark context but cannot be claimed as validated without species transport and chemistry.",
         },
     ]
 
@@ -318,10 +351,9 @@ def assess_nasa_bk_readiness(
         "candidate_id": source["candidate_id"],
         "public_source_route_ready": True,
         "experimental_archive_ingested": True,
+        "source_backed_geometry_ready": True,
         "formal_case_ready": False,
-        "formal_scope_if_promoted": source["reduced_order_promotion_policy"][
-            "highest_permitted_target_scope"
-        ],
+        "formal_scope_if_promoted": source["reduced_order_promotion_policy"]["highest_permitted_target_scope"],
         "resolved_requirements": resolved,
         "open_requirements": blockers,
         "resolved_count": len(resolved),
@@ -334,13 +366,12 @@ def assess_nasa_bk_readiness(
 
 def build_readiness_record(path: Path | str = SOURCE_PATH) -> dict[str, Any]:
     source = load_nasa_bk_source(path)
-    ingestion = load_experimental_ingestion()
     return {
         "schema_version": 1,
         "stage": "P11.2B",
         "artifact_kind": "nasa-bk-public-validation-readiness",
-        "source_ledger": Path(path).resolve().relative_to(ROOT.resolve()).as_posix(),
-        **assess_nasa_bk_readiness(source, ingestion),
+        "source_ledger": _repo_relative(path),
+        **assess_nasa_bk_readiness(source),
     }
 
 
