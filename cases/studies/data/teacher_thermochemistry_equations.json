@@ -2,7 +2,7 @@
   "schema_version": 1,
   "record_kind": "teacher-reference-variable-thermochemistry-equation-ledger",
   "stage": "P11.3B",
-  "status": "EQUATIONS_IMPLEMENTED_COEFFICIENT_DATABASE_PENDING",
+  "status": "EQUATIONS_AND_CORE_DATA_IMPLEMENTED_FULL_FUEL_DATABASE_PENDING",
   "primary_sources": [
     {
       "source_id": "TEACHER-CH11-P258-259",
@@ -40,6 +40,7 @@
     "module": "src/scramjet1d/thermochemistry.py",
     "implemented": [
       "validated six-coefficient species thermo polynomial",
+      "validated low/high-temperature piecewise CHEMKIN/NASA polynomial selection",
       "species gas constant R_i = R_u/W_i",
       "species cp(T)",
       "species absolute h(T)",
@@ -48,17 +49,20 @@
       "ideal-mixture pressure p(rho,T,Y)",
       "bounded inversion from e to T for fixed composition"
     ],
+    "core_data_record": "cases/studies/data/teacher_thermochemistry_gri30_core.json",
+    "core_data_loader": "cases/studies/teacher_thermochemistry_database.py",
     "not_implemented_yet": [
       "production solver integration",
       "transport/evolution of species mass fractions",
       "teacher fuel/reaction composition closure",
-      "complete source-frozen CHEMKIN/NASA coefficient database for all required species",
-      "piecewise low/high-temperature polynomial selection where a species source requires it"
+      "source-compatible C10H22 pseudo-kerosene thermochemical record",
+      "complete thermochemical support for every future species required by the final teacher/Cao closure"
     ]
   },
   "coefficient_policy": {
-    "species_database_ready": false,
-    "rule": "Do not invent or silently copy thermochemical coefficients. Each production species coefficient set must record source, temperature interval, molecular weight, coefficient convention, and any interval switch temperature before solver integration.",
+    "core_H2_C2H4_branch_database_ready": true,
+    "complete_all_teacher_fuels_database_ready": false,
+    "rule": "Do not invent or silently copy thermochemical coefficients. Each species coefficient set must record source, temperature interval, molecular weight, coefficient convention, and interval switch temperature before solver integration.",
     "expected_teacher_species_from_the_photographed_reaction_set": [
       "H2",
       "O2",
@@ -69,7 +73,9 @@
       "CO2",
       "C10H22"
     ],
-    "note": "Additional products/intermediates may be required by the final Cao/teacher closure; the list above is not promoted as a complete chemistry mechanism."
+    "core_database_species": ["H2", "O2", "N2", "Ar", "H2O", "C2H4", "CO2"],
+    "blocked_species": ["C10H22"],
+    "note": "The frozen GRI-Mech 3.0 core supports teacher H2 and C2H4 thermodynamic evaluation. C10H22 remains blocked rather than assigned invented coefficients. Additional intermediates may be required by a future chemistry closure."
   },
   "energy_accounting_policy": {
     "chemical_energy_in_absolute_species_enthalpy": true,
@@ -79,8 +85,10 @@
   "readiness": {
     "equation_transcription_ready": true,
     "isolated_thermochemistry_implementation_ready": true,
+    "piecewise_interval_selection_ready": true,
+    "core_H2_C2H4_species_data_ready": true,
+    "complete_all_teacher_fuels_species_data_ready": false,
     "unit_tests_ready": true,
-    "production_species_data_ready": false,
     "solver_integration_ready": false,
     "integrated_teacher_case_ready": false
   }

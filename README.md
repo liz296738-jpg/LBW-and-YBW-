@@ -14,7 +14,7 @@ P0-P10 established the numerical/verification foundation. P11.1 added reproducib
 
 The uploaded teacher material confirms that our main numerical route is substantially correct: unsteady quasi-one-dimensional conservation equations, variable area, friction/heat/mass-addition source terms, first-order upwind/Steger-Warming spatial treatment, third-order TVD Runge-Kutta advancement, CFL stepping, and steady convergence.
 
-P11.3A has added the teacher Chapter 11 Eq. 11.46 relative-density convergence diagnostic alongside the existing normalized residual criterion. P11.3B now has an isolated implementation of the teacher/Cao variable thermochemistry equations: species `cp(T)` / absolute `h(T)`, mixture molecular weight, `R(Y)`, `cp(T,Y)`, `cv(T,Y)`, `gamma(T,Y)`, `h(T,Y)`, `e(T,Y)`, ideal-mixture pressure, and bounded `e -> T` inversion. Production coefficient data and solver integration remain gated rather than guessed.
+P11.3A has added the teacher Chapter 11 Eq. 11.46 relative-density convergence diagnostic alongside the existing normalized residual criterion. P11.3B now implements the teacher/Cao variable thermochemistry equations and a source-backed two-interval CHEMKIN/NASA data subset for `H2`, `O2`, `N2`, `Ar`, `H2O`, `C2H4`, and `CO2`. The source intervals, molecular weights, low/high polynomial switch, continuity checks, and an independent Berkeley GRI-Mech 298 K `cp` check are all explicit. Pseudo-kerosene `C10H22` remains blocked rather than guessed, and production variable-thermo state recovery is still intentionally separate from the accepted constant-gas solver.
 
 The earlier plan to interpret `LBW`/`YBW` as combustion modes was incorrect and has been abandoned. Combustion-mode-transition studies remain a later scientific application after the teacher-reference model is complete.
 
@@ -51,6 +51,7 @@ Machine-readable status:
 
 - `cases/studies/data/teacher_reference_alignment.json`
 - `cases/studies/data/teacher_thermochemistry_equations.json`
+- `cases/studies/data/teacher_thermochemistry_gri30_core.json`
 
 Strongly aligned already:
 
@@ -62,16 +63,17 @@ Strongly aligned already:
 - CFL-controlled stepping;
 - compatible supersonic inflow / zero-gradient-like outflow capability;
 - teacher Chapter 11 Eq. 11.46 maximum relative-density iteration-change diagnostic, implemented alongside the existing normalized residual criterion;
-- isolated teacher/Cao variable-thermochemistry equations and internal-energy temperature inversion.
+- teacher/Cao variable-thermochemistry equations, internal-energy temperature inversion, and source-backed piecewise H2/C2H4 core thermo data.
 
 Main gaps to close:
 
-1. freeze a complete source-backed thermochemical coefficient database and temperature-interval policy for the required species, then integrate the verified variable-thermo path into solver state recovery;
-2. teacher-reference mixing efficiency / mixing-length closure;
-3. equivalence-ratio and fuel-specific composition closure;
-4. teacher empirical friction and wall-heat closures as optional models;
-5. near-sonic Steger-Warming eigenvalue smoothing once its epsilon policy is source-frozen;
-6. integrated teacher-reference case and regression evidence.
+1. implement and verify a separate variable-thermo conservative/primitive state-recovery path using the frozen core database; keep the constant-gas path intact;
+2. recover a source-compatible `C10H22` record if the kerosene branch is required in the first integrated case;
+3. teacher-reference mixing efficiency / mixing-length closure;
+4. equivalence-ratio and fuel-specific composition closure;
+5. teacher empirical friction and wall-heat closures as optional models;
+6. near-sonic Steger-Warming eigenvalue smoothing once its epsilon policy is source-frozen;
+7. integrated teacher-reference case and regression evidence.
 
 ## Energy-Accounting Rule
 
