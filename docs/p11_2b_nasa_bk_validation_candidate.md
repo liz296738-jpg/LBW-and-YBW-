@@ -2,173 +2,184 @@
 
 ## Status
 
-`PRIMARY PUBLIC VALIDATION ROUTE — PUBLIC EXPERIMENTAL DATA INGESTED, FORMAL REDUCED-ORDER CASE NOT YET READY`
+`PRIMARY PUBLIC VALIDATION ROUTE — EXPERIMENT, GEOMETRY, AND EFFECTIVE-GAS POLICY READY; FORMAL LINE-ENERGY CLOSURE PENDING`
 
-This candidate removes the project's dependence on author-held or publisher-gated supplementary data for its first formal P11.2B heated validation. The existing Jin–Liu chain remains an advanced evidence-blocked candidate and is not deleted.
+This route is now the project's primary path to a first fully public P11.2B heated-flow validation. The Jin–Liu chain remains documented as an advanced evidence-blocked candidate and is not deleted.
 
-The new route uses the NASA Burrows–Kurkov supersonic hydrogen-combustion benchmark because both the primary experiment and NASA's validation archive are publicly accessible and traceable.
+The claim boundary remains deliberately narrower than the original NASA computation: the repository solver is quasi-one-dimensional, calorically perfect gas, and uses prescribed source terms. NASA Study #2 is a two-dimensional viscous multi-species finite-rate reacting calculation compared with experiment.
 
-## Authoritative public sources
+## Public source chain
 
-### NASA-TM-X-2828 — primary experiment
+### Primary experiment
 
 Marshall C. Burrows and Anatole P. Kurkov, *Analytical and Experimental Study of Supersonic Combustion of Hydrogen in a Vitiated Airstream*, NASA-TM-X-2828, September 1973.
 
 - NTRS record: `https://ntrs.nasa.gov/citations/19730023096`
-- NTRS PDF: `https://ntrs.nasa.gov/api/citations/19730023096/downloads/19730023096.pdf`
-- NTRS distribution status: `Public`
-- NTRS copyright statement: work of the U.S. Government; public use permitted.
+- NTRS distribution: `Public`
+- NTRS marks the report as U.S. Government work / public use permitted.
 
-The experiment reports detailed probe measurements of total temperature, pressure, and composition at a station `35.6 cm` downstream of hydrogen injection in a Mach `2.44` vitiated stream.
+### NASA Glenn validation archive
 
-### NASA Glenn Wind-US validation archive
-
-NASA Glenn's *Burrows and Kurkov Supersonic Combustion: Study #2* is available at:
+NASA Glenn, *Burrows and Kurkov Supersonic Combustion: Study #2*:
 
 `https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/bk2.html`
 
-The archive exposes:
+Public assets include `exp.tar`, `str_run.dat`, `str_run.cgd`, `str_run.cfl`, and `str_run.lis`.
 
-- `exp.tar` — experimental exit profiles;
-- `str_run.dat` — Wind-US input deck;
-- `str_run.cgd` — structured grid;
-- `str_run.cfl` — NASA reference solution;
-- `str_run.lis` — run log.
+## Reproducible asset acquisition
 
-## Reproducible public-asset acquisition
+GitHub Actions successfully downloads the NASA assets directly from the official host and records SHA-256 values. The first accepted acquisition record is workflow run `34951670961`, artifact `10389039980`.
 
-GitHub Actions workflow run `34951670961` successfully downloaded the public NASA assets directly from the official NASA Glenn host and uploaded them as workflow artifact `10389039980`.
-
-Tracked source-file checksums include:
+Tracked source hashes include:
 
 - `exp.tar`: `8e3a60293b4a16aa821ac839bee8c890871ef415040029c4f573c743f6b9dc89`
 - `str_run.dat`: `4ec41f3a4b034839fcd137f7c382528910db16c5db923cff363844fc14abcac2`
 - `str_run.cgd`: `255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91`
 - `str_run.cfl`: `e0d9c3c89c40b947934c6ab6a5aa0df1e9f32b22dc7919f81dd9ad391f08e602`
 
-The complete manifest is stored at:
+Manifest:
 
 `cases/studies/data/p11_2b_nasa_bk_asset_manifest.json`
 
-Raw multi-megabyte binary assets are not committed blindly to the repository.
+Raw multi-megabyte binaries are not committed blindly.
 
-## Experimental data now ingested
+## Experimental data — resolved
 
-`exp.tar` contains four public experimental files:
+`exp.tar` contains four public exit-plane datasets:
 
-- `bkmach.dat` — 14 Mach measurements;
-- `bktemp.dat` — 16 total-temperature measurements;
-- `bkh2.dat` — 27 H2 mole-fraction measurements;
-- `bkh2o.dat` — 28 H2O mole-fraction measurements.
+- `bkmach.dat`: 14 Mach points;
+- `bktemp.dat`: 16 total-temperature points;
+- `bkh2.dat`: 27 H2 mole-fraction points;
+- `bkh2o.dat`: 28 H2O mole-fraction points.
 
-The original member SHA-256 values and point counts are tracked in the asset manifest. A normalized SI-coordinate copy preserving every data point, including repeated experimental coordinates, is stored at:
+The checksum-tracked normalized copy is:
 
 `cases/studies/data/p11_2b_nasa_bk_exp_exit_profiles.csv`
 
-This closes the **experimental archive ingestion** requirement. The data remain transverse exit-plane measurements at `x=0.356 m`; they are not an axial heat-release profile.
+All 85 points are retained, including repeated transverse coordinates. These are experimental measurements at the exit plane `x=0.356 m`; they are **not** an axial heat-release curve.
 
-## Source-backed boundary / initial conditions
+For the `2286 R` freestream condition NASA also reports experimental ignition onset near `0.18 m`; its Wind-US reference computation predicts about `0.14 m`.
 
-NASA Study #2 and `str_run.dat` expose:
+## Source inlet / wall conditions — resolved
 
-| Quantity | Freestream | Hydrogen |
+NASA Study #2 / `str_run.dat` provide:
+
+| Quantity | Vitiated stream | Hydrogen |
 | --- | ---: | ---: |
 | Mach | 2.44 | 1.0 |
 | static pressure | 14.7 psi | 14.7 psi |
 | static temperature | 2286 R | 457.2 R |
 
-Exact SI conversions tracked in the source ledger are:
+Exact SI conversions used by the ledger are:
 
-- freestream static pressure: `101352.9322095696 Pa`
-- freestream static temperature: `1270 K`
-- hydrogen static pressure: `101352.9322095696 Pa`
-- hydrogen static temperature: `254 K`
+- vitiated-stream pressure: `101352.9322095696 Pa`
+- vitiated-stream temperature: `1270 K`
+- hydrogen pressure: `101352.9322095696 Pa`
+- hydrogen temperature: `254 K`
 - wall temperature: `298 K`
 - downstream pressure record: `107558.2137734208 Pa`
 
-The vitiated-stream mass fractions in the Wind-US source input are:
+Vitiated-stream mass fractions are:
 
 - `O2 = 0.2576`
 - `H2O = 0.2562`
 - `N2 = 0.4862`
-- `H2 = 0`
 
-The hydrogen stream is pure `H2`.
+The project does not replace this gas silently with `gamma=1.4, R=287` air.
 
-These values do not authorize silently replacing the vitiated mixture by calorically perfect air.
+## Quasi-one-dimensional main-duct geometry — resolved
 
-## Public experimental validation targets
+A separate public NASA technical report, NASA-TM-74094, states that the rectangular duct expands linearly from `5.10 cm × 9.38 cm` at the hydrogen-injection station to `5.10 cm × 10.48 cm` at `35.6 cm` downstream. NASA Glenn independently defines `x=0` at the injection step and the combustor length as `35.6 cm`.
 
-The ingested experimental dataset provides exit-plane profiles of:
+The frozen reduced-order geometry is therefore:
 
-- total temperature;
-- Mach number;
-- H2O mole fraction;
-- H2 mole fraction.
+- `L = 0.356 m`
+- `W = 0.051 m`
+- `H(0) = 0.0938 m`
+- `H(L) = 0.1048 m`
+- `A(0) = 0.0047838 m²`
+- `A(L) = 0.0053448 m²`
+- `A(L)/A(0) = 1.1172707889125801`
 
-NASA also reports an experimental ignition onset of approximately `18 cm` downstream of injection for the `2286 R` freestream case. The documented Wind-US reference computation predicts approximately `14 cm`.
+with
 
-The present solver can eventually compare reduced-order Mach and thermal diagnostics after a defensible reduction. It cannot claim validation of H2/H2O profiles without species transport and chemistry.
+`H(x) = H0 + (H1-H0) x/L`
 
-## Why this route is the primary public path
+and
 
-The NASA route now has:
+`A(x) = W H(x)`.
 
-1. a public primary experiment;
-2. a checksum-tracked public experimental archive;
-3. normalized experimental exit data in the repository;
-4. a public structured grid;
-5. a public solver input deck;
-6. a public NASA reference solution;
-7. explicit inlet/wall conditions;
-8. explicit experimental comparison quantities.
+Source record:
 
-This is a materially stronger reproducibility position than the still evidence-blocked Jin–Liu chain for the project's first formal P11.2B validation.
+`cases/studies/data/p11_2b_nasa_bk_geometry_source.json`
 
-## Important model mismatch
+Implementation:
 
-NASA Study #2 is a two-dimensional viscous, multi-species, hydrogen-injection, finite-rate reacting flow. The repository currently uses a quasi-one-dimensional calorically perfect gas with prescribed source terms.
+`cases/studies/p11_2b_nasa_bk_geometry.py`
 
-Therefore a future reduced-order calculation must not be described as a direct finite-rate-chemistry reproduction.
+The hydrogen plenum/slot is not silently added to axial core area, and no boundary-layer displacement correction is hidden in this geometry.
 
-## Remaining formal-promotion requirements
+## Effective calorically-perfect gas policy — resolved as a model reduction
 
-### 1. Quasi-one-dimensional geometry mapping
+The present solver requires constant `R` and `gamma`, while the NASA benchmark is variable-property and reacting. The project therefore freezes a transparent reference-state reduction rather than pretending the gas is ordinary air.
 
-Derive `A(x)` deterministically from the public `str_run.cgd` grid/geometry. Do not hand-copy dimensions from a plot when the source grid is available.
+The policy uses:
 
-The mapping must record the grid checksum, source units, axial origin, two-dimensional-to-one-dimensional reduction rule, treatment of the injection region, and approximation boundaries.
+- the NASA source inlet mass fractions above;
+- public Cantera / GRI-Mech 3.0 NASA7 species heat-capacity polynomials;
+- the NASA inlet reference temperature `1270 K`.
 
-### 2. Effective thermodynamic reduction
+Derived reference values are:
 
-The current solver does not model the vitiated source mixture. A formal case needs an explicit effective `gamma`, `R`, and heat-capacity policy or a stronger thermodynamic extension.
+- `R_eff = 329.4821420180208 J/(kg K)`
+- `cp_eff = 1514.961402157982 J/(kg K)`
+- `gamma_eff = 1.2779315953440815`
 
-The project must not silently set `gamma=1.4`, `R=287` and call that the NASA gas.
+The same fixed inlet composition gives lower effective gamma as temperature rises:
 
-### 3. Non-circular line-heat closure
+- `gamma(2000 K) ≈ 1.246731798`
+- `gamma(2500 K) ≈ 1.235485697`
+- `gamma(3000 K) ≈ 1.228362524`
 
-The ingested experiment supplies exit profiles, not a measured axial `Qdot'(x)` distribution.
+Therefore a future formal result must include at least one lower-gamma heated-range sensitivity case. The `1270 K` reference-gamma run alone is not sufficient for a robustness claim.
 
-A candidate reduced-order heat-release profile may be derived from the public **NASA Wind-US reference solution** only if:
+Evidence record:
 
-- `str_run.cfl` remains checksum-tracked;
-- the field reduction is deterministic and reproducible;
-- the derivation equations are documented;
-- resulting quantities are labelled `NASA_REFERENCE_SOLUTION_DERIVED`;
-- they are never relabelled as experimentally measured heat release;
-- the experimental exit Mach/temperature profiles remain independent validation targets and are not used circularly to tune the heat source.
+`cases/studies/data/p11_2b_nasa_bk_thermo_reduction.json`
 
-### 4. Species-scope gate
+Implementation:
 
-The public H2 and H2O data remain in the benchmark record, but species-profile validation is outside the present solver capability.
+`cases/studies/p11_2b_nasa_bk_thermo.py`
+
+This is explicitly `MODEL_REDUCTION_WITH_SOURCE_BACKED_REFERENCE_PROPERTIES`; it is not a finite-rate thermodynamic reproduction.
+
+## Only active formal blocker: effective axial line-energy closure
+
+The experiment gives transverse exit measurements, not a measured axial `Qdot'(x)` curve. It would be circular to tune heat addition against those same exit Mach / total-temperature data and then call the result validation.
+
+The intended route is instead to derive an **effective one-dimensional energy-source profile** from the checksum-tracked public NASA Wind-US reference solution `str_run.cfl`, while retaining the experimental Mach and total-temperature data as independent comparison targets.
+
+Any such profile must be labelled:
+
+`NASA_REFERENCE_SOLUTION_DERIVED`
+
+or, more specifically, an effective net line-energy source if it includes combined reaction / wall / multidimensional effects. It must never be relabelled as experimentally measured chemical heat release.
+
+A dedicated CGNS probe workflow now attempts to convert the public ADF CGNS reference files to HDF5 and inventory their datasets so the reduction can be deterministic rather than figure-digitized.
+
+## Scope exclusions — not blockers for the thermal/flow claim
+
+The public H2 and H2O profiles remain valuable benchmark context, but the present solver has no species transport or finite-rate chemistry. Therefore species agreement is explicitly outside the formal P11.2B thermal/flow acceptance claim.
+
+Likewise Burrows–Kurkov does not define `LBW` or `YBW`. P11.3 must freeze those definitions separately from authoritative project-specific evidence.
 
 ## Highest permitted future claim
 
-Even after formal promotion, the strongest permitted claim is:
+If the remaining line-energy closure is completed and the solver result passes the predeclared numerical / applicability checks, the strongest permitted claim is:
 
-**prescribed-heat quasi-one-dimensional validation against public NASA thermal/flow observables, with separately identified NASA-reference-solution-derived closure data where required.**
+**prescribed-energy quasi-one-dimensional validation against public NASA thermal/flow observables, using an explicitly identified NASA-reference-solution-derived closure where necessary.**
 
-The case is not authorized to claim:
+It is not authorized to claim:
 
 - finite-rate chemistry validation;
 - species-profile validation;
@@ -176,41 +187,30 @@ The case is not authorized to claim:
 - experimentally measured `Qdot'(x)` unless directly recovered;
 - LBW/YBW classification.
 
-## Current machine-readable gate
+## Machine-readable state
 
-Source ledger:
+Primary files:
 
-`cases/studies/data/p11_2b_nasa_bk_public_source.json`
+- `cases/studies/data/p11_2b_nasa_bk_public_source.json`
+- `cases/studies/data/p11_2b_nasa_bk_asset_manifest.json`
+- `cases/studies/data/p11_2b_nasa_bk_exp_exit_profiles.csv`
+- `cases/studies/data/p11_2b_nasa_bk_geometry_source.json`
+- `cases/studies/data/p11_2b_nasa_bk_thermo_reduction.json`
+- `cases/studies/p11_2b_nasa_bk_readiness.py`
 
-Asset manifest:
-
-`cases/studies/data/p11_2b_nasa_bk_asset_manifest.json`
-
-Normalized experiment:
-
-`cases/studies/data/p11_2b_nasa_bk_exp_exit_profiles.csv`
-
-Readiness implementation:
-
-`cases/studies/p11_2b_nasa_bk_readiness.py`
-
-Expected state:
+Expected readiness:
 
 ```text
 public_source_route_ready = true
 experimental_archive_ingested = true
+source_backed_geometry_ready = true
+thermodynamic_reduction_ready = true
 formal_case_ready = false
-lbw_ybw_classification_authorized = false
-finite_rate_chemistry_validation_authorized = false
-species_validation_authorized = false
+open blocker = non_circular_line_heat_release_closure
+species validation = explicitly excluded from the thermal/flow claim
+LBW/YBW classification = not authorized by this case
 ```
-
-The remaining blockers are now model-reduction tasks over already-public data, not private-data acquisition.
 
 ## Relationship to Jin–Liu
 
-The Jin–Liu candidate remains documented as an advanced chain whose missing same-condition evidence has not been fabricated. It is no longer the sole path to the project's first public P11.2B formal heated case.
-
-## Relationship to P11.3
-
-Burrows–Kurkov does **not** define the project's `LBW` / `YBW` labels. P11.3 must still freeze an authoritative mode-discrimination criterion separately.
+Jin–Liu remains preserved as an advanced scramjet-specific candidate. Its missing same-condition evidence has not been fabricated. NASA Burrows–Kurkov is now the reproducible public route for the first P11.2B heated thermal/flow validation.
