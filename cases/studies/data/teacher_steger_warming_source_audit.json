@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-steger-warming-source-audit",
+  "stage": "P11.3N",
+  "status": "CAO_AUDIT_COMPLETE_NO_VARIABLE_THERMOCHEMISTRY_FVS_RECONCILIATION_FOUND",
+  "question": "Do the teacher-provided Cao references state how variable cp and absolute species enthalpy are reconciled with the classical Steger-Warming Eq.11.42 energy split?",
+  "sources": [
+    {
+      "identity": "超燃冲压发动机燃烧模态转换及其控制方法研究_曹瑞峰.pdf",
+      "relevant_section": "第2章, Eqs.2-28 through 2-63",
+      "findings": [
+        "mixture enthalpy is sum(h_i*Y_i)",
+        "species enthalpy includes sensible/thermal enthalpy plus chemical energy",
+        "cp and heat-capacity ratio vary with temperature and composition",
+        "energy equation uses total enthalpy including sensible enthalpy, chemical energy and kinetic energy",
+        "the one-dimensional model is solved through coupled spatial ODE / Mach-number-influence equations",
+        "no Steger-Warming or flux-vector-splitting reconciliation for this variable-thermochemistry model was found"
+      ]
+    },
+    {
+      "identity": "面向控制的超燃冲压发动机一维建模研究_曹瑞峰.pdf",
+      "relevant_section": "燃烧室一维模型基本守恒方程组",
+      "findings": [
+        "the relevant reduced-order derivation explicitly assumes a thermally and calorically perfect gas",
+        "specific heat is stated to be constant",
+        "the model is an ODE-based reduced-order formulation",
+        "no variable-cp absolute-enthalpy Steger-Warming extension was found"
+      ]
+    }
+  ],
+  "conclusion": {
+    "source_backed_variable_cp_absolute_enthalpy": true,
+    "source_backed_classical_constant_property_limit": true,
+    "source_backed_variable_thermochemistry_steger_warming_reconciliation": false,
+    "unsourced_energy_correction_allowed": false,
+    "rusanov_integrated_compatibility_path_remains_primary": true
+  },
+  "blocked_actions": [
+    "subtracting formation enthalpy before flux splitting without a source",
+    "inventing a reference-energy correction flux",
+    "replacing the physical Euler energy flux with the inconsistent literal Eq.11.42 recombination",
+    "promoting variable-thermochemistry Steger-Warming into the source-enabled teacher solver",
+    "guessing a numerical Eq.11.44 epsilon"
+  ],
+  "next_step": "Continue integrated teacher-case work on the accepted Rusanov path. Reopen variable-thermochemistry Steger-Warming only if a teacher note, original implementation, or other authoritative source supplies the missing thermodynamic/FVS convention."
+}
