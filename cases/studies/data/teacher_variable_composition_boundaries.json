@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-variable-composition-boundary-readiness",
+  "stage": "P11.3L",
+  "status": "TEACHER_STATIC_INLET_AND_EXTRAPOLATED_OUTLET_COMPATIBILITY_IMPLEMENTED_STEGER_WARMING_PENDING",
+  "purpose": "Replace transmissive verification boundaries with the teacher-aligned prescribed static p/T/u air inlet and first-order/zero-gradient outlet for the source-enabled variable-composition compatibility solver.",
+  "implemented": [
+    "prescribed static inlet pressure/temperature/axial velocity state",
+    "air-only inlet composition inherited from the single-injector mapping",
+    "rightward supersonic inlet applicability guard",
+    "physical Euler inlet flux independent of the first interior cell",
+    "internal variable-composition Rusanov interfaces",
+    "physical last-cell outlet flux representing first-order zero-gradient extrapolation",
+    "source-enabled CFL/SSP-RK3 boundary compatibility solver"
+  ],
+  "verification": {
+    "inlet_state_recovers_prescribed_p_T_u": true,
+    "inlet_is_air_only_and_supersonic": true,
+    "fixed_inlet_flux_is_independent_of_first_interior_state": true,
+    "internal_fluxes_match_verified_variable_composition_rusanov": true,
+    "outlet_flux_matches_last_interior_physical_flux": true,
+    "short_source_enabled_boundary_transient_is_valid": true,
+    "subsonic_inlet_is_explicitly_rejected": true
+  },
+  "scientific_boundaries": [
+    "This boundary adapter implements the teacher-aligned static p/T/u inlet for the current rightward supersonic scramjet inlet path only; no unsourced subsonic static-inlet reconstruction is invented.",
+    "The outlet uses the last interior state as a first-order zero-gradient extrapolation compatibility treatment.",
+    "Internal interfaces still use Rusanov; variable-property Steger-Warming remains pending.",
+    "Eq.11.26-to-dimensional-wall-heat conversion remains pending.",
+    "Chemical reaction energy remains composition/absolute-enthalpy based with no duplicate Qdot source."
+  ],
+  "readiness": {
+    "teacher_static_p_T_u_inlet_ready": true,
+    "teacher_first_order_outlet_ready": true,
+    "source_enabled_boundary_ssp_rk3_ready": true,
+    "teacher_variable_composition_steger_warming_ready": false,
+    "teacher_near_sonic_smoothing_policy_ready": false,
+    "eq11_26_dimensional_wall_heat_adapter_ready": false,
+    "formal_integrated_teacher_case_ready": false
+  },
+  "next_step": "Revisit the photographed Eq.11.40-11.44 Steger-Warming section and freeze the exact variable-property flux-vector split and near-sonic eigenvalue smoothing rule. Do not guess a smoothing epsilon. If the source does not uniquely specify the parameter, keep the Rusanov boundary-complete compatibility case and record Steger-Warming as evidence-gated."
+}
