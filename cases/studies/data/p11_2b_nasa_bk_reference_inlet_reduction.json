@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "record_kind": "nasa-reference-solution-derived-effective-inlet-state",
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "status": "FROZEN_CONSERVATIVE_MOMENT_MATCHED_INLET",
+  "source_class": "NASA_REFERENCE_SOLUTION_DERIVED",
+  "purpose": "Define the effective one-dimensional state at the reduced-domain origin x=0 (hydrogen injection station). The NASA freestream condition remains an upstream source condition; it is not silently equated to the already-developed cross section at x=0.",
+  "source_assets": {
+    "nasa_cfl_sha256": "e0d9c3c89c40b947934c6ab6a5aa0df1e9f32b22dc7919f81dd9ad391f08e602",
+    "nasa_cgd_sha256": "255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91",
+    "extraction_workflow_run_id": 34963725967,
+    "extraction_artifact_id": 10394114156,
+    "thermal_section_csv_sha256": "a77a519027fe316e205d848c8fe80059967ddc821556879ea20a295d7dd0341e",
+    "momentum_section_csv_sha256": "7b9b7135c972cc1fe73270d86f83ce30b21bdf20baf336ec0f9b640d2c1e514c"
+  },
+  "x0_reference_section": {
+    "x_m": 0.0,
+    "duct_width_m": 0.051,
+    "extracted_height_m": 0.09376000946689211,
+    "source_backed_quasi_1d_area_m2": 0.0047838,
+    "mass_flux_per_width_kg_m_s": 38.927591015569575,
+    "momentum_flux_per_width_N_per_m": 77465.70023246195,
+    "thermal_T_flux_per_width_kgK_m_s": 49048.745806519844,
+    "kinetic_energy_flux_per_width_W_m": 59274616.62914987,
+    "mass_flux_weighted_temperature_K": 1259.9995151742678,
+    "mass_flux_weighted_Mach_diagnostic": 2.369628520674107,
+    "area_weighted_pressure_Pa_diagnostic": 103452.82253282188
+  },
+  "effective_gas_policy": {
+    "source_record": "cases/studies/data/p11_2b_nasa_bk_thermo_reduction.json",
+    "R_J_per_kg_K": 329.4821420180208,
+    "cp_J_per_kg_K": 1514.961402157982,
+    "gamma": 1.2779315953440815
+  },
+  "matched_integral_targets": {
+    "mass_flow_kg_s": 1.9853071417940482,
+    "axial_momentum_flux_N": 3950.7507118555595,
+    "effective_specific_total_enthalpy_J_per_kg": 3431539.683430655
+  },
+  "derivation": {
+    "equations": [
+      "mdot = rho*u*A",
+      "J = (rho*u^2 + p)*A",
+      "h0_eff = cp_eff*T + 0.5*u^2",
+      "p = rho*R_eff*T"
+    ],
+    "solution_method": "Eliminate rho, p, and T to obtain a quadratic in u; choose the positive supersonic root because the NASA reference section is supersonic. The other positive root is subsonic and is rejected by branch physics, not by exit-data tuning.",
+    "alternate_subsonic_root_u_m_per_s": 476.88553300783263
+  },
+  "effective_inlet_state": {
+    "rho_kg_per_m3": 0.23634835011187622,
+    "u_m_per_s": 1755.9094472595275,
+    "p_Pa": 97146.85937279568,
+    "T_K": 1247.5107862490224,
+    "Mach": 2.422759005781948,
+    "mass_flow_kg_s": 1.9853071417940482,
+    "specific_total_enthalpy_J_per_kg": 3431539.683430655,
+    "classification": "NASA_REFERENCE_SOLUTION_DERIVED_CONSERVATIVE_MOMENT_MATCH"
+  },
+  "claim_boundary": [
+    "This effective inlet is derived from the NASA computational reference section, not experimentally measured as a uniform primitive state.",
+    "It is used because the reduced one-dimensional domain begins at the hydrogen-injection station rather than at the upstream freestream boundary.",
+    "No experimental exit target is used to select or tune the effective inlet state."
+  ]
+}
