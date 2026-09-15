@@ -1,0 +1,84 @@
+{
+  "schema_version": 1,
+  "record_kind": "validation-model-applicability",
+  "candidate_id": "JIN-LIU-MODEL-B-VALIDATION",
+  "primary_source": {
+    "source_id": "SRC08",
+    "citation": "Kaiyan Jin, Jianbin Li, Lin Zhang, Jianhan Liang, Xiaodong Cai, Experimental study on heat release distribution during supersonic combustion, Combustion and Flame 287 (2026) 114876.",
+    "doi": "10.1016/j.combustflame.2026.114876",
+    "locators": [
+      "Sec. 3.2.3, Eqs. (9)-(11)",
+      "Sec. 3.2.3 text immediately following Eq. (11)",
+      "Fig. 14 validation discussion"
+    ]
+  },
+  "published_quasi_1d_inputs": {
+    "equation_9_pressure_terms": [
+      "cross-sectional area A(x)",
+      "stagnation temperature Tt(x)",
+      "specific heat ratio gamma",
+      "wall friction coefficient Cf",
+      "combustor diameter D"
+    ],
+    "equation_10_mach_terms": [
+      "cross-sectional area A(x)",
+      "stagnation temperature Tt(x)",
+      "specific heat ratio gamma",
+      "wall friction coefficient Cf",
+      "combustor diameter D"
+    ],
+    "equation_11_energy_terms": [
+      "axial heat-release rate Qdot(x)",
+      "mass flow rate mdot",
+      "constant-pressure specific heat cp",
+      "initial stagnation temperature Tt0"
+    ]
+  },
+  "explicit_source_assumptions": {
+    "flow_must_remain_supersonic": true,
+    "flow_separation_absent": true,
+    "shock_wave_train_effects_ignored_under_assumption": true,
+    "reason": "Jin et al. state that the supersonic and separation-free assumption avoids the M=1 singular point and permits shock-train and separation-induced area uncertainty to be ignored in the simple quasi-one-dimensional validation."
+  },
+  "solver_applicability_policy": {
+    "mach_gate": "A formal reproduction using the Jin simple-validation assumptions must have min(M)>1 over the compared domain. No arbitrary safety margin is added to the scientific gate; the reported sonic margin is min(M)-1.",
+    "separation_gate": "The current quasi-one-dimensional state vector cannot prove absence of boundary-layer separation. Separation-free applicability must therefore remain an externally justified source/model assumption, not a quantity inferred from a one-dimensional Mach profile.",
+    "shock_train_gate": "The current reduced model does not resolve a physical shock train/separated area. If the intended condition contains such physics, agreement with Jin's simple supersonic validation equations cannot be claimed merely because the numerical solver converges."
+  },
+  "resolved_reproduction_inputs": [
+    {
+      "item": "Cf convention to repository Darcy friction factor",
+      "status": "RESOLVED_DERIVED_FROM_SOURCE_DEFINITION",
+      "evidence_record": "cases/studies/data/p11_2b_jin_friction_convention_source.json",
+      "mapping": "f_D = 4 Cf",
+      "basis": "Jin Eqs. (9)-(10) are explicitly sourced to Shapiro [51] and use 4 Cf dx/D; Shapiro defines the duct friction coefficient as wall shear stress divided by dynamic head. Equating the resulting wall-force-per-volume to the repository's explicit Darcy source gives f_D=4 Cf."
+    }
+  ],
+  "unresolved_reproduction_inputs": [
+    {
+      "item": "Fig. 14 station-3 / combustor-inlet boundary state",
+      "status": "NOT_FROZEN",
+      "reason": "The accessible Jin validation text does not tabulate the complete primitive or total state used to start the external Liu model-B calculation. Liu defines station 3 but the accessible primary record does not directly tabulate M3/p3/Tt3 for the matching reacting run."
+    },
+    {
+      "item": "Fig. 14 wall-friction coefficient Cf",
+      "status": "NOT_FROZEN",
+      "reason": "Jin Eqs. (9)-(10) explicitly retain Cf and define it as a wall friction coefficient, but the accessible article text does not expose the numerical Cf used for Fig. 14. The coefficient convention is now resolved separately; only the numerical value remains missing."
+    }
+  ],
+  "friction_convention_closure": {
+    "status": "RESOLVED_DERIVED_FROM_SOURCE_DEFINITION",
+    "record": "cases/studies/data/p11_2b_jin_friction_convention_source.json",
+    "jin_reference": "Ref. [51] A.H. Shapiro (1953)",
+    "shapiro_definition": "f = tau_w / (0.5 rho u^2)",
+    "repository_parameter": "Darcy friction factor f_D",
+    "mapping": "f_D = 4 Cf",
+    "remaining_gap": "The numerical Cf used by Jin for Fig. 14 is not publicly exposed in the recovered article text."
+  },
+  "cross_source_boundary": {
+    "liu_source_id": "SRC10",
+    "confirmed": "Liu's own quasi-one-dimensional mode-transition derivation separately presents a negligible-wall-friction Mach relation. This supports the importance of declaring friction assumptions explicitly.",
+    "not_authorized": "Liu's negligible-friction derivation is not evidence that Jin set Cf=0 in the independent Fig. 14 validation. The repository therefore does not disable friction for that reproduction without a direct source statement or a documented sensitivity study clearly labelled as a modelling assumption."
+  },
+  "formal_case_effect": "The friction coefficient convention is now closed, but the exact Fig. 14 inlet state and numerical Cf remain source-gated. Recovery of the heat-release shape and absolute energy scale alone would therefore still not fully specify an exact Jin Fig. 14 reproduction."
+}

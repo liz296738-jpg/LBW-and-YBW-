@@ -6,17 +6,32 @@ from typing import Literal, NamedTuple
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-from .boundary import BoundaryConditions, boundary_interface_fluxes, transmissive_ghost_cells, validate_boundary_conditions
+from .boundary import (
+    BoundaryConditions,
+    boundary_interface_fluxes,
+    transmissive_ghost_cells,
+    validate_boundary_conditions,
+)
 from .config import GasProperties, NumericalConfig
-from .convergence import SteadyResidualReference, normalized_steady_residual, steady_residual_reference
+from .convergence import (
+    SteadyResidualReference,
+    normalized_steady_residual,
+    steady_residual_reference,
+)
 from .gas import speed_of_sound
 from .geometry import AreaProfile
-from .spatial import finite_volume_residual, internal_rusanov_fluxes, internal_numerical_fluxes, quasi_1d_residual
 from .source_terms import (
     combined_wall_source,
+    combustion_heat_release_source,
     distributed_combustion_heat_release_source,
     distributed_fuel_injection_source,
     heat_release_rate_per_length_from_burned_fuel,
+    volumetric_heat_release_rate_from_axial_distribution,
+)
+from .spatial import (
+    finite_volume_residual,
+    internal_rusanov_fluxes,
+    quasi_1d_residual,
 )
 from .state import conservative_to_primitive
 from .time_integration import ssp_rk3_step
@@ -66,7 +81,9 @@ def _wall_physics_enabled(
         friction = np.broadcast_to(friction, target_shape)
         heat_flux = np.broadcast_to(heat_flux, target_shape)
     except ValueError as error:
-        raise ValueError("darcy_friction_factor and wall_heat_flux must broadcast to the state shape") from error
+        raise ValueError(
+            "darcy_friction_factor and wall_heat_flux must broadcast to the state shape"
+        ) from error
     if not np.all(np.isfinite(friction) & (friction >= 0.0)):
         raise ValueError("darcy_friction_factor must be finite and nonnegative")
     if not np.all(np.isfinite(heat_flux)):
@@ -75,7 +92,9 @@ def _wall_physics_enabled(
     active = bool(np.any(friction != 0.0) or np.any(heat_flux != 0.0))
     if hydraulic_diameter is None:
         if active:
-            raise ValueError("hydraulic_diameter is required when wall friction or wall heat transfer is enabled")
+            raise ValueError(
+                "hydraulic_diameter is required when wall friction or wall heat transfer is enabled"
+            )
         return False
 
     diameter = np.asarray(hydraulic_diameter, dtype=float)
@@ -88,12 +107,16 @@ def _wall_physics_enabled(
     return active
 
 
-def _fuel_injection_enabled(states: NDArray[np.float64], mass_flow: object, velocity: object, enthalpy: object) -> bool:
+def _fuel_injection_enabled(
+    states: NDArray[np.float64], mass_flow: object, velocity: object, enthalpy: object
+) -> bool:
     """Validate fuel inputs and return whether the prescribed distribution is active."""
     target_shape = states.shape[:-1]
     values = [np.asarray(value, dtype=float) for value in (mass_flow, velocity, enthalpy)]
     try:
-        distribution, injection_velocity, total_enthalpy = [np.broadcast_to(value, target_shape) for value in values]
+        distribution, injection_velocity, total_enthalpy = [
+            np.broadcast_to(value, target_shape) for value in values
+        ]
     except ValueError as error:
         raise ValueError("fuel inputs must broadcast to the state shape") from error
     if not np.all(np.isfinite(distribution) & (distribution >= 0.0)):
@@ -108,7 +131,7 @@ def _combustion_enabled(
     fuel_burn_rate_per_length: object,
     fuel_lower_heating_value: object,
 ) -> bool:
-    """Validate P8 inputs and return whether prescribed combustion is active."""
+    """Validate burned-fuel/LHV P8 inputs and return whether they are active."""
     target_shape = states.shape[:-1]
     burn_rate = np.asarray(fuel_burn_rate_per_length, dtype=float)
     try:
@@ -134,7 +157,44 @@ def _combustion_enabled(
     return bool(np.any(burn_rate > 0.0))
 
 
-def cfl_timestep(U: ArrayLike, dx: object, gas: GasProperties, numerical: NumericalConfig) -> float:
+def _prescribed_heat_release_enabled(
+    states: NDArray[np.float64], heat_release_rate_per_length: object
+) -> bool:
+    """Validate a direct prescribed line heat-release profile [W/m]."""
+    target_shape = states.shape[:-1]
+    line_heat_release = np.asarray(heat_release_rate_per_length, dtype=float)
+    try:
+        line_heat_release = np.broadcast_to(line_heat_release, target_shape)
+    except ValueError as error:
+        raise ValueError("heat_release_rate_per_length must broadcast to the state shape") from error
+    if not np.all(np.isfinite(line_heat_release) & (line_heat_release >= 0.0)):
+        raise ValueError("heat_release_rate_per_length must be finite and nonnegative")
+    return bool(np.any(line_heat_release > 0.0))
+
+
+def _validate_combustion_paths(
+    states: NDArray[np.float64],
+    fuel_burn_rate_per_length: object,
+    fuel_lower_heating_value: object,
+    heat_release_rate_per_length: object,
+) -> tuple[bool, bool]:
+    """Validate both P8 input paths and prevent accidental double counting."""
+    burned_fuel_active = _combustion_enabled(
+        states, fuel_burn_rate_per_length, fuel_lower_heating_value
+    )
+    direct_heat_active = _prescribed_heat_release_enabled(
+        states, heat_release_rate_per_length
+    )
+    if burned_fuel_active and direct_heat_active:
+        raise ValueError(
+            "choose exactly one combustion-energy path: burned-fuel/LHV or direct heat_release_rate_per_length"
+        )
+    return burned_fuel_active, direct_heat_active
+
+
+def cfl_timestep(
+    U: ArrayLike, dx: object, gas: GasProperties, numerical: NumericalConfig
+) -> float:
     """Return CFL*dx/max(|u|+a) [s] for valid conservative states on a uniform grid."""
     spacing = _positive_scalar("dx", dx)
     primitive = conservative_to_primitive(U, gas)
@@ -144,7 +204,9 @@ def cfl_timestep(U: ArrayLike, dx: object, gas: GasProperties, numerical: Numeri
     return float(numerical.cfl * spacing / maximum_speed)
 
 
-def euler_rhs_transmissive(U: ArrayLike, dx: object, gas: GasProperties) -> NDArray[np.float64]:
+def euler_rhs_transmissive(
+    U: ArrayLike, dx: object, gas: GasProperties
+) -> NDArray[np.float64]:
     """Return the complete source-free Euler RHS with transmissive edge states."""
     spacing = _positive_scalar("dx", dx)
     ghosted = transmissive_ghost_cells(U)
@@ -168,14 +230,16 @@ def quasi_1d_rhs(
     fuel_specific_total_enthalpy: object = 0.0,
     fuel_burn_rate_per_length: ArrayLike = 0.0,
     fuel_lower_heating_value: ArrayLike | None = None,
+    heat_release_rate_per_length: ArrayLike = 0.0,
 ) -> NDArray[np.float64]:
-    """Return quasi-1D RHS with selected P9.1 boundaries and optional sources.
+    """Return quasi-1D RHS with selected boundaries and optional sources.
 
-    ``fuel_burn_rate_per_length`` [kg/(m s)] is a prescribed reacted-fuel
-    distribution independent of P7's ``fuel_mass_flow_rate_per_length``.
-    ``fuel_lower_heating_value`` [J/kg] is required when any burn rate is
-    positive; ``None`` is valid only when all burn rates are zero. The P8.2
-    source is re-evaluated from each supplied state and adds only energy.
+    Combustion energy may be prescribed by exactly one of two equivalent
+    interfaces. The legacy P8.2 path maps ``fuel_burn_rate_per_length``
+    [kg/(m s)] through a caller-supplied LHV [J/kg]. The direct path accepts
+    ``heat_release_rate_per_length`` [W/m] and maps it to local energy source
+    using cell area. The direct path adds no mass or momentum and does not
+    imply chemistry, species, mixing, ignition, or fuel consumption.
     """
     if not isinstance(geometry, AreaProfile):
         raise TypeError("geometry must be an AreaProfile")
@@ -186,23 +250,47 @@ def quasi_1d_rhs(
         raise ValueError("U cell count must match geometry.num_cells")
 
     spacing = _positive_scalar("dx", dx)
-    wall_active = _wall_physics_enabled(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
-    fuel_active = _fuel_injection_enabled(states, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
-    combustion_active = _combustion_enabled(
-        states, fuel_burn_rate_per_length, fuel_lower_heating_value
+    wall_active = _wall_physics_enabled(
+        states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux
+    )
+    fuel_active = _fuel_injection_enabled(
+        states,
+        fuel_mass_flow_rate_per_length,
+        fuel_axial_velocity,
+        fuel_specific_total_enthalpy,
+    )
+    burned_fuel_active, direct_heat_active = _validate_combustion_paths(
+        states,
+        fuel_burn_rate_per_length,
+        fuel_lower_heating_value,
+        heat_release_rate_per_length,
     )
     interface_fluxes = boundary_interface_fluxes(
         states, gas, boundary_conditions, scheme=flux_scheme
     )
     rhs = quasi_1d_residual(states, interface_fluxes, geometry, spacing, gas)
     if wall_active:
-        rhs = rhs + combined_wall_source(states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
+        rhs = rhs + combined_wall_source(
+            states, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas
+        )
     if fuel_active:
-        rhs = rhs + distributed_fuel_injection_source(states, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
-    if combustion_active:
+        rhs = rhs + distributed_fuel_injection_source(
+            states,
+            geometry,
+            fuel_mass_flow_rate_per_length,
+            fuel_axial_velocity,
+            fuel_specific_total_enthalpy,
+            gas,
+        )
+    if burned_fuel_active:
         rhs = rhs + distributed_combustion_heat_release_source(
             states, geometry, fuel_burn_rate_per_length, fuel_lower_heating_value, gas
         )
+    if direct_heat_active:
+        volumetric_heat_release = volumetric_heat_release_rate_from_axial_distribution(
+            states, geometry, heat_release_rate_per_length, gas
+        )
+        rhs = rhs + combustion_heat_release_source(states, volumetric_heat_release, gas)
     return rhs
 
 
@@ -221,17 +309,25 @@ def quasi_1d_rhs_transmissive(
     fuel_specific_total_enthalpy: object = 0.0,
     fuel_burn_rate_per_length: ArrayLike = 0.0,
     fuel_lower_heating_value: ArrayLike | None = None,
+    heat_release_rate_per_length: ArrayLike = 0.0,
 ) -> NDArray[np.float64]:
     """Legacy wrapper retaining exactly transmissive boundary semantics."""
     return quasi_1d_rhs(
-        U, geometry, dx, gas, flux_scheme=flux_scheme,
-        boundary_conditions=BoundaryConditions(), hydraulic_diameter=hydraulic_diameter,
-        darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux,
+        U,
+        geometry,
+        dx,
+        gas,
+        flux_scheme=flux_scheme,
+        boundary_conditions=BoundaryConditions(),
+        hydraulic_diameter=hydraulic_diameter,
+        darcy_friction_factor=darcy_friction_factor,
+        wall_heat_flux=wall_heat_flux,
         fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length,
         fuel_axial_velocity=fuel_axial_velocity,
         fuel_specific_total_enthalpy=fuel_specific_total_enthalpy,
         fuel_burn_rate_per_length=fuel_burn_rate_per_length,
         fuel_lower_heating_value=fuel_lower_heating_value,
+        heat_release_rate_per_length=heat_release_rate_per_length,
     )
 
 
@@ -250,12 +346,17 @@ def solve_euler_1d(
     conservative_to_primitive(state, gas)
     spacing = _positive_scalar("dx", dx)
     final_time = _positive_scalar("t_final", t_final)
-    if isinstance(max_steps, (bool, np.bool_)) or not isinstance(max_steps, (int, np.integer)) or max_steps <= 0:
+    if (
+        isinstance(max_steps, (bool, np.bool_))
+        or not isinstance(max_steps, (int, np.integer))
+        or max_steps <= 0
+    ):
         raise ValueError("max_steps must be a positive integer")
 
     state = np.array(state, dtype=float, copy=True)
     time = 0.0
     steps = 0
+
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
         return euler_rhs_transmissive(stage_state, spacing, gas)
 
@@ -295,16 +396,10 @@ def solve_quasi_1d(
     fuel_specific_total_enthalpy: object = 0.0,
     fuel_burn_rate_per_length: ArrayLike = 0.0,
     fuel_lower_heating_value: ArrayLike | None = None,
+    heat_release_rate_per_length: ArrayLike = 0.0,
     boundary_conditions: BoundaryConditions | None = None,
 ) -> SolverResult:
-    """Advance quasi-1D flow with optional wall, injection, and combustion sources.
-
-    ``fuel_burn_rate_per_length`` [kg/(m s)] and its caller-supplied
-    ``fuel_lower_heating_value`` [J/kg] define P8 chemical heat release and
-    are independent from the P7 injected-fuel inputs. Zero burn with ``None``
-    LHV disables combustion; an explicit LHV is always validated. Combustion
-    is evaluated in the full SSP-RK3 RHS path and does not alter the CFL rule.
-    """
+    """Advance quasi-1D flow with optional wall, injection, and energy sources."""
     state = np.asarray(U0, dtype=float)
     if state.ndim != 2 or state.shape[-1] != 3 or state.shape[0] < 2:
         raise ValueError("U0 must have shape (N, 3) with N >= 2")
@@ -315,43 +410,86 @@ def solve_quasi_1d(
     conservative_to_primitive(state, gas)
     spacing = _positive_scalar("dx", dx)
     final_time = _positive_scalar("t_final", t_final)
-    if isinstance(max_steps, (bool, np.bool_)) or not isinstance(max_steps, (int, np.integer)) or max_steps <= 0:
+    if (
+        isinstance(max_steps, (bool, np.bool_))
+        or not isinstance(max_steps, (int, np.integer))
+        or max_steps <= 0
+    ):
         raise ValueError("max_steps must be a positive integer")
     if flux_scheme not in ("rusanov", "steger-warming"):
         raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
     conditions = validate_boundary_conditions(boundary_conditions, state, gas)
-    wall_active = _wall_physics_enabled(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
-    fuel_active = _fuel_injection_enabled(state, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
-    combustion_active = _combustion_enabled(
-        state, fuel_burn_rate_per_length, fuel_lower_heating_value
+    wall_active = _wall_physics_enabled(
+        state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux
+    )
+    fuel_active = _fuel_injection_enabled(
+        state,
+        fuel_mass_flow_rate_per_length,
+        fuel_axial_velocity,
+        fuel_specific_total_enthalpy,
+    )
+    burned_fuel_active, direct_heat_active = _validate_combustion_paths(
+        state,
+        fuel_burn_rate_per_length,
+        fuel_lower_heating_value,
+        heat_release_rate_per_length,
     )
     if wall_active:
-        combined_wall_source(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
+        combined_wall_source(
+            state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas
+        )
     if fuel_active:
-        distributed_fuel_injection_source(state, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
+        distributed_fuel_injection_source(
+            state,
+            geometry,
+            fuel_mass_flow_rate_per_length,
+            fuel_axial_velocity,
+            fuel_specific_total_enthalpy,
+            gas,
+        )
 
     state = np.array(state, dtype=float, copy=True)
     time = 0.0
     steps = 0
     source_kwargs: dict[str, object] = {}
     if wall_active:
-        source_kwargs.update(hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux)
+        source_kwargs.update(
+            hydraulic_diameter=hydraulic_diameter,
+            darcy_friction_factor=darcy_friction_factor,
+            wall_heat_flux=wall_heat_flux,
+        )
     if fuel_active:
-        source_kwargs.update(fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy)
-    if combustion_active:
+        source_kwargs.update(
+            fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length,
+            fuel_axial_velocity=fuel_axial_velocity,
+            fuel_specific_total_enthalpy=fuel_specific_total_enthalpy,
+        )
+    if burned_fuel_active:
         source_kwargs.update(
             fuel_burn_rate_per_length=fuel_burn_rate_per_length,
             fuel_lower_heating_value=fuel_lower_heating_value,
         )
+    if direct_heat_active:
+        source_kwargs.update(heat_release_rate_per_length=heat_release_rate_per_length)
 
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
         if boundary_conditions is None:
             return quasi_1d_rhs_transmissive(
-                stage_state, geometry, spacing, gas, flux_scheme=flux_scheme, **source_kwargs
+                stage_state,
+                geometry,
+                spacing,
+                gas,
+                flux_scheme=flux_scheme,
+                **source_kwargs,
             )
         return quasi_1d_rhs(
-            stage_state, geometry, spacing, gas, flux_scheme=flux_scheme,
-            boundary_conditions=conditions, **source_kwargs,
+            stage_state,
+            geometry,
+            spacing,
+            gas,
+            flux_scheme=flux_scheme,
+            boundary_conditions=conditions,
+            **source_kwargs,
         )
 
     while time < final_time:
@@ -373,56 +511,147 @@ def solve_quasi_1d(
 
 
 def solve_quasi_1d_steady(
-    U0: ArrayLike, geometry: AreaProfile, dx: object, max_time: object,
-    gas: GasProperties, numerical: NumericalConfig, max_steps: int = 100_000, *,
-    flux_scheme: object = "rusanov", hydraulic_diameter: object = None,
-    darcy_friction_factor: object = 0.0, wall_heat_flux: object = 0.0,
-    fuel_mass_flow_rate_per_length: object = 0.0, fuel_axial_velocity: object = 0.0,
-    fuel_specific_total_enthalpy: object = 0.0, fuel_burn_rate_per_length: ArrayLike = 0.0,
+    U0: ArrayLike,
+    geometry: AreaProfile,
+    dx: object,
+    max_time: object,
+    gas: GasProperties,
+    numerical: NumericalConfig,
+    max_steps: int = 100_000,
+    *,
+    flux_scheme: object = "rusanov",
+    hydraulic_diameter: object = None,
+    darcy_friction_factor: object = 0.0,
+    wall_heat_flux: object = 0.0,
+    fuel_mass_flow_rate_per_length: object = 0.0,
+    fuel_axial_velocity: object = 0.0,
+    fuel_specific_total_enthalpy: object = 0.0,
+    fuel_burn_rate_per_length: ArrayLike = 0.0,
     fuel_lower_heating_value: ArrayLike | None = None,
+    heat_release_rate_per_length: ArrayLike = 0.0,
     boundary_conditions: BoundaryConditions | None = None,
 ) -> SteadySolverResult:
     """Advance quasi-1D pseudo-time until a normalized full-RHS residual converges."""
     state = np.asarray(U0, dtype=float)
-    if state.ndim != 2 or state.shape[-1] != 3 or state.shape[0] < 2: raise ValueError("U0 must have shape (N, 3) with N >= 2")
-    if not isinstance(geometry, AreaProfile) or geometry.num_cells != state.shape[0]: raise ValueError("geometry.num_cells must match U0 cell count")
+    if state.ndim != 2 or state.shape[-1] != 3 or state.shape[0] < 2:
+        raise ValueError("U0 must have shape (N, 3) with N >= 2")
+    if not isinstance(geometry, AreaProfile) or geometry.num_cells != state.shape[0]:
+        raise ValueError("geometry.num_cells must match U0 cell count")
     conservative_to_primitive(state, gas)
-    spacing, final_time = _positive_scalar("dx", dx), _positive_scalar("max_time", max_time)
-    if isinstance(max_steps, (bool, np.bool_)) or not isinstance(max_steps, (int, np.integer)) or max_steps <= 0: raise ValueError("max_steps must be a positive integer")
-    if flux_scheme not in ("rusanov", "steger-warming"): raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
+    spacing = _positive_scalar("dx", dx)
+    final_time = _positive_scalar("max_time", max_time)
+    if (
+        isinstance(max_steps, (bool, np.bool_))
+        or not isinstance(max_steps, (int, np.integer))
+        or max_steps <= 0
+    ):
+        raise ValueError("max_steps must be a positive integer")
+    if flux_scheme not in ("rusanov", "steger-warming"):
+        raise ValueError("supported schemes are 'rusanov' and 'steger-warming'")
     conditions = validate_boundary_conditions(boundary_conditions, state, gas)
-    wall_active = _wall_physics_enabled(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux)
-    fuel_active = _fuel_injection_enabled(state, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy)
-    combustion_active = _combustion_enabled(state, fuel_burn_rate_per_length, fuel_lower_heating_value)
+    wall_active = _wall_physics_enabled(
+        state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux
+    )
+    fuel_active = _fuel_injection_enabled(
+        state,
+        fuel_mass_flow_rate_per_length,
+        fuel_axial_velocity,
+        fuel_specific_total_enthalpy,
+    )
+    burned_fuel_active, direct_heat_active = _validate_combustion_paths(
+        state,
+        fuel_burn_rate_per_length,
+        fuel_lower_heating_value,
+        heat_release_rate_per_length,
+    )
     if wall_active:
-        combined_wall_source(state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas)
+        combined_wall_source(
+            state, hydraulic_diameter, darcy_friction_factor, wall_heat_flux, gas
+        )
     if fuel_active:
-        distributed_fuel_injection_source(state, geometry, fuel_mass_flow_rate_per_length, fuel_axial_velocity, fuel_specific_total_enthalpy, gas)
+        distributed_fuel_injection_source(
+            state,
+            geometry,
+            fuel_mass_flow_rate_per_length,
+            fuel_axial_velocity,
+            fuel_specific_total_enthalpy,
+            gas,
+        )
+
     reference: SteadyResidualReference = steady_residual_reference(state, spacing, gas)
     source_kwargs: dict[str, object] = {}
     if wall_active:
-        source_kwargs.update(hydraulic_diameter=hydraulic_diameter, darcy_friction_factor=darcy_friction_factor, wall_heat_flux=wall_heat_flux)
+        source_kwargs.update(
+            hydraulic_diameter=hydraulic_diameter,
+            darcy_friction_factor=darcy_friction_factor,
+            wall_heat_flux=wall_heat_flux,
+        )
     if fuel_active:
-        source_kwargs.update(fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length, fuel_axial_velocity=fuel_axial_velocity, fuel_specific_total_enthalpy=fuel_specific_total_enthalpy)
-    if combustion_active:
-        source_kwargs.update(fuel_burn_rate_per_length=fuel_burn_rate_per_length, fuel_lower_heating_value=fuel_lower_heating_value)
+        source_kwargs.update(
+            fuel_mass_flow_rate_per_length=fuel_mass_flow_rate_per_length,
+            fuel_axial_velocity=fuel_axial_velocity,
+            fuel_specific_total_enthalpy=fuel_specific_total_enthalpy,
+        )
+    if burned_fuel_active:
+        source_kwargs.update(
+            fuel_burn_rate_per_length=fuel_burn_rate_per_length,
+            fuel_lower_heating_value=fuel_lower_heating_value,
+        )
+    if direct_heat_active:
+        source_kwargs.update(heat_release_rate_per_length=heat_release_rate_per_length)
+
     def rhs(stage_state: NDArray[np.float64]) -> NDArray[np.float64]:
-        return quasi_1d_rhs(stage_state, geometry, spacing, gas, flux_scheme=flux_scheme, boundary_conditions=conditions, **source_kwargs)
-    state = np.array(state, dtype=float, copy=True); time = 0.0; steps = 0
-    try: residual = normalized_steady_residual(rhs(state), reference)
-    except (ValueError, FloatingPointError) as error: raise RuntimeError(f"steady solve failed during initial residual at step 0, time=0: {error}") from error
+        return quasi_1d_rhs(
+            stage_state,
+            geometry,
+            spacing,
+            gas,
+            flux_scheme=flux_scheme,
+            boundary_conditions=conditions,
+            **source_kwargs,
+        )
+
+    state = np.array(state, dtype=float, copy=True)
+    time = 0.0
+    steps = 0
+    try:
+        residual = normalized_steady_residual(rhs(state), reference)
+    except (ValueError, FloatingPointError) as error:
+        raise RuntimeError(
+            f"steady solve failed during initial residual at step 0, time=0: {error}"
+        ) from error
     residuals, times = [residual], [time]
     while residual > numerical.tolerance and time < final_time and steps < max_steps:
         try:
             dt = min(cfl_timestep(state, spacing, gas, numerical), final_time - time)
             state = ssp_rk3_step(state, dt, rhs)
             conservative_to_primitive(state, gas)
-            time += dt; steps += 1; residual = normalized_steady_residual(rhs(state), reference)
+            time += dt
+            steps += 1
+            residual = normalized_steady_residual(rhs(state), reference)
         except (ValueError, FloatingPointError) as error:
-            raise RuntimeError(f"steady solve failed during CFL/SSP-RK3/state validation at step {steps}, time={time}: {error}") from error
-        residuals.append(residual); times.append(time)
+            raise RuntimeError(
+                f"steady solve failed during CFL/SSP-RK3/state validation at step {steps}, time={time}: {error}"
+            ) from error
+        residuals.append(residual)
+        times.append(time)
     converged = residual <= numerical.tolerance
-    reason: Literal["converged", "max-time", "max-steps"] = "converged" if converged else ("max-time" if time >= final_time else "max-steps")
-    result_state = state.copy(); residual_history = np.asarray(residuals); time_history = np.asarray(times)
-    result_state.setflags(write=False); residual_history.setflags(write=False); time_history.setflags(write=False)
-    return SteadySolverResult(result_state, time, steps, converged, reason, residual, residual_history, time_history)
+    reason: Literal["converged", "max-time", "max-steps"] = (
+        "converged" if converged else ("max-time" if time >= final_time else "max-steps")
+    )
+    result_state = state.copy()
+    residual_history = np.asarray(residuals)
+    time_history = np.asarray(times)
+    result_state.setflags(write=False)
+    residual_history.setflags(write=False)
+    time_history.setflags(write=False)
+    return SteadySolverResult(
+        result_state,
+        time,
+        steps,
+        converged,
+        reason,
+        residual,
+        residual_history,
+        time_history,
+    )

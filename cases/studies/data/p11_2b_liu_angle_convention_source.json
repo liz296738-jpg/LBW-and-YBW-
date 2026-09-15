@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "record_kind": "validation-geometry-angle-convention",
+  "candidate_id": "JIN-LIU-MODEL-B-VALIDATION",
+  "purpose": "Resolve the Liu axisymmetric combustor 2 degree area-relief convention without silently choosing between wall half-angle and full included cone angle.",
+  "sources": [
+    {
+      "source_id": "SRC13",
+      "citation": "Qili Liu, Damiano Baccarella, Brendan McGann, Tonghun Lee, Cavity-Enhanced Combustion Stability in an Axisymmetric Scramjet Model, AIAA Journal 57(9) (2019) 3898-3909.",
+      "doi": "10.2514/1.J058204",
+      "url": "https://www.researchgate.net/publication/333431203_Cavity-Enhanced_Combustion_Stability_in_an_Axisymmetric_Scramjet_Model",
+      "authority": "primary same-program experimental source",
+      "source_locators": [
+        "experimental-setup geometry paragraph",
+        "2 deg versus 5 deg combustor comparisons"
+      ],
+      "confirmed_claims": [
+        "The model is axisymmetric.",
+        "The source describes a 2 deg diverging cone angle in the combustor.",
+        "The study compares 2 deg and 5 deg diverging combustors as different area-relief configurations."
+      ],
+      "directly_defines_wall_half_angle": false
+    },
+    {
+      "source_id": "SRC14",
+      "citation": "Guangwei Ma, Mingbo Sun, Guoyan Zhao, Pei Liu, Tao Tang, Li Fan, Hongbo Wang, Numerical Investigation of an Axisymmetric Model Scramjet Assisted with Cavity of Different Aft Wall Angles, International Journal of Aerospace Engineering (2021) 7525824.",
+      "doi": "10.1155/2021/7525824",
+      "url": "https://onlinelibrary.wiley.com/doi/10.1155/2021/7525824",
+      "authority": "peer-reviewed secondary geometry terminology cross-check",
+      "source_locators": [
+        "Introduction: description of Liu et al. [22]",
+        "Sec. 2.3 Computational Grids and Boundary Conditions"
+      ],
+      "confirmed_claims": [
+        "The paper describes Liu et al. [22], which is Liu et al. AIAA Journal 2019 J058204, as varying the wall divergent angle.",
+        "For a closely related axisymmetric Liu experimental configuration, the paper states that the divergent angle of the combustor is 5 deg."
+      ],
+      "evidence_role": "corroborates that the 2 deg / 5 deg parameter in this Liu axisymmetric-combustor literature is a wall-divergence parameter rather than a full included apex angle"
+    }
+  ],
+  "interpretation_decision": {
+    "raw_primary_descriptor": "2 deg diverging cone angle",
+    "adopted_reduced_order_meaning": "axisymmetric wall divergence angle measured from the engine centerline",
+    "wall_divergence_angle_deg": 2.0,
+    "classification": "SOURCE_CORROBORATED_INTERPRETATION",
+    "status": "READY_FOR_STUDY_LAYER_AREA_PROFILE",
+    "primary_source_direct_definition": false,
+    "rationale": "The primary experiment gives the 2 deg cone-angle value but does not explicitly spell out half-angle versus included angle in text. A peer-reviewed follow-on paper explicitly characterizes Liu et al. J058204 as varying wall divergent angle. The project therefore adopts 2 deg as the wall angle for the reduced-order axisymmetric area law, while preserving that this is a corroborated interpretation rather than a verbatim primary-source definition."
+  },
+  "source_backed_geometry_inputs": {
+    "constant_section_diameter_m": 0.035,
+    "diverging_section_length_m": 0.357,
+    "divergence_start_in_solver_coordinates_m": 0.10355634918610404,
+    "combustor_exit_in_solver_coordinates_m": 0.46055634918610404
+  },
+  "derived_area_profile_metrics": {
+    "derivation_status": "DERIVED_FROM_SOURCE_BACKED_GEOMETRY_PLUS_SOURCE_CORROBORATED_ANGLE_INTERPRETATION",
+    "radius_law": "r(x) = r0 for x <= x_div; r(x) = r0 + (x-x_div)*tan(theta_wall) for x_div < x <= x_exit",
+    "inlet_radius_m": 0.0175,
+    "adopted_wall_angle_deg": 2.0,
+    "outlet_radius_m": 0.029966714708553943,
+    "outlet_diameter_m": 0.059933429417107886,
+    "exit_to_inlet_area_ratio": 2.9322579279146552
+  },
+  "counterfactual_if_2_deg_were_full_included_angle": {
+    "wall_angle_deg": 1.0,
+    "outlet_radius_m": 0.02373145817937368,
+    "outlet_diameter_m": 0.04746291635874736,
+    "exit_to_inlet_area_ratio": 1.8389619830836306,
+    "adopted_to_counterfactual_area_ratio_factor": 1.5945179698591434,
+    "interpretation": "The two conventions change exit area ratio by about 59.45 percent, so the convention is physically material and must be tracked explicitly."
+  },
+  "evidence_boundary": [
+    "The raw 2 deg value is SOURCE evidence from the Liu experimental literature.",
+    "Treating 2 deg as the wall divergence angle is a SOURCE_CORROBORATED_INTERPRETATION, not a verbatim statement that the primary paper calls it a half-angle.",
+    "The axisymmetric radius/area law is DERIVED geometry for the quasi-one-dimensional model.",
+    "No outlet diameter is claimed as directly measured; the outlet diameter and area ratio are derived from the adopted wall-angle interpretation and source-backed length/diameter.",
+    "If a higher-authority primary figure or author dataset later contradicts this convention, this record must be revised before a formal validation run."
+  ]
+}
