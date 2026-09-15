@@ -1,0 +1,19 @@
+{
+  "classification": "PROJECT_DEFINED_NUMERICAL_GRID_AUDIT",
+  "not_a_source_reproduction": true,
+  "source_commit": "2498bf4361f52d196fc12b6e1537ab11c3f31a82",
+  "workflow_run_id": 35012277081,
+  "artifact_id": 10415421293,
+  "artifact_zip_sha256": "b366a1bc76b2a328bc3af43d1513fe5fc7aa58082ca5bca430b9b34ff97b28d0",
+  "tolerance": 2e-05,
+  "levels": [
+    {"cells":20,"dx_m":0.02,"converged":true,"steps":485,"density_change":1.9799228071952737e-05,"normalized_residual":0.0007879577164719876,"max_temperature_K":1580.0467522292365,"max_pressure_Pa":114466.51348360155,"min_mach":1.27140884274981,"max_mach":2.24150801228316},
+    {"cells":40,"dx_m":0.01,"converged":true,"steps":721,"density_change":1.9990461374500907e-05,"normalized_residual":0.0016026392483982136,"max_temperature_K":1584.805254556386,"max_pressure_Pa":115474.2519502044,"min_mach":1.2634394882103626,"max_mach":2.248787036734907},
+    {"cells":80,"dx_m":0.005,"converged":true,"steps":1118,"density_change":1.9939840526132074e-05,"normalized_residual":0.0032082542631097534,"max_temperature_K":1588.1544368751292,"max_pressure_Pa":116259.59848626627,"min_mach":1.2568481737088568,"max_mach":2.2518966290686917}
+  ],
+  "successive_grid_changes": [
+    {"coarse_cells":20,"fine_cells":40,"max_mach_relative_change":0.003236866956648772,"max_pressure_relative_change":0.008726953841081525,"max_temperature_relative_change":0.003002578590314845,"min_mach_relative_change":0.006307666187270992},
+    {"coarse_cells":40,"fine_cells":80,"max_mach_relative_change":0.0013808770321178181,"max_pressure_relative_change":0.0067551113739193315,"max_temperature_relative_change":0.0021088517848006955,"min_mach_relative_change":0.005244320387605216}
+  ],
+  "interpretation": "All three levels satisfy the teacher Eq.11.46 density-change gate. Successive changes decrease for the recorded extrema, but this record does not claim formal asymptotic grid independence or source reproduction. Conservation audit remains a separate gate."
+}
