@@ -47,7 +47,7 @@ def _load_json_record(path: Path, *, expected_kind: str) -> dict:
 
 
 def _repo_relative(path: Path) -> str:
-    return str(path.resolve().relative_to(ROOT.resolve()))
+    return path.resolve().relative_to(ROOT.resolve()).as_posix()
 
 
 def build_evidence_gate_summary(
@@ -270,7 +270,7 @@ def build_readiness_record(source_ledger: Path = SOURCE_LEDGER) -> dict[str, obj
         "schema_version": 1,
         "stage": "P11.2B",
         "artifact_kind": "formal-case-readiness",
-        "source_ledger": str(source_ledger.relative_to(ROOT)),
+        "source_ledger": source_ledger.resolve().relative_to(ROOT.resolve()).as_posix(),
         "declared_project_status": declared_status,
         "evidence_gate_summary": evidence_summary,
         **assessment,
