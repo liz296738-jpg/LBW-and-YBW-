@@ -30,13 +30,13 @@ jobs:
 
       - name: Run reference-gamma candidate
         run: |
-          python cases/studies/p11_2b_nasa_bk_heated_candidate.py \
+          python -m cases.studies.p11_2b_nasa_bk_heated_candidate \
             --output-dir nasa_bk_heated/reference_gamma \
             --cells 80
 
       - name: Run lower-gamma sensitivity candidate
         run: |
-          python cases/studies/p11_2b_nasa_bk_heated_candidate.py \
+          python -m cases.studies.p11_2b_nasa_bk_heated_candidate \
             --output-dir nasa_bk_heated/lower_gamma \
             --cells 80 \
             --gamma 1.246731797999899
