@@ -1,9 +1,10 @@
 """Readiness gate for the public NASA Burrows-Kurkov P11.2B candidate.
 
 The gate separates source values, exact conversions, checksum-tracked public
-experimental data, source-backed geometry, and future reduced-order quantities
-derived from NASA computational assets. Passing it never implies finite-rate
-chemistry, species, or LBW/YBW validation.
+experimental data, source-backed geometry, an explicit reduced-order
+thermodynamic policy, and future quantities derived from NASA computational
+assets. Passing it never implies finite-rate chemistry, species, or LBW/YBW
+validation.
 """
 
 from __future__ import annotations
@@ -21,6 +22,7 @@ SOURCE_PATH = DATA_DIR / "p11_2b_nasa_bk_public_source.json"
 ASSET_MANIFEST_PATH = DATA_DIR / "p11_2b_nasa_bk_asset_manifest.json"
 EXPERIMENTAL_PROFILES_PATH = DATA_DIR / "p11_2b_nasa_bk_exp_exit_profiles.csv"
 GEOMETRY_SOURCE_PATH = DATA_DIR / "p11_2b_nasa_bk_geometry_source.json"
+THERMO_SOURCE_PATH = DATA_DIR / "p11_2b_nasa_bk_thermo_reduction.json"
 EXPECTED_SCHEMA_VERSION = 1
 EXPECTED_CASE_FAMILY = "P11_2B_NASA_BK_PUBLIC_VALIDATION"
 EXPECTED_CANDIDATE_ID = "NASA-BURROWS-KURKOV-REACTING-VALIDATION"
@@ -230,10 +232,8 @@ def load_geometry_evidence(path: Path | str = GEOMETRY_SOURCE_PATH) -> dict[str,
 
     with Path(path).open("r", encoding="utf-8") as stream:
         record = json.load(stream)
-    if record.get("schema_version") != 1:
-        raise ValueError("unsupported NASA-BK geometry schema")
-    if record.get("record_kind") != "validation-geometry-source":
-        raise ValueError("unexpected NASA-BK geometry record_kind")
+    if record.get("schema_version") != 1 or record.get("record_kind") != "validation-geometry-source":
+        raise ValueError("unsupported NASA-BK geometry source record")
     if record.get("candidate_id") != EXPECTED_CANDIDATE_ID:
         raise ValueError("NASA-BK geometry candidate_id mismatch")
     if record.get("status") != "GEOMETRY_FROZEN_SOURCE_BACKED":
@@ -253,16 +253,14 @@ def load_geometry_evidence(path: Path | str = GEOMETRY_SOURCE_PATH) -> dict[str,
     if source.get("expansion_type") != "linear-height rectangular duct":
         raise ValueError("NASA-BK expansion type drifted")
 
-    area0 = width * h0
-    area1 = width * h1
+    area0, area1 = width * h0, width * h1
     ratio = area1 / area0
-    expected = {
+    for key, expected in {
         "area_start_m2": area0,
         "area_exit_m2": area1,
         "area_ratio_exit_over_start": ratio,
-    }
-    for key, value in expected.items():
-        if not math.isclose(float(derived.get(key)), value, rel_tol=0.0, abs_tol=1.0e-14):
+    }.items():
+        if not math.isclose(float(derived.get(key)), expected, rel_tol=0.0, abs_tol=1.0e-14):
             raise ValueError(f"{key} is inconsistent with source geometry")
     if derived.get("derivation_class") != "DERIVED_EXACTLY_FROM_SOURCE_DIMENSIONS":
         raise ValueError("NASA-BK geometry derivation class drifted")
@@ -279,15 +277,60 @@ def load_geometry_evidence(path: Path | str = GEOMETRY_SOURCE_PATH) -> dict[str,
     }
 
 
+def load_thermo_evidence(path: Path | str = THERMO_SOURCE_PATH) -> dict[str, Any]:
+    """Validate the frozen reference-state effective-gas reduction policy."""
+
+    with Path(path).open("r", encoding="utf-8") as stream:
+        record = json.load(stream)
+    if record.get("schema_version") != 1:
+        raise ValueError("unsupported NASA-BK thermo evidence schema")
+    if record.get("record_kind") != "effective-gas-thermodynamic-reduction":
+        raise ValueError("unexpected NASA-BK thermo evidence record_kind")
+    if record.get("candidate_id") != EXPECTED_CANDIDATE_ID:
+        raise ValueError("NASA-BK thermo evidence candidate_id mismatch")
+    if record.get("status") != "FROZEN_REDUCED_ORDER_REFERENCE_STATE_POLICY":
+        raise ValueError("NASA-BK thermo policy is not frozen")
+
+    derived = record.get("derived_reference_state")
+    policy = record.get("formal_case_policy")
+    sensitivity = record.get("temperature_sensitivity_fixed_inlet_composition")
+    if not isinstance(derived, dict) or not isinstance(policy, dict) or not isinstance(sensitivity, list):
+        raise ValueError("NASA-BK thermo evidence is incomplete")
+    if derived.get("derivation_class") != "SOURCE_BACKED_THERMO_DERIVED_REDUCED_ORDER_CONSTANT_GAS":
+        raise ValueError("NASA-BK thermo derivation class drifted")
+    if policy.get("classification") != "MODEL_REDUCTION_WITH_SOURCE_BACKED_REFERENCE_PROPERTIES":
+        raise ValueError("NASA-BK thermo policy classification drifted")
+    R_eff = _finite_positive("thermo.R_mix", derived.get("R_mix_J_per_kg_K"))
+    cp_eff = _finite_positive("thermo.cp_mix", derived.get("cp_mix_J_per_kg_K"))
+    gamma_eff = _finite_positive("thermo.gamma_eff", derived.get("gamma_eff"))
+    if not 1.0 < gamma_eff < 2.0:
+        raise ValueError("NASA-BK thermo gamma_eff is outside physical ideal-gas bounds")
+    if len(sensitivity) < 2:
+        raise ValueError("NASA-BK thermo sensitivity must contain multiple temperatures")
+    return {
+        "thermo_path": _repo_relative(path),
+        "temperature_reference_K": float(derived["temperature_K"]),
+        "R_J_per_kg_K": R_eff,
+        "cp_J_per_kg_K": cp_eff,
+        "gamma": gamma_eff,
+        "classification": policy["classification"],
+        "required_sensitivity": policy.get("required_sensitivity"),
+        "sensitivity_gamma_min": min(float(row["gamma"]) for row in sensitivity),
+        "sensitivity_gamma_max": max(float(row["gamma"]) for row in sensitivity),
+    }
+
+
 def assess_nasa_bk_readiness(
     source: dict[str, Any],
     ingestion: dict[str, Any] | None = None,
     geometry: dict[str, Any] | None = None,
+    thermo: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Return the current public-data and reduced-order readiness state."""
 
     ingestion = ingestion or load_experimental_ingestion()
     geometry = geometry or load_geometry_evidence()
+    thermo = thermo or load_thermo_evidence()
     archive = source["nasa_validation_archive"]
     targets = source["experimental_targets"]
     assets = {item["asset_id"]: item for item in archive["public_assets"]}
@@ -327,24 +370,31 @@ def assess_nasa_bk_readiness(
             "status": "RESOLVED_SOURCE_BACKED_LINEAR_RECTANGULAR_DUCT",
             **geometry,
         },
+        {
+            "requirement": "effective_gas_thermodynamic_reduction",
+            "status": "RESOLVED_MODEL_REDUCTION_WITH_REQUIRED_SENSITIVITY",
+            **thermo,
+        },
     ]
 
     blockers = [
         {
-            "requirement": "effective_gas_thermodynamic_reduction",
-            "status": "NOT_YET_FROZEN",
-            "detail": "The solver is calorically perfect gas while the NASA benchmark uses a reacting vitiated mixture; an explicit reduced-order gamma/R/cp policy is required.",
-        },
-        {
             "requirement": "non_circular_line_heat_release_closure",
             "status": "NOT_YET_DERIVED",
-            "detail": "The experiment supplies exit profiles, not measured axial Qdot-prime. Any effective line-energy profile derived from the NASA Wind-US reference solution must retain computational provenance and independent experimental validation targets.",
-        },
+            "detail": "The experiment supplies exit profiles, not measured axial Qdot-prime. A deterministic effective line-energy profile must be derived from the checksum-tracked NASA Wind-US reference solution with computational provenance; experimental exit Mach/temperature remain independent comparison targets.",
+        }
+    ]
+    scope_exclusions = [
         {
             "requirement": "species_validation_scope",
-            "status": "OUTSIDE_CURRENT_SOLVER_CAPABILITY",
-            "detail": "H2/H2O profiles are public benchmark context but cannot be claimed as validated without species transport and chemistry.",
+            "status": "EXPLICITLY_EXCLUDED_FROM_FORMAL_THERMAL_FLOW_CLAIM",
+            "detail": "H2/H2O profiles remain public benchmark context. The present solver has no species transport or finite-rate chemistry, so species agreement will not be claimed or used as a formal acceptance gate."
         },
+        {
+            "requirement": "lbw_ybw_classification",
+            "status": "NOT_AUTHORIZED_BY_NASA_BK",
+            "detail": "Burrows-Kurkov validates a public heated supersonic-combustion benchmark; P11.3 must define LBW/YBW separately from authoritative project-specific evidence."
+        }
     ]
 
     return {
@@ -352,10 +402,12 @@ def assess_nasa_bk_readiness(
         "public_source_route_ready": True,
         "experimental_archive_ingested": True,
         "source_backed_geometry_ready": True,
+        "thermodynamic_reduction_ready": True,
         "formal_case_ready": False,
         "formal_scope_if_promoted": source["reduced_order_promotion_policy"]["highest_permitted_target_scope"],
         "resolved_requirements": resolved,
         "open_requirements": blockers,
+        "scope_exclusions": scope_exclusions,
         "resolved_count": len(resolved),
         "open_count": len(blockers),
         "lbw_ybw_classification_authorized": False,
