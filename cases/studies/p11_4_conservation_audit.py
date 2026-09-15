@@ -76,7 +76,7 @@ def run_conservation_audit(
     )
     # U stores per-volume conservative variables; A*dx is the cell volume.
     inventory_rate = np.sum(rhs * geometry.cell_area[:, None] * dx, axis=0)
-    inlet_mdot = inlet_primitive.rho * inlet.velocity_m_per_s * geometry.face_area[0]
+    inlet_mdot = inlet_primitive.rho * inlet.axial_velocity_m_per_s * geometry.face_area[0]
     return ConservationAuditResult(
         cells=cells,
         converged=steady.converged,
