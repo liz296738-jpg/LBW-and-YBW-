@@ -13,39 +13,65 @@ permissions:
 jobs:
   inspect-cgns:
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install CGNS inspection tools
+      - name: Build legacy-compatible CGNS tools
         shell: bash
         run: |
           set -euo pipefail
           sudo apt-get update
-          sudo apt-get install -y cgns-convert hdf5-tools
-          cgnsversion || true
+          sudo apt-get install -y build-essential cmake curl libhdf5-dev hdf5-tools python3-h5py
+
+          mkdir -p nasa_bk_cgns/toolchain
+          curl --fail --location --retry 3 \
+            "https://github.com/CGNS/CGNS/archive/refs/tags/v3.4.2.tar.gz" \
+            -o nasa_bk_cgns/toolchain/cgns-v3.4.2.tar.gz
+          sha256sum nasa_bk_cgns/toolchain/cgns-v3.4.2.tar.gz \
+            > nasa_bk_cgns/toolchain/cgns_source_SHA256SUMS.txt
+          tar -xzf nasa_bk_cgns/toolchain/cgns-v3.4.2.tar.gz -C nasa_bk_cgns/toolchain
+
+          cmake \
+            -S nasa_bk_cgns/toolchain/CGNS-3.4.2 \
+            -B nasa_bk_cgns/toolchain/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$PWD/nasa_bk_cgns/toolchain/install" \
+            -DCGNS_ENABLE_FORTRAN=OFF \
+            -DCGNS_ENABLE_HDF5=ON \
+            -DCGNS_ENABLE_LEGACY=ON \
+            -DCGNS_ENABLE_64BIT=OFF \
+            -DCGNS_BUILD_CGNSTOOLS=ON \
+            -DCGNS_ENABLE_TESTS=OFF
+          cmake --build nasa_bk_cgns/toolchain/build --parallel 2
+          cmake --install nasa_bk_cgns/toolchain/build
+
+          echo "$PWD/nasa_bk_cgns/toolchain/install/bin" >> "$GITHUB_PATH"
+          find nasa_bk_cgns/toolchain/install -maxdepth 2 -type f -printf '%P\n' \
+            | sort > nasa_bk_cgns/toolchain/install_inventory.txt
 
       - name: Download checksum-tracked NASA CGNS assets
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p nasa_bk_cgns
           base="https://www.grc.nasa.gov/WWW/wind/valid/bk/study02"
           curl --fail --location --retry 3 "$base/str_run.cgd" -o nasa_bk_cgns/str_run.cgd
           curl --fail --location --retry 3 "$base/str_run.cfl" -o nasa_bk_cgns/str_run.cfl
           echo "255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91  nasa_bk_cgns/str_run.cgd" | sha256sum -c -
           echo "e0d9c3c89c40b947934c6ab6a5aa0df1e9f32b22dc7919f81dd9ad391f08e602  nasa_bk_cgns/str_run.cfl" | sha256sum -c -
 
-      - name: Inventory original ADF CGNS trees
+      - name: Inventory legacy ADF CGNS trees
         shell: bash
         run: |
           set -euo pipefail
+          command -v cgnslist
+          command -v cgnsconvert
           cgnslist -a nasa_bk_cgns/str_run.cgd > nasa_bk_cgns/cgd_tree.txt
           cgnslist -a nasa_bk_cgns/str_run.cfl > nasa_bk_cgns/cfl_tree.txt
           cgnscheck -v nasa_bk_cgns/str_run.cgd > nasa_bk_cgns/cgd_check.txt 2>&1 || true
           cgnscheck -v nasa_bk_cgns/str_run.cfl > nasa_bk_cgns/cfl_check.txt 2>&1 || true
 
-      - name: Convert ADF to HDF5 CGNS
+      - name: Convert legacy ADF to HDF5 CGNS
         shell: bash
         run: |
           set -euo pipefail
@@ -53,13 +79,14 @@ jobs:
           cgnsconvert -h nasa_bk_cgns/str_run.cfl nasa_bk_cgns/str_run_hdf.cfl.cgns
           h5ls -r nasa_bk_cgns/str_run_hdf.cgns > nasa_bk_cgns/cgd_h5_tree.txt
           h5ls -r nasa_bk_cgns/str_run_hdf.cfl.cgns > nasa_bk_cgns/cfl_h5_tree.txt
-          sha256sum nasa_bk_cgns/str_run_hdf.cgns nasa_bk_cgns/str_run_hdf.cfl.cgns > nasa_bk_cgns/converted_SHA256SUMS.txt
+          sha256sum nasa_bk_cgns/str_run_hdf.cgns nasa_bk_cgns/str_run_hdf.cfl.cgns \
+            > nasa_bk_cgns/converted_SHA256SUMS.txt
 
       - name: Extract compact HDF5 dataset inventory
         shell: bash
         run: |
           set -euo pipefail
-          python - <<'PY'
+          python3 - <<'PY'
           import h5py
           import json
           from pathlib import Path
@@ -85,6 +112,7 @@ jobs:
 
       - name: Upload CGNS probe artifact
         uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: p11-2b-nasa-bk-cgns-probe
           path: nasa_bk_cgns/
