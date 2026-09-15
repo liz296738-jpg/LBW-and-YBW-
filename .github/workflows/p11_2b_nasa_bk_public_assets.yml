@@ -1,0 +1,49 @@
+name: P11.2B NASA BK Public Asset Intake
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/p11_2b_nasa_bk_public_assets.yml"
+      - "cases/studies/p11_2b_nasa_bk_readiness.py"
+      - "cases/studies/data/p11_2b_nasa_bk_public_source.json"
+      - "docs/p11_2b_nasa_bk_validation_candidate.md"
+      - "tests/test_p11_2b_nasa_bk_readiness.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  acquire-public-assets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download official NASA public assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p nasa_bk_public
+          base="https://www.grc.nasa.gov/WWW/wind/valid/bk/study02"
+          curl --fail --location --retry 3 --retry-delay 2 "$base/exp.tar" -o nasa_bk_public/exp.tar
+          curl --fail --location --retry 3 --retry-delay 2 "$base/str_run.dat" -o nasa_bk_public/str_run.dat
+          curl --fail --location --retry 3 --retry-delay 2 "$base/str_run.cgd" -o nasa_bk_public/str_run.cgd
+          curl --fail --location --retry 3 --retry-delay 2 "$base/str_run.cfl" -o nasa_bk_public/str_run.cfl
+
+      - name: Record checksums and archive inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          sha256sum nasa_bk_public/* | tee nasa_bk_public/SHA256SUMS.txt
+          tar -tf nasa_bk_public/exp.tar | tee nasa_bk_public/exp_tar_contents.txt
+          file nasa_bk_public/* | tee nasa_bk_public/file_types.txt
+          du -h nasa_bk_public/* | tee nasa_bk_public/file_sizes.txt
+
+      - name: Upload acquisition artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: p11-2b-nasa-bk-public-assets
+          path: nasa_bk_public/
+          if-no-files-found: error
+          retention-days: 14
