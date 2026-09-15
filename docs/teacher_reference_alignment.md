@@ -25,7 +25,7 @@ The current repository has **not gone in the opposite direction**. Its numerical
 - CFL-controlled stepping;
 - steady-state convergence infrastructure.
 
-The main problem is not that the foundation is wrong. The problem is that the project recently began to treat **mode classification and external validation evidence as the next main deliverable before completing the teacher-reference physical closures**. That priority is now corrected.
+The project-priority correction remains important: external validation and later mode-transition applications must not displace completion of the teacher-reference physical closures.
 
 ## Detailed alignment matrix
 
@@ -42,18 +42,18 @@ The main problem is not that the foundation is wrong. The problem is that the pr
 | CFL time step | General CFL implementation | **Aligned in principle** | Teacher-specific value can be a case/configuration choice, not a magic constant |
 | Inlet static p/T/u | Supersonic primitive inflow implemented | **Functionally compatible** | Add a helper/case adapter if useful; do not rewrite BC core |
 | Outlet first-order extrapolation | Transmissive/zero-gradient style path exists | **Functionally compatible** | Keep and document compatibility |
-| Steady convergence Eq. 11.46 | Relative-density diagnostic now implemented in `max_relative_density_change` | **Aligned as compatibility diagnostic** | Keep existing normalized residual too; do not weaken the convergence gate |
-| Temperature/composition-dependent gas properties | Production gas model uses constant `gamma`, `R` | **Major gap** | Implement isolated variable thermochemistry layer |
-| `cp(T)`, `h(T)` Chemkin/NASA polynomial mixture properties | NASA-BK study utility proves polynomial evaluation concept, but not production integrated | **Major gap** | Generalize with source-backed coefficients and tests |
+| Steady convergence Eq. 11.46 | Relative-density diagnostic implemented in `max_relative_density_change` | **Aligned as compatibility diagnostic** | Keep existing normalized residual too; do not weaken convergence |
+| Temperature/composition-dependent gas properties | Isolated teacher/Cao thermochemistry layer implemented; production solver remains constant-gas | **Foundation aligned; integration gated** | Freeze coefficient database and then integrate variable thermo into state recovery |
+| `cp(T)`, `h(T)` Chemkin/NASA polynomial mixture properties | Teacher/Cao six-coefficient evaluator, mixture properties, and `e -> T` inversion implemented | **Equation layer aligned** | Freeze source-backed species coefficients and temperature intervals; add piecewise interval selection if required |
 | Mixing efficiency / mixing length | Not implemented as teacher closure | **Major gap** | Implement Eqs. 11.19-11.20 after transcription/source audit |
 | Equivalence ratio / fuel-specific composition model | Not production implemented | **Major gap** | Implement Eqs. 11.21-11.29 in a separate tested closure layer |
 | Empirical friction law versus combustion state | Not implemented | **Gap** | Add optional Eq. 11.25 closure |
 | Empirical wall heat-transfer law versus combustion state | Not implemented | **Gap** | Add optional Eq. 11.26 closure |
-| Chemical energy through composition/enthalpy | Current direct `Qdot'(x)` path is an energy-only surrogate | **Important model-boundary difference** | Keep surrogate for V&V, but do not call it the final teacher chemistry model; avoid chemical-energy double counting |
+| Chemical energy through composition/enthalpy | Direct `Qdot'(x)` remains a surrogate; absolute species enthalpy bookkeeping policy frozen | **Boundary explicitly controlled** | Do not double-count reaction energy when composition-dependent enthalpy is integrated |
 | Combustion-mode transition study | Infrastructure/diagnostics exist, but no teacher-complete model yet | **Premature as primary milestone** | Defer until teacher-reference integrated model is ready |
-| NASA/Jin/Liu benchmark work | Extensive and source-traced | **Useful, not wasted** | Reclassify as supporting V&V, not the project objective |
+| NASA/Jin/Liu benchmark work | Extensive and source-traced | **Useful, not wasted** | Keep as supporting V&V, not the project objective |
 
-## Teacher-reference equations that now control the next implementation phase
+## Teacher-reference equations that control the implementation sequence
 
 The photographed chapter's equation chain is the target for compatibility work:
 
@@ -70,25 +70,27 @@ The photographed chapter's equation chain is the target for compatibility work:
 - CFL time step (Eq. 11.45);
 - relative-density steady criterion (Eq. 11.46).
 
-The repository already covers a large portion of the numerical skeleton. Eq. 11.46 compatibility is now implemented as an additional diagnostic. The remaining work is concentrated in the **physical closure/thermochemistry layer** and near-sonic Steger-Warming smoothing.
+The repository already covers a large portion of the numerical skeleton. Eq. 11.46 compatibility is implemented as an additional diagnostic. The isolated Eq. 11.30-11.35 thermochemistry layer is now implemented and tested; its production integration remains intentionally blocked until the coefficient database is source-frozen.
+
+Detailed P11.3B report: `docs/teacher_thermochemistry.md`.
 
 ## Important energy-accounting correction
 
-The teacher reference explicitly distinguishes wall/additional heat from chemical reaction energy. The current repository's direct prescribed `Qdot'(x)` combustion input is still useful as a validated reduced-order **surrogate** and for V&V. It must not be silently treated as identical to the final teacher-reference reacting formulation.
+The teacher reference explicitly states that the fitted absolute species enthalpy contains sensible enthalpy plus the zero-point / chemical-energy contribution. The current repository's direct prescribed `Qdot'(x)` combustion input is still useful as a validated reduced-order **surrogate** and for V&V, but it is not silently treated as identical to the final teacher-reference reacting formulation.
 
 When variable composition and species enthalpy are introduced, chemical energy must be accounted for exactly once. A future implementation must not both:
 
-1. change species/composition-dependent enthalpy to include reaction chemistry, **and**
+1. change species/composition-dependent enthalpy to represent reaction chemistry, **and**
 2. add the same chemical energy again through the direct `Qdot'(x)` source.
 
-This is now a project-level invariant.
+External wall/additional heat remains a separate source. This is a project-level invariant.
 
 ## Corrected development priority
 
 The next primary development sequence is:
 
 1. finish numerical compatibility: boundary/case adapters if needed and a sourced policy for near-sonic Steger-Warming smoothing;
-2. variable temperature/composition thermodynamics;
+2. finish P11.3B by freezing and independently validating the thermochemical coefficient database, then integrate variable thermo into state recovery;
 3. mixing-efficiency, mixing-length, equivalence-ratio, and composition closures;
 4. teacher empirical friction and wall heat-transfer closures;
 5. integrated teacher-reference case and regression/verification;

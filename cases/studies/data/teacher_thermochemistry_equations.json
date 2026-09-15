@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-variable-thermochemistry-equation-ledger",
+  "stage": "P11.3B",
+  "status": "EQUATIONS_IMPLEMENTED_COEFFICIENT_DATABASE_PENDING",
+  "primary_sources": [
+    {
+      "source_id": "TEACHER-CH11-P258-259",
+      "source": "Teacher-provided photographed Chapter 11, 双模态冲压燃烧室一维数值模拟",
+      "locators": ["page 258, Eqs. 11.30-11.33", "page 259, Eqs. 11.34-11.35"],
+      "authority": "PRIMARY_PROJECT_REFERENCE",
+      "frozen_relations": [
+        "single-component calorically-perfect limit: cp = gamma/(gamma-1) * R_u/W and h = cp*T",
+        "single-component ideal-gas law: p = rho * R_u/W * T",
+        "species cp polynomial: cp_s = R_u/W_s * (a1 + a2*T + a3*T^2 + a4*T^3 + a5*T^4)",
+        "mixture cp: cp = sum_s(Y_s * cp_s)",
+        "species enthalpy polynomial: h_s = R_u/W_s * (a1*T + a2*T^2/2 + a3*T^3/3 + a4*T^4/4 + a5*T^5/5 + a6)",
+        "mixture enthalpy: h = sum_s(Y_s * h_s)",
+        "mixture gamma: gamma = cp/(cp - R_mix)",
+        "Dalton ideal-mixture state law: p = rho*T*sum_s(Y_s*R_u/W_s)"
+      ],
+      "energy_note": "The photographed text states that the fitted absolute enthalpy contains sensible enthalpy plus the zero-point/chemical-energy contribution, so reaction heat associated with composition change is already represented in the enthalpy bookkeeping."
+    },
+    {
+      "source_id": "CAO-PHD-CH2-EQ2-28-2-34",
+      "source": "曹瑞峰, 超燃冲压发动机燃烧模态转换及其控制方法研究",
+      "locators": ["Chapter 2, Eqs. 2-28 through 2-34"],
+      "authority": "TEACHER_LINEAGE_CORROBORATION",
+      "frozen_relations": [
+        "mixture molecular weight: 1/W = sum_i(Y_i/W_i)",
+        "mixture enthalpy: h = sum_i(Y_i*h_i)",
+        "species enthalpy polynomial equivalent to the teacher Chapter 11 form",
+        "species cp = dh_i/dT",
+        "mixture cp = sum_i(Y_i*cp_i)",
+        "mixture gamma = cp/(cp - R_u/W)"
+      ]
+    }
+  ],
+  "implementation": {
+    "module": "src/scramjet1d/thermochemistry.py",
+    "implemented": [
+      "validated six-coefficient species thermo polynomial",
+      "species gas constant R_i = R_u/W_i",
+      "species cp(T)",
+      "species absolute h(T)",
+      "mixture molecular weight from mass fractions",
+      "mixture R(Y), cp(T,Y), cv(T,Y), gamma(T,Y), h(T,Y), e(T,Y)",
+      "ideal-mixture pressure p(rho,T,Y)",
+      "bounded inversion from e to T for fixed composition"
+    ],
+    "not_implemented_yet": [
+      "production solver integration",
+      "transport/evolution of species mass fractions",
+      "teacher fuel/reaction composition closure",
+      "complete source-frozen CHEMKIN/NASA coefficient database for all required species",
+      "piecewise low/high-temperature polynomial selection where a species source requires it"
+    ]
+  },
+  "coefficient_policy": {
+    "species_database_ready": false,
+    "rule": "Do not invent or silently copy thermochemical coefficients. Each production species coefficient set must record source, temperature interval, molecular weight, coefficient convention, and any interval switch temperature before solver integration.",
+    "expected_teacher_species_from_the_photographed_reaction_set": [
+      "H2",
+      "O2",
+      "N2",
+      "Ar",
+      "H2O",
+      "C2H4",
+      "CO2",
+      "C10H22"
+    ],
+    "note": "Additional products/intermediates may be required by the final Cao/teacher closure; the list above is not promoted as a complete chemistry mechanism."
+  },
+  "energy_accounting_policy": {
+    "chemical_energy_in_absolute_species_enthalpy": true,
+    "direct_Qdot_surrogate_must_not_double_count_same_reaction_energy": true,
+    "external_wall_or_added_heat_remains_a_separate_source": true
+  },
+  "readiness": {
+    "equation_transcription_ready": true,
+    "isolated_thermochemistry_implementation_ready": true,
+    "unit_tests_ready": true,
+    "production_species_data_ready": false,
+    "solver_integration_ready": false,
+    "integrated_teacher_case_ready": false
+  }
+}
