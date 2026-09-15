@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-second-scheme-alignment",
+  "status": "FOUNDATION_ALIGNED_FULL_SECOND_SCHEME_INCOMPLETE",
+  "project_naming": {
+    "LBW": "PERSON_OR_COLLABORATOR_IDENTIFIER",
+    "YBW": "PERSON_OR_COLLABORATOR_IDENTIFIER",
+    "policy": "LBW and YBW are names/identifiers, not combustion-mode labels. Never infer physical meaning from the repository name."
+  },
+  "teacher_direction": {
+    "primary_instruction": "Build the one-dimensional ramjet/scramjet model first using the teacher-provided CFD formulas and Cao Ruifeng references; the teacher described this as a second, more accurate scheme.",
+    "target_model_family": "unsteady quasi-one-dimensional conservative CFD model for a dual-mode/scramjet combustor",
+    "primary_reference_set": [
+      "Teacher-provided photographed Chapter 11: 双模态冲压燃烧室一维数值模拟",
+      "曹瑞峰：面向控制的超燃冲压发动机一维建模研究",
+      "曹瑞峰：超燃冲压发动机燃烧模态转换及其控制方法研究"
+    ]
+  },
+  "alignment": {
+    "unsteady_quasi_1d_conservative_pde": {"ready": true, "status": "ALIGNED"},
+    "variable_area_source": {"ready": true, "status": "ALIGNED"},
+    "mass_momentum_energy_fuel_injection_sources": {"ready": true, "status": "STRUCTURALLY_ALIGNED_PRESCRIBED_INPUTS"},
+    "wall_friction_source": {"ready": true, "status": "STRUCTURALLY_ALIGNED_GENERIC_DARCY_INPUT"},
+    "wall_heat_transfer_source": {"ready": true, "status": "STRUCTURALLY_ALIGNED_GENERIC_PRESCRIBED_FLUX"},
+    "steger_warming_fvs": {"ready": true, "status": "ALIGNED_RAW_SPLITTING"},
+    "first_order_upwind_finite_volume": {"ready": true, "status": "ALIGNED"},
+    "third_order_tvd_ssp_rk": {"ready": true, "status": "ALIGNED"},
+    "cfl_time_step": {
+      "ready": true,
+      "status": "ALIGNED_GENERAL_CFL_IMPLEMENTATION",
+      "note": "Teacher reference shows a one-half acoustic/convective cap; project exposes a general CFL control and already defaults cfl=0.5."
+    },
+    "teacher_reference_inlet_outlet_compatibility": {
+      "ready": true,
+      "status": "FUNCTIONALLY_COMPATIBLE_NOT_IDENTICAL_API"
+    },
+    "teacher_relative_density_convergence_metric": {
+      "ready": true,
+      "status": "IMPLEMENTED_AS_ADDITIONAL_COMPATIBILITY_DIAGNOSTIC",
+      "reference": "Teacher Chapter 11 Eq. 11.46",
+      "implementation": "scramjet1d.convergence.max_relative_density_change",
+      "policy": "Retain the existing normalized steady residual; do not weaken convergence to density change alone."
+    },
+    "near_sonic_eigenvalue_smoothing": {
+      "ready": false,
+      "status": "GAP",
+      "reference": "Teacher Chapter 11 Eq. 11.44",
+      "note": "Current Steger-Warming uses raw lambda +/- |lambda| splitting. Do not guess epsilon."
+    },
+    "temperature_and_composition_dependent_thermodynamics": {
+      "ready": false,
+      "status": "MAJOR_GAP",
+      "reference": "Teacher Chapter 11 Eqs. 11.30-11.35 and Cao references",
+      "note": "Production gas model is calorically perfect with constant gamma/R."
+    },
+    "mixing_efficiency_and_mixing_length_closure": {
+      "ready": false,
+      "status": "MAJOR_GAP",
+      "reference": "Teacher Chapter 11 Eqs. 11.19-11.20"
+    },
+    "equivalence_ratio_and_fuel_specific_composition_closure": {
+      "ready": false,
+      "status": "MAJOR_GAP",
+      "reference": "Teacher Chapter 11 Eqs. 11.21-11.29"
+    },
+    "teacher_empirical_friction_closure": {
+      "ready": false,
+      "status": "GAP",
+      "reference": "Teacher Chapter 11 Eq. 11.25"
+    },
+    "teacher_empirical_wall_heat_closure": {
+      "ready": false,
+      "status": "GAP",
+      "reference": "Teacher Chapter 11 Eq. 11.26"
+    },
+    "chemical_energy_bookkeeping_consistency": {
+      "ready": false,
+      "status": "MAJOR_GAP_AND_POLICY_REQUIREMENT",
+      "note": "External wall/additional heat is distinct from reaction chemical energy. Direct Qdot remains a surrogate; future composition-enthalpy chemistry must not double-count energy."
+    },
+    "source_backed_validation_and_vv": {
+      "ready": true,
+      "status": "USEFUL_SUPPORTING_WORK_NOT_PRIMARY_TEACHER_DELIVERABLE"
+    }
+  },
+  "overall_assessment": {
+    "direction_conflict": false,
+    "foundation_is_reusable": true,
+    "full_teacher_second_scheme_ready": false,
+    "primary_correction_needed": "Recenter the roadmap from the incorrect LBW/YBW mode-classification premise onto completion of teacher-reference second-scheme physics/numerics.",
+    "next_priority": [
+      "Freeze teacher-reference thermochemical data/coefficients and implement variable T/composition thermodynamics in an isolated tested layer.",
+      "Implement source-backed mixing efficiency/mixing-length and equivalence-ratio/composition closures.",
+      "Implement teacher-reference friction and wall-heat empirical closures as optional models, preserving generic prescribed-source interfaces.",
+      "Add near-sonic Steger-Warming smoothing only after the epsilon policy is explicitly sourced/frozen.",
+      "Build a teacher-reference integrated case before returning to combustion-mode transition studies."
+    ]
+  }
+}
