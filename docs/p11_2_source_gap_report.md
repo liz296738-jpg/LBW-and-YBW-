@@ -26,6 +26,8 @@ The public P11.2A surrogate does **not** replace the teacher-designated Cao Ruif
 | SRC10 | Liu et al. (2019), DOI `10.2514/1.J058391` | primary axisymmetric experiment explicitly reused by Jin | strongest public independent validation candidate |
 | SRC11 | Liu et al. (2019), AIAA 2019-1681, DOI `10.2514/6.2019-1681` | same-program experimental geometry source | independent overall-length and cavity-replacement description |
 | SRC12 | Liu & Yao (2021), AIAA 2021-3536, DOI `10.2514/6.2021-3536` | same-geometry numerical reconstruction | dimensional cross-check only; never allowed to override primary experimental conflicts |
+| SRC13 | Liu et al. (2019), DOI `10.2514/1.J058204` | primary same-program experiment | confirms the 2 deg / 5 deg area-relief family in the axisymmetric combustor program |
+| SRC14 | Ma et al. (2021), DOI `10.1155/2021/7525824` | peer-reviewed terminology cross-check | explicitly describes the Liu family parameter as wall divergent angle |
 
 Machine-readable records:
 
@@ -33,10 +35,13 @@ Machine-readable records:
 - `cases/studies/data/p11_2b_heat_release_model_source.json`
 - `cases/studies/data/p11_2b_jin_liu_condition_discrepancy.json`
 - `cases/studies/data/p11_2b_liu_model_b_geometry_source.json`
+- `cases/studies/data/p11_2b_liu_angle_convention_source.json`
+- `cases/studies/data/p11_2b_jin_validation_applicability.json`
 
-Focused validation note:
+Focused validation notes:
 
 - `docs/p11_2b_jin_liu_validation_candidate.md`
+- `docs/p11_2b_jin_validation_applicability.md`
 
 ## P11.2A closure
 
@@ -64,9 +69,10 @@ The study layer contains:
 - Jin Eq. 8 asymmetric quasi-Gaussian profile downstream of heat-release initiation;
 - exact finite-volume scaling from normalized shape to caller-supplied total power;
 - Jin Eq. 11 cumulative total-temperature energy integral;
-- total-enthalpy-ratio diagnostics that preserve dimensionless evidence without inventing an absolute energy scale.
+- total-enthalpy-ratio diagnostics that preserve dimensionless evidence without inventing an absolute energy scale;
+- a source-traceable Liu model-B `AreaProfile` whose 2 deg wall-divergence interpretation is explicitly classified as `SOURCE_CORROBORATED_INTERPRETATION`, not as a verbatim primary-source half-angle statement.
 
-Therefore the project no longer lacks a mathematically defined path from source-backed heat-release evidence to the verified P8 energy equation.
+Therefore the project no longer lacks a mathematically defined path from source-backed heat-release evidence to the verified P8 energy equation, and the model-B study-layer geometry is now usable without silently choosing an angle convention.
 
 ## SRC08 / SRC09 evidence boundary
 
@@ -84,7 +90,7 @@ For reacting ethylene cases, Liu uses average `gamma=1.31` and `cp=1255 J/(kg K)
 
 Jin reports theoretical exit Mach `2.24` versus experimental `2.27`, and states that the validation heat-release distribution used the quasi-Gaussian model together with the experimental PLIF image and measured exit stagnation-enthalpy increment.
 
-## Geometry/coordinate gap that is now closed
+## Geometry/coordinate closure
 
 The station and divergence locations no longer require visual digitization.
 
@@ -120,7 +126,19 @@ The reconstruction closes SRC11's `752 mm` overall length within about `0.044 mm
 
 Therefore **source-to-solver axial coordinate mapping is no longer an open blocker**.
 
-One geometry interpretation remains unresolved: the recovered sources call the downstream section a `2 deg cone angle`, but do not yet unambiguously state whether that is the wall half-angle or full included angle. Because this changes the radius and area growth materially, the radial `A(x)` law remains evidence-gated.
+### Radial area-law convention
+
+The primary Liu experimental literature reports a `2 deg` diverging cone angle but does not explicitly spell out “half-angle” versus “full included angle” in the recovered text. That ambiguity is physically material: interpreting 2 deg as a wall angle gives an exit/inlet area ratio of about `2.9323`, while interpreting it as a full included angle gives about `1.8390`.
+
+The project therefore does not relabel the primary source. Instead it records a source-corroborated interpretation:
+
+- SRC13 is primary same-program experimental evidence for the 2 deg / 5 deg diverging-combustor family;
+- SRC14 explicitly describes Liu et al.'s corresponding experimental parameter as **wall divergent angle** and describes the closely related configuration using a `5 deg` combustor divergent angle;
+- the study layer consequently adopts `2 deg` as the axisymmetric wall divergence angle measured from the centerline, classified as `SOURCE_CORROBORATED_INTERPRETATION`;
+- the resulting radius/area law is `DERIVED`, not a direct measurement;
+- a higher-authority primary figure or author dataset must override this interpretation if it later contradicts it.
+
+On that basis the **study-layer radial `A(x)` law is now ready**. This does not promote the full Jin–Liu heated validation case, because the remaining blockers are non-geometry evidence.
 
 ## Validation-condition conflict remains open
 
@@ -133,6 +151,20 @@ Liu Table 2 instead gives:
 
 SRC12 separately studies the cavity-present geometry at `phi=1.04`. This is contextual evidence only and cannot prove a typo in Jin or replace the primary experimental record. The repository therefore records the conflict as `UNRESOLVED_CROSS_MODEL_EQUIVALENCE_RATIO_CONFLICT` and forbids silent rounding or cross-model substitution.
 
+## Jin simple-model applicability requirements
+
+The recovered Jin Sec. 3.2.3 equations add requirements beyond heat release itself. Eqs. (9)–(10) retain `A(x)`, `Tt(x)`, `gamma`, wall-friction coefficient `Cf`, and a combustor diameter/scale, while Eq. (11) uses heat release, mass flow, `cp`, and inlet stagnation temperature. Jin also states the simple validation assumes supersonic flow without separation so that the `M=1` singularity, shock-train effects, and separation-induced area uncertainty are avoided.
+
+Accordingly:
+
+- a formal reproduction must report `min(M)>1`; solver convergence alone is not enough;
+- the one-dimensional state cannot prove absence of boundary-layer separation, so that remains an externally justified applicability assumption;
+- the exact Fig. 14 station-3 inlet state is not yet frozen;
+- Jin's numerical `Cf` for Fig. 14 is not yet frozen;
+- the repository wall model accepts a Darcy friction factor, so a source-defined `Cf`-to-Darcy convention mapping is required before applying a Jin coefficient. No factor-of-four conversion is assumed from notation alone.
+
+These requirements are tracked in `p11_2b_jin_validation_applicability.json` and are now included in the generated readiness summary.
+
 ## Formal-case promotion gate
 
 `cases/studies/p11_2b_case_gate.py` separates solver capability from scientific case readiness. Every formal candidate requires one declared case identity, traceable locators, and an explicit source-to-solver coordinate mapping.
@@ -142,20 +174,24 @@ It accepts one of two heat-release evidence paths:
 1. **normalized Eq. 8 path:** source-backed `x_i`, `x_m`, `x_c`, `k` plus a separate source-backed total heat-release power, or stagnation-enthalpy increment plus mass flow, for that same condition;
 2. **absolute tabulated path:** a traceable `x [m]` / `Qdot'(x) [W/m]` table, which already contains both shape and absolute energy scale and therefore must not be given a second independent absolute-energy scale.
 
-Cross-source/cross-condition mixing is rejected. `candidate_formal_cases` remains empty, so the machine-readable status remains:
+Cross-source/cross-condition mixing is rejected. `candidate_formal_cases` remains empty, so the coarse project status remains:
 
 `BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY`
 
+The tracked readiness artifact now separately distinguishes requirements that are closed by dedicated evidence records from requirements that remain open. This prevents a resolved geometry issue from reappearing as an active blocker while preserving the formal promotion gate.
+
 ## Primary remaining blockers
 
-The preferred Jin–Liu model-B chain is now blocked by four precisely bounded items:
+The preferred Jin–Liu model-B chain is now blocked by six bounded non-geometry items:
 
 1. **condition identity:** resolve Jin model-B `phi=1.04` versus Liu model-B `phi=1.03` / model-A `phi=1.04`;
 2. **axial heat-release shape:** recover the exact Fig. 14 shape or fitted `Q_m/x_i/x_m/x_c/k` values with traceable coordinates;
 3. **absolute energy scale:** recover Jin's measured stagnation-enthalpy increment and matching mass flow / station-3 absolute enthalpy, or an already-absolute `Qdot'(x)` table;
-4. **radial area law:** resolve whether `2 deg cone angle` denotes wall half-angle or included angle.
+4. **station-3 boundary state:** recover the complete inlet primitive/total state used for the Fig. 14 external model-B calculation;
+5. **wall-friction coefficient:** recover the numerical `Cf` used in Jin's Fig. 14 validation, or an explicit source statement that it was neglected;
+6. **coefficient convention:** source-define the mapping from Jin's `Cf` notation to the repository Darcy friction-factor convention before applying any nonzero coefficient.
 
-The old blocker “freeze full source-to-solver axial coordinate mapping” is closed and must not reappear in readiness reporting.
+The old blockers “freeze full source-to-solver axial coordinate mapping” and “resolve the study-layer 2 deg area-law convention” are closed and must not reappear in readiness reporting. Their evidence classifications remain explicit so they can be revised if higher-authority source material becomes available.
 
 If P7 fuel mass addition is later activated, axial fuel mass-source distribution, fuel axial velocity, and fuel specific total enthalpy are additionally required. They are not required for the minimal direct-energy surrogate.
 
@@ -165,6 +201,6 @@ SRC02 still provides useful locatable records, including an idealized Chapter-2 
 
 ## Next development decision
 
-Continue evidence recovery on the Jin–Liu model-B chain before inventing a synthetic heated baseline. Publisher supplementary material or an author-provided data table is preferred for the Fig. 14 shape and absolute energy inputs. Low-resolution figure reading, untracked digitization, nominal-geometry mass-flow inference, and cross-condition parameter mixing remain prohibited.
+Continue evidence recovery on the Jin–Liu model-B chain before inventing a synthetic heated baseline. Publisher supplementary material or an author-provided data table is preferred for the Fig. 14 shape, absolute energy inputs, boundary state, and friction closure. Low-resolution figure reading, untracked digitization, nominal-geometry mass-flow inference, silent coefficient conversions, and cross-condition parameter mixing remain prohibited.
 
 In parallel, the teacher-designated Cao materials remain the preferred source for the project's ultimate mode-transition lineage. No formal reactive curve is promoted until one evidence chain passes the gate.
