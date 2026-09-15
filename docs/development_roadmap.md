@@ -55,17 +55,44 @@ Remaining closeout items:
 - preserve the teacher's inlet `p/T/u` and first-order extrapolation semantics through case adapters/configuration where needed;
 - add Eq. 11.44 near-sonic Steger-Warming smoothing only after the smoothing parameter policy is explicitly source-frozen. Do not guess `epsilon`.
 
-### P11.3B Variable thermochemistry — Planned next
+### P11.3B Variable thermochemistry — **In Progress; isolated equation layer implemented**
 
-Implement an isolated, tested thermochemical layer for the teacher-reference equations around Eqs. 11.30-11.35:
+Primary equation source:
 
-- species `cp(T)` and `h(T)` polynomial evaluation;
-- mixture molecular weight / gas constant from composition;
-- mixture `cp`, `h`, `cv`, and `gamma` from temperature and composition;
-- explicit validity ranges and coefficient provenance;
-- no replacement of the constant-gas baseline until the variable-property path is independently verified.
+- teacher Chapter 11 pages 258-259, Eqs. 11.30-11.35;
+- Cao Ruifeng Chapter 2, Eqs. 2-28 through 2-34 as corroboration.
 
-The NASA-Burrows-Kurkov study utility already demonstrates source-backed NASA7 polynomial evaluation for a fixed-composition reduction; that code is useful scaffolding but is not yet the production variable-thermo model.
+Implemented and regression-tested in `src/scramjet1d/thermochemistry.py`:
+
+- six-coefficient species `cp(T)` / absolute `h(T)` polynomial form;
+- per-species temperature validity ranges;
+- mixture molecular weight from `1/W = sum(Y_i/W_i)`;
+- mixture `R(Y)`, `cp(T,Y)`, `cv(T,Y)`, `gamma(T,Y)`, `h(T,Y)`, and `e(T,Y)`;
+- ideal-mixture pressure `p=rho R(Y) T`;
+- bounded fixed-composition inversion `e -> T` for future conservative-state recovery;
+- strict mass-fraction validation with no silent renormalization;
+- no out-of-range polynomial extrapolation.
+
+Evidence ledger:
+
+`cases/studies/data/teacher_thermochemistry_equations.json`
+
+Detailed report:
+
+`docs/teacher_thermochemistry.md`
+
+Current gate:
+
+- equation transcription — **READY**;
+- isolated thermochemistry implementation — **READY**;
+- regression tests — **READY**;
+- complete production species coefficient database — **PENDING**;
+- piecewise temperature-interval selection where required — **PENDING**;
+- production solver state-recovery integration — **BLOCKED until the coefficient set is frozen**.
+
+The next P11.3B substage is therefore not to change `state.py` yet. First freeze a traceable species database (source, molecular weight, coefficient convention, valid intervals/switch temperatures), validate it against independent source values, and only then integrate variable thermodynamics into conservative/primitive conversion.
+
+The NASA-Burrows-Kurkov study utility remains useful scaffolding for polynomial evaluation, but it is not substituted for the teacher/Cao model or promoted as the production coefficient source by default.
 
 ### P11.3C Mixing / combustion / composition closures — Planned
 
@@ -82,7 +109,7 @@ The existing prescribed injection and direct heat-release interfaces remain usef
 
 Add teacher-reference empirical friction and wall-heat closures (around Eqs. 11.25-11.26) as **optional source models**, preserving the generic prescribed Darcy/heat-flux interfaces.
 
-Energy bookkeeping is a hard gate: external wall/additional heat is not identical to chemical reaction heat. When chemical energy is represented through composition-dependent enthalpy, it must not also be silently added through the direct `Qdot'(x)` surrogate.
+Energy bookkeeping is a hard gate: external wall/additional heat is not identical to chemical reaction heat. The teacher/Cao absolute species enthalpy contains sensible enthalpy plus the chemical/zero-point contribution. When reaction chemistry is represented through composition-dependent enthalpy, the same reaction energy must not also be silently added through the direct `Qdot'(x)` surrogate.
 
 ### P11.3E Integrated teacher model — Planned
 
