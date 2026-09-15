@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-reference-source-enabled-variable-composition-time-march",
+  "stage": "P11.3K",
+  "status": "SOURCE_ENABLED_SSP_RK3_COMPATIBILITY_IMPLEMENTED_FINAL_BOUNDARY_CASE_PENDING",
+  "purpose": "Combine the accepted single-injector mapping, variable-composition quasi-1D Euler operator, and Chapter 11 Eq.11.38 non-geometric source vector in one CFL/SSP-RK3 compatibility solver while preserving explicit source and boundary gates.",
+  "implemented": [
+    "Euler/area plus Eq.11.38 source RHS",
+    "stage-local recomputation of density/velocity-dependent wall friction",
+    "single-cell fuel mass/momentum/enthalpy injection from the frozen mapping",
+    "explicit dimensional wall specific-heat-gain gradient channel",
+    "variable-composition CFL controlled SSP-RK3 pseudo-time advancement",
+    "post-step thermochemical admissibility checks"
+  ],
+  "verification": {
+    "integrated_rhs_equals_verified_operator_plus_verified_source": true,
+    "integrated_mass_rate_equals_single_prescribed_fuel_source": true,
+    "rk3_recomputes_complete_rhs_at_each_stage": true,
+    "short_source_enabled_transient_is_finite_and_thermochemically_valid": true,
+    "explicit_wall_heat_gradient_affects_energy_channel_as_eq11_38": true,
+    "grid_geometry_and_step_budget_guards": true
+  },
+  "scientific_boundaries": [
+    "The single-injector operating-point composition/source mapping is fixed during pseudo-time; no species transport PDE is introduced.",
+    "The geometric p*dA/dx source is supplied only by the quasi-1D Euler operator and is not duplicated in the Eq.11.38 adapter.",
+    "Chemical reaction energy is not added through an independent Qdot source.",
+    "The empirical Eq.11.26 wall-heat coefficient is not converted to a dimensional wall heat term; callers must provide d(delta q)/dx explicitly.",
+    "Rusanov flux and transmissive boundaries remain compatibility choices, not the final teacher numerical/boundary configuration.",
+    "Teacher static inlet p/T/u and outlet first-order extrapolation adapter remains pending."
+  ],
+  "readiness": {
+    "single_injector_mapping_ready": true,
+    "eq11_38_source_vector_ready": true,
+    "source_enabled_rhs_ready": true,
+    "source_enabled_ssp_rk3_ready": true,
+    "teacher_static_inlet_adapter_ready": false,
+    "teacher_outlet_extrapolation_adapter_ready": false,
+    "teacher_variable_composition_steger_warming_ready": false,
+    "eq11_26_dimensional_wall_heat_adapter_ready": false,
+    "formal_integrated_teacher_case_ready": false
+  },
+  "next_step": "Implement and verify the teacher-compatible variable-composition boundary adapter: prescribed inlet static p/T/u with air-only inlet composition and first-order/zero-gradient outlet semantics. Keep Rusanov as the compatibility flux until the sourced variable-property Steger-Warming near-sonic smoothing policy is frozen."
+}
