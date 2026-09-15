@@ -32,6 +32,12 @@ SRC11 is the earlier same-program AIAA SciTech paper, *Influences of Cavity on C
 
 SRC12 is Hang Liu and Wei Yao, *LES investigation of nonequilibrium flow in a cavity-flameholding axisymmetric scramjet*, AIAA 2021-3536, DOI `10.2514/6.2021-3536`. It is **not** used to replace the primary experimental source. It is used only as an independent same-geometry dimensional cross-check because it publishes a full-scale reconstruction with inlet length `37.43 mm`, a `296 mm` constant-diameter run to the cavity leading edge, and total model length `752.43 mm`.
 
+### SRC13 / SRC14 — area-angle convention cross-check
+
+SRC13 is Liu et al., *Cavity-Enhanced Combustion Stability in an Axisymmetric Scramjet Model*, AIAA Journal 57(9) (2019) 3898–3909, DOI `10.2514/1.J058204`. It is primary same-program experimental evidence for the `2 deg` / `5 deg` diverging-combustor family.
+
+SRC14 is Ma et al., *Numerical Investigation of an Axisymmetric Model Scramjet Assisted with Cavity of Different Aft Wall Angles*, International Journal of Aerospace Engineering (2021) 7525824, DOI `10.1155/2021/7525824`. It explicitly describes Liu et al.'s experimental parameter as a **wall divergent angle** and, for the related configuration it reconstructs, states a `5 deg` combustor divergent angle. SRC14 is used as a terminology cross-check, not as a replacement for the primary experiment.
+
 ## Geometry evidence
 
 The source chain provides:
@@ -103,11 +109,20 @@ about `0.444 mm` from SRC12's `752.43 mm`. Both residuals are sub-millimetre and
 
 The machine-readable derivation is stored in `cases/studies/data/p11_2b_liu_model_b_geometry_source.json`.
 
-### One area-profile ambiguity remains
+### Area-profile convention is resolved for the study layer
 
-The primary sources repeatedly call the downstream section a `2 deg cone angle`. The text also discusses a constant-cone-angle area expansion whose rate depends on the combustor radius, but the recovered primary text does not explicitly define whether `2 deg` is the wall half-angle or the full included cone angle. The two interpretations lead to materially different `A(x)`, so neither is promoted by nomenclature alone.
+The primary Liu experimental text describes the downstream section as a `2 deg cone angle`, but the recovered primary text does not literally define “half-angle” versus “full included angle”. The project therefore keeps that distinction visible rather than rewriting the primary source.
 
-A formal model-B area profile therefore remains blocked **only** on this angular convention. The station-3 coordinate, divergence-start coordinate, and combustor-exit coordinate are no longer geometry blockers.
+The ambiguity is materially important. For the source-backed `35 mm` diameter and `357 mm` diverging length:
+
+- interpreting `2 deg` as a wall angle gives a derived outlet diameter of about `59.93 mm` and exit/inlet area ratio about `2.9323`;
+- interpreting `2 deg` as a full included angle would imply a `1 deg` wall angle, outlet diameter about `47.46 mm`, and area ratio about `1.8390`.
+
+SRC13 and SRC14 provide a defensible cross-check: SRC13 establishes the same-program `2 deg` / `5 deg` divergence family, while SRC14 explicitly characterizes the Liu experimental parameter as **wall divergent angle**. The reduced-order study layer therefore adopts `2 deg` as the wall divergence angle measured from the centerline.
+
+This decision is classified as `SOURCE_CORROBORATED_INTERPRETATION`, not as a verbatim primary-source half-angle definition. The resulting axisymmetric radius/area law is `DERIVED`. A higher-authority primary figure or author dataset must override this interpretation if contradictory.
+
+The study-layer `AreaProfile` is therefore geometrically ready; geometry is no longer a blocker for exploratory or validation-preparation calculations. This does **not** make the complete Fig. 14 validation case formal-ready because the remaining evidence gaps are thermodynamic, heat-release, condition-identity, and friction related.
 
 ## Thermodynamic / measurement evidence
 
@@ -141,30 +156,48 @@ SRC12 additionally studies the **cavity-present** axisymmetric configuration at 
 
 Therefore an automatic `1.03 -> 1.04` rounding assumption is inadmissible: matching Jin by equivalence ratio would cross engine configurations, while matching by experimental exit Mach points to Liu's model-B `phi=1.03` row. The dedicated record `cases/studies/data/p11_2b_jin_liu_condition_discrepancy.json` preserves the conflict and explicitly forbids using the secondary numerical paper to override the primary-source disagreement.
 
+## Jin simple-model applicability requirements
+
+Jin Sec. 3.2.3 Eqs. (9)–(10) retain cross-sectional area `A(x)`, stagnation temperature `Tt(x)`, `gamma`, wall-friction coefficient `Cf`, and combustor diameter/scale. Eq. (11) uses axial heat release, mass flow, `cp`, and inlet stagnation temperature.
+
+Jin also states that the simple validation assumes the flow remains supersonic and separation-free. Under that assumption the `M=1` singularity is avoided and shock-train / separation-induced area effects are outside the simple model.
+
+The repository therefore applies these evidence/application rules:
+
+- a formal reproduction must have `min(M)>1` over the compared domain; no arbitrary extra Mach margin is added to the scientific gate;
+- the one-dimensional state cannot prove absence of boundary-layer separation, so separation-free applicability remains an externally justified source/model assumption;
+- the complete Fig. 14 station-3 / combustor-inlet state is not yet frozen;
+- the numerical wall-friction coefficient `Cf` used by Jin for Fig. 14 is not yet frozen;
+- the production wall source uses a Darcy friction factor, so the mapping from Jin's `Cf` convention to the repository convention must be source-defined. A factor-of-four conversion is **not** assumed from notation alone.
+
+These requirements are machine-tracked in `cases/studies/data/p11_2b_jin_validation_applicability.json`.
+
 ## Why the case is still blocked
 
-The current public record is not yet sufficient to execute the exact Jin–Liu validation without hidden assumptions. The remaining blockers are:
+The current public record is not yet sufficient to execute the exact Jin–Liu validation without hidden assumptions. The remaining blockers are now non-geometry items:
 
 1. resolve the model/condition identity conflict above;
 2. recover the axial heat-release shape used in Jin Fig. 14, or the fitted quasi-Gaussian parameters for that exact condition, with traceable coordinate evidence;
 3. recover the **absolute stagnation-enthalpy increment** used by Jin together with the matching mass flow / station-3 absolute enthalpy, or recover an already-absolute `Qdot'(x) [W/m]` profile;
-4. resolve whether the source's `2 deg cone angle` is a wall half-angle or an included cone angle before constructing the radial area-growth law.
+4. recover the complete Fig. 14 station-3 boundary state;
+5. recover the numerical wall-friction coefficient `Cf` used for the validation, or direct source evidence that friction was neglected;
+6. source-define the mapping from Jin's `Cf` notation to the repository Darcy friction-factor convention before applying any nonzero coefficient.
 
-The station-3 coordinate and axial divergence-start location are now closed and must not be listed as open blockers.
+The station-3 coordinate, axial divergence-start location, and study-layer radial area law are closed requirements and must not be listed as active blockers.
 
 ## Supplement / author-data recovery priority
 
 Jin explicitly points readers to supplementary material and states that supporting data can be requested from the corresponding author. Public indexing confirms that supplementary material exists, but the exact file exposing the Fig. 14 validation inputs has not been recovered in a traceable form. The next evidence priority is therefore:
 
 1. recover publisher supplementary material or an author-hosted copy;
-2. inspect it specifically for model-B condition identity, fitted `Q_m/x_m/x_i/x_c/k`, PLIF coordinate extraction, exit stagnation-enthalpy increment, and mass flow;
+2. inspect it specifically for model-B condition identity, fitted `Q_m/x_m/x_i/x_c/k`, PLIF coordinate extraction, exit stagnation-enthalpy increment, mass flow, station-3 inlet state, and `Cf`;
 3. if the supplement omits these quantities, prefer an author-provided data table over untracked figure digitization.
 
 ## Promotion rule
 
 This candidate remains in `candidate_validation_chains`, not `candidate_formal_cases`.
 
-The project will not infer air mass flow from nominal geometry, infer absolute heat from `Ht4/Ht3` alone, silently change `phi=1.04` to `1.03`, substitute model A for model B, assume the `2 deg` convention, or transplant this heat-release distribution into the unrelated P11.2A geometry and call it validation.
+The project will not infer air mass flow from nominal geometry, infer absolute heat from `Ht4/Ht3` alone, silently change `phi=1.04` to `1.03`, substitute model A for model B, invent a station-3 state, assume a friction coefficient, silently apply a Fanning/Darcy factor conversion, or transplant this heat-release distribution into the unrelated P11.2A geometry and call it validation.
 
 ## Scientific value if completed
 
