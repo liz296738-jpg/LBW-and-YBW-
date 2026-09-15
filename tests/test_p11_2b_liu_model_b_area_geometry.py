@@ -3,6 +3,7 @@
 import importlib.util
 import math
 from pathlib import Path
+import sys
 
 import numpy as np
 import pytest
@@ -13,6 +14,7 @@ MODULE_PATH = ROOT / "cases" / "studies" / "p11_2b_liu_model_b_geometry.py"
 SPEC = importlib.util.spec_from_file_location("p11_2b_liu_model_b_geometry", MODULE_PATH)
 assert SPEC is not None and SPEC.loader is not None
 MODULE = importlib.util.module_from_spec(SPEC)
+sys.modules[SPEC.name] = MODULE
 SPEC.loader.exec_module(MODULE)
 
 
@@ -24,6 +26,7 @@ def test_angle_evidence_remains_source_corroborated_not_primary_direct() -> None
     assert decision["status"] == "READY_FOR_STUDY_LAYER_AREA_PROFILE"
     assert decision["wall_divergence_angle_deg"] == 2.0
     assert decision["primary_source_direct_definition"] is False
+    assert {source["source_id"] for source in evidence["angle"]["sources"]} == {"SRC13", "SRC14"}
 
 
 def test_model_b_area_profile_matches_tracked_geometry_metrics() -> None:
