@@ -1,0 +1,36 @@
+name: P11.4 Three-Level Grid Audit
+
+on:
+  pull_request:
+    paths:
+      - 'cases/studies/p11_4_grid_convergence.py'
+      - 'cases/studies/p11_4_project_defined_h2_smoke.py'
+      - 'src/scramjet1d/**'
+      - '.github/workflows/p11_4_grid_convergence.yml'
+  workflow_dispatch:
+
+jobs:
+  grid-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[dev]'
+      - name: Run 20/40/80 grid audit
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from cases.studies.p11_4_grid_convergence import run_grid_study
+          payload = run_grid_study()
+          Path('p11_4_grid_convergence.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p11-4-grid-convergence
+          path: p11_4_grid_convergence.json
