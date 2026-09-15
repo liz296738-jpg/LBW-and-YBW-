@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "record_kind": "validation-geometry-corollary",
+  "candidate_id": "JIN-LIU-MODEL-B-VALIDATION",
+  "sources": [
+    {
+      "source_id": "SRC10",
+      "citation": "Qili Liu, Damiano Baccarella, Brendan McGann, Tonghun Lee, Dual-Mode Operation and Transition in Axisymmetric Scramjets, AIAA Journal 57(11) (2019) 4764-4777.",
+      "doi": "10.2514/1.J058391",
+      "role": "primary journal validation experiment"
+    },
+    {
+      "source_id": "SRC11",
+      "citation": "Qili Liu, Damiano Baccarella, Gyu-Sub Lee, Tonghun Lee, Influences of Cavity on Combustion Stabilization in an Axisymmetric Scramjet, AIAA SciTech Forum (2019), AIAA 2019-1681.",
+      "doi": "10.2514/6.2019-1681",
+      "role": "earlier same-program geometry/diagnostic description"
+    }
+  ],
+  "confirmed_geometry_records": {
+    "overall_model_length_m_from_SRC11": 0.752,
+    "isolator_diameter_m": 0.035,
+    "isolator_length_m_from_SRC10": 0.254,
+    "inlet_area_contraction_ratio": 1.9,
+    "inlet_internal_lip_angle_deg": 10.0,
+    "injector_location_downstream_from_inlet_lip_m": 0.2914,
+    "injector_count": 16,
+    "injector_diameter_m": 0.00075,
+    "injector_backward_inclination_deg": 45.0,
+    "model_A_cavity_leading_edge_downstream_from_injector_m": 0.042,
+    "model_A_cavity_depth_m": 0.011,
+    "model_A_cavity_floor_length_m": 0.035,
+    "model_A_cavity_ramp_angle_deg": 22.5,
+    "downstream_diverging_combustor_cone_angle_deg": 2.0,
+    "downstream_diverging_combustor_length_m_from_SRC10": 0.357
+  },
+  "model_B_corollary": {
+    "SRC10_statement": "model B replaces the cavity flameholder by a constant-cross-sectional tube with the same diameter as the isolator",
+    "SRC11_statement": "parallel experiments replace the cavity flameholder by a constant-area cross-section tube with the same length dimensions as the cavity",
+    "confirmed_constant_diameter_m": 0.035,
+    "constant_section_from_injector_to_cavity_leading_edge_m": 0.042,
+    "exact_replacement_tube_axial_length_m": null,
+    "diverging_start_downstream_from_injector_m": null,
+    "status": "PARTIALLY_FROZEN_GEOMETRY_TRANSITION_LOCATION_UNRESOLVED"
+  },
+  "coordinate_records": {
+    "SRC10_source_axis_origin": "center of the inlet",
+    "station_3_definition": "isolator exit / combustor inlet / most-upstream fuel injection",
+    "station_4_definition": "combustor exit",
+    "preferred_solver_origin": "station 3 / injector plane",
+    "preferred_solver_origin_status": "PROJECT_COORDINATE_CONVENTION_ALLOWED",
+    "source_to_solver_absolute_offset_m": null,
+    "absolute_offset_status": "NOT_REQUIRED_IF_ALL_RECOVERED_VALIDATION_SHAPE_COORDINATES_ARE_REBASED_TO_STATION_3_WITH_TRACEABLE_SOURCE_LOCATORS"
+  },
+  "evidence_boundary": [
+    "The model-B constant-area replacement and its 35 mm diameter are source-backed.",
+    "The 42 mm injector-to-cavity-leading-edge distance is source-backed and remains constant-area in the corresponding model-B location.",
+    "The phrase 'same length dimensions as the cavity' is not converted into a numerical replacement-tube length without an unambiguous Fig. 1/Fig. 2 dimensional interpretation.",
+    "The 2 degree cone angle is retained as a raw source descriptor; whether it is a wall half-angle or included cone angle must be frozen from the original geometry figure before constructing a formal area profile.",
+    "No formal validation geometry is promoted until the transition from the 35 mm constant tube to the 2 degree diverging section is unambiguously located."
+  ],
+  "next_geometry_evidence_priority": "Recover the original dimensioned model-B geometry figure at sufficient resolution to freeze replacement-tube axial extent, divergence start, and 2-degree angle convention."
+}
