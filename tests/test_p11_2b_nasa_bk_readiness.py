@@ -11,6 +11,8 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "cases" / "studies" / "p11_2b_nasa_bk_readiness.py"
 SOURCE_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_public_source.json"
+MANIFEST_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_asset_manifest.json"
+PROFILES_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_exp_exit_profiles.csv"
 
 
 def _load_module():
@@ -63,12 +65,29 @@ def test_nasa_assets_are_official_public_routes():
         assert assets[required]["url"].startswith("https://www.grc.nasa.gov/")
 
 
+def test_checksum_tracked_experimental_archive_is_ingested():
+    module = _load_module()
+    ingestion = module.load_experimental_ingestion()
+
+    assert ingestion["archive_sha256"] == "8e3a60293b4a16aa821ac839bee8c890871ef415040029c4f573c743f6b9dc89"
+    assert ingestion["row_count"] == 85
+    assert ingestion["profile_counts"] == {
+        "H2O_mole_fraction": 28,
+        "H2_mole_fraction": 27,
+        "Mach": 14,
+        "total_temperature_K": 16,
+    }
+    assert ingestion["manifest_path"] == "cases/studies/data/p11_2b_nasa_bk_asset_manifest.json"
+    assert ingestion["profiles_path"] == "cases/studies/data/p11_2b_nasa_bk_exp_exit_profiles.csv"
+
+
 def test_current_nasa_candidate_stays_formally_blocked_and_scoped():
     module = _load_module()
     source = module.load_nasa_bk_source()
     readiness = module.assess_nasa_bk_readiness(source)
 
     assert readiness["public_source_route_ready"] is True
+    assert readiness["experimental_archive_ingested"] is True
     assert readiness["formal_case_ready"] is False
     assert readiness["lbw_ybw_classification_authorized"] is False
     assert readiness["finite_rate_chemistry_validation_authorized"] is False
@@ -79,9 +98,10 @@ def test_current_nasa_candidate_stays_formally_blocked_and_scoped():
         "quasi_1d_geometry_mapping",
         "effective_gas_thermodynamic_reduction",
         "non_circular_line_heat_release_closure",
-        "experimental_archive_ingestion",
         "species_validation_scope",
     }
+    resolved_requirements = {item["requirement"] for item in readiness["resolved_requirements"]}
+    assert "experimental_archive_ingestion" in resolved_requirements
 
 
 def test_experimental_targets_separate_thermal_flow_from_species_scope():
@@ -125,10 +145,33 @@ def test_source_mass_fraction_drift_is_rejected(tmp_path: Path):
         module.load_nasa_bk_source(tampered)
 
 
+def test_manifest_checksum_drift_is_rejected(tmp_path: Path):
+    module = _load_module()
+    manifest = json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
+    exp = next(item for item in manifest["assets"] if item["filename"] == "exp.tar")
+    exp["sha256"] = "0" * 64
+    tampered = tmp_path / "manifest.json"
+    tampered.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="unexpected exp.tar checksum"):
+        module.load_experimental_ingestion(manifest_path=tampered, profiles_path=PROFILES_PATH)
+
+
+def test_experimental_profile_point_count_drift_is_rejected(tmp_path: Path):
+    module = _load_module()
+    lines = PROFILES_PATH.read_text(encoding="utf-8").splitlines()
+    tampered = tmp_path / "profiles.csv"
+    tampered.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
+
+    with pytest.raises(ValueError, match="point count"):
+        module.load_experimental_ingestion(manifest_path=MANIFEST_PATH, profiles_path=tampered)
+
+
 def test_readiness_record_uses_repository_relative_posix_source_path():
     module = _load_module()
     record = module.build_readiness_record()
 
     assert record["source_ledger"] == "cases/studies/data/p11_2b_nasa_bk_public_source.json"
     assert "\\" not in record["source_ledger"]
+    assert record["experimental_archive_ingested"] is True
     assert record["formal_case_ready"] is False
