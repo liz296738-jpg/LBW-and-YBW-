@@ -143,7 +143,7 @@
         "density_kg_m3": 0.0025,
         "velocity_m_s": 1966.0,
         "static_pressure_raw": 345.0,
-        "static_pressure_unit_status": "DO_NOT FREEZE FROM TEXT EXTRACTION; OCR/header rendering is ambiguous and must be checked against the original table image before use"
+        "static_pressure_unit_status": "DO NOT FREEZE FROM TEXT EXTRACTION; OCR/header rendering is ambiguous and must be checked against the original table image before use"
       },
       "measurement_model_records": {
         "fuel": "ethylene for reacting cases",
@@ -172,21 +172,34 @@
         "jin_theoretical_exit_Mach": 2.24,
         "liu_experimental_exit_Mach": 2.27,
         "jin_heat_release_inputs": "experimental PLIF image and stagnation-enthalpy increment at combustor exit",
-        "condition_identity_status": "UNRESOLVED_1.04_VS_1.03_DISCREPANCY"
+        "condition_identity_status": "UNRESOLVED_CROSS_MODEL_EQUIVALENCE_RATIO_CONFLICT"
       },
       "evidence_boundary": [
         "The Liu model-B configuration removes the cavity and is therefore a promising independent quasi-one-dimensional validation geometry.",
         "Table 2 supplies the measured exit Mach and the enthalpy ratio Ht4/Ht3, but the repository does not convert that ratio into a stagnation-enthalpy increment without a traceable station-3 enthalpy definition/value for the same case.",
         "The accessible text does not provide a solver-ready tabulated Qdot-prime(x) distribution for model B.",
-        "The Jin validation labels the model-B condition as phi=1.04 while Liu Table 2 lists model-B ethylene rows including phi=1.03 but not 1.04; this discrepancy must be resolved before formal promotion.",
+        "The Jin validation labels model B as phi=1.04, whereas the Liu Table-2 model-B row matching M4=2.27 is phi=1.03 and Liu's exact phi=1.04 row is model A; the dedicated discrepancy record preserves this cross-model conflict.",
         "No mass-flow or heat-release-shape value is inferred from geometry, equivalence ratio, PLIF images, or plotted curves without retained source evidence."
       ]
+    }
+  ],
+  "supporting_evidence_records": [
+    {
+      "path": "cases/studies/data/p11_2b_jin_liu_condition_discrepancy.json",
+      "role": "primary-source condition-identity conflict plus secondary contextual cross-check",
+      "status": "UNRESOLVED_CROSS_MODEL_EQUIVALENCE_RATIO_CONFLICT"
+    },
+    {
+      "path": "cases/studies/data/p11_2b_liu_model_b_geometry_source.json",
+      "role": "source-backed model-B axial geometry and source-to-solver coordinate closure",
+      "status": "AXIAL_MAPPING_FROZEN_AREA_ANGLE_CONVENTION_PENDING"
     }
   ],
   "candidate_validation_chains": [
     {
       "candidate_id": "JIN-LIU-MODEL-B-VALIDATION",
       "source_ids": ["SRC08", "SRC10"],
+      "supporting_source_ids": ["SRC11", "SRC12"],
       "purpose": "independent validation candidate for the source-backed quasi-Gaussian heat-release model in a cavity-free axisymmetric combustor",
       "reported_by_jin_condition": "model B, phi=1.04",
       "nearest_liu_table_condition": "model B, C2H4, phi=1.03",
@@ -194,13 +207,19 @@
       "positive_evidence": [
         "Liu model B removes the cavity and is explicitly selected by Jin as closer to quasi-one-dimensional assumptions.",
         "Jin states that the heat-release distribution can be estimated from its model using the Liu experimental PLIF image and measured exit stagnation-enthalpy increment.",
-        "Jin reports theoretical exit Mach 2.24 versus Liu experimental 2.27 and strong pressure-distribution agreement."
+        "Jin reports theoretical exit Mach 2.24 versus Liu experimental 2.27 and strong pressure-distribution agreement.",
+        "The station-3 coordinate, divergence-start coordinate, combustor-exit coordinate, and source-to-solver axial offset are now frozen by mutually consistent SRC10/SRC11/SRC12 dimensions without figure-coordinate digitization."
+      ],
+      "resolved_requirements": [
+        "source-to-solver axial coordinate mapping: x_solver = x_source - 0.2914 m for SRC10 inlet-referenced coordinates",
+        "divergence start in solver coordinates: 0.10355634918610404 m",
+        "combustor exit in solver coordinates: 0.46055634918610404 m"
       ],
       "blockers": [
-        "resolve the phi=1.04 (Jin) versus phi=1.03 (Liu Table 2) condition identity discrepancy",
-        "recover a traceable heat-release shape or its fitted parameters for this exact validation condition",
-        "recover the absolute stagnation-enthalpy increment and mass flow needed to scale Qdot-prime, rather than inferring them from Ht4/Ht3 alone",
-        "freeze the source-to-solver axial coordinate mapping from the original Fig. 2 / validation setup"
+        "resolve the model-B phi=1.04 (Jin) versus model-B phi=1.03 / model-A phi=1.04 (Liu Table 2) condition identity conflict",
+        "recover a traceable heat-release shape or fitted parameters for the exact Jin Fig. 14 validation condition",
+        "recover the absolute stagnation-enthalpy increment and matching mass flow / station-3 absolute enthalpy needed to scale Qdot-prime, or an absolute Qdot-prime profile directly",
+        "resolve whether the source-described 2 degree cone angle is the wall half-angle or the full included cone angle before freezing radial area growth"
       ],
       "formal_candidate": false
     }
@@ -223,7 +242,8 @@
       "converting equivalence ratio to power when fuel identity/LHV or oxidizer convention is unresolved",
       "digitizing figures without a retained extraction record and coordinate convention",
       "treating normalized CH* or PLIF intensity as absolute W/m without an independent energy scale",
-      "silently treating the Jin phi=1.04 validation label and Liu phi=1.03 table row as identical"
+      "silently treating the Jin phi=1.04 validation label and Liu phi=1.03 table row as identical",
+      "choosing a half-angle or included-angle interpretation for the 2 degree cone angle without source evidence"
     ]
   },
   "project_decision": {
@@ -234,6 +254,6 @@
     "chemistry_implied": false,
     "mutual_exclusion": "Direct heat_release_rate_per_length and burned-fuel/LHV energy paths may not both be active, preventing double counting.",
     "formal_case_status": "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY",
-    "next_evidence_priority": "Resolve and complete the Jin-Liu model-B validation chain first: condition identity, heat-release shape, absolute stagnation-enthalpy increment/mass flow, and coordinate mapping. This is preferable to mixing unrelated P11.2A geometry and heat-release evidence."
+    "next_evidence_priority": "Complete the Jin-Liu model-B validation chain without reopening the now-closed axial-coordinate problem: resolve condition identity, exact heat-release shape, absolute energy scale, and the 2-degree radial-area convention. Prefer publisher supplementary or author-provided data over figure guessing."
   }
 }
