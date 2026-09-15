@@ -79,7 +79,7 @@
     "derived_diverging_start_downstream_from_injector_m": 0.10355634918610404,
     "derived_diverging_start_downstream_from_inlet_lip_m": 0.394956349186104,
     "axial_transition_status": "FROZEN_BY_SOURCE_BACKED_GEOMETRIC_CLOSURE",
-    "area_profile_status": "BLOCKED_ONLY_ON_2_DEG_CONE_ANGLE_CONVENTION"
+    "area_profile_status": "READY_BY_SOURCE_CORROBORATED_WALL_DIVERGENCE_INTERPRETATION"
   },
   "coordinate_records": {
     "SRC10_source_axis_origin": "center of the inlet",
@@ -95,14 +95,27 @@
     "source_to_solver_absolute_offset_m": 0.2914,
     "absolute_offset_status": "FROZEN_FROM_SRC10_AND_INDEPENDENTLY_CLOSED_BY_SRC12_DIMENSIONS"
   },
+  "area_angle_resolution": {
+    "supporting_record": "cases/studies/data/p11_2b_liu_angle_convention_source.json",
+    "supporting_source_ids": ["SRC13", "SRC14"],
+    "raw_primary_descriptor": "2 deg diverging cone angle",
+    "adopted_wall_divergence_angle_deg": 2.0,
+    "classification": "SOURCE_CORROBORATED_INTERPRETATION",
+    "primary_source_directly_defines_half_angle": false,
+    "derived_outlet_diameter_m": 0.059933429417107886,
+    "derived_exit_to_inlet_area_ratio": 2.9322579279146552,
+    "study_layer_area_profile_status": "READY",
+    "formal_validation_case_status": "STILL_BLOCKED_BY_NON_GEOMETRY_EVIDENCE"
+  },
   "evidence_boundary": [
     "The model-B constant-area replacement and its 35 mm diameter are source-backed.",
     "The 42 mm injector-to-cavity-leading-edge distance is source-backed and remains constant-area in the corresponding model-B location.",
     "SRC12 independently closes the station-3 location: its 37.43 mm inlet plus 254 mm isolator gives 291.43 mm, matching the SRC10 injector coordinate 291.4 mm within 0.03 mm.",
     "SRC12's 296 mm constant-diameter run from inlet end to cavity leading edge equals 254 mm isolator plus 42 mm injector-to-cavity distance exactly, clarifying that these lengths use different endpoints rather than conflicting geometries.",
     "The model-B replacement-tube axial extent is derived from source-stated cavity floor/depth/ramp dimensions and independently cross-checked by two reported overall model lengths; no figure-coordinate digitization is used.",
-    "The 2 degree cone angle is still retained as a raw source descriptor; whether it denotes the wall half-angle or included cone angle is not silently assumed.",
-    "A formal area profile remains blocked only on the 2 degree cone-angle convention, not on the station-3 coordinate, divergence-start location, or combustor-exit axial location."
+    "The raw 2 degree cone-angle value is source evidence; treating it as a wall divergence angle is explicitly classified as SOURCE_CORROBORATED_INTERPRETATION using SRC13 primary same-program evidence and SRC14 peer-reviewed terminology cross-check, not as a verbatim primary-source half-angle definition.",
+    "The axisymmetric radius law and outlet area are derived study-layer quantities. They are not claimed as direct measurements.",
+    "The study-layer AreaProfile is now geometrically ready; a formal heated validation case remains blocked by the unresolved operating-condition identity, exact heat-release/absolute-energy chain, inlet state, and wall-friction closure."
   ],
-  "next_geometry_evidence_priority": "Resolve the 2-degree cone-angle convention from an authoritative geometry definition, source-defined outlet radius/diameter, or an unambiguous original dimensioned figure; do not infer half-angle versus included angle from nomenclature alone."
+  "next_geometry_evidence_priority": "No additional geometry evidence is required for the study-layer AreaProfile. A higher-authority primary figure or author dataset that explicitly defines the 2-degree convention should be retained as a future cross-check and must override this interpretation if contradictory."
 }
