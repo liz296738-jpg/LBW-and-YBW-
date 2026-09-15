@@ -112,7 +112,7 @@ def test_model_b_transition_is_closed_by_source_backed_geometry_consistency() ->
         model_b["derived_diverging_start_downstream_from_injector_m"], injector_to_divergence, rel_tol=0.0, abs_tol=1.0e-15
     )
     assert model_b["axial_transition_status"] == "FROZEN_BY_SOURCE_BACKED_GEOMETRIC_CLOSURE"
-    assert model_b["area_profile_status"] == "BLOCKED_ONLY_ON_2_DEG_CONE_ANGLE_CONVENTION"
+    assert model_b["area_profile_status"] == "READY_BY_SOURCE_CORROBORATED_WALL_DIVERGENCE_INTERPRETATION"
 
 
 def test_station3_coordinate_transform_is_frozen_without_figure_digitization() -> None:
@@ -142,7 +142,15 @@ def test_station3_coordinate_transform_is_frozen_without_figure_digitization() -
     )
 
 
-def test_two_degree_cone_angle_convention_remains_the_only_area_profile_blocker() -> None:
+def test_area_profile_angle_resolution_is_explicit_and_non_geometry_blockers_remain() -> None:
     record = _load()
-    assert any("2 degree cone angle" in item for item in record["evidence_boundary"])
-    assert "2-degree cone-angle convention" in record["next_geometry_evidence_priority"]
+    resolution = record["area_angle_resolution"]
+
+    assert resolution["supporting_source_ids"] == ["SRC13", "SRC14"]
+    assert resolution["adopted_wall_divergence_angle_deg"] == 2.0
+    assert resolution["classification"] == "SOURCE_CORROBORATED_INTERPRETATION"
+    assert resolution["primary_source_directly_defines_half_angle"] is False
+    assert resolution["study_layer_area_profile_status"] == "READY"
+    assert resolution["formal_validation_case_status"] == "STILL_BLOCKED_BY_NON_GEOMETRY_EVIDENCE"
+    assert resolution["derived_exit_to_inlet_area_ratio"] == 2.9322579279146552
+    assert "No additional geometry evidence is required" in record["next_geometry_evidence_priority"]
