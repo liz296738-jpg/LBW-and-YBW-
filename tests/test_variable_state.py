@@ -87,22 +87,22 @@ def test_common_temperature_bounds_ignore_zero_fraction_species() -> None:
     composition = {"O2": 0.233, "N2": 0.767, "AR": 0.0}
     lower, upper = common_temperature_bounds(composition, SPECIES)
     assert lower == pytest.approx(250.0)
-    assert upper == pytest.approx(5000.0)
+    assert upper == pytest.approx(3500.0)
 
 
 def test_common_temperature_bounds_respect_active_species_limits() -> None:
     lower, upper = common_temperature_bounds(AIR_LIKE, SPECIES)
     assert lower == pytest.approx(250.0)
-    assert upper == pytest.approx(5000.0)
+    assert upper == pytest.approx(3500.0)
 
     lower, upper = common_temperature_bounds(C2H4_MIX, SPECIES)
-    assert lower == pytest.approx(200.0)
+    assert lower == pytest.approx(250.0)
     assert upper == pytest.approx(3500.0)
 
 
 def test_primitive_path_rejects_temperature_extrapolation() -> None:
     with pytest.raises(ValueError, match="common range"):
-        variable_primitive_to_conservative(1.0, 100.0, 199.0, C2H4_MIX, SPECIES)
+        variable_primitive_to_conservative(1.0, 100.0, 249.0, C2H4_MIX, SPECIES)
     with pytest.raises(ValueError, match="common range"):
         variable_primitive_to_conservative(1.0, 100.0, 3501.0, C2H4_MIX, SPECIES)
 
