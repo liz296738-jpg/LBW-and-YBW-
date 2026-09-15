@@ -9,7 +9,7 @@
   "evidence_gate_summary": {
     "candidate_id": "JIN-LIU-MODEL-B-VALIDATION",
     "formal_promotion_unchanged": true,
-    "open_count": 5,
+    "open_count": 4,
     "open_requirements": [
       {
         "detail": "Jin reports model B at phi=1.04, while the Liu Table-2 model-B row matching M4=2.27 is phi=1.03 and Liu's exact phi=1.04 row is model A.",
@@ -25,14 +25,8 @@
       },
       {
         "evidence_record": "cases/studies/data/p11_2b_jin_validation_applicability.json",
-        "reason": "Jin Eqs. (9)-(10) explicitly retain Cf and define it as a wall friction coefficient, but the accessible article text does not expose the numerical Cf used for Fig. 14.",
+        "reason": "Jin Eqs. (9)-(10) explicitly retain Cf and define it as a wall friction coefficient, but the accessible article text does not expose the numerical Cf used for Fig. 14. The coefficient convention is now resolved separately; only the numerical value remains missing.",
         "requirement": "Fig. 14 wall-friction coefficient Cf",
-        "status": "NOT_FROZEN"
-      },
-      {
-        "evidence_record": "cases/studies/data/p11_2b_jin_validation_applicability.json",
-        "reason": "The repository production wall source accepts a Darcy friction factor. A coefficient-convention mapping must be source-defined before a Jin Cf value can be applied; no factor-of-four conversion is assumed from notation alone.",
-        "requirement": "Cf convention to repository Darcy friction factor",
         "status": "NOT_FROZEN"
       },
       {
@@ -43,7 +37,7 @@
         "status": "NOT_PROMOTED_TO_FORMAL_CASE"
       }
     ],
-    "resolved_count": 2,
+    "resolved_count": 3,
     "resolved_requirements": [
       {
         "evidence_record": "cases/studies/data/p11_2b_liu_model_b_geometry_source.json",
@@ -62,6 +56,14 @@
         "revision_policy": "A higher-authority primary figure or author dataset must override this interpretation if contradictory.",
         "status": "RESOLVED_SOURCE_CORROBORATED_INTERPRETATION",
         "wall_divergence_angle_deg": 2.0
+      },
+      {
+        "basis": "Jin Eqs. (9)-(10) use 4 Cf dx/D and explicitly cite Shapiro [51]; Shapiro defines the duct friction coefficient as wall shear divided by dynamic head. Equating that wall force to the repository Darcy source yields f_D=4 Cf.",
+        "classification": "DERIVED_CONVENTION_MAPPING",
+        "evidence_record": "cases/studies/data/p11_2b_jin_friction_convention_source.json",
+        "mapping": "f_D = 4 Cf",
+        "requirement": "Cf convention to repository Darcy friction factor",
+        "status": "RESOLVED_DERIVED_FROM_SOURCE_DEFINITION"
       }
     ]
   },
