@@ -73,8 +73,11 @@ def test_station3_is_preferred_solver_origin_and_transition_is_relative_to_it() 
     assert coordinate["divergence_start_in_solver_coordinates_m"] == model_b[
         "derived_diverging_start_downstream_from_injector_m"
     ]
-    assert coordinate["combustor_exit_in_solver_coordinates_m"] == (
-        coordinate["divergence_start_in_solver_coordinates_m"] + 0.357
+    assert math.isclose(
+        coordinate["combustor_exit_in_solver_coordinates_m"],
+        coordinate["divergence_start_in_solver_coordinates_m"] + 0.357,
+        rel_tol=0.0,
+        abs_tol=1.0e-15,
     )
     assert coordinate["source_to_solver_absolute_offset_m"] is None
 
