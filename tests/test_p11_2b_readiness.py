@@ -34,7 +34,7 @@ def test_current_readiness_record_is_explicitly_blocked() -> None:
     assert record["blockers"] == ["no candidate_formal_cases declared"]
 
 
-def test_evidence_summary_closes_only_requirements_with_dedicated_support() -> None:
+def test_evidence_summary_closes_requirements_with_dedicated_support() -> None:
     record = MODULE.build_readiness_record()
     summary = record["evidence_gate_summary"]
     resolved = _requirements_by_name(summary["resolved_requirements"])
@@ -53,11 +53,17 @@ def test_evidence_summary_closes_only_requirements_with_dedicated_support() -> N
     assert area["wall_divergence_angle_deg"] == 2.0
     assert area["primary_source_directly_defines_half_angle"] is False
 
+    friction = resolved["Cf convention to repository Darcy friction factor"]
+    assert friction["status"] == "RESOLVED_DERIVED_FROM_SOURCE_DEFINITION"
+    assert friction["classification"] == "DERIVED_CONVENTION_MAPPING"
+    assert friction["mapping"] == "f_D = 4 Cf"
+
     assert "axial_coordinate_mapping" not in open_requirements
     assert "study_layer_radial_area_law" not in open_requirements
+    assert "Cf convention to repository Darcy friction factor" not in open_requirements
 
 
-def test_evidence_summary_retains_all_current_non_geometry_blockers() -> None:
+def test_evidence_summary_retains_all_current_open_non_geometry_blockers() -> None:
     record = MODULE.build_readiness_record()
     open_requirements = _requirements_by_name(
         record["evidence_gate_summary"]["open_requirements"]
@@ -71,9 +77,6 @@ def test_evidence_summary_retains_all_current_non_geometry_blockers() -> None:
         "Fig. 14 station-3 / combustor-inlet boundary state"
     ]["status"] == "NOT_FROZEN"
     assert open_requirements["Fig. 14 wall-friction coefficient Cf"]["status"] == "NOT_FROZEN"
-    assert open_requirements[
-        "Cf convention to repository Darcy friction factor"
-    ]["status"] == "NOT_FROZEN"
     assert open_requirements[
         "heat_release_shape_and_absolute_energy_chain"
     ]["status"] == "NOT_PROMOTED_TO_FORMAL_CASE"
