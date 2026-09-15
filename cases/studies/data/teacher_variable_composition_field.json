@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "stage": "P11.3E",
+  "status": "TEACHER_H2_C2H4_CELLWISE_COMPOSITION_STATE_COMPATIBILITY_IMPLEMENTED_FLUX_TIME_COUPLING_GATED",
+  "inputs": {
+    "composition_source": "teacher Eqs.11.27 and 11.29 via lean_reaction_mass_fractions",
+    "combustion_efficiency_policy": "explicit eta in [0,1]; upstream raw mixing adapter is eta=min(eta_m_raw,1)",
+    "thermochemistry_source": "existing source-backed GRI-Mech core database"
+  },
+  "supported_fuels": ["H2", "C2H4"],
+  "blocked_fuels": {
+    "C10H22": "teacher stoichiometry is transcribed but source-backed C10H22 thermochemistry is not frozen"
+  },
+  "state_representation": {
+    "composition_field": "immutable per-cell mass-fraction table Y_i(x)",
+    "flow_state": "three conservative variables [rho, rho*u, rho*E]",
+    "composition_evolution_in_this_stage": "algebraically prescribed field; no species transport PDE",
+    "energy_datum": "absolute composition-dependent species internal energy from the verified thermochemistry path"
+  },
+  "verification_scope": [
+    "per-cell nonnegative normalized mass fractions",
+    "H2 and C2H4 source-backed species coverage",
+    "cell-wise common thermochemistry temperature bounds",
+    "primitive-to-conservative-to-primitive round trip with spatially varying composition",
+    "exact reduction to the fixed-composition variable-state path when all composition rows are identical",
+    "scalar primitive broadcast across a composition field",
+    "rich-mixture and C10H22 thermochemistry gates"
+  ],
+  "scientific_boundaries": {
+    "species_transport_equations_added": false,
+    "reaction_heat_source_added": false,
+    "prescribed_Qdot_used_for_teacher_reaction_energy": false,
+    "fuel_injection_source_coupled": false,
+    "numerical_flux_supports_different_left_right_compositions": false,
+    "time_marching_supports_variable_composition": false
+  },
+  "readiness": {
+    "composition_field_ready": true,
+    "cellwise_state_conversion_ready": true,
+    "variable_composition_flux_ready": false,
+    "variable_composition_time_marching_ready": false,
+    "integrated_teacher_combustor_case_ready": false,
+    "production_solver_replacement_ready": false
+  },
+  "next_gate": "Implement and verify Euler/Rusanov interface fluxes whose left and right states use their own source-backed cell compositions. Preserve the existing fixed-composition path as a limiting case before adding time marching or teacher source terms."
+}
