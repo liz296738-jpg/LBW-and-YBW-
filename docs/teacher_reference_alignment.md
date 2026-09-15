@@ -42,7 +42,7 @@ The main problem is not that the foundation is wrong. The problem is that the pr
 | CFL time step | General CFL implementation | **Aligned in principle** | Teacher-specific value can be a case/configuration choice, not a magic constant |
 | Inlet static p/T/u | Supersonic primitive inflow implemented | **Functionally compatible** | Add a helper/case adapter if useful; do not rewrite BC core |
 | Outlet first-order extrapolation | Transmissive/zero-gradient style path exists | **Functionally compatible** | Keep and document compatibility |
-| Steady convergence Eq. 11.46 | Current gate uses normalized steady RHS residual | **Gap** | Add relative-density-change diagnostic alongside current gate |
+| Steady convergence Eq. 11.46 | Relative-density diagnostic now implemented in `max_relative_density_change` | **Aligned as compatibility diagnostic** | Keep existing normalized residual too; do not weaken the convergence gate |
 | Temperature/composition-dependent gas properties | Production gas model uses constant `gamma`, `R` | **Major gap** | Implement isolated variable thermochemistry layer |
 | `cp(T)`, `h(T)` Chemkin/NASA polynomial mixture properties | NASA-BK study utility proves polynomial evaluation concept, but not production integrated | **Major gap** | Generalize with source-backed coefficients and tests |
 | Mixing efficiency / mixing length | Not implemented as teacher closure | **Major gap** | Implement Eqs. 11.19-11.20 after transcription/source audit |
@@ -70,7 +70,7 @@ The photographed chapter's equation chain is the target for compatibility work:
 - CFL time step (Eq. 11.45);
 - relative-density steady criterion (Eq. 11.46).
 
-The repository already covers a large portion of the numerical skeleton. The missing work is concentrated in the **physical closure/thermochemistry layer** and a few teacher-specific numerical compatibility details.
+The repository already covers a large portion of the numerical skeleton. Eq. 11.46 compatibility is now implemented as an additional diagnostic. The remaining work is concentrated in the **physical closure/thermochemistry layer** and near-sonic Steger-Warming smoothing.
 
 ## Important energy-accounting correction
 
@@ -87,7 +87,7 @@ This is now a project-level invariant.
 
 The next primary development sequence is:
 
-1. teacher numerical-compatibility closeout: relative-density convergence diagnostic, boundary/case compatibility, and a sourced policy for near-sonic Steger-Warming smoothing;
+1. finish numerical compatibility: boundary/case adapters if needed and a sourced policy for near-sonic Steger-Warming smoothing;
 2. variable temperature/composition thermodynamics;
 3. mixing-efficiency, mixing-length, equivalence-ratio, and composition closures;
 4. teacher empirical friction and wall heat-transfer closures;
