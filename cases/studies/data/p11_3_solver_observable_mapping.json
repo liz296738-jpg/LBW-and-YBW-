@@ -1,0 +1,175 @@
+{
+  "schema_version": 1,
+  "record_kind": "p11-3-solver-observable-capability-mapping",
+  "stage": "P11.3",
+  "status": "CAPABILITY_AUDIT_COMPLETE_CLASSIFIER_MAPPING_PENDING",
+  "purpose": "Map the observables required by the frozen dual-mode literature taxonomy to quantities that the current quasi-one-dimensional project solver can or cannot support. This record does not assign LBW/YBW labels and does not invent a precombustion shock-train detector.",
+  "literature_requirements": {
+    "precombustion_shock_or_isolator_state": {
+      "importance": "CENTRAL",
+      "sources": [
+        "TIAN-ET-AL-2014-Q1D-MULTIMODES",
+        "ZHANG-ET-AL-2014-MODE-TRANSITION",
+        "FOTIA-DRISCOLL-2013-RAM-SCRAM"
+      ]
+    },
+    "combustor_entry_flow_state": {
+      "importance": "CENTRAL",
+      "sources": [
+        "TIAN-ET-AL-2014-Q1D-MULTIMODES",
+        "ZHANG-ET-AL-2014-MODE-TRANSITION"
+      ]
+    },
+    "wall_pressure_distribution": {
+      "importance": "SUPPORTING_OR_CLASSIFYING_IN_SOURCE_SPECIFIC_SETUPS",
+      "sources": [
+        "ZHANG-ET-AL-2014-MODE-TRANSITION",
+        "FOTIA-DRISCOLL-2013-RAM-SCRAM"
+      ]
+    },
+    "thermal_choking_or_heat_addition_vs_area_relief": {
+      "importance": "TRANSITION_MECHANISM",
+      "sources": [
+        "LIU-ET-AL-2019-AXISYMMETRIC-TRANSITION",
+        "CAO-ET-AL-2020-1D-BOUNDARY"
+      ]
+    },
+    "history_or_hysteresis": {
+      "importance": "RELEVANT_IN_TRANSITION_REGION",
+      "sources": [
+        "ZHANG-ET-AL-2014-MODE-TRANSITION",
+        "FOTIA-DRISCOLL-2013-RAM-SCRAM"
+      ]
+    }
+  },
+  "native_solver_observables": [
+    {
+      "observable_id": "AXIAL_MACH_PROFILE",
+      "quantity": "Mach(x)",
+      "status": "DIRECTLY_AVAILABLE",
+      "valid_uses": [
+        "combustor-entry Mach when the domain coordinate and entry station are source-backed",
+        "sonic-crossing diagnostic",
+        "minimum/maximum Mach diagnostic",
+        "post-source reacceleration diagnostic"
+      ],
+      "forbidden_inference": "A minimum Mach below one anywhere in the domain is not by itself a ram/dual-mode label."
+    },
+    {
+      "observable_id": "AXIAL_STATIC_PRESSURE_PROFILE",
+      "quantity": "p(x)",
+      "status": "DIRECTLY_AVAILABLE",
+      "valid_uses": [
+        "pressure-rise and pressure-gradient diagnostics",
+        "source-specific station pressure if coordinate and normalization are source-backed",
+        "comparison with one-dimensional pressure data"
+      ],
+      "forbidden_inference": "A generic pressure-rise threshold is not a universal shock-train or mode detector."
+    },
+    {
+      "observable_id": "AXIAL_TEMPERATURE_PROFILE",
+      "quantity": "T(x)",
+      "status": "DIRECTLY_AVAILABLE",
+      "valid_uses": [
+        "thermal-state diagnostic",
+        "source-backed energy-balance studies"
+      ],
+      "forbidden_inference": "Temperature alone does not identify ram/scram mode."
+    },
+    {
+      "observable_id": "AREA_PROFILE",
+      "quantity": "A(x)",
+      "status": "DIRECTLY_AVAILABLE",
+      "valid_uses": [
+        "area-relief accounting",
+        "geometry-conditioned transition studies"
+      ],
+      "forbidden_inference": "Geometry alone does not define the combustion mode."
+    },
+    {
+      "observable_id": "PRESCRIBED_SOURCE_HISTORY",
+      "quantity": "prescribed energy/momentum/fuel source profiles where a study supplies them",
+      "status": "DIRECTLY_AVAILABLE_WHEN_ENABLED",
+      "valid_uses": [
+        "heat-addition/source-strength continuation",
+        "condition-controlled parametric studies"
+      ],
+      "forbidden_inference": "A prescribed heat input is not automatically an experimentally measured heat-release distribution or a mode label."
+    },
+    {
+      "observable_id": "STEADY_CONVERGENCE_AND_TERMINATION",
+      "quantity": "residual / convergence / failure diagnostics",
+      "status": "DIRECTLY_AVAILABLE",
+      "valid_uses": [
+        "numerical admissibility gate",
+        "detecting failed operating points"
+      ],
+      "forbidden_inference": "Numerical nonconvergence is not physical inlet unstart unless an independent source-backed unstart criterion is satisfied."
+    }
+  ],
+  "not_natively_resolved": [
+    {
+      "observable_id": "PRECOMBUSTION_SHOCK_TRAIN_PRESENCE",
+      "status": "NOT_SOURCE_DEFINED_IN_CURRENT_SOLVER",
+      "reason": "The production model has no dedicated strength-adaptable isolator/precombustion-shock model equivalent to Tian et al.'s X-shock treatment and no frozen shock-train detector."
+    },
+    {
+      "observable_id": "SHOCK_TRAIN_LENGTH",
+      "status": "NOT_SOURCE_DEFINED_IN_CURRENT_SOLVER",
+      "reason": "No source-backed detector maps the current first-order quasi-1D pressure/Mach solution to a physical shock-train length, and multidimensional separation is not represented."
+    },
+    {
+      "observable_id": "BOUNDARY_LAYER_SEPARATION_REATTACHMENT",
+      "status": "OUTSIDE_CURRENT_MODEL",
+      "reason": "The current quasi-one-dimensional model does not resolve multidimensional shock/boundary-layer separation topology."
+    },
+    {
+      "observable_id": "FLAME_POSITION_OR_OPTICAL_STRUCTURE",
+      "status": "OUTSIDE_CURRENT_MODEL",
+      "reason": "No finite-rate chemistry/flame-front or optical diagnostic is solved."
+    },
+    {
+      "observable_id": "SPECIES_PROFILE",
+      "status": "OUTSIDE_CURRENT_MODEL",
+      "reason": "The present solver does not transport H2/H2O or other reacting species."
+    }
+  ],
+  "domain_specific_findings": [
+    {
+      "case_family": "P11.2B_NASA_BURROWS_KURKOV",
+      "classification_capability": "NOT_SUITABLE_FOR_LBW_YBW_MODE_CLASSIFICATION",
+      "reason": "The accepted reduced domain starts at the hydrogen-injection station and was constructed as a scoped heated-flow reference benchmark, not an isolator + combustor mode-transition model. It cannot observe an upstream precombustion shock train."
+    },
+    {
+      "case_family": "P11.2A_LI_PUBLIC_COLD_SURROGATE",
+      "classification_capability": "NOT_SUITABLE_FOR_REACTIVE_MODE_CLASSIFICATION",
+      "reason": "The accepted case is non-reactive/source-free. Its isolator-length result was explicitly found inert in the inviscid cold-flow model and cannot establish reactive combustion mode."
+    },
+    {
+      "case_family": "FUTURE_P11_3_MODE_TRANSITION_CASE",
+      "classification_capability": "REQUIRES_NEW_SOURCE_BACKED_CASE_DEFINITION",
+      "reason": "A future mode-transition case must include a source-backed isolator/combustor coordinate mapping and an admissible representation or detector for the precombustion shock state before literature mode labels can be assigned."
+    }
+  ],
+  "candidate_diagnostics_allowed_now": [
+    "combustor_entry_Mach_when_entry_station_is_frozen",
+    "minimum_Mach_diagnostic_only",
+    "sonic_crossing_count_diagnostic_only",
+    "pressure_ratio_at_source_defined_station",
+    "maximum_pressure_gradient_diagnostic_only",
+    "heat_addition_or_source_control_parameter",
+    "steady_convergence_status"
+  ],
+  "classification_policy": {
+    "can_implement_general_literature_classifier_now": false,
+    "can_implement_lbw_ybw_classifier_now": false,
+    "can_generate_lbw_ybw_regime_map_now": false,
+    "reason": "The project's current accepted study cases do not jointly expose the literature's central isolator/precombustion-shock observable, and the literal LBW/YBW project labels remain undefined.",
+    "next_evidence_needed": [
+      "Explicit project/teacher definition of LBW and YBW.",
+      "Source-backed future mode-transition geometry/domain containing the relevant isolator and combustor-entry station.",
+      "Source-backed method for representing or detecting the precombustion shock state in the reduced-order model, or an alternative authoritative criterion that is observable with the current solver.",
+      "Decision on steady/quasi-steady versus hysteretic transition-map scope."
+    ]
+  }
+}
