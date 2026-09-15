@@ -37,12 +37,23 @@
       "pt4_Pa": 10337.5,
       "pt4_over_pt3": 0.24,
       "Ht4_over_Ht3": 1.29
+    },
+    "liu_yao_2021_context_phi_1_04": {
+      "source_id": "SRC12",
+      "citation": "Hang Liu, Wei Yao, LES investigation of nonequilibrium flow in a cavity-flameholding axisymmetric scramjet, AIAA Propulsion and Energy Forum 2021, AIAA 2021-3536.",
+      "doi": "10.2514/6.2021-3536",
+      "locator": "Sec. II.D Experimental case",
+      "configuration": "cavity-flameholding axisymmetric scramjet, i.e. cavity-present configuration rather than model B",
+      "equivalence_ratio": 1.04,
+      "role": "contextual corroboration only; this numerical study uses the cavity-present geometry at phi=1.04 and does not resolve Jin's model-B label"
     }
   },
   "inference_boundary": {
     "confirmed": [
+      "Jin explicitly states that Fig. 14 uses scramjet model B at phi=1.04 and compares a theoretical exit Mach of 2.24 with an experimental exit Mach of 2.27.",
       "The Liu Table-2 model-B row whose experimental exit Mach equals the 2.27 value cited by Jin is phi=1.03.",
       "The Liu Table-2 row at exactly phi=1.04 belongs to model A, not model B, and has exit Mach 1.76.",
+      "The 2021 Liu-Yao LES paper independently uses the cavity-present axisymmetric configuration at phi=1.04; this is consistent with phi=1.04 being associated with a cavity-present case elsewhere in the same geometry family, but it is not proof that Jin made a typo.",
       "Therefore the Jin text cannot be matched to Liu Table 2 by equivalence ratio alone without crossing from model B to model A."
     ],
     "not_resolved": [
@@ -50,6 +61,6 @@
       "Whether Jin used a distinct model-B run at phi=1.04 that is not represented by the accessible Liu Table 2.",
       "Whether supplementary or author-held data contain the exact validation-condition identity and fitted heat-release inputs."
     ],
-    "promotion_policy": "Do not promote the Jin-Liu validation chain to candidate_formal_cases until the condition identity is resolved by traceable source evidence."
+    "promotion_policy": "Do not promote the Jin-Liu validation chain to candidate_formal_cases until the condition identity is resolved by traceable source evidence. Contextual agreement from a separate numerical paper is not sufficient to override the primary-source conflict."
   }
 }
