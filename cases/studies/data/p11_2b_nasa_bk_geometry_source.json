@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "record_kind": "validation-geometry-source",
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "status": "GEOMETRY_FROZEN_SOURCE_BACKED",
+  "sources": [
+    {
+      "source_id": "NASA-GLENN-BK-PARENT",
+      "citation": "NASA Glenn NPARC Alliance, Burrows and Kurkov Supersonic Mixing/Combustion validation case.",
+      "url": "https://www.grc.nasa.gov/www/wind/valid/bk/bk.html",
+      "confirmed": [
+        "combustor section length is 35.6 cm",
+        "x=0 is located at the hydrogen injection step"
+      ]
+    },
+    {
+      "source_id": "NASA-TM-74094",
+      "citation": "Y. S. Pan, Evaluation of the Three-Dimensional Parabolic Flow Computer Program SHIP, NASA-TM-74094, 1978.",
+      "ntrs_document_id": "19780007057",
+      "url": "https://ntrs.nasa.gov/citations/19780007057",
+      "pdf_url": "https://ntrs.nasa.gov/api/citations/19780007057/downloads/19780007057.pdf",
+      "distribution_limits": "Public",
+      "copyright_status": "Work of the US Government; public use permitted",
+      "locator": "section Supersonic Combustion and Mixing of Hydrogen in a Duct, text associated with Fig. 19",
+      "confirmed": [
+        "rectangular duct cross-section expands linearly",
+        "cross-section at z=0 is 5.10 cm by 9.38 cm",
+        "cross-section at exit z=35.6 cm is 5.10 cm by 10.48 cm"
+      ]
+    }
+  ],
+  "source_geometry_si": {
+    "solver_origin": "hydrogen injection step",
+    "x_start_m": 0.0,
+    "x_exit_m": 0.356,
+    "width_m": 0.051,
+    "height_start_m": 0.0938,
+    "height_exit_m": 0.1048,
+    "expansion_type": "linear-height rectangular duct"
+  },
+  "derived_geometry": {
+    "height_law": "H(x)=H0+(H1-H0)*x/L for 0<=x<=L",
+    "area_law": "A(x)=W*H(x)",
+    "area_start_m2": 0.0047838,
+    "area_exit_m2": 0.0053448,
+    "area_ratio_exit_over_start": 1.1172707889125801,
+    "derivation_class": "DERIVED_EXACTLY_FROM_SOURCE_DIMENSIONS"
+  },
+  "grid_crosscheck": {
+    "asset": "str_run.cgd",
+    "sha256": "255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91",
+    "status": "AVAILABLE_FOR_FUTURE_CROSSCHECK_NOT_REQUIRED_TO_DEFINE_SOURCE_AREA_LAW",
+    "reason": "The public NASA technical text already gives the rectangular start/exit dimensions and states linear expansion explicitly."
+  },
+  "scope_boundary": [
+    "This area law represents the main rectangular combustion duct only.",
+    "The transverse hydrogen injection slot/plenum is not added to A(x) as axial core-flow area.",
+    "Boundary-layer displacement thickness is not converted into an effective-area correction in this source geometry.",
+    "Any future effective-area correction must be a separately identified model, not a silent geometry modification."
+  ]
+}

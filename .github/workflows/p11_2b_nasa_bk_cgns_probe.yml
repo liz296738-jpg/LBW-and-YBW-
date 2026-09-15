@@ -1,0 +1,245 @@
+name: P11.2B NASA BK Common File Extraction
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/p11_2b_nasa_bk_cgns_probe.yml"
+      - "cases/studies/tools/p11_2b_nasa_bk_cff_extract.c"
+      - "cases/studies/tools/p11_2b_nasa_bk_cff_momentum_extract.c"
+      - "cases/studies/data/p11_2b_nasa_bk_asset_manifest.json"
+      - "cases/studies/data/p11_2b_nasa_bk_geometry_source.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  extract-common-file:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build public legacy ADF reader
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake curl
+
+          mkdir -p nasa_bk_cff/toolchain
+          curl --fail --location --retry 3 \
+            "https://github.com/CGNS/CGNS/archive/refs/tags/v3.4.2.tar.gz" \
+            -o nasa_bk_cff/toolchain/cgns-v3.4.2.tar.gz
+          sha256sum nasa_bk_cff/toolchain/cgns-v3.4.2.tar.gz \
+            > nasa_bk_cff/toolchain/cgns_source_SHA256SUMS.txt
+          tar -xzf nasa_bk_cff/toolchain/cgns-v3.4.2.tar.gz -C nasa_bk_cff/toolchain
+
+          cmake \
+            -S nasa_bk_cff/toolchain/CGNS-3.4.2 \
+            -B nasa_bk_cff/toolchain/build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX="$PWD/nasa_bk_cff/toolchain/install" \
+            -DCGNS_ENABLE_FORTRAN=OFF \
+            -DCGNS_ENABLE_HDF5=OFF \
+            -DCGNS_ENABLE_LEGACY=ON \
+            -DCGNS_ENABLE_64BIT=OFF \
+            -DCGNS_BUILD_CGNSTOOLS=OFF \
+            -DCGNS_ENABLE_TESTS=OFF
+          cmake --build nasa_bk_cff/toolchain/build --parallel 2
+          cmake --install nasa_bk_cff/toolchain/build
+
+      - name: Download and verify immutable NASA source files
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="https://www.grc.nasa.gov/WWW/wind/valid/bk/study02"
+          curl --fail --location --retry 3 "$base/str_run.cgd" -o nasa_bk_cff/str_run.cgd
+          curl --fail --location --retry 3 "$base/str_run.cfl" -o nasa_bk_cff/str_run.cfl
+          echo "255563ffa5cf3afe3fdd791f642842f398c84e4f39936ef62bc92d9bb80b0e91  nasa_bk_cff/str_run.cgd" | sha256sum -c -
+          echo "e0d9c3c89c40b947934c6ab6a5aa0df1e9f32b22dc7919f81dd9ad391f08e602  nasa_bk_cff/str_run.cfl" | sha256sum -c -
+
+      - name: Create read-only ADF compatibility copies
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib
+          import json
+          from pathlib import Path
+
+          records = []
+          for name in ("str_run.cgd", "str_run.cfl"):
+              source = Path("nasa_bk_cff") / name
+              target = Path("nasa_bk_cff") / f"{name}.compat"
+              raw = bytearray(source.read_bytes())
+              original_sha = hashlib.sha256(raw).hexdigest()
+              if raw[25:31] != b"A03001":
+                  raise SystemExit(f"{name}: expected Wind-US ADF header A03001, found {raw[25:31]!r}")
+              raw[25:31] = b"A02011"
+              target.write_bytes(raw)
+              records.append({
+                  "source_file": name,
+                  "source_sha256": original_sha,
+                  "source_header": "A03001",
+                  "compatibility_copy": target.name,
+                  "compatibility_header": "A02011",
+                  "modified_byte_range_zero_based_half_open": [25, 31],
+                  "compatibility_sha256": hashlib.sha256(raw).hexdigest(),
+                  "policy": "Header change is applied to a disposable read-only working copy only. The checksum-frozen NASA source file is never modified or treated as CGNS semantic data; low-level ADF access is used to read Wind-US Common File nodes."
+              })
+          Path("nasa_bk_cff/compatibility_manifest.json").write_text(
+              json.dumps({"schema_version": 1, "records": records}, indent=2, sort_keys=True),
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Inventory Wind-US Common File trees
+        shell: bash
+        run: |
+          set -euo pipefail
+          export PATH="$PWD/nasa_bk_cff/toolchain/install/bin:$PATH"
+          cgnslist -a nasa_bk_cff/str_run.cgd.compat > nasa_bk_cff/cgd_cff_tree.txt
+          cgnslist -a nasa_bk_cff/str_run.cfl.compat > nasa_bk_cff/cfl_cff_tree.txt
+          grep -q "RefScl00000001_CFF" nasa_bk_cff/cgd_cff_tree.txt
+          grep -q "RefScl00000001_CFF" nasa_bk_cff/cfl_cff_tree.txt
+          grep -q "rho\*e0" nasa_bk_cff/cfl_cff_tree.txt
+          grep -q "ZONE   8" nasa_bk_cff/cgd_cff_tree.txt
+
+      - name: Build repository-owned Common File extractors
+        shell: bash
+        run: |
+          set -euo pipefail
+          common_flags=(
+            -O2 -Wall -Wextra
+            -I"$PWD/nasa_bk_cff/toolchain/install/include"
+            -I"$PWD/cases/studies/tools"
+          )
+          cc "${common_flags[@]}" \
+            cases/studies/tools/p11_2b_nasa_bk_cff_extract.c \
+            "$PWD/nasa_bk_cff/toolchain/install/lib/libcgns.a" \
+            -lm -o nasa_bk_cff/p11_2b_nasa_bk_cff_extract
+          cc "${common_flags[@]}" \
+            cases/studies/tools/p11_2b_nasa_bk_cff_momentum_extract.c \
+            "$PWD/nasa_bk_cff/toolchain/install/lib/libcgns.a" \
+            -lm -o nasa_bk_cff/p11_2b_nasa_bk_cff_momentum_extract
+
+      - name: Extract dimensional main-duct cross sections
+        shell: bash
+        run: |
+          set -euo pipefail
+          nasa_bk_cff/p11_2b_nasa_bk_cff_extract \
+            nasa_bk_cff/str_run.cgd.compat \
+            nasa_bk_cff/str_run.cfl.compat \
+            nasa_bk_cff/nasa_bk_reference_sections.csv
+          nasa_bk_cff/p11_2b_nasa_bk_cff_momentum_extract \
+            nasa_bk_cff/str_run.cgd.compat \
+            nasa_bk_cff/str_run.cfl.compat \
+            nasa_bk_cff/nasa_bk_reference_momentum_sections.csv
+
+      - name: Validate extraction and write provenance summary
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import csv
+          import hashlib
+          import json
+          from collections import Counter
+          from pathlib import Path
+
+          csv_path = Path("nasa_bk_cff/nasa_bk_reference_sections.csv")
+          momentum_path = Path("nasa_bk_cff/nasa_bk_reference_momentum_sections.csv")
+          with csv_path.open(newline="", encoding="utf-8") as stream:
+              rows = list(csv.DictReader(stream))
+          with momentum_path.open(newline="", encoding="utf-8") as stream:
+              momentum_rows = list(csv.DictReader(stream))
+          if len(rows) != 127 or len(momentum_rows) != 127:
+              raise SystemExit(
+                  f"expected 127 extracted section records, found thermal={len(rows)}, momentum={len(momentum_rows)}"
+              )
+          counts = Counter(int(row["zone"]) for row in rows)
+          expected = {2: 17, 3: 17, 4: 17, 5: 17, 6: 17, 7: 17, 8: 25}
+          if dict(sorted(counts.items())) != expected:
+              raise SystemExit(f"unexpected main-duct zone topology: {dict(counts)}")
+
+          for thermal, momentum in zip(rows, momentum_rows, strict=True):
+              if (thermal["zone"], thermal["i_index"]) != (momentum["zone"], momentum["i_index"]):
+                  raise SystemExit("thermal/momentum section ordering drifted")
+              if abs(float(thermal["x_mid_m"]) - float(momentum["x_mid_m"])) > 1.0e-12:
+                  raise SystemExit("thermal/momentum axial coordinates disagree")
+              if abs(float(thermal["mass_flux_per_width_kg_m_s"]) - float(momentum["mass_flux_per_width_kg_m_s"])) > 1.0e-9:
+                  raise SystemExit("thermal/momentum mass-flux integrals disagree")
+              if abs(float(thermal["area_weighted_p_Pa"]) - float(momentum["area_weighted_p_Pa"])) > 1.0e-6:
+                  raise SystemExit("thermal/momentum pressure integrals disagree")
+              if float(momentum["momentum_flux_per_width_N_per_m"]) <= 0.0:
+                  raise SystemExit("nonpositive axial momentum flux")
+
+          x = [float(row["x_mid_m"]) for row in rows]
+          x_span = [float(row["x_span_m"]) for row in rows]
+          height = [float(row["height_m"]) for row in rows]
+          mdot_per_width = [float(row["mass_flux_per_width_kg_m_s"]) for row in rows]
+          width_m = 0.051
+          mdot = [value * width_m for value in mdot_per_width]
+          if abs(min(x)) > 1.0e-10 or abs(max(x) - 0.356) > 5.0e-5:
+              raise SystemExit("extracted main-duct axial extent disagrees with frozen NASA geometry")
+          if max(x_span) > 3.0e-5:
+              raise SystemExit("cross-section x skew exceeds the documented reduction tolerance")
+          if abs(height[0] - 0.09376) > 5.0e-5 or abs(height[-1] - 0.1048) > 5.0e-5:
+              raise SystemExit("extracted duct height disagrees with source-backed NASA geometry")
+          mdot_mean = sum(mdot) / len(mdot)
+          mdot_span = max(mdot) - min(mdot)
+          if mdot_span / mdot_mean > 0.005:
+              raise SystemExit("NASA reference main-duct mass-flow span exceeds 0.5%")
+
+          compatibility = json.loads(Path("nasa_bk_cff/compatibility_manifest.json").read_text(encoding="utf-8"))
+          summary = {
+              "schema_version": 1,
+              "artifact_kind": "nasa-bk-wind-us-common-file-section-extraction",
+              "source_class": "NASA_REFERENCE_SOLUTION_DERIVED",
+              "common_file_semantics": "Wind-US Common File; low-level ADF tree, not CGNS semantic nodes",
+              "scaling_rule": "V_SI = (V_file * RF + RO) * SF + SO, with VSCLST/REFARR read from each source file",
+              "compatibility_manifest": compatibility,
+              "main_duct_zone_counts": expected,
+              "section_record_count": len(rows),
+              "unique_section_count_expected_after_interface_deduplication": 121,
+              "x_min_m": min(x),
+              "x_max_m": max(x),
+              "max_cross_section_x_span_m": max(x_span),
+              "height_start_m": height[0],
+              "height_exit_m": height[-1],
+              "width_m_for_mass_flow_diagnostic": width_m,
+              "mass_flow_mean_kg_s": mdot_mean,
+              "mass_flow_min_kg_s": min(mdot),
+              "mass_flow_max_kg_s": max(mdot),
+              "mass_flow_relative_span": mdot_span / mdot_mean,
+              "section_csv_sha256": hashlib.sha256(csv_path.read_bytes()).hexdigest(),
+              "momentum_section_csv_sha256": hashlib.sha256(momentum_path.read_bytes()).hexdigest(),
+              "scientific_boundary": [
+                  "No experimental exit target is used to construct these section integrals.",
+                  "The extraction dimensionalizes NASA Wind-US reference fields using source-file scaling metadata.",
+                  "Thermal and momentum reductions come from the same checksum-tracked computational reference solution.",
+                  "A later reduced-order closure may use these computational reference sections but must remain labelled NASA_REFERENCE_SOLUTION_DERIVED."
+              ],
+          }
+          Path("nasa_bk_cff/extraction_summary.json").write_text(
+              json.dumps(summary, indent=2, sort_keys=True), encoding="utf-8"
+          )
+          print(json.dumps(summary, indent=2, sort_keys=True))
+          PY
+
+      - name: Upload Common File extraction artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p11-2b-nasa-bk-common-file-extraction
+          path: |
+            nasa_bk_cff/compatibility_manifest.json
+            nasa_bk_cff/cgd_cff_tree.txt
+            nasa_bk_cff/cfl_cff_tree.txt
+            nasa_bk_cff/nasa_bk_reference_sections.csv
+            nasa_bk_cff/nasa_bk_reference_momentum_sections.csv
+            nasa_bk_cff/extraction_summary.json
+            nasa_bk_cff/toolchain/cgns_source_SHA256SUMS.txt
+          retention-days: 14
+          if-no-files-found: warn

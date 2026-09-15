@@ -1,0 +1,77 @@
+name: P11.2B NASA BK Grid Convergence
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/p11_2b_nasa_bk_convergence.yml"
+      - "cases/studies/p11_2b_nasa_bk_convergence.py"
+      - "cases/studies/p11_2b_nasa_bk_heated_candidate.py"
+      - "cases/studies/p11_2b_nasa_bk_reference_exit.py"
+      - "cases/studies/data/p11_2b_nasa_bk_reference_exit_reduction.json"
+      - "cases/studies/p11_2b_nasa_bk_reference_inlet.py"
+      - "cases/studies/p11_2b_nasa_bk_energy_reduction.py"
+      - "cases/studies/p11_2b_nasa_bk_momentum_reduction.py"
+      - "src/scramjet1d/net_energy.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  grid-convergence:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install project
+        run: pip install -e ".[dev]"
+
+      - name: Run grid convergence
+        run: |
+          python -m cases.studies.p11_2b_nasa_bk_convergence \
+            --output-dir nasa_bk_convergence \
+            --cells 40 80 160 320
+
+      - name: Enforce convergence and scope gates
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          data = json.loads(Path("nasa_bk_convergence/convergence.json").read_text(encoding="utf-8"))
+          assert data["source_class"] == "NASA_REFERENCE_SOLUTION_DERIVED"
+          assert data["target_classification"] == "CONSERVATIVE_MOMENT_MATCHED_EXIT_TARGET"
+          for row in data["records"]:
+              assert row["converged"], row
+              assert row["termination_reason"] == "converged", row
+              assert row["minimum_Mach"] > 1.0, row
+          finest = data["finest_grid"]
+          changes = data["finest_vs_previous"]
+          # These are intentionally modest verification gates, not experimental fit tolerances.
+          assert abs(finest["Mach_relative_error"]) < 0.02, finest
+          assert abs(finest["pressure_relative_error"]) < 0.02, finest
+          assert abs(finest["temperature_relative_error"]) < 0.02, finest
+          assert changes["Mach_relative_change"] < 0.005, changes
+          assert changes["pressure_relative_change"] < 0.005, changes
+          assert changes["temperature_relative_change"] < 0.005, changes
+          print(json.dumps({"finest_grid": finest, "finest_vs_previous": changes}, indent=2, sort_keys=True))
+          PY
+
+      - name: Hash outputs
+        run: |
+          find nasa_bk_convergence -type f -print0 | sort -z | xargs -0 sha256sum \
+            > nasa_bk_convergence/SHA256SUMS.txt
+
+      - name: Upload convergence artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p11-2b-nasa-bk-grid-convergence
+          path: nasa_bk_convergence/
+          retention-days: 14
+          if-no-files-found: error

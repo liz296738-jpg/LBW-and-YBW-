@@ -1,0 +1,167 @@
+{
+  "schema_version": 1,
+  "case_family": "P11_2B_NASA_BK_PUBLIC_VALIDATION",
+  "candidate_id": "NASA-BURROWS-KURKOV-REACTING-VALIDATION",
+  "status": "PUBLIC_EXPERIMENT_AND_GEOMETRY_READY_REDUCED_ORDER_CASE_NOT_READY",
+  "purpose": "Public, reproducible evidence ledger for evaluating the NASA Burrows-Kurkov supersonic hydrogen-combustion benchmark as a P11.2B reduced-order heated-flow validation candidate. The public experiment, checksum-tracked exit data, source inlet/wall conditions, and source-backed quasi-one-dimensional main-duct geometry are available. A formal case remains blocked on a defensible thermodynamic reduction and prescribed line-energy closure; no finite-rate chemistry or species validation is claimed.",
+  "primary_experiment": {
+    "source_id": "NASA-BK-EXP-1973",
+    "citation": "Marshall C. Burrows and Anatole P. Kurkov, Analytical and Experimental Study of Supersonic Combustion of Hydrogen in a Vitiated Airstream, NASA-TM-X-2828, September 1973.",
+    "ntrs_document_id": "19730023096",
+    "ntrs_url": "https://ntrs.nasa.gov/citations/19730023096",
+    "pdf_url": "https://ntrs.nasa.gov/api/citations/19730023096/downloads/19730023096.pdf",
+    "distribution_limits": "Public",
+    "copyright_status": "Work of the US Government; NTRS marks public use permitted",
+    "confirmed_claims": [
+      "The experiment used Mach 2.44 vitiated air at elevated temperature with hydrogen injection.",
+      "Detailed probe measurements of total temperature, pressure, and composition were obtained 35.6 cm downstream of hydrogen injection.",
+      "Ignition location varied with freestream temperature and is an experimentally observed quantity."
+    ]
+  },
+  "nasa_validation_archive": {
+    "source_id": "NASA-GLENN-BK-STUDY02",
+    "title": "Burrows and Kurkov Supersonic Combustion: Study #2",
+    "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/bk2.html",
+    "parent_case_url": "https://www.grc.nasa.gov/www/wind/valid/bk/bk.html",
+    "code": "Wind-US 4.107",
+    "role": "NASA public unit/validation computation compared against Burrows-Kurkov experimental data",
+    "public_assets": [
+      {
+        "asset_id": "NASA-BK-EXP-TAR",
+        "kind": "experimental-data-archive",
+        "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/exp.tar",
+        "repository_policy": "Checksum-tracked acquisition and normalized data are recorded in cases/studies/data/p11_2b_nasa_bk_asset_manifest.json and p11_2b_nasa_bk_exp_exit_profiles.csv."
+      },
+      {
+        "asset_id": "NASA-BK-RUN-DAT",
+        "kind": "Wind-US-input-text",
+        "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.dat"
+      },
+      {
+        "asset_id": "NASA-BK-RUN-CGD",
+        "kind": "Wind-US-structured-grid",
+        "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.cgd",
+        "repository_policy": "Retained as a checksum-tracked geometry/reference asset. The formal main-duct area law is independently source-backed by NASA-TM-74094 and may be cross-checked against this grid."
+      },
+      {
+        "asset_id": "NASA-BK-RUN-CFL",
+        "kind": "Wind-US-reference-solution",
+        "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.cfl",
+        "repository_policy": "Any one-dimensional field or effective-energy quantity derived from this file must be labelled NASA_REFERENCE_SOLUTION_DERIVED, never EXPERIMENT_MEASURED."
+      },
+      {
+        "asset_id": "NASA-BK-RUN-LIS",
+        "kind": "Wind-US-run-log",
+        "url": "https://www.grc.nasa.gov/WWW/wind/valid/bk/study02/str_run.lis"
+      }
+    ]
+  },
+  "source_conditions_raw": {
+    "source_locator": "NASA Glenn Study #2 Initial Conditions table and str_run.dat inlet/wall records",
+    "freestream": {
+      "Mach": 2.44,
+      "pressure_psi": 14.7,
+      "temperature_R": 2286.0,
+      "mass_fractions": {
+        "H2": 0.0,
+        "O2": 0.2576,
+        "H2O": 0.2562,
+        "N2": 0.4862
+      }
+    },
+    "hydrogen": {
+      "Mach": 1.0,
+      "pressure_psi": 14.7,
+      "temperature_R": 457.2,
+      "mass_fractions": {
+        "H2": 1.0
+      }
+    },
+    "wall_temperature_R": 536.4,
+    "downstream_pressure_psi": 15.6
+  },
+  "source_conditions_si": {
+    "conversion_policy": "Exact unit conversions only: 1 psi = 6894.757293168 Pa and T[K] = T[R] * 5/9.",
+    "freestream": {
+      "Mach": 2.44,
+      "pressure_Pa": 101352.9322095696,
+      "temperature_K": 1270.0,
+      "mass_fractions": {
+        "H2": 0.0,
+        "O2": 0.2576,
+        "H2O": 0.2562,
+        "N2": 0.4862
+      }
+    },
+    "hydrogen": {
+      "Mach": 1.0,
+      "pressure_Pa": 101352.9322095696,
+      "temperature_K": 254.0,
+      "mass_fractions": {
+        "H2": 1.0
+      }
+    },
+    "wall_temperature_K": 298.0,
+    "downstream_pressure_Pa": 107558.2137734208
+  },
+  "experimental_targets": {
+    "exit_plane_x_m": 0.356,
+    "exit_profile_quantities": [
+      "total_temperature",
+      "Mach",
+      "H2O_mole_fraction",
+      "H2_mole_fraction"
+    ],
+    "ignition_onset_m_for_2286_R_case": 0.18,
+    "source_locator": "NASA Glenn Study #2 comparison discussion",
+    "ingestion_status": "RESOLVED_CHECKSUM_TRACKED_PUBLIC_NASA_DATA",
+    "normalized_data_path": "cases/studies/data/p11_2b_nasa_bk_exp_exit_profiles.csv",
+    "asset_manifest_path": "cases/studies/data/p11_2b_nasa_bk_asset_manifest.json",
+    "scope_note": "The current repository solver may compare reduced-order thermal/flow quantities such as Mach and total-temperature-related diagnostics after an admissible model reduction. It cannot claim validation of H2/H2O species profiles without species transport and chemistry."
+  },
+  "geometry_record": {
+    "status": "RESOLVED_SOURCE_BACKED_LINEAR_RECTANGULAR_DUCT",
+    "path": "cases/studies/data/p11_2b_nasa_bk_geometry_source.json",
+    "implementation": "cases/studies/p11_2b_nasa_bk_geometry.py",
+    "x_start_m": 0.0,
+    "x_exit_m": 0.356,
+    "width_m": 0.051,
+    "height_start_m": 0.0938,
+    "height_exit_m": 0.1048,
+    "area_start_m2": 0.0047838,
+    "area_exit_m2": 0.0053448,
+    "area_ratio_exit_over_start": 1.1172707889125801,
+    "evidence_class": "DERIVED_EXACTLY_FROM_SOURCE_DIMENSIONS"
+  },
+  "nasa_reference_solution_record": {
+    "turbulent_Prandtl_reported_good_match": 0.7,
+    "turbulent_Schmidt_reported_good_match": 0.7,
+    "predicted_ignition_onset_m": 0.14,
+    "experimental_ignition_onset_m": 0.18,
+    "reference_output_asset_id": "NASA-BK-RUN-CFL",
+    "evidence_class_for_derived_1d_fields": "NASA_REFERENCE_SOLUTION_DERIVED",
+    "boundary": "Wind-US output is a computational reference solution. It may support a transparent reduced-order closure study but may not be relabelled as experimentally measured heat release."
+  },
+  "reduced_order_promotion_policy": {
+    "highest_permitted_target_scope": "Prescribed-heat reduced-order validation against public NASA thermal/flow observables, with separate comparison to NASA Wind-US reference fields where derived quantities are used.",
+    "forbidden_claims": [
+      "finite-rate chemistry validation by the present solver",
+      "species-profile validation by the present solver",
+      "experimentally measured Qdot-prime unless a direct experimental source is recovered",
+      "LBW/YBW classification from the Burrows-Kurkov case",
+      "silent replacement of the vitiated mixture with air properties",
+      "tuning heat release solely to force agreement with the exit Mach or temperature profile"
+    ],
+    "resolved_before_formal_case": [
+      "public primary experiment identity",
+      "checksum-tracked experimental exit targets",
+      "source inlet/wall conditions and exact SI conversions",
+      "source-backed quasi-one-dimensional main-duct geometry mapping"
+    ],
+    "required_before_formal_case": [
+      "explicit effective-gas or thermodynamic reduction policy compatible with the calorically perfect-gas solver",
+      "a non-circular prescribed line-energy closure with provenance, preferably derived from the public NASA reference solution and independently checked against experimental observables",
+      "formal statement that species comparisons remain outside solver capability"
+    ]
+  }
+}
