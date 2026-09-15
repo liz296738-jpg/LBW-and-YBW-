@@ -10,9 +10,11 @@ Develop a quasi-one-dimensional, compressible-flow CFD solver and reproducible s
 
 Current stage: **teacher-reference second-scheme alignment and physical-closure completion.**
 
-P0-P10 established the numerical/verification foundation. P11.1 added reproducible parametric-study infrastructure. P11.2A established a literature-backed public cold-flow surrogate. P11.2B now includes an accepted, deliberately scoped NASA Burrows-Kurkov **reduced-order computational-reference benchmark**; this supporting benchmark is useful for verification but is not the teacher's primary requested deliverable.
+P0-P10 established the numerical/verification foundation. P11.1 added reproducible parametric-study infrastructure. P11.2A established a literature-backed public cold-flow surrogate. P11.2B includes an accepted, deliberately scoped NASA Burrows-Kurkov **reduced-order computational-reference benchmark**; this supporting benchmark is useful for verification but is not the teacher's primary requested deliverable.
 
-The uploaded teacher material confirms that our main numerical route is substantially correct: unsteady quasi-one-dimensional conservation equations, variable area, friction/heat/mass-addition source terms, first-order upwind/Steger-Warming spatial treatment, third-order TVD Runge-Kutta advancement, CFL stepping, and steady convergence. The remaining work is concentrated in the **teacher-reference physical closure layer**, especially variable thermochemistry/composition and empirical mixing/combustion closures.
+The uploaded teacher material confirms that our main numerical route is substantially correct: unsteady quasi-one-dimensional conservation equations, variable area, friction/heat/mass-addition source terms, first-order upwind/Steger-Warming spatial treatment, third-order TVD Runge-Kutta advancement, CFL stepping, and steady convergence.
+
+P11.3A has added the teacher Chapter 11 Eq. 11.46 relative-density convergence diagnostic alongside the existing normalized residual criterion. P11.3B now has an isolated implementation of the teacher/Cao variable thermochemistry equations: species `cp(T)` / absolute `h(T)`, mixture molecular weight, `R(Y)`, `cp(T,Y)`, `cv(T,Y)`, `gamma(T,Y)`, `h(T,Y)`, `e(T,Y)`, ideal-mixture pressure, and bounded `e -> T` inversion. Production coefficient data and solver integration remain gated rather than guessed.
 
 The earlier plan to interpret `LBW`/`YBW` as combustion modes was incorrect and has been abandoned. Combustion-mode-transition studies remain a later scientific application after the teacher-reference model is complete.
 
@@ -41,9 +43,14 @@ Detailed review:
 
 `docs/teacher_reference_alignment.md`
 
+Variable thermochemistry:
+
+`docs/teacher_thermochemistry.md`
+
 Machine-readable status:
 
-`cases/studies/data/teacher_reference_alignment.json`
+- `cases/studies/data/teacher_reference_alignment.json`
+- `cases/studies/data/teacher_thermochemistry_equations.json`
 
 Strongly aligned already:
 
@@ -54,11 +61,12 @@ Strongly aligned already:
 - third-order TVD/SSP RK;
 - CFL-controlled stepping;
 - compatible supersonic inflow / zero-gradient-like outflow capability;
-- teacher Chapter 11 Eq. 11.46 maximum relative-density iteration-change diagnostic, implemented alongside the existing normalized residual criterion.
+- teacher Chapter 11 Eq. 11.46 maximum relative-density iteration-change diagnostic, implemented alongside the existing normalized residual criterion;
+- isolated teacher/Cao variable-thermochemistry equations and internal-energy temperature inversion.
 
 Main gaps to close:
 
-1. temperature- and composition-dependent mixture thermodynamics (`cp(T)`, `h(T)`, `R(Y)`, `gamma(T,Y)`);
+1. freeze a complete source-backed thermochemical coefficient database and temperature-interval policy for the required species, then integrate the verified variable-thermo path into solver state recovery;
 2. teacher-reference mixing efficiency / mixing-length closure;
 3. equivalence-ratio and fuel-specific composition closure;
 4. teacher empirical friction and wall-heat closures as optional models;
@@ -67,7 +75,7 @@ Main gaps to close:
 
 ## Energy-Accounting Rule
 
-The teacher reference distinguishes external wall/additional heat from chemical-reaction energy. When variable composition and species enthalpy are introduced, the same chemical energy must not be counted both through species/enthalpy changes and again through the direct prescribed heat-release source.
+The teacher reference distinguishes external wall/additional heat from chemical-reaction energy. The teacher/Cao absolute species enthalpy contains sensible enthalpy plus the chemical/zero-point contribution. When variable composition and species enthalpy are introduced, the same reaction energy must not be counted both through species/enthalpy changes and again through the direct prescribed heat-release source.
 
 This is a project-level invariant: **no silent double counting of chemical energy.**
 
