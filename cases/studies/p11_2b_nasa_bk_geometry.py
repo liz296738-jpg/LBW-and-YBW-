@@ -5,8 +5,6 @@ expansion from the hydrogen-injection step to the 35.6 cm exit station. No
 boundary-layer effective-area correction or injection-plenum area is added.
 """
 
-from __future__ import annotations
-
 import json
 import math
 from dataclasses import dataclass
