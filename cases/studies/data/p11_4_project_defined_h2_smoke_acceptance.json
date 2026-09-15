@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "stage": "P11.4",
+  "case_classification": "PROJECT_DEFINED_INTEGRATED_SMOKE_CASE",
+  "source_reproduction": false,
+  "accepted_head_sha": "852a9f1faa5137a4a30123bb1fa921b139eb7521",
+  "workflow": {
+    "name": "P11.4 Teacher H2 Integrated Smoke",
+    "run_id": 35000992620,
+    "run_number": 4,
+    "conclusion": "success",
+    "artifact_id": 10409254663,
+    "artifact_name": "p11-4-teacher-h2-smoke",
+    "artifact_zip_sha256": "4c148282045e63311d738e448d3bc42eb5c93de825cb97b072c50eb9bc08bd30"
+  },
+  "numerical_gate": {
+    "cells": 20,
+    "dx_m": 0.02,
+    "cfl": 0.5,
+    "teacher_density_change_tolerance": 0.0001,
+    "max_steps": 8000,
+    "converged": true,
+    "steps": 343,
+    "final_density_change": 9.908109581867078e-05,
+    "final_normalized_residual": 0.0039151399815723536
+  },
+  "case_outputs": {
+    "inlet_air_mass_flow_kg_per_s": 1.1974413203893883,
+    "fuel_mass_source_kg_per_s": 0.006975386332365369,
+    "min_temperature_K": 798.9847474320868,
+    "max_temperature_K": 1577.253758730194,
+    "min_pressure_Pa": 54229.783283702425,
+    "max_pressure_Pa": 113514.9230062522,
+    "min_mach": 1.2789913988416468,
+    "max_mach": 2.241515330251246
+  },
+  "scientific_boundary": {
+    "teacher_eq_11_46_primary_gate_passed": true,
+    "normalized_residual_is_secondary_diagnostic": true,
+    "grid_independence_established": false,
+    "formal_cao_case2_reproduction": false,
+    "wall_heat_eq_11_26_enabled": false,
+    "variable_thermochemistry_steger_warming_enabled": false,
+    "next_required_step": "Run a multi-grid tighter-convergence study before treating this project-defined case as a grid-resolved reference result."
+  },
+  "geometry_note": "The smoke case uses a project-defined mild linear divergence from 0.0040 to 0.0050 m^2 over 0.40 m and derives a rectangular hydraulic-diameter profile from a fixed 0.040 m height. The geometry change was introduced after the original constant-area smoke trial developed reverse flow; it is not a source-derived Cao geometry."
+}
