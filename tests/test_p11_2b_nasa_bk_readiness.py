@@ -14,6 +14,7 @@ SOURCE_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_public_sourc
 MANIFEST_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_asset_manifest.json"
 PROFILES_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_exp_exit_profiles.csv"
 GEOMETRY_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_geometry_source.json"
+THERMO_PATH = ROOT / "cases" / "studies" / "data" / "p11_2b_nasa_bk_thermo_reduction.json"
 
 
 def _load_module():
@@ -94,7 +95,21 @@ def test_source_backed_geometry_is_resolved_in_readiness():
     assert geometry["area_exit_m2"] == pytest.approx(0.0053448)
 
 
-def test_current_nasa_candidate_stays_formally_blocked_and_scoped():
+def test_effective_gas_reduction_is_resolved_but_keeps_required_sensitivity():
+    module = _load_module()
+    thermo = module.load_thermo_evidence()
+
+    assert thermo["thermo_path"] == "cases/studies/data/p11_2b_nasa_bk_thermo_reduction.json"
+    assert thermo["temperature_reference_K"] == pytest.approx(1270.0)
+    assert thermo["R_J_per_kg_K"] == pytest.approx(329.4821420180208)
+    assert thermo["cp_J_per_kg_K"] == pytest.approx(1514.961402157982)
+    assert thermo["gamma"] == pytest.approx(1.2779315953440815)
+    assert thermo["classification"] == "MODEL_REDUCTION_WITH_SOURCE_BACKED_REFERENCE_PROPERTIES"
+    assert thermo["sensitivity_gamma_min"] < thermo["gamma"]
+    assert "formal NASA-BK reduced-order result" in thermo["required_sensitivity"]
+
+
+def test_current_nasa_candidate_has_only_line_energy_as_active_formal_blocker():
     module = _load_module()
     source = module.load_nasa_bk_source()
     readiness = module.assess_nasa_bk_readiness(source)
@@ -102,20 +117,23 @@ def test_current_nasa_candidate_stays_formally_blocked_and_scoped():
     assert readiness["public_source_route_ready"] is True
     assert readiness["experimental_archive_ingested"] is True
     assert readiness["source_backed_geometry_ready"] is True
+    assert readiness["thermodynamic_reduction_ready"] is True
     assert readiness["formal_case_ready"] is False
     assert readiness["lbw_ybw_classification_authorized"] is False
     assert readiness["finite_rate_chemistry_validation_authorized"] is False
     assert readiness["species_validation_authorized"] is False
 
     open_requirements = {item["requirement"] for item in readiness["open_requirements"]}
-    assert open_requirements == {
-        "effective_gas_thermodynamic_reduction",
-        "non_circular_line_heat_release_closure",
-        "species_validation_scope",
-    }
+    assert open_requirements == {"non_circular_line_heat_release_closure"}
+
     resolved_requirements = {item["requirement"] for item in readiness["resolved_requirements"]}
     assert "experimental_archive_ingestion" in resolved_requirements
     assert "quasi_1d_geometry_mapping" in resolved_requirements
+    assert "effective_gas_thermodynamic_reduction" in resolved_requirements
+
+    exclusions = {item["requirement"]: item["status"] for item in readiness["scope_exclusions"]}
+    assert exclusions["species_validation_scope"] == "EXPLICITLY_EXCLUDED_FROM_FORMAL_THERMAL_FLOW_CLAIM"
+    assert exclusions["lbw_ybw_classification"] == "NOT_AUTHORIZED_BY_NASA_BK"
 
 
 def test_experimental_targets_separate_thermal_flow_from_species_scope():
@@ -129,12 +147,6 @@ def test_experimental_targets_separate_thermal_flow_from_species_scope():
     assert "total_temperature" in targets["exit_profile_quantities"]
     assert "H2O_mole_fraction" in targets["exit_profile_quantities"]
     assert "H2_mole_fraction" in targets["exit_profile_quantities"]
-
-    readiness = module.assess_nasa_bk_readiness(source)
-    species_block = next(
-        item for item in readiness["open_requirements"] if item["requirement"] == "species_validation_scope"
-    )
-    assert species_block["status"] == "OUTSIDE_CURRENT_SOLVER_CAPABILITY"
 
 
 def test_tampered_si_conversion_is_rejected(tmp_path: Path):
@@ -187,6 +199,16 @@ def test_geometry_derived_value_drift_is_rejected(tmp_path: Path):
         module.load_geometry_evidence(tampered)
 
 
+def test_thermo_policy_drift_is_rejected(tmp_path: Path):
+    module = _load_module()
+    thermo = json.loads(THERMO_PATH.read_text(encoding="utf-8"))
+    thermo["formal_case_policy"]["classification"] = "UNTRACKED_ASSUMPTION"
+    tampered = tmp_path / "thermo.json"
+    tampered.write_text(json.dumps(thermo), encoding="utf-8")
+    with pytest.raises(ValueError, match="classification"):
+        module.load_thermo_evidence(tampered)
+
+
 def test_readiness_record_uses_repository_relative_posix_source_path():
     module = _load_module()
     record = module.build_readiness_record()
@@ -195,4 +217,5 @@ def test_readiness_record_uses_repository_relative_posix_source_path():
     assert "\\" not in record["source_ledger"]
     assert record["experimental_archive_ingested"] is True
     assert record["source_backed_geometry_ready"] is True
+    assert record["thermodynamic_reduction_ready"] is True
     assert record["formal_case_ready"] is False
