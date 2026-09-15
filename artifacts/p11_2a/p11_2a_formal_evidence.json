@@ -1,0 +1,69 @@
+{
+  "stage": "P11.2A",
+  "status": "verified",
+  "claim_level": "PHYSICAL-SCALE PUBLIC SURROGATE — NON-REACTIVE REDUCED-ORDER MODEL",
+  "head_sha": "9032d5e8304ac6022ba7c4f185b170c6ba9cddd2",
+  "standard_ci": {
+    "run_id": 34880624298,
+    "conclusion": "success",
+    "pytest": "801 passed in 47.01 s"
+  },
+  "formal_workflow": {
+    "run_id": 34880624357,
+    "conclusion": "success",
+    "artifact_id": 10362683519,
+    "artifact_name": "p11-2a-public-surrogate-9032d5e8304ac6022ba7c4f185b170c6ba9cddd2",
+    "artifact_sha256": "364ea31e3395e0080ad7a426f20e4fc53dc438efb4b53147ed3dcc3fcb759789"
+  },
+  "baseline": {
+    "case_id": "P11A-PUBLIC-COLD-BASE",
+    "converged": true,
+    "termination_reason": "converged",
+    "steps": 1779,
+    "final_time_s": 0.0009286050657850441,
+    "final_residual": 9.83970984211644e-09,
+    "N": 238,
+    "dx_m": 0.005,
+    "Mach_in": 2.519999999999999,
+    "Mach_out": 2.7131182430276577,
+    "p_in_Pa": 76025.75290293168,
+    "p_out_Pa": 56388.41624596558,
+    "T_in_K": 726.8466309557375,
+    "T_out_K": 667.421157209449,
+    "mass_flow_in_kg_s": 0.8685623459459791,
+    "mass_flow_out_kg_s": 0.867823772674948,
+    "mass_flow_relative_span": 0.0010187197738379481
+  },
+  "isolator_ofat": {
+    "case_id": "P11A-ISO-L280",
+    "isolator_length_m": 0.28,
+    "converged": true,
+    "termination_reason": "converged",
+    "steps": 1772,
+    "final_time_s": 0.0009249646221641123,
+    "final_residual": 9.653607551407441e-09,
+    "N": 182,
+    "dx_m": 0.005,
+    "Mach_out": 2.713118242903841,
+    "p_out_Pa": 56388.41625231091,
+    "T_out_K": 667.4211572308136,
+    "mass_flow_relative_span": 0.0010188397831035932
+  },
+  "aligned_profile_comparison": {
+    "coordinate_shift_m": 0.28,
+    "max_relative_difference_rho": 6.503796926352956e-11,
+    "max_relative_difference_u": 2.963093570354893e-11,
+    "max_relative_difference_p": 8.346294892469552e-11,
+    "max_relative_difference_T": 2.939354475749881e-11,
+    "max_relative_difference_Mach": 4.5636239008929095e-11,
+    "max_relative_difference_mass_flow": 5.084430896520118e-11,
+    "interpretation": "After shifting the axial coordinate by the 0.28 m isolator-length difference, the two cold-flow solutions are numerically identical to about 1e-10 relative. In the present inviscid, source-free quasi-1D model, changing only the length of a constant-area isolator cannot reproduce the experimental reactive isolator-length sensitivity. This is a model-scope finding, not agreement with the experiment."
+  },
+  "remaining_reactive_blockers": [
+    "axial fuel mass-source distribution",
+    "fuel axial velocity",
+    "fuel specific total enthalpy",
+    "burned-fuel or heat-release axial distribution",
+    "approved closure connecting total injected fuel to axial reaction/heat release"
+  ]
+}

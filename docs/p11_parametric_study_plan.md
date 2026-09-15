@@ -2,96 +2,94 @@
 
 ## Scientific scope
 
-P11.1 verifies study infrastructure using a controlled numerical similarity experiment. Its scientific claim level is `framework-only`. It is not a calibrated engine study, an experimental validation, an LBW/YBW classification, or a mode-transition prediction. `LBW` and `YBW` remain literal project labels until authoritative definitions and a criterion are frozen.
+P11 converts the verified quasi-one-dimensional solver into reproducible study workflows while keeping numerical controls, physical inputs, modelling assumptions, and scientific claims separate.
 
-Numerical controls, physical inputs, and framework controls are separate categories. P11.1 sweeps only the dimensionless framework control `stagnation_pressure_scale = 0.8, 1.0, 1.2`; these values must not be interpreted as engine operating conditions.
+`LBW` and `YBW` remain literal project labels until P11.3 freezes an authoritative discrimination criterion. Mach extrema, sonic fractions, sonic margin, and sonic-crossing count are diagnostics only.
 
 ## Stage breakdown
 
-- P11.1 Parametric Study Foundation + controlled similarity pilot — formal run pending.
-- P11.2A Source-backed public surrogate geometry/inflow baseline + physical OFAT — source evidence available; implementation may proceed.
-- P11.2B Reactive physical baseline — evidence-gated pending axial injection/burn or heat-release closure.
-- P11.3 Literature/teacher-defined LBW/YBW criterion + regime/transition map — planned.
+- P11.1 Parametric Study Foundation + controlled similarity pilot — framework implemented and verified; framework-only claim.
+- **P11.2A Source-backed public surrogate cold-flow baseline + isolator-length diagnostic — IMPLEMENTED AND FORMALLY VERIFIED.**
+- P11.2B Reactive physical baseline / prescribed heat-release closure — evidence-gated; next development target.
+- P11.3 Literature/teacher-defined LBW/YBW criterion + regime/transition map — planned after P11.2B.
 - P11.4 Integrated LBW/YBW comparison, robustness, interpretation, and study closure — planned.
 
-P11.2A uses the public surrogate source recorded in `cases/studies/data/p11_2_public_surrogate_source.json`. It must never be described as a Cao-thesis reproduction. P11.2B remains reserved for a source-backed reactive case.
+P11.2A uses the public source ledger `cases/studies/data/p11_2_public_surrogate_source.json`. It must never be described as a Cao-thesis reproduction. P11.2B remains reserved for a stronger source-backed reactive case or explicitly documented prescribed-heat-release surrogate.
 
 ## P11.1 controlled pilot
 
-The pilot reuses the verified smooth quasi-one-dimensional isentropic family with `L=1 m`, `N=80`, linear face area from `1.0` to `1.2 m²`, `gamma=1.4`, `R=287 J/(kg K)`, and `T0=500 K`. Stagnation pressure is `300000 Pa × stagnation_pressure_scale`. Steger-Warming, CFL `0.2`, residual tolerance `1e-8`, maximum pseudo-time `0.10 s`, and `200000` maximum steps are fixed numerical controls.
+P11.1 verifies study infrastructure using smooth quasi-one-dimensional isentropic cases. Its pressure-scale sweep is a framework control rather than an engine operating-condition claim. Wall friction, wall heat flux, fuel injection, and combustion inputs remain inactive in that pilot.
 
-The formal matrix contains `SUB-SW-P080`, `SUB-SW-P100`, `SUB-SW-P120`, `SUB-SW-P100-REPEAT`, `SUP-SW-P080`, `SUP-SW-P100`, and `SUP-SW-P120` in that order. The repeat differs only by case ID and verifies deterministic reproducibility.
+The P11.1 result establishes study metadata, repeatability, metrics, and controlled parameter-matrix machinery. It is not an engine calibration or experimental validation.
 
-Wall friction, wall heat flux, fuel injection, and prescribed combustion inputs are inactive. Injection and prescribed burn distributions remain independent inputs; the study layer adds no inventory, efficiency, mixing, ignition, chemistry, or species model.
+## P11.2A accepted source and model
 
-With geometry, total temperature, reference Mach, and gas fixed, the controlled family expects invariant velocity, temperature, and Mach; pressure, density, and mass flow scale with total pressure. Relative L1 and Linf differences after the defined scaling must each be at most `1e-6`. These are framework-verification relations, not physical sensitivity claims about an engine.
+The public surrogate source is Li et al. (2025), *Sensitive factors of ethylene combustion heat release under different combustion modes in scramjet engine*, DOI `10.7527/S1000-6893.2024.30944`.
 
-## P11.2A public surrogate policy
+Direct source evidence includes:
 
-The surrogate source is Li et al. (2025), *Sensitive factors of ethylene combustion heat release under different combustion modes in scramjet engine*, DOI `10.7527/S1000-6893.2024.30944`.
+- inlet Mach `2.52`, total temperature `1650 K`, total pressure `1.34 MPa`, and vitiated-air composition (Table 1);
+- dimensioned engine geometry (Fig. 2 / Table 2);
+- total ethylene flow and injector-module operating points (Table 3);
+- one-factor levels for isolator length, injection distance, cavity depth, and throat size (Table 4).
 
-The source provides:
+The accepted P11.2A reduced-order mapping uses the source-backed `L1/L2/L3/W/H1/H2`, keeps `H=H1` through `L1+L2`, varies the main-passage height linearly `H1 -> H2` through `L3`, and sets `A(x)=W H(x)`. Cavity recirculation volume is not added to the one-dimensional core area. The project perfect-gas values `gamma=1.4` and `R=287 J/(kg K)` remain explicit model assumptions.
 
-- inlet Mach `2.52`, total temperature `1650 K`, total pressure `1.34 MPa`, and vitiated-air composition;
-- dimensioned engine geometry in Fig. 2 / Table 2;
-- total ethylene flow and injector-module operating points in Table 3;
-- source-supported OFAT levels in Table 4 for isolator length, injection distance, cavity depth, and throat size.
+Fuel injection, prescribed combustion, wall friction, and wall heat transfer are disabled in P11.2A because the paper does not provide the complete solver-ready source distributions required by P7/P8.
 
-P11.2A may freeze only inputs that are directly locatable or transparently derived from them. The initial accepted scope is a quasi-1D **core-flow surrogate** with reactive sources disabled unless an axial source distribution and the additional P7/P8 inputs are separately justified.
+## P11.2A formal acceptance record
 
-The current perfect-gas model may retain `gamma=1.4` and `R=287 J/(kg K)` only as explicit model assumptions. The source composition is evidence metadata, not species-transport input to the present solver.
+The accepted exact-SHA evidence is recorded in `artifacts/p11_2a/p11_2a_formal_evidence.json`.
 
-## Mode-classification policy
+- code SHA: `9032d5e8304ac6022ba7c4f185b170c6ba9cddd2`
+- Test workflow run `34880624298`: `801 passed in 47.01 s`
+- dedicated formal workflow run `34880624357`: success
+- runtime artifact `10362683519`
+- artifact SHA-256 `364ea31e3395e0080ad7a426f20e4fc53dc438efb4b53147ed3dcc3fcb759789`
 
-`lbw_ybw_classification_defined` remains false; `mode_criterion_id` and `mode_label` remain null. Mach extrema, sonic fractions, sonic margin, and crossing count are diagnostics only and do not classify LBW or YBW.
+Baseline `P11A-PUBLIC-COLD-BASE` (`L1=0.560 m`) converged in `1779` steps to residual `9.83971e-9`. The solution remained supersonic from `Mach=2.52` at the inlet to `Mach=2.71312` at the outlet, while static pressure changed from `76.026 kPa` to `56.388 kPa` and temperature from `726.847 K` to `667.421 K`. The cell-centred mass-flow relative span is `1.01872e-3` and is retained as a numerical diagnostic rather than hidden by a new ad-hoc gate.
 
-The experimental paper's verbal combustion-mode observations may be used as comparison context, but they are not automatically adopted as the repository's formal LBW/YBW criterion. P11.3 must freeze that criterion separately.
+The source-backed isolator-length variation `L1=0.560 -> 0.280 m` also converged. Once the `0.280 m` coordinate shift is removed, the overlapping solutions agree to approximately `1e-10` relative. This is a **model-scope result**: an inviscid, source-free constant-area isolator has no mechanism for the experimental reactive isolator-length sensitivity. P11.2A therefore does not claim agreement with the paper's combustion trend.
 
 ## P11.2 input status
 
-| Required input | P11.2A surrogate | P11.2B reactive/Cao track |
+| Required input | P11.2A status | P11.2B status |
 | --- | --- | --- |
-| Engine/combustor axial dimensions | SOURCE AVAILABLE (SRC06) | NOT FROZEN for exact Cao reproduction |
-| Area profile `A(x)` | PARTIAL — dimensions available; quasi-1D mapping must be explicit | NOT FROZEN |
-| Hydraulic diameter `D_h(x)` | DERIVABLE only if rectangular-core mapping is approved | NOT FROZEN |
-| Inlet condition definition | SOURCE AVAILABLE | Candidate values only |
-| Inlet total/static pressure | TOTAL SOURCE AVAILABLE; static derivable under model assumptions | Candidate values only |
-| Inlet total/static temperature | TOTAL SOURCE AVAILABLE; static derivable under model assumptions | Candidate values only |
-| Inlet Mach or velocity | Mach SOURCE AVAILABLE; velocity derivable under model assumptions | Candidate values only |
-| Outlet/back-pressure treatment | NOT SOURCE-FROZEN; supersonic-outflow may be tested only if physically applicable | NOT FROZEN |
-| Wall friction factor/model input | DISABLED unless separately sourced | NOT FROZEN |
-| Wall heat-flux/thermal condition | DISABLED unless separately sourced | NOT FROZEN |
-| Total fuel mass flow | SOURCE AVAILABLE (Table 3) | Partial |
-| Fuel-injection axial distribution | NOT FROZEN | NOT FROZEN |
-| Fuel axial velocity | NOT FROZEN | NOT FROZEN |
-| Fuel specific total enthalpy | NOT FROZEN | NOT FROZEN |
-| Prescribed burned-fuel distribution / heat release | NOT FROZEN | NOT FROZEN |
-| Fuel LHV | NOT REQUIRED while combustion disabled | Cao kerosene value available but insufficient alone |
-| Physical OFAT non-baseline levels | SOURCE AVAILABLE (Table 4) | NOT FROZEN |
-| Authoritative LBW/YBW criterion | NOT FROZEN | NOT FROZEN |
-| Experimental comparison observables | Wall-pressure / heat-release trends available | Partial |
+| Physical axial scale / main-passage geometry | FROZEN surrogate mapping | available as starting geometry |
+| Inlet total conditions and Mach | SOURCE + DERIVED primitive state | available |
+| Outlet treatment | VERIFIED supersonic-outflow for P11.2A | must be rechecked for heated cases |
+| Wall friction / heat transfer | DISABLED | optional; needs sourced/approved closure if enabled |
+| Total fuel flow | SOURCE AVAILABLE | available operating target only |
+| Axial fuel mass-source distribution | NOT USED | NOT FROZEN |
+| Fuel axial velocity / total enthalpy | NOT USED | NOT FROZEN |
+| Prescribed burned-fuel / heat-release distribution | NOT USED | **PRIMARY BLOCKER / closure required** |
+| Fuel LHV | not required | source can be added once fuel/closure is selected |
+| Isolator-length factor | FORMALLY EXECUTED; dynamically inert in current cold-flow model | potentially meaningful with added physics |
+| Injection-distance factor | DEFERRED | requires injection representation |
+| Cavity-depth factor | DEFERRED | requires reduced-order cavity closure |
+| Throat-size factor | DEFERRED pending unambiguous local area mapping | candidate future factor |
+| LBW/YBW criterion | NOT FROZEN | P11.3 responsibility |
 
-## P11.2A permitted OFAT factors
+## P11.2B decision rule
 
-Source-supported factor levels may be created only where the quasi-1D mapping remains meaningful:
+The next stage must not turn total fuel flow into an arbitrary uniform source. A reactive or heat-addition case can enter the formal study only when its axial energy-addition representation is traceable to a source or an explicitly approved reduced-order closure.
 
-- isolator length `560 -> 280 mm`;
-- injection distance `21 -> 42 mm` only after an injection-source representation exists;
-- cavity depth `21 -> 10 mm` only after the chosen quasi-1D cavity/core-area mapping is documented;
-- throat size `Hc 21 -> 16.8 mm`, corresponding `H 35 -> 39.2 mm`, after the local area mapping is frozen.
+A minimal defensible P11.2B may use a **prescribed heat-release / burned-fuel distribution** without P7 mass addition if the source and mathematical transformation are documented. A stronger case including fuel mass and momentum additionally needs axial fuel distribution, fuel velocity, and fuel total enthalpy.
 
-Until then, the safest first formal P11.2A study is the dimensioned inflow/geometry baseline plus the isolator-length variation, with reactive and wall sources disabled.
+Any such closure must preserve the existing solver semantics and be labelled according to its evidence level. It must not be presented as detailed chemistry, finite-rate combustion, or an exact experiment reproduction.
 
-## Metric Metadata Contract
+## Mode-classification policy
 
-P11.1 writes an explicit, fixed metadata record for every reported metric: symbol, units, definition, interpretation, hard-gate status, and scope. P11.2 must preserve the same provenance discipline and add, for every physical input, source ID, locator, raw value, SI conversion, and derivation status (`source`, `derived`, or `model-assumption`).
+No P11.2 result may automatically be labelled LBW or YBW. The experimental paper's verbal mode observations are comparison context only. P11.3 must separately freeze definitions, observables, thresholds/logic, and source locators before a regime map is produced.
 
-Sonic fractions, minimum sonic margin, sonic-crossing count, and Mach-extremum positions remain diagnostic only. They do not define a hard scientific gate and are not an LBW/YBW classifier.
+## Metric metadata contract
 
-## Limitations
+Each formal study must report symbol, units, definition, interpretation, scope, source status, and whether the metric is a scientific gate or a diagnostic. Physical inputs must additionally record source ID/locator, raw value, SI conversion, and derivation status (`source`, `derived`, `model-assumption`, `numerical-control`, or `deferred`).
 
-- P11.2A is a literature-backed surrogate, not a reproduction of the teacher-designated Cao case.
-- The solver is quasi-one-dimensional and calorically perfect; the experimental vitiated-air composition is not species-resolved.
-- Cavity recirculation, transverse jets, finite-rate chemistry, mixing, ignition, and species transport are not represented explicitly.
-- Total fuel flow alone is not enough to activate the existing P7/P8 source models without axial distribution, fuel velocity/enthalpy, and prescribed burn/heat-release information.
-- No LBW/YBW criterion is frozen yet.
+## Current limitations
+
+- quasi-one-dimensional calorically perfect gas;
+- experimental vitiated-air composition is not species-resolved;
+- no explicit cavity recirculation, transverse jets, boundary-layer/shock-train model, finite-rate chemistry, ignition, mixing, or species transport;
+- the P11.2A isolator-length experiment demonstrates a limitation of the cold-flow model rather than experimental sensitivity;
+- no authoritative LBW/YBW discrimination criterion has yet been frozen.
