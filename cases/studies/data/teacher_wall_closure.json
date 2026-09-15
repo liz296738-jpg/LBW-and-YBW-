@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "stage": "P11.3D",
+  "status": "TEACHER_WALL_FRICTION_AND_HEAT_COEFFICIENTS_TRANSCRIBED_FRICTION_MAPPING_READY_HEAT_ADAPTER_GATED",
+  "primary_source": {
+    "identity": "高超声速气动布局理论及应用, 第11章 双模态冲压发动机一维数值模拟",
+    "local_evidence": [
+      "乔老师项目/IMG_2463.HEIC.jpg",
+      "乔老师项目/IMG_2465.HEIC.JPG",
+      "乔老师项目/IMG_2468.HEIC.JPG"
+    ],
+    "locators": {
+      "friction_polynomial": "p.257 Eq.11.25",
+      "wall_heat_polynomial": "p.257 Eq.11.26",
+      "source_vector_original": "p.255 Eq.11.16",
+      "source_vector_numerical_section": "p.260 Eq.11.38"
+    }
+  },
+  "equations": {
+    "11.25": {
+      "topic": "wall friction coefficient",
+      "independent_variable": "z = phi*eta",
+      "coefficients_c0_to_c3": [0.0018, 0.001958, 0.00927, -0.0088525],
+      "implementation_policy": "RETURN_RAW_EMPIRICAL_POLYNOMIAL_WITHOUT_CLIPPING"
+    },
+    "11.26": {
+      "topic": "wall heat coefficient",
+      "independent_variable": "z = phi*eta",
+      "coefficients_c0_to_c3": [0.0009, 0.001125, 0.00594, -0.00469],
+      "implementation_policy": "RETURN_RAW_EMPIRICAL_POLYNOMIAL_ONLY"
+    },
+    "11.38_friction_term": {
+      "teacher_normalized_momentum_source": "-0.5*rho*u^2*(4*f/D_e)",
+      "repo_generic_darcy_source": "-0.5*f_D*rho*u*abs(u)/D_h",
+      "forward_flow_mapping": "f_D = 4*f when D_h = D_e and u >= 0"
+    },
+    "11.38_heat_term": {
+      "teacher_normalized_energy_source": "rho*u*d(delta_q)/dx",
+      "dimensional_adapter_from_eq_11_26": "NOT_FROZEN"
+    }
+  },
+  "scientific_boundaries": {
+    "raw_polynomials_not_clipped": true,
+    "negative_raw_friction_outside_practical_range_must_not_be_mapped_to_solver": true,
+    "friction_mapping_valid_for_teacher_forward_flow_convention": true,
+    "heat_coefficient_is_not_assumed_to_be_wall_heat_flux_W_per_m2": true,
+    "heat_source_solver_coupling_ready": false
+  },
+  "readiness": {
+    "source_transcription_ready": true,
+    "isolated_polynomial_verification_ready": true,
+    "teacher_to_repo_friction_convention_mapping_ready": true,
+    "friction_solver_adapter_ready": true,
+    "wall_heat_dimensional_adapter_ready": false,
+    "production_solver_replacement_ready": false
+  },
+  "next_gate": "Use f_D=4*f only through an explicit teacher adapter for forward-flow cases. Recover or derive a source-traceable relation between Eq.11.26 q(x) and Eq.11.38 d(delta_q)/dx before any teacher wall-heat coupling."
+}
