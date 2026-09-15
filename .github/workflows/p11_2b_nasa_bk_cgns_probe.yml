@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/p11_2b_nasa_bk_cgns_probe.yml"
       - "cases/studies/tools/p11_2b_nasa_bk_cff_extract.c"
+      - "cases/studies/tools/p11_2b_nasa_bk_cff_momentum_extract.c"
       - "cases/studies/data/p11_2b_nasa_bk_asset_manifest.json"
       - "cases/studies/data/p11_2b_nasa_bk_geometry_source.json"
   workflow_dispatch:
@@ -105,15 +106,23 @@ jobs:
           grep -q "rho\*e0" nasa_bk_cff/cfl_cff_tree.txt
           grep -q "ZONE   8" nasa_bk_cff/cgd_cff_tree.txt
 
-      - name: Build repository-owned Common File extractor
+      - name: Build repository-owned Common File extractors
         shell: bash
         run: |
           set -euo pipefail
-          cc -O2 -Wall -Wextra \
-            -I"$PWD/nasa_bk_cff/toolchain/install/include" \
+          common_flags=(
+            -O2 -Wall -Wextra
+            -I"$PWD/nasa_bk_cff/toolchain/install/include"
+            -I"$PWD/cases/studies/tools"
+          )
+          cc "${common_flags[@]}" \
             cases/studies/tools/p11_2b_nasa_bk_cff_extract.c \
             "$PWD/nasa_bk_cff/toolchain/install/lib/libcgns.a" \
             -lm -o nasa_bk_cff/p11_2b_nasa_bk_cff_extract
+          cc "${common_flags[@]}" \
+            cases/studies/tools/p11_2b_nasa_bk_cff_momentum_extract.c \
+            "$PWD/nasa_bk_cff/toolchain/install/lib/libcgns.a" \
+            -lm -o nasa_bk_cff/p11_2b_nasa_bk_cff_momentum_extract
 
       - name: Extract dimensional main-duct cross sections
         shell: bash
@@ -123,6 +132,10 @@ jobs:
             nasa_bk_cff/str_run.cgd.compat \
             nasa_bk_cff/str_run.cfl.compat \
             nasa_bk_cff/nasa_bk_reference_sections.csv
+          nasa_bk_cff/p11_2b_nasa_bk_cff_momentum_extract \
+            nasa_bk_cff/str_run.cgd.compat \
+            nasa_bk_cff/str_run.cfl.compat \
+            nasa_bk_cff/nasa_bk_reference_momentum_sections.csv
 
       - name: Validate extraction and write provenance summary
         shell: bash
@@ -136,14 +149,31 @@ jobs:
           from pathlib import Path
 
           csv_path = Path("nasa_bk_cff/nasa_bk_reference_sections.csv")
+          momentum_path = Path("nasa_bk_cff/nasa_bk_reference_momentum_sections.csv")
           with csv_path.open(newline="", encoding="utf-8") as stream:
               rows = list(csv.DictReader(stream))
-          if len(rows) != 127:
-              raise SystemExit(f"expected 127 extracted section records, found {len(rows)}")
+          with momentum_path.open(newline="", encoding="utf-8") as stream:
+              momentum_rows = list(csv.DictReader(stream))
+          if len(rows) != 127 or len(momentum_rows) != 127:
+              raise SystemExit(
+                  f"expected 127 extracted section records, found thermal={len(rows)}, momentum={len(momentum_rows)}"
+              )
           counts = Counter(int(row["zone"]) for row in rows)
           expected = {2: 17, 3: 17, 4: 17, 5: 17, 6: 17, 7: 17, 8: 25}
           if dict(sorted(counts.items())) != expected:
               raise SystemExit(f"unexpected main-duct zone topology: {dict(counts)}")
+
+          for thermal, momentum in zip(rows, momentum_rows, strict=True):
+              if (thermal["zone"], thermal["i_index"]) != (momentum["zone"], momentum["i_index"]):
+                  raise SystemExit("thermal/momentum section ordering drifted")
+              if abs(float(thermal["x_mid_m"]) - float(momentum["x_mid_m"])) > 1.0e-12:
+                  raise SystemExit("thermal/momentum axial coordinates disagree")
+              if abs(float(thermal["mass_flux_per_width_kg_m_s"]) - float(momentum["mass_flux_per_width_kg_m_s"])) > 1.0e-9:
+                  raise SystemExit("thermal/momentum mass-flux integrals disagree")
+              if abs(float(thermal["area_weighted_p_Pa"]) - float(momentum["area_weighted_p_Pa"])) > 1.0e-6:
+                  raise SystemExit("thermal/momentum pressure integrals disagree")
+              if float(momentum["momentum_flux_per_width_N_per_m"]) <= 0.0:
+                  raise SystemExit("nonpositive axial momentum flux")
 
           x = [float(row["x_mid_m"]) for row in rows]
           x_span = [float(row["x_span_m"]) for row in rows]
@@ -184,9 +214,11 @@ jobs:
               "mass_flow_max_kg_s": max(mdot),
               "mass_flow_relative_span": mdot_span / mdot_mean,
               "section_csv_sha256": hashlib.sha256(csv_path.read_bytes()).hexdigest(),
+              "momentum_section_csv_sha256": hashlib.sha256(momentum_path.read_bytes()).hexdigest(),
               "scientific_boundary": [
                   "No experimental exit target is used to construct these section integrals.",
                   "The extraction dimensionalizes NASA Wind-US reference fields using source-file scaling metadata.",
+                  "Thermal and momentum reductions come from the same checksum-tracked computational reference solution.",
                   "A later reduced-order closure may use these computational reference sections but must remain labelled NASA_REFERENCE_SOLUTION_DERIVED."
               ],
           }
@@ -206,6 +238,7 @@ jobs:
             nasa_bk_cff/cgd_cff_tree.txt
             nasa_bk_cff/cfl_cff_tree.txt
             nasa_bk_cff/nasa_bk_reference_sections.csv
+            nasa_bk_cff/nasa_bk_reference_momentum_sections.csv
             nasa_bk_cff/extraction_summary.json
             nasa_bk_cff/toolchain/cgns_source_SHA256SUMS.txt
           retention-days: 14
