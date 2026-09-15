@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "record_kind": "p11-3-dual-mode-combustion-definition-evidence",
+  "stage": "P11.3",
+  "status": "GENERAL_MODE_TAXONOMY_FROZEN_PROJECT_LABEL_MAPPING_PENDING",
+  "purpose": "Freeze authoritative public evidence for dual-mode scramjet combustion-mode terminology, observables, transition mechanisms, and limitations before any LBW/YBW classifier or regime map is implemented. The project-specific meanings of the labels LBW and YBW are not inferred from the repository name and remain unresolved until a teacher/project source explicitly defines them.",
+  "evidence_sources": [
+    {
+      "source_id": "TIAN-ET-AL-2014-Q1D-MULTIMODES",
+      "citation": "Lu Tian, Lihong Chen, Qiang Chen, Fei Li, Xinyu Chang. Quasi-One-Dimensional Multimodes Analysis for Dual-Mode Scramjet. Journal of Propulsion and Power 30(6), 1559-1567 (2014).",
+      "doi": "10.2514/1.B35177",
+      "source_type": "peer-reviewed-journal-primary-modeling",
+      "evidence_class": "AUTHORITATIVE_MODE_DEFINITION_FOR_QUASI_1D_MODELING",
+      "mode_taxonomy": {
+        "supersonic_combustion_mode": {
+          "isolator_state": "Only very weak shock structures in the isolator.",
+          "flow_observable": "Averaged Mach number remains above one along the engine duct in the authors' definition."
+        },
+        "dual_mode_supersonic_combustion_mode": {
+          "isolator_state": "An obvious precombustion shock-train system is present.",
+          "flow_observable": "Mach number behind the modeled precombustion shock train remains greater than one."
+        },
+        "dual_mode_subsonic_combustion_mode": {
+          "isolator_state": "An obvious precombustion shock-train system is present.",
+          "flow_observable": "Mach number after the modeled precombustion shock train is less than one."
+        },
+        "subsonic_combustion_mode": {
+          "isolator_state": "Very strong shock structures may occur, potentially including a normal shock.",
+          "flow_observable": "Averaged Mach number in the combustor is below one."
+        },
+        "inlet_unstart": {
+          "observable": "The modeled precombustion shock-train length exceeds the available isolator length."
+        }
+      },
+      "project_use": "Primary definition source for a future quasi-one-dimensional mode-state representation because it explicitly defines multiple dual-mode states and distinguishes the two dual modes by the state after the precombustion shock system.",
+      "limitation": "The paper includes a dedicated strength-adaptable precombustion shock model. The current project must not claim equivalent shock-train observability unless the solver/domain can represent and diagnose the isolator shock system."
+    },
+    {
+      "source_id": "ZHANG-ET-AL-2014-MODE-TRANSITION",
+      "citation": "Yan Zhang, Bing Chen, Gang Liu, Baoxi Wei, Xu Xu. Influencing factors on the mode transition in a dual-mode scramjet. Acta Astronautica 103, 1-15 (2014).",
+      "doi": "10.1016/j.actaastro.2014.06.006",
+      "source_type": "peer-reviewed-journal-primary-experiment",
+      "evidence_class": "AUTHORITATIVE_EXPERIMENTAL_MODE_CLASSIFICATION",
+      "mode_taxonomy": {
+        "pure_scram_mode": "No pre-combustion shock train; combustion remains in the scram/supersonic family.",
+        "dual_mode_scram_mode": "A weaker oblique pre-combustion shock train is present while the one-dimensional averaged Mach number at combustor entrance is greater than one.",
+        "dual_mode_ram_mode": "A sufficiently strong normal-shock train in the isolator decelerates the flow to subsonic speed at the combustor entrance."
+      },
+      "transition_observables": [
+        "wall static-pressure distribution",
+        "one-dimensional Mach-number distribution",
+        "optical visualization",
+        "fuel equivalence ratio as a control/continuation parameter"
+      ],
+      "facility_specific_example": {
+        "condition": "P0=0.85 MPa, T0=1200 K, isolator-inlet Mach 2.0, ethylene experiment described by the paper",
+        "lower_transition": "Pure Scram -> Dual-Mode Scram; normalized wall pressure at x/H=2.5 reported as 0.23.",
+        "upper_transition": "Dual-Mode Scram -> Dual-Mode Ram; normalized wall pressure at x/H=2.5 reported as 0.34."
+      },
+      "project_use": "Supports a three-state experimental taxonomy and confirms that precombustion-shock structure plus combustor-entrance Mach are physically meaningful observables.",
+      "limitation": "The reported normalized-pressure values and equivalence-ratio transition points are facility/condition specific and must not be promoted as universal project thresholds. Hysteresis is reported in the transition region, so transition direction/history can matter."
+    },
+    {
+      "source_id": "LIU-ET-AL-2019-AXISYMMETRIC-TRANSITION",
+      "citation": "Qili Liu, Damiano Baccarella, Brendan McGann, Tonghun Lee. Dual-Mode Operation and Transition in Axisymmetric Scramjets. AIAA Journal 57(11), 4764-4777 (2019).",
+      "doi": "10.2514/1.J058391",
+      "source_type": "peer-reviewed-journal-primary-experiment",
+      "evidence_class": "AUTHORITATIVE_TRANSITION_MECHANISM_EVIDENCE",
+      "findings_for_project": [
+        "Mode-transition initiation depends on heat addition relative to area relief along the flowpath.",
+        "Thermal choking can be attained in a diverging combustor when combustion heat addition is sufficiently strong.",
+        "Thermal choking initiates near a pressure inflection where combustion heat loading and area relief become comparable in the reported configuration.",
+        "After scram-to-ram transition, steady ramjet combustion can be established upstream of the diverging section and the flow can subsequently reaccelerate to supersonic speed."
+      ],
+      "project_use": "Prevents a future classifier from treating downstream supersonic reacceleration as proof that the entire combustor is in scram mode; the relevant mode observable must be tied to the precombustion/combustor-entry state and transition topology.",
+      "limitation": "The paper does not provide a universal scalar threshold transferable to arbitrary project geometries."
+    },
+    {
+      "source_id": "FOTIA-DRISCOLL-2013-RAM-SCRAM",
+      "citation": "Matthew L. Fotia, James F. Driscoll. Ram-Scram Transition and Flame/Shock-Train Interactions in a Model Scramjet Experiment. Journal of Propulsion and Power 29(1), 261-273 (2013).",
+      "doi": "10.2514/1.B34486",
+      "source_type": "peer-reviewed-journal-primary-experiment",
+      "evidence_class": "AUTHORITATIVE_TRANSITION_DYNAMICS_EVIDENCE",
+      "findings_for_project": [
+        "Ram-scram transition is associated with a sudden change in wall static-pressure distribution and flame position when the downstream boundary changes between choked and unchoked behavior.",
+        "A measured transition-boundary regime diagram was constructed rather than asserting one universal Mach-number threshold.",
+        "Low-frequency oscillations and coupling with the upstream precombustion pseudoshock can occur in part of the transition region."
+      ],
+      "project_use": "Supports explicit transition-region/uncertain classification and history dependence rather than forcing every state into a binary label."
+    },
+    {
+      "source_id": "CAO-ET-AL-2020-1D-BOUNDARY",
+      "citation": "Ruifeng Cao, Yue Lu, Daren Yu, Juntao Chang. Study on influencing factors of combustion mode transition boundary for a scramjet engine based on one-dimensional model. Aerospace Science and Technology 96, 105590 (2020).",
+      "doi": "10.1016/j.ast.2019.105590",
+      "source_type": "peer-reviewed-journal-one-dimensional-model",
+      "evidence_class": "AUTHORITATIVE_ONE_DIMENSIONAL_BOUNDARY_SENSITIVITY_EVIDENCE",
+      "findings_for_project": [
+        "A one-dimensional model can be used to study a combustion-mode transition boundary.",
+        "The transition boundary depends on combustor area profile, heat-release distribution, wall temperature, wall roughness, and incoming-flow composition."
+      ],
+      "project_use": "Supports parameter-dependent regime mapping but explicitly argues against treating one threshold calibrated at one condition as universal."
+    }
+  ],
+  "frozen_general_rules": [
+    {
+      "rule_id": "MODE-DEF-001",
+      "rule": "Do not classify ram/scram family solely from the minimum Mach anywhere in the computational domain."
+    },
+    {
+      "rule_id": "MODE-DEF-002",
+      "rule": "For dual-mode distinctions, the state of the precombustion shock system / isolator and the flow state near the combustor entrance are central observables in the cited literature."
+    },
+    {
+      "rule_id": "MODE-DEF-003",
+      "rule": "Downstream reacceleration to Mach > 1 is compatible with ram-mode operation upstream and therefore cannot by itself establish scram mode."
+    },
+    {
+      "rule_id": "MODE-DEF-004",
+      "rule": "Published wall-pressure or equivalence-ratio transition values are condition-specific unless a source explicitly establishes transferability."
+    },
+    {
+      "rule_id": "MODE-DEF-005",
+      "rule": "A transition/uncertain band is scientifically preferable to a forced binary label when shock/flame oscillation, hysteresis, or insufficient observables prevent an unambiguous mode assignment."
+    }
+  ],
+  "project_label_resolution": {
+    "labels": ["LBW", "YBW"],
+    "status": "UNRESOLVED_PROJECT_SPECIFIC_SEMANTICS",
+    "search_record": [
+      "The current repository contains no authoritative expansion or definition of the literal labels LBW and YBW.",
+      "The available prior project initialization material describes a scramjet/dual-mode quasi-1D CFD goal but does not define LBW or YBW.",
+      "Public exact-string searches did not recover a credible aerospace source defining LBW/YBW as standard dual-mode scramjet mode names."
+    ],
+    "policy": "Do not map LBW or YBW to Pure Scram, Dual-Mode Scram, Dual-Mode Ram, supersonic combustion, subsonic combustion, geometry names, or any other state until an explicit teacher/project source resolves the labels."
+  },
+  "classifier_readiness": {
+    "general_mode_taxonomy_ready": true,
+    "transition_mechanism_evidence_ready": true,
+    "condition_specific_threshold_evidence_ready": true,
+    "lbw_ybw_label_mapping_ready": false,
+    "solver_observable_mapping_ready": false,
+    "universal_threshold_ready": false,
+    "classifier_ready": false,
+    "regime_map_ready": false,
+    "blocking_items": [
+      "Authoritative project-specific definition/expansion of LBW and YBW.",
+      "Explicit mapping from the project's modeled domain to the literature observables: isolator/precombustion shock state and combustor-entry Mach/state.",
+      "A decision on whether transition hysteresis/history is inside P11.3 scope or whether the first regime map is strictly steady/quasi-steady.",
+      "If wall-pressure thresholds are used, source-backed normalization and condition-specific calibration rather than copying Zhang et al.'s facility-specific 0.23/0.34 values."
+    ]
+  }
+}
