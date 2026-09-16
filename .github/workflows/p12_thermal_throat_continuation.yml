@@ -1,0 +1,80 @@
+name: P12 Thermal-Throat Continuation
+
+on:
+  pull_request:
+    paths:
+      - 'cases/studies/p12_thermal_throat_continuation.py'
+      - 'cases/studies/p11_4_project_defined_h2_smoke.py'
+      - 'src/scramjet1d/**'
+      - '.github/workflows/p12_thermal_throat_continuation.yml'
+  workflow_dispatch:
+
+jobs:
+  continuation:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e '.[dev]'
+      - name: Run guarded continuation
+        run: |
+          python - <<'PY'
+          from dataclasses import asdict
+          import json
+          import math
+          from pathlib import Path
+
+          from cases.studies.p12_thermal_throat_continuation import (
+              CASE_CLASSIFICATION,
+              STATUS_CONVERGED,
+              STATUS_FORWARD_FLOW_GUARD,
+              STATUS_MAX_STEPS,
+              run_continuation,
+          )
+
+          points = run_continuation(cells=20, tolerance=1.0e-4, max_steps=8000)
+          payload = {
+              'classification': CASE_CLASSIFICATION,
+              'points': [asdict(point) for point in points],
+          }
+          Path('p12_thermal_throat_continuation.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+          print(json.dumps(payload, indent=2, sort_keys=True))
+
+          if not points or points[0].equivalence_ratio != 0.20 or not points[0].converged:
+              raise SystemExit('accepted phi=0.20 continuation anchor did not converge')
+          if len(points) < 2:
+              raise SystemExit('continuation did not evaluate any point beyond phi=0.20')
+
+          for point in points:
+              if point.status == STATUS_CONVERGED:
+                  if point.density_change is None or point.density_change > 1.0e-4:
+                      raise SystemExit(f'phi={point.equivalence_ratio}: Eq.11.46 gate failed')
+                  if point.mass_inventory_relative_to_inlet is None or point.mass_inventory_relative_to_inlet > 5.0e-3:
+                      raise SystemExit(f'phi={point.equivalence_ratio}: mass inventory gate failed')
+                  for value in (
+                      point.normalized_residual,
+                      point.momentum_inventory_relative_to_inlet,
+                      point.energy_inventory_relative_to_inlet,
+                      point.min_mach,
+                      point.max_mach,
+                  ):
+                      if value is None or not math.isfinite(value):
+                          raise SystemExit(f'phi={point.equivalence_ratio}: invalid converged diagnostic')
+                  if point.cao_thermal_throat_state is None:
+                      raise SystemExit(f'phi={point.equivalence_ratio}: converged point lacks source-criterion state')
+              elif point.status in (STATUS_FORWARD_FLOW_GUARD, STATUS_MAX_STEPS):
+                  if point.cao_thermal_throat_state is not None:
+                      raise SystemExit(f'phi={point.equivalence_ratio}: nonconverged point was assigned a physical mode')
+              else:
+                  raise SystemExit(f'phi={point.equivalence_ratio}: unknown continuation status {point.status}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p12-thermal-throat-continuation
+          path: p12_thermal_throat_continuation.json
