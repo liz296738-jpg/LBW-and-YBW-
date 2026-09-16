@@ -5,20 +5,31 @@
   "assessment_date": "2026-09-16",
   "repository_evidence_search": {
     "queries": ["Cao Case 2", "曹瑞峰", "Case 2", "cao"],
-    "result": "No Cao Case 2 source record or source-backed candidate was found on main after P11.4 conservation acceptance."
+    "result": "A source-backed Cao Case 2 record is present on main as cases/studies/data/teacher_cao_case2_source.json. Source identity, dissertation locator, Table 2-2 isolator-entrance state, H2 fuel, phi=0.2, vitiated inlet composition, wall temperature, and reported comparison grid spacings are frozen. Formal reproduction remains blocked by missing spatial inputs."
+  },
+  "frozen_source_evidence": {
+    "record": "cases/studies/data/teacher_cao_case2_source.json",
+    "primary_source": "曹瑞峰《超燃冲压发动机燃烧模态转换及其控制方法研究》",
+    "locator": "2.5.4.2 算例2 / 表2-2 算例2中的隔离段入口条件",
+    "fuel": "H2",
+    "equivalence_ratio": 0.2,
+    "isolator_entrance_state_ready": true,
+    "vitiated_inlet_composition_ready": true,
+    "wall_temperature_ready": true,
+    "reported_grid_spacings_ready": true
   },
   "required_before_promotion": [
-    "traceable primary-source identity and locator for Cao Ruifeng Case 2",
-    "exact source-backed combustor area profile A(x), including coordinate origin and units",
-    "exact source-backed inlet/boundary state required by the teacher solver path",
-    "prescribed species/composition distribution Yi(x), or the exact source-backed rule that generates it",
-    "source-backed injector/fuel operating condition and any case-specific wall/source settings needed by the governing equations"
+    "exact source-backed combustor/isolator area profile A(x), including coordinate origin and units",
+    "exact prescribed species/composition distribution Yi(x), or the exact source-backed spatial rule that generates it",
+    "the original Case 2 fuel-addition/source spatial convention required to map the prescribed-composition case into the conservative solver without inventing mass addition",
+    "any remaining case-specific wall/source settings required by the governing equations that are not already frozen in teacher_cao_case2_source.json"
   ],
   "prohibited_shortcuts": [
     "Do not substitute the accepted PROJECT_DEFINED_INTEGRATED_SMOKE_CASE geometry or controls.",
     "Do not infer missing A(x) or Yi(x) from plots without a traceable digitization/source record.",
+    "Do not conflate the Case 2 vitiated inlet/prescribed-composition benchmark with the photographed Chapter 11 dry-air single-injector algebraic closure.",
     "Do not label a surrogate or project-defined run as Cao Case 2 reproduction."
   ],
-  "next_safe_stage": "P12_PROJECT_DEFINED_MODE_TRANSITION_APPLICATION",
-  "note": "P11.4 project-defined H2 integration, three-level grid study, and discrete conservation audit are accepted independently. They validate the implementation path but do not supply missing Cao Case 2 scientific inputs."
+  "next_safe_stage": "P12_PROJECT_DEFINED_RESPONSE_STUDY_WITHOUT_MODE_LABELS",
+  "note": "P11.4 project-defined H2 integration, three-level grid study, and discrete conservation audit are accepted independently. They validate the implementation path but do not supply the missing Cao Case 2 A(x), Yi(x), or original source-spatial convention."
 }
