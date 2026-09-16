@@ -1,6 +1,6 @@
 # P12 Project-Defined Mode-Transition Foundation
 
-Status: **ACTIVE / EVIDENCE-GATED RESPONSE STUDY**
+Status: **SOURCE CRITERION RECOVERED / PROJECT APPLICATION ACTIVE**
 
 Classification: `P12_PROJECT_DEFINED_MODE_TRANSITION_APPLICATION`
 
@@ -8,66 +8,85 @@ This stage begins only after the accepted P11.4 integrated H2 smoke case, three-
 
 ## Purpose
 
-P12 studies whether the accepted one-dimensional infrastructure can support a defensible combustion-mode-transition application. The first step is to freeze the distinction between (a) numerical/physical observables already produced by the solver and (b) a source-backed transition criterion.
+P12 studies whether the accepted one-dimensional infrastructure can support a defensible combustion-mode-transition application. The project now distinguishes explicitly between (a) numerical/physical observables produced by the solver, (b) source-defined combustion-mode criteria recovered from Cao Ruifeng's doctoral dissertation, and (c) project-defined geometry and operating points.
 
 ## Inputs that may be reused
 
 The accepted P11.4 project-defined H2 case may be reused only as a project-defined baseline. Its geometry, inlet state, equivalence ratio, injector location, mixing constant, injection state, zero explicit wall-heat-gradient scope, Rusanov flux, SSP-RK3 integration, CFL choice, and Eq.11.46 steady gate remain project choices or previously documented model choices.
 
-No Cao-specific geometry, prescribed species profile, shock-train geometry, transition threshold, or transition location may be inferred from that baseline.
+No Cao-specific geometry, prescribed species profile, shock-train geometry, transition location, or Case 2 result may be inferred from that baseline.
 
 ## Solver observables already available
 
-A P12 sweep may record, without inventing a transition definition:
+A P12 sweep may record:
 
 - local and extrema of Mach number;
 - pressure and temperature;
 - velocity and density;
 - algebraic mixture composition;
 - convergence diagnostics;
-- discrete conservation diagnostics.
+- normalized discrete conservation diagnostics;
+- explicit solver-admissibility status.
 
-These are **observables**, not by themselves a source-backed mode label.
+These observables may be evaluated with a source-defined criterion only when the corresponding solution is admissible and converged.
 
-## Transition-classification evidence gate
+## Recovered source-defined criterion
 
-A result must not be labelled `scramjet`, `ramjet`, `dual-mode`, `LBW`, `YBW`, `unstart`, or a Cao transition reproduction merely because a Mach-number threshold is crossed, a run stops converging, or an existing solver-domain guard is triggered.
+The teacher-provided Cao Ruifeng doctoral dissertation has now been checked directly at the relevant source pages. The source record and implementation are:
 
-Before a source-defined mode classifier is implemented, freeze from an authoritative source:
+- `cases/studies/data/p12_cao_mode_criterion_source.json`;
+- `docs/p12_cao_source_mode_criteria.md`;
+- `src/scramjet1d/cao_mode_criteria.py`.
 
-1. the exact physical definition/criterion used for the relevant combustion modes;
-2. the spatial domain over which that criterion is evaluated;
-3. any shock-train / precombustion model and required geometry;
-4. the transition observable(s) and threshold(s), including units and reference frame;
-5. the parameter varied to induce transition and its source-defined range;
-6. the expected comparison quantity (transition location, critical parameter, pressure signature, Mach signature, etc.).
+For the broad two-mode thermal-throat distinction, Cao Eq. (3-2) defines:
 
-If those items are incomplete, P12 may perform only a clearly labelled **project-defined response sweep** and must report continuous observables and solver-admissibility status rather than categorical mode claims.
+- scram side: `min(Ma(x)) > 1`;
+- ram side: `min(Ma(x)) < 1`;
+- transition boundary: the thermal throat is exactly critical at `Ma = 1`.
 
-## First computational application
+The dissertation does not prescribe a floating-point sonic tolerance. Any numerical tolerance used around `Ma=1` is therefore an explicit project numerical choice, not a source physical threshold.
 
-The first application is a `PROJECT_DEFINED_RESPONSE_SWEEP` around the accepted P11.4 H2 baseline. It varies only an explicitly project-defined control, keeps all other accepted controls fixed, and records continuous pressure/temperature/Mach responses together with convergence, conservation, and solver-admissibility diagnostics.
+Cao Table 3-1 also supplies the more detailed no-shock scram / oblique-shock scram / ram criteria involving `Ma_s`, `Ma_2`, `Ma_3m`, and `Ma_2min`. Those equations are transcribed and tested, but the detailed classifier is not attached to the current integrated project-defined combustor because the accepted solver does not yet provide all source-compatible isolator/shock-train state variables and geometry.
 
-The first control is equivalence ratio because it is already an explicit input in the accepted H2 mapping. The initial values `0.10`, `0.20`, and `0.30` are project choices; they are not Cao values or transition thresholds.
+A solver guard, nonconvergence, or numerical failure is never converted into a combustion-mode or unstart label.
 
-Acceptance requirements:
+## First accepted computational application
 
-- every **accepted response point** reaches the stated teacher Eq.11.46 density-change tolerance without weakening physical guards;
-- the independent normalized semi-discrete residual is reported as a secondary diagnostic and is not assigned an unsourced acceptance threshold;
-- positive/source-valid thermodynamic states are retained for accepted response points;
-- mass-source bookkeeping remains exact, and normalized mass/momentum/energy inventory rates are reported for converged points;
-- if an existing physical/model-domain guard is triggered, the point is recorded explicitly as outside the currently admissible solver path rather than forcing convergence by disabling the guard;
-- a guarded or nonconverged point is excluded from continuous-response inference unless and until a model extension is separately justified and verified;
-- outputs remain continuous observables and solver status only;
-- no categorical combustion-mode transition is claimed until the transition-classification evidence gate above is satisfied.
+The first `PROJECT_DEFINED_RESPONSE_SWEEP` varies equivalence ratio at `0.10`, `0.20`, and `0.30`. Those values are project choices, not Cao transition values.
 
-The currently retained forward-flow restriction in the teacher Eq.11.38 friction adapter is an example of such a guard. Triggering it is a numerical/model-domain observation, not by itself evidence of inlet unstart or a combustion-mode transition.
+The accepted evidence record is:
+
+`cases/studies/data/p12_project_defined_response_sweep_acceptance.json`
+
+Results:
+
+- `phi=0.10`: converged and fully supersonic, with `min(Ma)=1.694412...`;
+- `phi=0.20`: converged and fully supersonic, with `min(Ma)=1.278991...`;
+- `phi=0.30`: the existing forward-flow Eq.11.38 friction guard is triggered during the cold-start pseudo-time path and no physical mode label is assigned.
+
+Applying Cao Eq. (3-2) to the two admissible converged points places both robustly on the source-defined scram side over the explicit numerical sonic-tolerance sensitivity set `1e-6`, `1e-4`, `1e-3`, `1e-2`. The accepted points therefore do **not** yet bracket the `Ma=1` transition boundary.
+
+## Current numerical continuation step
+
+The next safe experiment is a guarded warm-start continuation from the accepted `phi=0.20` state toward higher equivalence ratio. Each next initial condition must be remapped consistently to the new composition while preserving primitive `p/T/u` and recomputing density and conservative energy with the new mixture thermochemistry.
+
+This continuation is a numerical strategy only. It does not alter the physical model, weaken the forward-flow guard, or turn a failed/guarded point into a mode label.
+
+## Acceptance rules retained
+
+- every accepted response point must satisfy the stated teacher Eq.11.46 density-change tolerance;
+- normalized residual remains an independent diagnostic and is not assigned an unsourced threshold;
+- positive/source-valid thermodynamic states must be retained;
+- normalized mass/momentum/energy inventory diagnostics must be reported for converged points;
+- the existing 0.5% normalized mass-inventory gate is retained;
+- guarded or nonconverged points receive no physical mode label;
+- a source criterion applied to project-defined geometry must be reported as a project application of the criterion, not a Cao Case 2 reproduction.
 
 ## Current blockers retained
 
 - Cao Case 2 formal reproduction: source identity and Table 2-2 inlet data are frozen, but exact source `A(x)`, prescribed `Yi(x)`, and the original fuel/source spatial convention remain incomplete.
 - Eq.11.26 dimensional wall-heat adapter: unresolved.
 - variable-thermochemistry Steger-Warming production integration: unresolved source compatibility.
-- Cao/source-defined mode-transition classifier: not yet frozen.
+- detailed Cao Table 3-1 production classification: source criteria are frozen, but source-compatible isolator/shock-train variables and geometry are not yet available in the current integrated path.
 
 These blockers must remain visible while project-defined P12 work proceeds.
