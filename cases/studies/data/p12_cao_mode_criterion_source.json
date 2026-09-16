@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "record_kind": "cao-source-defined-combustion-mode-criteria",
+  "status": "SOURCE_CRITERIA_FROZEN_INTEGRATION_PARTIAL",
+  "primary_source": {
+    "author": "曹瑞峰",
+    "title": "超燃冲压发动机燃烧模态转换及其控制方法研究",
+    "document_kind": "doctoral_dissertation",
+    "year": 2016,
+    "source_origin": "teacher-provided reference",
+    "locators": [
+      "Section 3.2 燃烧模态概念的定义与分类 / Table 3-1 超燃冲压发动机燃烧模态判定准则",
+      "Section 3.3.1.2 热力喉道临界限制 / Eq. (3-2)",
+      "Section 4.2.1 燃烧模态转换边界空间描述"
+    ],
+    "pdf_page_evidence": [70, 72, 102]
+  },
+  "source_defined_two_mode_criterion": {
+    "physical_distinction": "The physical distinction used in the later dissertation analysis is whether the combustor thermal throat is critical.",
+    "scram_side": "min[Ma(x)] > 1",
+    "ram_side": "min[Ma(x)] < 1",
+    "transition_boundary": "thermal throat is exactly critical, Ma=1, at the equivalence ratio defining the mode-transition boundary for a fixed incoming condition",
+    "boundary_interpretation": "At fixed flight Mach, the transition boundary is the maximum equivalence ratio at which the engine can remain on the scram side, equivalently the minimum equivalence ratio for the ram side."
+  },
+  "table_3_1_detailed_criteria": {
+    "variables": {
+      "Ma_s": "Mach number at the combustor maximum-pressure location",
+      "Ma_2": "isolator/combustor upstream Mach number used by the dissertation criterion",
+      "Ma_3m": "supersonic characteristic combustor-inlet Mach number when a sonic section exists",
+      "Ma_2min": "minimum allowable combustor-inlet Mach number, obtained from Ma_3p across a normal shock"
+    },
+    "no_shock_scram": "Ma_s > 0.762 Ma_2",
+    "oblique_shock_scram": "Ma_2 > Ma_3m AND Ma_s < 0.762 Ma_2",
+    "ram": "Ma_2min < Ma_2 < Ma_3m",
+    "physical_annotations": {
+      "no_shock_scram": "no shock train, unseparated boundary layer, thermal throat not choked",
+      "oblique_shock_scram": "oblique/weaker precombustion shock train, separated boundary layer, thermal throat not choked",
+      "ram": "normal/strong shock train, separated boundary layer, thermal throat choked"
+    }
+  },
+  "integration_policy": {
+    "thermal_throat_two_mode_indicator_ready": true,
+    "detailed_table_3_1_classifier_ready_for_current_solver": false,
+    "reason": "The current accepted project-defined combustor path does not yet provide the dissertation's full isolator shock-train state variables Ma_2, Ma_s, Ma_3m and Ma_2min with source-compatible geometry/conventions.",
+    "numerical_sonic_tolerance": "PROJECT_CHOICE_REQUIRED_EXPLICITLY; the source defines Ma=1 but does not prescribe a numerical floating-point tolerance.",
+    "guard_policy": "A forward-flow solver guard or nonconvergence is not a mode label. Apply the source criterion only to an admissible converged solution.",
+    "claim_policy": "Applying this source-defined thermal-throat criterion to the project-defined geometry is a project application of a source criterion, not a Cao Case 2 reproduction."
+  }
+}
