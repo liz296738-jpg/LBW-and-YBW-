@@ -8,7 +8,7 @@ Develop a quasi-one-dimensional compressible-flow CFD solver and reproducible st
 
 ## Current Status
 
-Current stage: **P12 source-criterion application, after acceptance of the P11.4 project-defined H2 integrated baseline.**
+Current stage: **P12 source-criterion application and grid refinement around a project-defined thermal-throat candidate.**
 
 The teacher-reference implementation path is substantially complete for the lean `H2` / `C2H4` branch. The repository contains the accepted chain from variable thermochemistry and algebraic composition closure through quasi-1D finite-volume marching, teacher-compatible source terms, boundary conditions, steady stopping diagnostics, and reproducible integrated cases.
 
@@ -24,9 +24,9 @@ Accepted P11.4 evidence includes:
 
 The Cao Case 2 source identity and Table 2-2 inlet evidence are frozen. Formal reproduction is **not** claimed because the exact source `A(x)`, prescribed `Yi(x)` spatial profiles/rule, and original fuel/source spatial convention remain incomplete.
 
-P12 has now recovered a defensible source-defined broad combustion-mode criterion directly from Cao Ruifeng's doctoral dissertation. For the thermal-throat distinction, Eq. (3-2) defines the scram side by `min(Ma(x)) > 1`, the ram side by `min(Ma(x)) < 1`, and the transition boundary at the critical thermal throat `Ma=1`. The source gives no floating-point sonic tolerance, so numerical tolerance is always an explicit project choice.
+P12 has recovered a defensible source-defined broad combustion-mode criterion directly from Cao Ruifeng's doctoral dissertation. For the thermal-throat distinction, Eq. (3-2) defines the scram side by `min(Ma(x)) > 1`, the ram side by `min(Ma(x)) < 1`, and the transition boundary at the critical thermal throat `Ma=1`. The source gives no floating-point sonic tolerance, so numerical tolerance is always an explicit project choice. The more detailed Table 3-1 mode split remains gated because the current production path does not yet provide the required isolator/shock-train observables.
 
-The accepted project-defined H2 response sweep has converged points at `phi=0.10` and `phi=0.20`; both remain on the Cao source-defined scram side. The cold-start `phi=0.30` point triggers the existing forward-flow model-domain guard and is deliberately left without a physical mode label. A guarded warm-start continuation is the next numerical step; it does not weaken the guard or convert numerical failure into a physical transition.
+The accepted project-defined H2 response sweep converges at `phi=0.10` and `phi=0.20`, both on the Cao Eq. (3-2) scram side; the cold-start `phi=0.30` point triggers the existing forward-flow model-domain guard and therefore receives no physical mode label. A composition-consistent warm-start continuation has now also been accepted: `phi=0.20`, `0.22`, and `0.24` remain on the scram side, while the 20-cell `phi=0.26` solution reaches `min(Ma)=0.9991918`, inside the explicitly project-defined `1e-3` numerical sonic band. `phi=0.28` then triggers the forward-flow guard. This identifies a **candidate near-sonic region**, not a grid-independent transition equivalence ratio. The active next gate is 20/40/80-cell refinement with a tighter Eq. 11.46 steady tolerance.
 
 ## Implemented Teacher-Path Physics and Numerics
 
@@ -53,6 +53,7 @@ Implemented and regression-tested infrastructure includes:
 - Rusanov integrated numerical flux for the variable-thermochemistry production path;
 - normalized mass/momentum/energy discrete inventory diagnostics;
 - source-defined Cao thermal-throat criterion and source-faithful Table 3-1 utility;
+- guarded composition-consistent continuation across neighboring equivalence ratios;
 - grid, conservation, robustness, and regression evidence.
 
 The direct prescribed `Qdot'(x)` capability remains only a reduced-order surrogate/V&V interface. Chemical reaction energy is not silently counted both through composition-dependent absolute species energy and through an independent heat-release source.
