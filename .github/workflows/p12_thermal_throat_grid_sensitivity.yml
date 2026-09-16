@@ -17,7 +17,11 @@ jobs:
       matrix:
         cells: [20, 40, 80]
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    # The 80-cell continuation exceeded the former 120-minute CI wall-clock
+    # limit while 20/40-cell jobs completed successfully. This timeout is an
+    # execution-budget change only: it does not alter the solver, CFL,
+    # Eq.11.46 tolerance, continuation path, guards, or scientific gates.
+    timeout-minutes: 180
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
