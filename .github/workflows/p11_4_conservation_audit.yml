@@ -12,6 +12,7 @@ on:
 jobs:
   audit:
     runs-on: ubuntu-24.04
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -23,19 +24,33 @@ jobs:
           python - <<'PY'
           from dataclasses import asdict
           import json
+          import math
           from pathlib import Path
+
           from cases.studies.p11_4_conservation_audit import run_conservation_audit
+
           result = run_conservation_audit(cells=80, tolerance=2.0e-5, max_steps=20000)
           payload = asdict(result)
-          Path('p11_4_conservation_audit.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n')
+          Path('p11_4_conservation_audit.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
           print(json.dumps(payload, indent=2, sort_keys=True))
+
           if not result.converged:
               raise SystemExit('steady solve did not converge')
-          # This gate checks that the stopped state has a small net mass inventory
-          # rate relative to inlet flow. Momentum/energy are reported, not thresholded,
-          # because their nonzero integrated RHS contains wall/geometry/injection effects.
           if result.mass_rate_relative_to_inlet > 5.0e-3:
               raise SystemExit('mass inventory rate exceeds 0.5% of inlet mass flow')
+
+          # Momentum and energy are normalized and reported for auditability, but
+          # no numerical acceptance threshold is invented here without a frozen
+          # project/source policy. They must at least be finite and non-negative.
+          for name, value in (
+              ('momentum', result.momentum_rate_relative_to_inlet),
+              ('energy', result.energy_rate_relative_to_inlet),
+          ):
+              if not math.isfinite(value) or value < 0.0:
+                  raise SystemExit(f'{name} normalized inventory diagnostic is invalid')
           PY
       - uses: actions/upload-artifact@v4
         with:

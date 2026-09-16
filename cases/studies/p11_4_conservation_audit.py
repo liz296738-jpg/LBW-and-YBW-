@@ -1,9 +1,10 @@
 """Discrete conservation audit for the accepted P11.4 project-defined H2 case.
 
-This is a numerical audit, not source reproduction.  For a converged finite-volume
+This is a numerical audit, not source reproduction. For a converged finite-volume
 state it checks the domain-integrated semi-discrete balance directly from the
-same RHS used by the solver.  The diagnostic deliberately does not invent a
-separate analytical boundary-flux convention.
+same RHS used by the solver. Inventory-rate residuals are also normalized by
+physically meaningful inlet mass, momentum, and total-energy flux scales so the
+three equations can be interpreted on comparable dimensionless scales.
 """
 from __future__ import annotations
 
@@ -17,6 +18,7 @@ from cases.studies.p11_4_project_defined_h2_smoke import (
     build_case,
 )
 from scramjet1d.config import NumericalConfig
+from scramjet1d.teacher_boundaries import teacher_static_inlet_conservative_state
 from scramjet1d.teacher_boundary_solver import teacher_boundary_source_rhs
 from scramjet1d.teacher_steady_solver import solve_teacher_boundary_steady
 
@@ -34,6 +36,8 @@ class ConservationAuditResult:
     momentum_inventory_rate_N: float
     energy_inventory_rate_W: float
     mass_rate_relative_to_inlet: float
+    momentum_rate_relative_to_inlet: float
+    energy_rate_relative_to_inlet: float
 
 
 def run_conservation_audit(
@@ -74,9 +78,32 @@ def run_conservation_audit(
         hydraulic_diameter_m=hydraulic_diameter,
         wall_specific_heat_gain_gradient_J_per_kg_per_m=WALL_HEAT_GRADIENT_J_PER_KG_PER_M,
     )
+
     # U stores per-volume conservative variables; A*dx is the cell volume.
+    # At an exact steady discrete solution the domain-integrated *full* RHS tends
+    # to zero because boundary-flux changes and all internal source terms balance.
     inventory_rate = np.sum(rhs * geometry.cell_area[:, None] * dx, axis=0)
-    inlet_mdot = inlet_primitive.rho * inlet.axial_velocity_m_per_s * geometry.face_area[0]
+
+    inlet_U = teacher_static_inlet_conservative_state(inlet, mapping, species)
+    inlet_area = float(geometry.face_area[0])
+    u_in = float(inlet.axial_velocity_m_per_s)
+    p_in = float(inlet.pressure_Pa)
+
+    mass_scale = abs(float(inlet_U[1]) * inlet_area)
+    momentum_scale = abs((float(inlet_U[1]) * u_in + p_in) * inlet_area)
+    energy_scale = abs((float(inlet_U[2]) + p_in) * u_in * inlet_area)
+    if min(mass_scale, momentum_scale, energy_scale) <= 0.0:
+        raise ValueError("inlet conservation scales must be positive")
+
+    # Keep the independently returned primitive inlet state exercised as part of
+    # the accepted case builder contract. Its density must be consistent with the
+    # conservative mass flux scale used above.
+    inlet_mdot_from_primitive = (
+        inlet_primitive.rho * u_in * inlet_area
+    )
+    if not np.isclose(inlet_mdot_from_primitive, mass_scale, rtol=1.0e-10, atol=1.0e-12):
+        raise ValueError("primitive and conservative inlet mass-flow scales disagree")
+
     return ConservationAuditResult(
         cells=cells,
         converged=steady.converged,
@@ -85,7 +112,9 @@ def run_conservation_audit(
         mass_inventory_rate_kg_per_s=float(inventory_rate[0]),
         momentum_inventory_rate_N=float(inventory_rate[1]),
         energy_inventory_rate_W=float(inventory_rate[2]),
-        mass_rate_relative_to_inlet=float(abs(inventory_rate[0]) / inlet_mdot),
+        mass_rate_relative_to_inlet=float(abs(inventory_rate[0]) / mass_scale),
+        momentum_rate_relative_to_inlet=float(abs(inventory_rate[1]) / momentum_scale),
+        energy_rate_relative_to_inlet=float(abs(inventory_rate[2]) / energy_scale),
     )
 
 
