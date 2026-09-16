@@ -65,6 +65,23 @@ def _positive_finite(name: str, value: object) -> float:
     return scalar
 
 
+def _mach_profile(value: Iterable[float] | np.ndarray) -> np.ndarray:
+    if isinstance(value, np.ndarray):
+        mach = np.asarray(value, dtype=float)
+    else:
+        try:
+            mach = np.asarray(tuple(value), dtype=float)
+        except TypeError as error:
+            raise ValueError(
+                "mach_profile must be a nonempty one-dimensional profile"
+            ) from error
+    if mach.ndim != 1 or mach.size < 1:
+        raise ValueError("mach_profile must be a nonempty one-dimensional profile")
+    if not np.all(np.isfinite(mach)) or np.any(mach <= 0.0):
+        raise ValueError("mach_profile must be finite and strictly positive")
+    return mach
+
+
 def classify_thermal_throat(
     mach_profile: Iterable[float] | np.ndarray,
     *,
@@ -83,11 +100,7 @@ def classify_thermal_throat(
     not an additional physical threshold.
     """
 
-    mach = np.asarray(tuple(mach_profile) if not isinstance(mach_profile, np.ndarray) else mach_profile, dtype=float)
-    if mach.ndim != 1 or mach.size < 1:
-        raise ValueError("mach_profile must be a nonempty one-dimensional profile")
-    if not np.all(np.isfinite(mach)) or np.any(mach <= 0.0):
-        raise ValueError("mach_profile must be finite and strictly positive")
+    mach = _mach_profile(mach_profile)
     tolerance = _positive_finite("sonic_tolerance", sonic_tolerance)
     if tolerance >= 1.0:
         raise ValueError("sonic_tolerance must be smaller than 1")
@@ -111,9 +124,10 @@ def classify_cao_table_3_1(
 ) -> CaoTable31Classification:
     """Evaluate the strict inequalities transcribed from Cao Table 3-1.
 
-    Equality cases and any parameter combination not covered by the published
-    strict inequalities are returned as ``BOUNDARY_OR_UNCLASSIFIED`` rather than
-    being forced into a combustion mode.
+    Equality cases, uncovered combinations, and mathematically overlapping
+    combinations are returned as ``BOUNDARY_OR_UNCLASSIFIED`` rather than being
+    forced into a combustion mode. The latter protects the code from treating
+    the table's physically coupled variables as independent arbitrary numbers.
     """
 
     mas = _positive_finite("ma_s", ma_s)
@@ -124,13 +138,17 @@ def classify_cao_table_3_1(
         raise ValueError("ma_2min must be smaller than ma_3m")
 
     separation_threshold = 0.762 * ma2
+    matches: list[CaoTable31State] = []
     if mas > separation_threshold:
-        state = CaoTable31State.NO_SHOCK_SCRAM
-    elif ma2 > ma3m and mas < separation_threshold:
-        state = CaoTable31State.OBLIQUE_SHOCK_SCRAM
-    elif ma2min < ma2 < ma3m:
-        state = CaoTable31State.RAM
-    else:
-        state = CaoTable31State.BOUNDARY_OR_UNCLASSIFIED
+        matches.append(CaoTable31State.NO_SHOCK_SCRAM)
+    if ma2 > ma3m and mas < separation_threshold:
+        matches.append(CaoTable31State.OBLIQUE_SHOCK_SCRAM)
+    if ma2min < ma2 < ma3m:
+        matches.append(CaoTable31State.RAM)
 
+    state = (
+        matches[0]
+        if len(matches) == 1
+        else CaoTable31State.BOUNDARY_OR_UNCLASSIFIED
+    )
     return CaoTable31Classification(state, mas, ma2, ma3m, ma2min)
