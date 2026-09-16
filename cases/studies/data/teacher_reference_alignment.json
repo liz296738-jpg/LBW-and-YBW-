@@ -1,7 +1,7 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_kind": "teacher-reference-second-scheme-alignment",
-  "status": "FOUNDATION_ALIGNED_FULL_SECOND_SCHEME_INCOMPLETE",
+  "status": "CORE_H2_C2H4_PATH_IMPLEMENTED_REMAINING_SOURCE_GAPS_EXPLICIT",
   "project_naming": {
     "LBW": "PERSON_OR_COLLABORATOR_IDENTIFIER",
     "YBW": "PERSON_OR_COLLABORATOR_IDENTIFIER",
@@ -19,64 +19,82 @@
   "alignment": {
     "unsteady_quasi_1d_conservative_pde": {"ready": true, "status": "ALIGNED"},
     "variable_area_source": {"ready": true, "status": "ALIGNED"},
-    "mass_momentum_energy_fuel_injection_sources": {"ready": true, "status": "STRUCTURALLY_ALIGNED_PRESCRIBED_INPUTS"},
-    "wall_friction_source": {"ready": true, "status": "STRUCTURALLY_ALIGNED_GENERIC_DARCY_INPUT"},
-    "wall_heat_transfer_source": {"ready": true, "status": "STRUCTURALLY_ALIGNED_GENERIC_PRESCRIBED_FLUX"},
-    "steger_warming_fvs": {"ready": true, "status": "ALIGNED_RAW_SPLITTING"},
+    "mass_momentum_energy_fuel_injection_sources": {"ready": true, "status": "TEACHER_EQ_11_38_IMPLEMENTED"},
+    "wall_friction_source": {"ready": true, "status": "TEACHER_EQ_11_25_IMPLEMENTED_WITH_FD_EQUALS_4F_MAPPING"},
+    "wall_heat_transfer_source": {
+      "ready": true,
+      "status": "DIMENSIONAL_EXPLICIT_INPUT_CHANNEL_READY",
+      "note": "The solver accepts explicit d(delta q)/dx. The photographed Eq.11.26 empirical-to-dimensional mapping remains source-gated and is not guessed."
+    },
+    "steger_warming_fvs": {
+      "ready": true,
+      "status": "SOURCE_TRANSCRIBED_AND_CALORICALLY_PERFECT_LIMIT_VERIFIED",
+      "note": "The literal closed form is not used as the production variable-thermochemistry flux because it does not reconstruct the current absolute-energy Euler flux and no authoritative correction was found."
+    },
     "first_order_upwind_finite_volume": {"ready": true, "status": "ALIGNED"},
     "third_order_tvd_ssp_rk": {"ready": true, "status": "ALIGNED"},
     "cfl_time_step": {
       "ready": true,
       "status": "ALIGNED_GENERAL_CFL_IMPLEMENTATION",
-      "note": "Teacher reference shows a one-half acoustic/convective cap; project exposes a general CFL control and already defaults cfl=0.5."
+      "note": "Project exposes a general CFL control and teacher-path production cases use cfl=0.5 unless a case-specific value is documented."
     },
     "teacher_reference_inlet_outlet_compatibility": {
       "ready": true,
-      "status": "FUNCTIONALLY_COMPATIBLE_NOT_IDENTICAL_API"
+      "status": "TEACHER_STATIC_INLET_AND_FIRST_ORDER_OUTLET_IMPLEMENTED"
     },
     "teacher_relative_density_convergence_metric": {
       "ready": true,
-      "status": "IMPLEMENTED_AS_ADDITIONAL_COMPATIBILITY_DIAGNOSTIC",
+      "status": "IMPLEMENTED_AS_PRIMARY_TEACHER_COMPATIBILITY_STOPPING_DIAGNOSTIC_WITH_SECONDARY_NORMALIZED_RESIDUAL_REPORTING",
       "reference": "Teacher Chapter 11 Eq. 11.46",
       "implementation": "scramjet1d.convergence.max_relative_density_change",
-      "policy": "Retain the existing normalized steady residual; do not weaken convergence to density change alone."
+      "policy": "Use Eq.11.46 as the teacher compatibility stopping gate and retain the normalized semi-discrete residual as an independent diagnostic without inventing a source threshold."
     },
     "near_sonic_eigenvalue_smoothing": {
       "ready": false,
-      "status": "GAP",
+      "status": "SOURCE_GAP",
       "reference": "Teacher Chapter 11 Eq. 11.44",
-      "note": "Current Steger-Warming uses raw lambda +/- |lambda| splitting. Do not guess epsilon."
+      "note": "Formula is transcribed, but no numerical epsilon policy is source-frozen. Do not guess epsilon."
     },
     "temperature_and_composition_dependent_thermodynamics": {
-      "ready": false,
-      "status": "MAJOR_GAP",
+      "ready": true,
+      "status": "IMPLEMENTED_FOR_H2_C2H4_CORE_SPECIES",
       "reference": "Teacher Chapter 11 Eqs. 11.30-11.35 and Cao references",
-      "note": "Production gas model is calorically perfect with constant gamma/R."
+      "note": "Piecewise source-backed thermochemistry, mixture properties, bounded e-to-T recovery, and per-cell variable-composition state conversion are implemented. C10H22 remains source-gated."
     },
     "mixing_efficiency_and_mixing_length_closure": {
-      "ready": false,
-      "status": "MAJOR_GAP",
+      "ready": true,
+      "status": "TEACHER_EQ_11_19_AND_11_20_IMPLEMENTED",
       "reference": "Teacher Chapter 11 Eqs. 11.19-11.20"
     },
     "equivalence_ratio_and_fuel_specific_composition_closure": {
-      "ready": false,
-      "status": "MAJOR_GAP",
+      "ready": true,
+      "status": "LEAN_H2_C2H4_TEACHER_CLOSURES_IMPLEMENTED",
       "reference": "Teacher Chapter 11 Eqs. 11.21-11.29"
     },
     "teacher_empirical_friction_closure": {
-      "ready": false,
-      "status": "GAP",
+      "ready": true,
+      "status": "TEACHER_EQ_11_25_IMPLEMENTED",
       "reference": "Teacher Chapter 11 Eq. 11.25"
     },
     "teacher_empirical_wall_heat_closure": {
       "ready": false,
-      "status": "GAP",
-      "reference": "Teacher Chapter 11 Eq. 11.26"
+      "status": "SOURCE_GAP_FOR_DIMENSIONAL_MAPPING",
+      "reference": "Teacher Chapter 11 Eq. 11.26",
+      "note": "The exact conversion from the photographed empirical correlation to solver d(delta q)/dx has not been uniquely frozen."
     },
     "chemical_energy_bookkeeping_consistency": {
+      "ready": true,
+      "status": "ABSOLUTE_SPECIES_ENERGY_PATH_IMPLEMENTED_WITH_NO_SILENT_DOUBLE_COUNTING",
+      "note": "Chemical energy is carried through composition-dependent absolute species energy on the teacher variable-thermochemistry path; the direct Qdot interface remains a separate reduced-order surrogate."
+    },
+    "integrated_variable_thermochemistry_rusanov_path": {
+      "ready": true,
+      "status": "P11_4_PROJECT_DEFINED_H2_BASELINE_ACCEPTED_WITH_GRID_AND_CONSERVATION_AUDITS"
+    },
+    "cao_case2_formal_reproduction": {
       "ready": false,
-      "status": "MAJOR_GAP_AND_POLICY_REQUIREMENT",
-      "note": "External wall/additional heat is distinct from reaction chemical energy. Direct Qdot remains a surrogate; future composition-enthalpy chemistry must not double-count energy."
+      "status": "SOURCE_IDENTITY_AND_INLET_FROZEN_SPATIAL_INPUTS_INCOMPLETE",
+      "note": "Exact A(x), prescribed Yi(x) spatial information, and original fuel/source spatial convention remain required."
     },
     "source_backed_validation_and_vv": {
       "ready": true,
@@ -86,14 +104,15 @@
   "overall_assessment": {
     "direction_conflict": false,
     "foundation_is_reusable": true,
+    "core_h2_c2h4_teacher_path_ready": true,
     "full_teacher_second_scheme_ready": false,
-    "primary_correction_needed": "Recenter the roadmap from the incorrect LBW/YBW mode-classification premise onto completion of teacher-reference second-scheme physics/numerics.",
+    "primary_correction_needed": "Keep documentation and acceptance gates synchronized with the implemented teacher path; do not reopen already completed closures as gaps and do not promote source-gated items without evidence.",
     "next_priority": [
-      "Freeze teacher-reference thermochemical data/coefficients and implement variable T/composition thermodynamics in an isolated tested layer.",
-      "Implement source-backed mixing efficiency/mixing-length and equivalence-ratio/composition closures.",
-      "Implement teacher-reference friction and wall-heat empirical closures as optional models, preserving generic prescribed-source interfaces.",
-      "Add near-sonic Steger-Warming smoothing only after the epsilon policy is explicitly sourced/frozen.",
-      "Build a teacher-reference integrated case before returning to combustion-mode transition studies."
+      "Complete the guarded P12 project-defined response study without treating solver admissibility as a combustion-mode label.",
+      "Normalize and report mass, momentum, and energy inventory diagnostics for accepted response points.",
+      "Recover missing Cao Case 2 A(x), Yi(x), and source-spatial conventions before any formal reproduction claim.",
+      "Implement a source-defined mode-transition classifier only after the required authoritative criterion and shock-train/geometry inputs are frozen.",
+      "Keep Eq.11.26 wall-heat mapping and variable-thermochemistry Steger-Warming production integration source-gated rather than guessed."
     ]
   }
 }
