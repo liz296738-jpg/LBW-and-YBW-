@@ -1,0 +1,58 @@
+name: P11.4 Full H2 Profile Artifacts
+
+on:
+  pull_request:
+    paths:
+      - 'cases/studies/p11_4_profile_output.py'
+      - 'cases/studies/p11_4_project_defined_h2_smoke.py'
+      - 'src/scramjet1d/**'
+      - '.github/workflows/p11_4_profile_artifacts.yml'
+  workflow_dispatch:
+
+jobs:
+  profile:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e '.[dev]'
+      - name: Generate accepted 80-cell H2 full profile
+        run: |
+          python - <<'PY'
+          import csv
+          import json
+          import math
+          from pathlib import Path
+
+          from cases.studies.p11_4_profile_output import write_profile_artifacts
+
+          output = Path('p11_4_profile_artifacts')
+          csv_path, json_path, summary = write_profile_artifacts(
+              output,
+              cells=80,
+              tolerance=2.0e-5,
+              max_steps=20000,
+          )
+          print(json_path.read_text())
+          if not summary.converged:
+              raise SystemExit('profile run did not converge')
+          if summary.density_change > 2.0e-5:
+              raise SystemExit('profile run failed teacher Eq.11.46 gate')
+          if summary.min_pressure_Pa <= 0.0 or summary.min_temperature_K <= 0.0:
+              raise SystemExit('profile run contains non-positive thermodynamic state')
+          if not math.isfinite(summary.normalized_residual) or summary.normalized_residual < 0.0:
+              raise SystemExit('normalized residual diagnostic is invalid')
+          with csv_path.open(newline='', encoding='utf-8') as stream:
+              rows = list(csv.DictReader(stream))
+          if len(rows) != 80:
+              raise SystemExit('profile CSV does not contain exactly 80 physical cells')
+          if not all(key in rows[0] for key in ('Y_H2', 'Y_O2', 'Y_N2', 'Y_H2O')):
+              raise SystemExit('profile CSV is missing required H2-path species columns')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p11-4-h2-full-profile
+          path: p11_4_profile_artifacts/
