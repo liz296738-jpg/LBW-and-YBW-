@@ -2,89 +2,86 @@
 
 ## Project Goal
 
-Develop a quasi-one-dimensional, compressible-flow CFD solver and reproducible study workflow for scramjet and dual-mode ramjet combustors, with the **teacher-provided one-dimensional CFD / “second scheme” as the primary model target**.
+Develop a quasi-one-dimensional compressible-flow CFD solver and reproducible study workflow for scramjet and dual-mode ramjet combustors, with the **teacher-provided one-dimensional CFD / “second scheme” as the primary model target**.
 
 > Naming note: `LBW` and `YBW` in the repository name are people/project identifiers. They are **not combustion-mode labels** and must never be interpreted as physical states.
 
 ## Current Status
 
-Current stage: **teacher-reference second-scheme alignment and physical-closure completion.**
+Current stage: **P12 evidence-gated response study, after acceptance of the P11.4 project-defined H2 integrated baseline.**
 
-P0-P10 established the numerical/verification foundation. P11.1 added reproducible parametric-study infrastructure. P11.2A established a literature-backed public cold-flow surrogate. P11.2B includes an accepted, deliberately scoped NASA Burrows-Kurkov **reduced-order computational-reference benchmark**; this supporting benchmark is useful for verification but is not the teacher's primary requested deliverable.
+The teacher-reference implementation path is now substantially complete for the lean `H2` / `C2H4` branch. The repository contains the complete accepted chain from variable thermochemistry and algebraic composition closure through quasi-1D finite-volume marching, teacher-compatible source terms, boundary conditions, steady stopping diagnostics, and reproducible integrated cases.
 
-The uploaded teacher material confirms that our main numerical route is substantially correct: unsteady quasi-one-dimensional conservation equations, variable area, friction/heat/mass-addition source terms, first-order upwind/Steger-Warming spatial treatment, third-order TVD Runge-Kutta advancement, CFL stepping, and steady convergence.
+Accepted P11.4 evidence now includes:
 
-P11.3A has added the teacher Chapter 11 Eq. 11.46 relative-density convergence diagnostic alongside the existing normalized residual criterion. P11.3B now implements the teacher/Cao variable thermochemistry equations and a source-backed two-interval CHEMKIN/NASA data subset for `H2`, `O2`, `N2`, `Ar`, `H2O`, `C2H4`, and `CO2`. The source intervals, molecular weights, low/high polynomial switch, continuity checks, and an independent Berkeley GRI-Mech 298 K `cp` check are all explicit. Pseudo-kerosene `C10H22` remains blocked rather than guessed, and production variable-thermo state recovery is still intentionally separate from the accepted constant-gas solver.
+- a clearly labelled `PROJECT_DEFINED_INTEGRATED_SMOKE_CASE` for H2;
+- teacher Eq. 11.46 steady convergence reporting plus an independent normalized residual diagnostic;
+- positive/source-valid thermodynamic states;
+- a 20/40/80-cell numerical grid audit with decreasing successive changes in the reported extrema;
+- a discrete conservation audit with normalized mass-inventory rate below the accepted 0.5% inlet-flow gate;
+- an explicit evidence gate for Cao Ruifeng doctoral Case 2.
 
-The earlier plan to interpret `LBW`/`YBW` as combustion modes was incorrect and has been abandoned. Combustion-mode-transition studies remain a later scientific application after the teacher-reference model is complete.
+The Cao Case 2 source identity and Table 2-2 inlet evidence are already frozen. Formal reproduction is **not** yet claimed because the exact source `A(x)`, prescribed `Yi(x)` spatial profiles/rule, and original fuel/source spatial convention remain incomplete.
 
-## Solver Foundation
+P12 has started only as a **project-defined continuous response study**. Until a source-backed transition classifier is frozen, the code may report Mach, pressure, temperature, convergence, conservation, and solver-admissibility responses, but it must not convert those observations into ramjet/scramjet/dual-mode labels or interpret a solver guard as physical unstart.
 
-Implemented and verified infrastructure includes:
+## Implemented Teacher-Path Physics and Numerics
 
-- conservative quasi-one-dimensional mass, momentum, and energy equations;
-- variable-area duct source treatment;
-- prescribed Darcy wall-friction momentum source;
-- prescribed wall-heat-flux energy source;
-- prescribed local/distributed fuel mass, momentum, and total-enthalpy addition;
-- prescribed burned-fuel/LHV and direct line-heat-release surrogate interfaces;
-- Rusanov and raw Steger-Warming flux-vector splitting;
-- first-order finite volumes/upwind interface treatment;
-- third-order SSP/TVD Runge-Kutta;
-- CFL-based time stepping;
-- physical/transmissive boundary-condition infrastructure;
-- steady convergence, robustness, conservation, grid, and regression tests.
+Implemented and regression-tested infrastructure includes:
 
-The direct prescribed `Qdot'(x)` path remains a useful **reduced-order surrogate**. It is not automatically equivalent to the teacher-reference reacting formulation.
+- unsteady quasi-one-dimensional conservative mass, momentum, and energy equations;
+- variable-area geometry and non-duplicated `p dA/dx` treatment;
+- source-backed piecewise thermochemistry for `H2`, `O2`, `N2`, `Ar`, `H2O`, `C2H4`, and `CO2`;
+- `cp(T)`, absolute `h(T)`, internal energy, mixture molecular weight, `R(Y)`, and `gamma(T,Y)`;
+- bounded internal-energy-to-temperature inversion;
+- conservative/primitive conversion for per-cell variable composition;
+- teacher Eq. 11.18 combustion-efficiency identity;
+- teacher Eq. 11.19 mixing-efficiency correlations and Eq. 11.20 mixing length;
+- teacher Eqs. 11.21-11.24 stoichiometry/equivalence-ratio relations;
+- teacher lean `H2` / `C2H4` composition closures;
+- single-injector finite-volume mapping with upstream air-only cells and no fuel double counting;
+- teacher Eq. 11.38 fuel mass, axial momentum, and total-enthalpy source channels;
+- teacher Eq. 11.25 friction with explicit `f_D=4f` mapping;
+- teacher static `p/T/u` inlet and first-order/zero-gradient outlet semantics;
+- first-order finite-volume interface treatment;
+- SSP/TVD-RK3 integration;
+- CFL-controlled pseudo-time stepping;
+- teacher Eq. 11.46 maximum relative-density stopping diagnostic;
+- Rusanov integrated numerical flux for the variable-thermochemistry production path;
+- grid, conservation, robustness, and regression evidence.
 
-## Teacher-Reference Alignment
+The direct prescribed `Qdot'(x)` capability remains only a reduced-order surrogate/V&V interface. Chemical reaction energy is not silently counted both through composition-dependent absolute species energy and through an independent heat-release source.
 
-Detailed review:
+## Deliberately Gated Items
 
-`docs/teacher_reference_alignment.md`
+The following items are intentionally **not guessed**:
 
-Variable thermochemistry:
+1. `C10H22` thermochemistry compatible with the frozen teacher/CHEMKIN convention;
+2. the dimensional mapping needed to turn photographed Eq. 11.26 into the exact `d(delta q)/dx` energy-source input;
+3. a production variable-thermochemistry Steger-Warming energy correction and a numerical Eq. 11.44 epsilon policy;
+4. the missing Cao Case 2 spatial geometry/composition/source information required for formal reproduction;
+5. a source-defined combustion-mode-transition classifier and threshold set.
 
-`docs/teacher_thermochemistry.md`
+Teacher Eqs. 11.42-11.44 Steger-Warming are retained as a separately audited source-transcription path. Their classic closed form is valid in the calorically-perfect constant-property limit, but the examined teacher/Cao sources do not provide a defensible correction for the project's variable `cp(T,Y)` plus absolute species-energy formulation. The integrated variable-thermochemistry solver therefore remains on Rusanov rather than inventing an energy-reference fix.
 
-Machine-readable status:
+## Key Evidence Records
 
+- `docs/development_roadmap.md`
+- `docs/teacher_reference_alignment.md`
+- `docs/teacher_steger_warming_source_audit.md`
+- `docs/p12_project_defined_mode_transition_foundation.md`
+- `cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json`
+- `cases/studies/data/p11_4_grid_convergence_acceptance.json`
+- `cases/studies/data/p11_4_cao_case2_evidence_gate.json`
+- `cases/studies/data/teacher_cao_case2_source.json`
 - `cases/studies/data/teacher_reference_alignment.json`
-- `cases/studies/data/teacher_thermochemistry_equations.json`
-- `cases/studies/data/teacher_thermochemistry_gri30_core.json`
-
-Strongly aligned already:
-
-- unsteady quasi-1D conservative PDE structure;
-- area, friction, wall heat, and mass/momentum/enthalpy source architecture;
-- Steger-Warming FVS;
-- first-order spatial discretization;
-- third-order TVD/SSP RK;
-- CFL-controlled stepping;
-- compatible supersonic inflow / zero-gradient-like outflow capability;
-- teacher Chapter 11 Eq. 11.46 maximum relative-density iteration-change diagnostic, implemented alongside the existing normalized residual criterion;
-- teacher/Cao variable-thermochemistry equations, internal-energy temperature inversion, and source-backed piecewise H2/C2H4 core thermo data.
-
-Main gaps to close:
-
-1. implement and verify a separate variable-thermo conservative/primitive state-recovery path using the frozen core database; keep the constant-gas path intact;
-2. recover a source-compatible `C10H22` record if the kerosene branch is required in the first integrated case;
-3. teacher-reference mixing efficiency / mixing-length closure;
-4. equivalence-ratio and fuel-specific composition closure;
-5. teacher empirical friction and wall-heat closures as optional models;
-6. near-sonic Steger-Warming eigenvalue smoothing once its epsilon policy is source-frozen;
-7. integrated teacher-reference case and regression evidence.
-
-## Energy-Accounting Rule
-
-The teacher reference distinguishes external wall/additional heat from chemical-reaction energy. The teacher/Cao absolute species enthalpy contains sensible enthalpy plus the chemical/zero-point contribution. When variable composition and species enthalpy are introduced, the same reaction energy must not be counted both through species/enthalpy changes and again through the direct prescribed heat-release source.
-
-This is a project-level invariant: **no silent double counting of chemical energy.**
 
 ## Supporting V&V Work
 
-The NASA Burrows-Kurkov and Jin/Liu evidence chains remain in the repository because they improve solver verification, provenance, and reduced-order benchmarking. They are supporting V&V assets, not substitutes for implementing the teacher-provided model.
+The NASA Burrows-Kurkov and Jin/Liu evidence chains remain supporting V&V assets. They improve solver verification, provenance, and reduced-order benchmarking, but they do not replace the teacher-provided model or permit stronger source-reproduction claims than the available evidence supports.
 
 ## Development Philosophy
 
-Each physical model and scientific claim is introduced independently, source-traced where applicable, tested, and validated before stronger claims are allowed. Teacher-provided material has priority for the target model; public literature supplements it rather than redefining the project goal.
+Correctness > verifiability > readability > extensibility > performance.
+
+Every physical model and scientific claim is introduced independently, source-traced where applicable, and tested before stronger claims are allowed. Missing evidence is recorded as a blocker rather than filled with invented parameters.
