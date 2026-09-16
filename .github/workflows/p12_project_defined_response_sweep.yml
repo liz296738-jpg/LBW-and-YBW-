@@ -1,0 +1,88 @@
+name: P12 Project-Defined Response Sweep
+
+on:
+  pull_request:
+    paths:
+      - 'cases/studies/p12_project_defined_response_sweep.py'
+      - 'cases/studies/p11_4_project_defined_h2_smoke.py'
+      - 'src/scramjet1d/**'
+      - '.github/workflows/p12_project_defined_response_sweep.yml'
+  workflow_dispatch:
+
+jobs:
+  sweep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e '.[dev]'
+      - name: Run evidence-gated H2 response sweep
+        run: |
+          python - <<'PY'
+          from dataclasses import asdict
+          import json
+          import math
+          from pathlib import Path
+
+          from cases.studies import p12_project_defined_response_sweep as sweep
+
+          points = sweep.run_sweep()
+          payload = {
+              'classification': sweep.CASE_CLASSIFICATION,
+              'not_a_source_reproduction': sweep.NOT_A_SOURCE_REPRODUCTION,
+              'mode_label_claim': False,
+              'equivalence_ratios': list(sweep.PROJECT_EQUIVALENCE_RATIOS),
+              'points': [asdict(point) for point in points],
+          }
+          print(json.dumps(payload, indent=2, sort_keys=True))
+          Path('p12_project_defined_response_sweep.json').write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + '\n',
+              encoding='utf-8',
+          )
+
+          allowed = {sweep.STATUS_CONVERGED, sweep.STATUS_FORWARD_FLOW_GUARD}
+          if any(point.status not in allowed for point in points):
+              raise SystemExit('default sweep produced an unaccepted status')
+
+          converged = [point for point in points if point.status == sweep.STATUS_CONVERGED]
+          if len(converged) < 2:
+              raise SystemExit('fewer than two default response points converged')
+
+          baseline = next(point for point in points if point.equivalence_ratio == 0.20)
+          if baseline.status != sweep.STATUS_CONVERGED:
+              raise SystemExit('accepted phi=0.20 baseline no longer converges')
+
+          for point in converged:
+              if not point.converged:
+                  raise SystemExit('CONVERGED point has converged=false')
+              if point.density_change is None or point.density_change > 1.0e-4:
+                  raise SystemExit('teacher Eq.11.46 density-change gate failed')
+              if point.normalized_residual is None or not math.isfinite(point.normalized_residual):
+                  raise SystemExit('normalized residual diagnostic is invalid')
+              if point.mass_inventory_relative_to_inlet is None or point.mass_inventory_relative_to_inlet > 5.0e-3:
+                  raise SystemExit('normalized mass inventory exceeds the accepted 0.5% gate')
+              for value in (
+                  point.momentum_inventory_relative_to_inlet,
+                  point.energy_inventory_relative_to_inlet,
+              ):
+                  if value is None or not math.isfinite(value) or value < 0.0:
+                      raise SystemExit('normalized momentum/energy inventory diagnostic is invalid')
+              if point.min_pressure_Pa is None or point.min_pressure_Pa <= 0.0:
+                  raise SystemExit('non-positive pressure in converged response point')
+              if point.min_temperature_K is None or point.min_temperature_K <= 0.0:
+                  raise SystemExit('non-positive temperature in converged response point')
+
+          for point in points:
+              if point.status == sweep.STATUS_FORWARD_FLOW_GUARD:
+                  if point.converged or point.note is None:
+                      raise SystemExit('guarded point metadata is inconsistent')
+                  if 'forward axial flow' not in point.note:
+                      raise SystemExit('guarded point does not identify the existing forward-flow restriction')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p12-project-defined-response-sweep
+          path: p12_project_defined_response_sweep.json
