@@ -51,6 +51,10 @@ A forward-flow guard trigger is recorded as `solver/model-domain inadmissible`. 
 
 Primary record: `cases/studies/data/p12_project_defined_response_sweep_acceptance.json`.
 
+### Delivery gate audit note
+
+The frozen P12 response-sweep acceptance record currently states an Eq. 11.46 threshold of `1e-4`, with accepted `phi=0.1` and `phi=0.2` density-change values just below that threshold. The later grid-refined P12 work uses the stricter teacher steady gate `2e-5`. Therefore the legacy `1e-4` response record is retained as provenance but **must not by itself satisfy the final delivery steady-convergence gate**. Before the project is marked deliverable complete, the accepted response points must be rerun/re-frozen under the authoritative `2e-5` Eq. 11.46 definition (or an authoritative source must explicitly justify a different threshold). Normalized residual remains diagnostic only. This mismatch must not be hidden by relabelling the existing values or relaxing the later gate.
+
 ## 5. Source-backed reproduction lane
 
 Cao Case 2 must remain separate from project-defined response work. Source identity and Table 2-2 inlet data are frozen. Formal reproduction remains blocked until the exact source provides or unambiguously determines:
@@ -80,7 +84,7 @@ Before marking the project deliverable complete, the repository must expose, fro
 - convergence history/summary and key flow/composition distributions;
 - 20/40/80 grid evidence;
 - discrete mass/momentum/energy conservation diagnostics and scale definitions;
-- project-defined parameter-response results;
+- project-defined parameter-response results satisfying the authoritative Eq. 11.46 steady gate;
 - source/derived/project-defined/unresolved provenance labels for scientific inputs;
 - current blocker list;
 - passing ordinary `pytest`/CI for the exact delivery commit.
