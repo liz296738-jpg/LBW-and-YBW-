@@ -16,7 +16,7 @@
 | P11.1-P11.2 | Complete / supporting | Public studies and reduced-order benchmarks | Parametric framework, cold surrogate, NASA heated benchmark | Evidence-gated reproducible outputs |
 | P11.3 | **Complete on the defensible H2/C2H4 teacher path; explicit source gaps retained** | Teacher-reference second-scheme building blocks | Variable thermo + closures + sources + boundaries + integrated Rusanov march | Equation-by-equation regression and source audit |
 | P11.4 | **Baseline accepted; exact Cao Case 2 reproduction source-blocked** | Integrated teacher-path case and reproduction evidence | Project-defined H2 steady case, grid audit, conservation audit, Case 2 evidence gate | Convergence, conservation, grid trend, strict claim boundary |
-| P12 | **Active / evidence-gated** | Continuous response study now; source-defined mode transition later | Guarded project-defined response sweep, then source-defined classifier if evidence is recovered | No invented thresholds or mode labels |
+| P12 | **Active / criterion source-frozen, broader claims evidence-gated** | Project-defined continuous response with scoped Cao thermal-throat criterion | Guarded response sweep plus source-faithful Eq. (3-2) criterion application | No invented tolerances; guard/nonconvergence never promoted to physical mode claims |
 
 ## Naming Correction
 
@@ -138,30 +138,24 @@ Already frozen from the dissertation:
 
 Formal reproduction remains blocked by missing exact source `A(x)`, prescribed `Yi(x)` spatial information, and the original fuel/source spatial convention. The accepted project-defined H2 geometry/closure must not be substituted for those missing inputs.
 
-## P12 — Evidence-Gated Response / Mode-Transition Application
+## P12 — Evidence-Gated Response / Mode-Criterion Application
 
-P12 is now active, but only the **project-defined continuous response** layer is currently allowed.
+P12 remains a **project-defined continuous response study**. A defensible source-defined thermal-throat criterion has now been frozen from Cao Ruifeng Eq. (3-2): within that criterion's documented scope, the scram side has `min(Ma(x)) > 1`, the ram side has `min(Ma(x)) < 1`, and the critical thermal throat is `Ma=1`. The source does not provide a floating-point sonic tolerance, so any numerical tolerance must remain an explicit project choice rather than a source claim.
 
-Safe current outputs:
+Safe current outputs include:
 
 - Mach, pressure, temperature, velocity and density responses;
 - composition fields;
 - Eq. 11.46 convergence status;
-- normalized conservation diagnostics;
-- explicit solver-admissibility status.
+- normalized mass/momentum/energy conservation diagnostics;
+- explicit solver-admissibility status;
+- the scoped Cao Eq. (3-2) thermal-throat side when the numerical point is otherwise accepted and the criterion is evaluated on its documented domain.
 
-A solver guard, nonconvergence, or local Mach crossing is **not** by itself evidence of unstart or a physical combustion-mode transition.
+The accepted project-defined H2 response sweep has converged `phi=0.10` and `phi=0.20` points under the authoritative Eq. 11.46 `2e-5` maximum relative-density-change gate. The cold-start `phi=0.30` point is `solver/model-domain inadmissible` because the existing forward-flow guard triggers; it receives no physical mode label.
 
-Before a categorical source-defined mode classifier is implemented, freeze from an authoritative source:
+Grid-refined project-defined evidence also records `phi=0.24` on the Eq. (3-2) scram side for 20/40/80 cells, while `phi=0.26` is solver/model-domain inadmissible on all three grids. This is a grid-convergence trend/criterion application only and does **not** establish a grid-independent transition equivalence ratio.
 
-1. exact physical mode definitions;
-2. the spatial domain on which the criterion is evaluated;
-3. required precombustion shock-train model / geometry;
-4. transition observables and thresholds;
-5. the source-defined control parameter and range;
-6. the expected comparison quantity.
-
-Until those items are complete, P12 must remain a project-defined response study without categorical mode labels.
+A solver guard, nonconvergence, or isolated Mach observation outside the frozen criterion scope is not by itself evidence of unstart or a broader physical combustion-mode transition. Broader categorical classification remains blocked by source-compatible isolator/shock-train state variables, geometry, and any additional observables required by the source.
 
 ## Remaining Source Gaps
 
@@ -171,7 +165,7 @@ The remaining scientific gaps are now narrow and explicit:
 - Eq. 11.26 dimensional wall-heat mapping;
 - variable-thermochemistry Steger-Warming production correction and Eq. 11.44 epsilon policy;
 - Cao Case 2 exact spatial geometry/composition/source information;
-- source-defined combustion-mode-transition classifier.
+- source-compatible isolator/shock-train state variables and geometry for broader categorical mode-transition claims.
 
 ## Supporting P11.2 Work
 
