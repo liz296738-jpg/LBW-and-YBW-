@@ -35,6 +35,7 @@ jobs:
               'not_a_source_reproduction': sweep.NOT_A_SOURCE_REPRODUCTION,
               'mode_label_claim': False,
               'equivalence_ratios': list(sweep.PROJECT_EQUIVALENCE_RATIOS),
+              'teacher_eq_11_46_steady_tolerance': sweep.TEACHER_EQ_11_46_STEADY_TOLERANCE,
               'points': [asdict(point) for point in points],
           }
           print(json.dumps(payload, indent=2, sort_keys=True))
@@ -58,7 +59,7 @@ jobs:
           for point in converged:
               if not point.converged:
                   raise SystemExit('CONVERGED point has converged=false')
-              if point.density_change is None or point.density_change > 1.0e-4:
+              if point.density_change is None or point.density_change > sweep.TEACHER_EQ_11_46_STEADY_TOLERANCE:
                   raise SystemExit('teacher Eq.11.46 density-change gate failed')
               if point.normalized_residual is None or not math.isfinite(point.normalized_residual):
                   raise SystemExit('normalized residual diagnostic is invalid')
