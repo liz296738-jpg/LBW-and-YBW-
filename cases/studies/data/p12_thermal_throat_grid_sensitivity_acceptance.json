@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "classification": "P12_PROJECT_DEFINED_THERMAL_THROAT_GRID_SENSITIVITY_ACCEPTANCE",
+  "not_a_source_reproduction": true,
+  "source_criterion": "Cao Eq. (3-2) thermal-throat criterion applied only to admissible converged profiles",
+  "workflow_head_sha": "7049907fc85b93ec77ceee46ea4205409c890da6",
+  "merged_main_sha": "942ba699861c6f15f38388ef54fdb3c8c568c552",
+  "workflow_run_id": 35170605134,
+  "teacher_steady_tolerance": 2e-05,
+  "project_sonic_tolerance": 0.001,
+  "grid_levels": [20, 40, 80],
+  "artifact_provenance": {
+    "20": {"artifact_id": 10477073768, "sha256": "8f3b3f6cb75e452e76a585ff7c055f932d79fcf3b68ec1b5616c3cc4cd993dab"},
+    "40": {"artifact_id": 10478199258, "sha256": "1a081f2c22b58035528602feef6691a18541cd6ef1a3d776b9603a5271f43a08"},
+    "80": {"artifact_id": 10480182478, "sha256": "21edf3755c2d8ee91d04504b10a9b2d051228488cfea39682a4c75f684deaae4"}
+  },
+  "target_points": {
+    "phi_0.24": [
+      {"cells": 20, "min_mach": 1.0766129859616784, "mass_inventory_relative_to_inlet": 0.0005742124091342238, "momentum_inventory_relative_to_inlet": 0.00007313958618948171, "energy_inventory_relative_to_inlet": 0.0002484307466128984, "density_change": 1.9989692725476537e-05, "normalized_residual": 0.000846019611002732, "state": "SCRAM_SIDE"},
+      {"cells": 40, "min_mach": 1.04462708512229, "mass_inventory_relative_to_inlet": 0.0007913781756536641, "momentum_inventory_relative_to_inlet": 0.00007082192898394013, "energy_inventory_relative_to_inlet": 0.00035135815972876886, "density_change": 1.997298675123697e-05, "normalized_residual": 0.001728071036604147, "state": "SCRAM_SIDE"},
+      {"cells": 80, "min_mach": 1.0126683915382297, "mass_inventory_relative_to_inlet": 0.0011051324273690108, "momentum_inventory_relative_to_inlet": 0.00006365071459543739, "energy_inventory_relative_to_inlet": 0.0005045184560949025, "density_change": 1.9994916026622355e-05, "normalized_residual": 0.003542924964243051, "state": "SCRAM_SIDE"}
+    ],
+    "phi_0.26": [
+      {"cells": 20, "status": "FORWARD_FLOW_GUARD_TRIGGERED", "state": null},
+      {"cells": 40, "status": "FORWARD_FLOW_GUARD_TRIGGERED", "state": null},
+      {"cells": 80, "status": "FORWARD_FLOW_GUARD_TRIGGERED", "state": null}
+    ]
+  },
+  "acceptance": {
+    "all_grid_jobs_completed": true,
+    "all_converged_points_meet_teacher_eq_11_46_gate": true,
+    "all_converged_points_meet_existing_mass_inventory_0.5_percent_gate": true,
+    "momentum_and_energy_inventory_are_diagnostics_only": true,
+    "phi_0.24_is_scram_side_on_all_three_grids": true,
+    "phi_0.26_is_solver_model_domain_inadmissible_on_all_three_grids": true,
+    "transition_equivalence_ratio_bracketed": false,
+    "formal_grid_independence_claimed": false
+  },
+  "interpretation": "With the same continuation path and Eq.11.46 tolerance on 20/40/80 cells, phi=0.24 remains admissible and on the Cao Eq.(3-2) scram side, while phi=0.26 triggers the existing forward-flow guard on every grid. The minimum Mach at phi=0.24 moves toward unity with refinement (1.07661, 1.04463, 1.01267), but this does not establish a grid-independent transition value. The phi=0.26 guard is a solver/model-domain inadmissibility and receives no unstart or combustion-mode label."
+}
