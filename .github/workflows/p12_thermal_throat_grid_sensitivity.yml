@@ -1,0 +1,100 @@
+name: P12 Thermal-Throat Grid Sensitivity
+
+on:
+  pull_request:
+    paths:
+      - 'cases/studies/p12_thermal_throat_grid_sensitivity.py'
+      - 'cases/studies/p12_thermal_throat_continuation.py'
+      - 'cases/studies/data/p12_thermal_throat_continuation_acceptance.json'
+      - 'src/scramjet1d/**'
+      - '.github/workflows/p12_thermal_throat_grid_sensitivity.yml'
+  workflow_dispatch:
+
+jobs:
+  grid-level:
+    strategy:
+      fail-fast: false
+      matrix:
+        cells: [20, 40, 80]
+    runs-on: ubuntu-24.04
+    # The 80-cell continuation has now reached the former 120-, 180-, and
+    # 240-minute CI wall-clock limits while 20/40-cell jobs completed
+    # successfully. Give the unchanged 80-cell calculation the maximum normal
+    # GitHub-hosted job budget rather than changing numerical/scientific gates.
+    # This remains an execution-budget change only: solver, CFL, Eq.11.46
+    # tolerance, continuation path, guards, and acceptance criteria are intact.
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: pip install -e '.[dev]'
+      - name: Run grid-refined continuation
+        env:
+          CELLS: ${{ matrix.cells }}
+        run: |
+          python - <<'PY'
+          from dataclasses import asdict
+          import json
+          import math
+          import os
+          from pathlib import Path
+
+          from cases.studies.p12_thermal_throat_grid_sensitivity import (
+              CASE_CLASSIFICATION,
+              CONTINUATION_EQUIVALENCE_RATIOS,
+              PROJECT_SONIC_TOLERANCE,
+              TEACHER_STEADY_TOLERANCE,
+              run_grid_level,
+          )
+          from cases.studies.p12_thermal_throat_continuation import (
+              STATUS_CONVERGED,
+              STATUS_FORWARD_FLOW_GUARD,
+              STATUS_MAX_STEPS,
+          )
+
+          cells = int(os.environ['CELLS'])
+          points = run_grid_level(cells, tolerance=TEACHER_STEADY_TOLERANCE, max_steps=25000)
+          payload = {
+              'classification': CASE_CLASSIFICATION,
+              'not_a_source_reproduction': True,
+              'cells': cells,
+              'teacher_steady_tolerance': TEACHER_STEADY_TOLERANCE,
+              'project_sonic_tolerance': PROJECT_SONIC_TOLERANCE,
+              'continuation_equivalence_ratios': list(CONTINUATION_EQUIVALENCE_RATIOS),
+              'points': [asdict(point) for point in points],
+          }
+          output = Path(f'p12_thermal_throat_grid_{cells}.json')
+          output.write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+          print(json.dumps(payload, indent=2, sort_keys=True))
+
+          if not points or points[0].equivalence_ratio != 0.20 or not points[0].converged:
+              raise SystemExit(f'{cells} cells: phi=0.20 continuation anchor did not converge')
+          for point in points:
+              if point.status == STATUS_CONVERGED:
+                  if point.density_change is None or point.density_change > TEACHER_STEADY_TOLERANCE:
+                      raise SystemExit(f'{cells} cells phi={point.equivalence_ratio}: Eq.11.46 gate failed')
+                  if point.mass_inventory_relative_to_inlet is None or point.mass_inventory_relative_to_inlet > 5.0e-3:
+                      raise SystemExit(f'{cells} cells phi={point.equivalence_ratio}: mass inventory gate failed')
+                  for value in (
+                      point.normalized_residual,
+                      point.momentum_inventory_relative_to_inlet,
+                      point.energy_inventory_relative_to_inlet,
+                      point.min_mach,
+                      point.max_mach,
+                  ):
+                      if value is None or not math.isfinite(value):
+                          raise SystemExit(f'{cells} cells phi={point.equivalence_ratio}: invalid diagnostic')
+                  if point.cao_thermal_throat_state is None:
+                      raise SystemExit(f'{cells} cells phi={point.equivalence_ratio}: missing source-criterion state')
+              elif point.status in (STATUS_FORWARD_FLOW_GUARD, STATUS_MAX_STEPS):
+                  if point.cao_thermal_throat_state is not None:
+                      raise SystemExit(f'{cells} cells phi={point.equivalence_ratio}: nonconverged point has a physical label')
+              else:
+                  raise SystemExit(f'{cells} cells phi={point.equivalence_ratio}: unknown status {point.status}')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p12-thermal-throat-grid-${{ matrix.cells }}
+          path: p12_thermal_throat_grid_${{ matrix.cells }}.json
