@@ -17,12 +17,13 @@ jobs:
       matrix:
         cells: [20, 40, 80]
     runs-on: ubuntu-24.04
-    # The 80-cell continuation reached the former 180-minute CI wall-clock
-    # limit while 20/40-cell jobs completed successfully. Keep a modest
-    # headroom above the observed runtime. This is an execution-budget change
-    # only: it does not alter the solver, CFL, Eq.11.46 tolerance,
-    # continuation path, guards, or scientific gates.
-    timeout-minutes: 240
+    # The 80-cell continuation has now reached the former 120-, 180-, and
+    # 240-minute CI wall-clock limits while 20/40-cell jobs completed
+    # successfully. Give the unchanged 80-cell calculation the maximum normal
+    # GitHub-hosted job budget rather than changing numerical/scientific gates.
+    # This remains an execution-budget change only: solver, CFL, Eq.11.46
+    # tolerance, continuation path, guards, and acceptance criteria are intact.
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
