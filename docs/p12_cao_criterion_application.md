@@ -1,8 +1,8 @@
 # P12 Cao Criterion Application on Project-Defined H2 Sweep
 
-Status: **SOURCE CRITERION APPLIED / TRANSITION NOT YET BRACKETED**
+Status: **SOURCE CRITERION APPLIED / GRID-REFINED CANDIDATE REGION ACCEPTED / TRANSITION VALUE NOT CLAIMED**
 
-This stage applies Cao Ruifeng's source-defined thermal-throat criterion to the already accepted project-defined H2 response sweep. The flow cases remain project-defined; only the criterion is source-defined.
+This stage applies Cao Ruifeng's source-defined thermal-throat criterion to the accepted project-defined H2 response sweep and its warm-start continuation. The flow cases remain project-defined; only the criterion is source-defined.
 
 ## Source criterion
 
@@ -12,20 +12,42 @@ The teacher-provided doctoral dissertation defines the broad thermal-throat dist
 - ram side: `min(Ma(x)) < 1`;
 - exact transition boundary: thermal throat critical at `Ma = 1`.
 
-The source does not provide a floating-point sonic tolerance. The application therefore checks the frozen minimum Mach values over the explicit project numerical sensitivity set `1e-6, 1e-4, 1e-3, 1e-2`.
+The source does not provide a floating-point sonic tolerance. The project uses an explicit numerical tolerance only as a numerical sensitivity choice; it is not attributed to Cao.
 
-## Accepted sweep interpretation
+## Accepted response sweep
 
 From the frozen P12 response-sweep evidence:
 
-- `phi=0.10`: converged, `min(Ma)=1.694412...`; robustly on the Cao scram side for every tested numerical tolerance;
-- `phi=0.20`: converged, `min(Ma)=1.278991...`; robustly on the Cao scram side for every tested numerical tolerance;
-- `phi=0.30`: the existing forward-flow Eq.11.38 guard is triggered during the cold-start pseudo-time path. It receives **no physical mode label**.
+- `phi=0.10`: converged and on the Cao scram side;
+- `phi=0.20`: converged and on the Cao scram side;
+- cold-start `phi=0.30`: triggers the existing forward-flow Eq.11.38 guard and receives **no physical mode label**.
 
-Therefore the currently accepted sweep does not bracket the `Ma=1` transition boundary. It establishes only that the two admissible converged project-defined points are on the source-defined scram side.
+## Accepted warm-start continuation
 
-## Next numerical step
+The initial 20-cell continuation with Eq.11.46 tolerance `1e-4` reached a near-sonic `phi=0.26` state. That result was treated only as a candidate region and explicitly required grid refinement with a tighter steady tolerance before any stronger claim.
 
-Do not weaken or remove the forward-flow guard. The next safe numerical experiment is a continuation/warm-start sweep from the accepted `phi=0.20` solution toward higher equivalence ratio, using small increments and a composition-consistent remap of the previous converged primitive state as the next initial guess.
+## Accepted 20/40/80 grid-refined continuation
 
-That continuation is a numerical strategy, not a new physical model. If a converged admissible point reaches the source-defined sonic band, it may be used to bracket the project-defined transition application. If the guard still triggers first, record the current solver-domain limitation rather than inventing a transition.
+The dedicated grid study repeats the same continuation sequence `phi=0.20 -> 0.22 -> 0.24 -> 0.26` on 20, 40 and 80 cells using teacher Eq.11.46 tolerance `2e-5`.
+
+All three grids complete the dedicated CI workflow. Every accepted converged point satisfies the Eq.11.46 gate and the existing 0.5% normalized mass-inventory gate. Momentum and energy inventory rates remain reported diagnostics without invented hard thresholds.
+
+At `phi=0.24`, all three grids are admissible and remain on the Cao Eq. (3-2) scram side. The minimum Mach values are:
+
+- 20 cells: `1.07661298596`;
+- 40 cells: `1.04462708512`;
+- 80 cells: `1.01266839154`.
+
+The minimum Mach therefore moves toward unity as the grid is refined, but this is only a grid trend; no GCI/asymptotic-order claim is made.
+
+At `phi=0.26`, the unchanged forward-flow guard triggers on **all three grids** before an admissible converged state is accepted. Those points are classified only as **solver/model-domain inadmissible**. They are not labelled unstart, ramjet, scramjet, dual-mode, LBW or YBW.
+
+Machine-readable record:
+
+`cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`
+
+## Scientific conclusion and next safe step
+
+The grid-refined evidence does **not** bracket a transition equivalence ratio: `phi=0.24` is still on the source-defined scram side at 80 cells, while `phi=0.26` is outside the currently admissible forward-flow solver/model domain on every grid.
+
+Therefore no transition `phi` is quoted. The next safe work is to preserve this evidence, keep Cao Case 2 reproduction independently source-blocked, and improve deliverability/reproducibility of the accepted project-defined response package. Any attempt to cross the `phi=0.24` to `0.26` gap must retain the forward-flow guard and may only classify points that are both converged and solver-admissible.
