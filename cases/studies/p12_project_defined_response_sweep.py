@@ -33,6 +33,7 @@ CASE_CLASSIFICATION = "P12_PROJECT_DEFINED_RESPONSE_SWEEP"
 NOT_A_SOURCE_REPRODUCTION = True
 NO_MODE_LABEL_CLAIM = True
 PROJECT_EQUIVALENCE_RATIOS = (0.10, 0.20, 0.30)
+TEACHER_EQ_11_46_STEADY_TOLERANCE = 2.0e-5
 STATUS_CONVERGED = "CONVERGED"
 STATUS_MAX_STEPS = "MAX_STEPS_REACHED"
 STATUS_FORWARD_FLOW_GUARD = "FORWARD_FLOW_GUARD_TRIGGERED"
@@ -82,7 +83,13 @@ def _guarded_point(phi: float, fuel_mdot: float, note: str) -> ResponsePoint:
     )
 
 
-def run_response_point(phi: float, cells: int = 20, *, tolerance: float = 1.0e-4, max_steps: int = 8000) -> ResponsePoint:
+def run_response_point(
+    phi: float,
+    cells: int = 20,
+    *,
+    tolerance: float = TEACHER_EQ_11_46_STEADY_TOLERANCE,
+    max_steps: int = 8000,
+) -> ResponsePoint:
     if not np.isfinite(phi) or phi <= 0.0:
         raise ValueError("phi must be finite and positive")
     if cells < 4:
@@ -115,11 +122,6 @@ def run_response_point(phi: float, cells: int = 20, *, tolerance: float = 1.0e-4
         baseline.INLET_VELOCITY_M_PER_S,
     )
     inlet_U = teacher_static_inlet_conservative_state(inlet, mapping, species)
-    inlet_primitive = variable_conservative_to_primitive(
-        inlet_U,
-        mapping.composition.composition_at(0),
-        species,
-    )
     rows = []
     for i in range(cells):
         composition = mapping.composition.composition_at(i)
