@@ -53,7 +53,7 @@ Primary record: `cases/studies/data/p12_project_defined_response_sweep_acceptanc
 
 ### Delivery gate audit note
 
-The frozen P12 response-sweep acceptance record currently states an Eq. 11.46 threshold of `1e-4`, with accepted `phi=0.1` and `phi=0.2` density-change values just below that threshold. The later grid-refined P12 work uses the stricter teacher steady gate `2e-5`. Therefore the legacy `1e-4` response record is retained as provenance but **must not by itself satisfy the final delivery steady-convergence gate**. Before the project is marked deliverable complete, the accepted response points must be rerun/re-frozen under the authoritative `2e-5` Eq. 11.46 definition (or an authoritative source must explicitly justify a different threshold). Normalized residual remains diagnostic only. This mismatch must not be hidden by relabelling the existing values or relaxing the later gate.
+The P12 response-sweep acceptance record has now been rerun and re-frozen under the authoritative Eq. 11.46 maximum relative-density-change gate of `2e-5`. The accepted `phi=0.1` and `phi=0.2` points satisfy that gate and retain the existing 0.5% normalized mass-inventory requirement. Normalized residual remains an independent diagnostic only, with no unsourced hard threshold. The attempted `phi=0.3` point remains `solver/model-domain inadmissible` because the forward-flow guard is triggered; this is not interpreted as unstart or as a combustion-mode transition. The superseded `1e-4` record remains historical provenance only and is not the current delivery evidence.
 
 ## 5. Source-backed reproduction lane
 
