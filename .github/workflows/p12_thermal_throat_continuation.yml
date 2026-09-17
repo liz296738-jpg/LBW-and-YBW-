@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'cases/studies/p12_thermal_throat_continuation.py'
+      - 'cases/studies/p12_project_defined_response_sweep.py'
       - 'cases/studies/p11_4_project_defined_h2_smoke.py'
       - 'src/scramjet1d/**'
       - '.github/workflows/p12_thermal_throat_continuation.yml'
@@ -27,6 +28,7 @@ jobs:
           import math
           from pathlib import Path
 
+          from cases.studies.p12_project_defined_response_sweep import TEACHER_EQ_11_46_STEADY_TOLERANCE
           from cases.studies.p12_thermal_throat_continuation import (
               CASE_CLASSIFICATION,
               STATUS_CONVERGED,
@@ -35,9 +37,14 @@ jobs:
               run_continuation,
           )
 
-          points = run_continuation(cells=20, tolerance=1.0e-4, max_steps=8000)
+          points = run_continuation(
+              cells=20,
+              tolerance=TEACHER_EQ_11_46_STEADY_TOLERANCE,
+              max_steps=8000,
+          )
           payload = {
               'classification': CASE_CLASSIFICATION,
+              'teacher_eq_11_46_steady_tolerance': TEACHER_EQ_11_46_STEADY_TOLERANCE,
               'points': [asdict(point) for point in points],
           }
           Path('p12_thermal_throat_continuation.json').write_text(
@@ -53,7 +60,7 @@ jobs:
 
           for point in points:
               if point.status == STATUS_CONVERGED:
-                  if point.density_change is None or point.density_change > 1.0e-4:
+                  if point.density_change is None or point.density_change > TEACHER_EQ_11_46_STEADY_TOLERANCE:
                       raise SystemExit(f'phi={point.equivalence_ratio}: Eq.11.46 gate failed')
                   if point.mass_inventory_relative_to_inlet is None or point.mass_inventory_relative_to_inlet > 5.0e-3:
                       raise SystemExit(f'phi={point.equivalence_ratio}: mass inventory gate failed')
