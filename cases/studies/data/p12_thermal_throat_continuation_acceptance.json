@@ -1,79 +1,24 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "classification": "P12_PROJECT_DEFINED_WARM_START_CONTINUATION_ACCEPTANCE",
   "not_a_source_reproduction": true,
   "source_criterion": "Cao Eq. (3-2) thermal-throat criterion applied only to admissible converged profiles",
-  "accepted_head_sha": "7888173c44f75f45830b88babb07d3387bdce815",
-  "workflow_merge_ref_sha": "bb36d1b46987df1da598e7561ff81244ada2f986",
-  "merged_main_sha": "2d0bae6c7efb83255faa303461e57e195abbfdb0",
-  "workflow_run_id": 35107621546,
-  "artifact_id": 10452046983,
-  "artifact_zip_sha256": "77dbee21917376e2e6f513483fd70ab565fe69c36d0491c464fd1f2ae5855459",
-  "project_sonic_tolerance": 0.001,
-  "teacher_steady_tolerance": 0.0001,
+  "teacher_eq_11_46_steady_tolerance": 2e-05,
+  "mass_inventory_relative_to_inlet_gate": 0.005,
+  "normalized_residual_role": "independent diagnostic only; no hard acceptance threshold",
+  "momentum_energy_inventory_role": "dimensionless diagnostics only; no hard acceptance threshold frozen",
+  "workflow_evidence": {
+    "run_id": 35271347144,
+    "head_sha": "88e03edd0c3a6764c908c68483f06f57de69e0a1",
+    "artifact_id": 10520470249,
+    "artifact_name": "p12-thermal-throat-continuation",
+    "artifact_sha256": "e3ced4192e526ab711d96ae9b73fbcbf8fadb9e98361bc75bae7082593d12602"
+  },
   "points": [
-    {
-      "equivalence_ratio": 0.20,
-      "status": "CONVERGED",
-      "steps": 343,
-      "density_change": 9.908109581867078e-05,
-      "normalized_residual": 0.0039151399815723536,
-      "mass_inventory_relative_to_inlet": 0.0022930831711579537,
-      "momentum_inventory_relative_to_inlet": 0.00048251185951766096,
-      "energy_inventory_relative_to_inlet": 0.0009251113007201682,
-      "min_mach": 1.2789913988416468,
-      "max_mach": 2.241515330251246,
-      "sonic_margin": 0.2789913988416468,
-      "cao_thermal_throat_state": "SCRAM_SIDE"
-    },
-    {
-      "equivalence_ratio": 0.22,
-      "status": "CONVERGED",
-      "steps": 249,
-      "density_change": 9.949524320399715e-05,
-      "normalized_residual": 0.004084237862325688,
-      "mass_inventory_relative_to_inlet": 0.00252359984908437,
-      "momentum_inventory_relative_to_inlet": 0.00044563564957373096,
-      "energy_inventory_relative_to_inlet": 0.001040824374981753,
-      "min_mach": 1.1870897418282975,
-      "max_mach": 2.240415116082596,
-      "sonic_margin": 0.18708974182829752,
-      "cao_thermal_throat_state": "SCRAM_SIDE"
-    },
-    {
-      "equivalence_ratio": 0.24,
-      "status": "CONVERGED",
-      "steps": 317,
-      "density_change": 9.982280778568783e-05,
-      "normalized_residual": 0.004187670875357629,
-      "mass_inventory_relative_to_inlet": 0.002795757316659485,
-      "momentum_inventory_relative_to_inlet": 0.0003808720710635909,
-      "energy_inventory_relative_to_inlet": 0.0011958304840840343,
-      "min_mach": 1.0942455218692673,
-      "max_mach": 2.2392735142748137,
-      "sonic_margin": 0.09424552186926727,
-      "cao_thermal_throat_state": "SCRAM_SIDE"
-    },
-    {
-      "equivalence_ratio": 0.26,
-      "status": "CONVERGED",
-      "steps": 474,
-      "density_change": 9.997461694306207e-05,
-      "normalized_residual": 0.004279497953930918,
-      "mass_inventory_relative_to_inlet": 0.0032704898996191154,
-      "momentum_inventory_relative_to_inlet": 0.00030151348069208694,
-      "energy_inventory_relative_to_inlet": 0.0014723826206074965,
-      "min_mach": 0.9991918131044899,
-      "max_mach": 2.23805481549259,
-      "sonic_margin": -0.000808186895510099,
-      "cao_thermal_throat_state": "CRITICAL_TRANSITION_BAND"
-    },
-    {
-      "equivalence_ratio": 0.28,
-      "status": "FORWARD_FLOW_GUARD_TRIGGERED",
-      "cao_thermal_throat_state": null,
-      "note": "teacher Eq.11.38 friction adapter currently supports forward axial flow u >= 0 only"
-    }
+    {"equivalence_ratio":0.20,"initialization":"COLD_START","status":"CONVERGED","density_change":1.9799228071952737e-05,"normalized_residual":0.0007879577164719876,"mass_inventory_relative_to_inlet":0.00046080119689590447,"momentum_inventory_relative_to_inlet":9.507678610470791e-05,"energy_inventory_relative_to_inlet":0.0001866130850386762,"min_mach":1.27140884274981,"max_mach":2.24150801228316,"cao_thermal_throat_state":"SCRAM_SIDE"},
+    {"equivalence_ratio":0.22,"initialization":"COMPOSITION_CONSISTENT_WARM_START","status":"CONVERGED","density_change":1.9970607551449058e-05,"normalized_residual":0.0008239839568293585,"mass_inventory_relative_to_inlet":0.0005076688226983574,"momentum_inventory_relative_to_inlet":8.617578664602593e-05,"energy_inventory_relative_to_inlet":0.00021086884802945047,"min_mach":1.176579560375719,"max_mach":2.2404033653921647,"cao_thermal_throat_state":"SCRAM_SIDE"},
+    {"equivalence_ratio":0.24,"initialization":"COMPOSITION_CONSISTENT_WARM_START","status":"CONVERGED","density_change":1.9989692725476537e-05,"normalized_residual":0.000846019611002732,"mass_inventory_relative_to_inlet":0.0005742124091342238,"momentum_inventory_relative_to_inlet":7.313958618948171e-05,"energy_inventory_relative_to_inlet":0.0002484307466128984,"min_mach":1.0766129859616784,"max_mach":2.2392510077964927,"cao_thermal_throat_state":"SCRAM_SIDE"},
+    {"equivalence_ratio":0.26,"initialization":"COMPOSITION_CONSISTENT_WARM_START","status":"FORWARD_FLOW_GUARD_TRIGGERED","cao_thermal_throat_state":null,"note":"teacher Eq.11.38 friction adapter currently supports forward axial flow u >= 0 only"}
   ],
-  "interpretation": "At 20 cells and the project numerical sonic tolerance 1e-3, warm-start continuation reaches a converged near-sonic state at phi=0.26 before the forward-flow guard triggers at phi=0.28. This is evidence for a candidate thermal-throat boundary region, not a grid-independent transition value. Grid-refined continuation with a tighter steady tolerance is required before quoting a transition equivalence ratio."
+  "interpretation": "At 20 cells under the authoritative Eq.11.46 2e-5 density-change gate, phi=0.20, 0.22, and 0.24 converge and remain on the scoped Cao Eq. (3-2) scram side. phi=0.26 triggers the preserved forward-flow guard and is solver/model-domain inadmissible; it receives no physical mode label. The earlier 1e-4 near-sonic phi=0.26 result is superseded and must not be used as accepted transition evidence. No grid-independent transition equivalence ratio is claimed."
 }
