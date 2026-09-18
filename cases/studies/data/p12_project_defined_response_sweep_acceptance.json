@@ -1,13 +1,16 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "classification": "P12_PROJECT_DEFINED_RESPONSE_SWEEP_ACCEPTANCE",
   "not_a_source_reproduction": true,
   "mode_label_claim": false,
-  "accepted_head_sha": "9bd34e7ede71cd0e0e08b71ea0bdf46be32ae437",
-  "merged_main_sha": "f6a4f78599b2eb676378404ce2a3f076db8c8714",
-  "workflow_run_id": 35218417669,
-  "artifact_id": 10496696025,
-  "artifact_zip_sha256": "f7fb2d6c70b305d4ba7cd4612d8c5ed57fb786c59668e0799f6bf2b7355e206e",
+  "provenance": {
+    "accepted_head_sha": "9bd34e7ede71cd0e0e08b71ea0bdf46be32ae437",
+    "first_merged_main_sha": "f6a4f78599b2eb676378404ce2a3f076db8c8714",
+    "workflow_run_id": 35218417669,
+    "artifact_id": 10496696025,
+    "artifact_zip_sha256": "f7fb2d6c70b305d4ba7cd4612d8c5ed57fb786c59668e0799f6bf2b7355e206e",
+    "note": "These identifiers freeze the original accepted response-sweep computation. They are historical evidence provenance, not an assertion that the acceptance JSON was generated at the current main SHA."
+  },
   "project_equivalence_ratios": [0.1, 0.2, 0.3],
   "acceptance_policy": {
     "teacher_steady_gate": "Eq.11.46 density-change <= 2e-5 for converged response points",
