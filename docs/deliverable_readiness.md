@@ -18,7 +18,7 @@ This checklist separates **implemented/accepted evidence** from the stronger cla
 
 - [x] Freeze one documented, copy-paste run command for the accepted H2 integrated baseline and one for the accepted P12 response study, with expected output locations (`docs/deliverable_runbook.md`).
 - [ ] Freeze a compact deliverable results package containing the accepted convergence history, key axial distributions (`Mach`, `p`, `T`, `u`, `rho`, composition), 20/40/80 grid comparison, normalized mass/momentum/energy inventory diagnostics, and accepted equivalence-ratio response results.
-- [ ] Add a single manifest mapping every plotted/tabulated deliverable result to its machine-readable acceptance/evidence record and provenance.
+- [x] Add a single manifest mapping every plotted/tabulated deliverable result to its machine-readable acceptance/evidence record and provenance (`cases/studies/data/course_deliverable_manifest.json`).
 - [ ] Run the complete ordinary test suite and the relevant P12 numerical workflows on the final packaging commit; record the exact accepted commit/workflow provenance.
 
 Until all unchecked items above are closed, the repository may describe P11.4/P12 evidence as accepted where applicable, but must **not** mark the overall course project as `deliverable complete`.
