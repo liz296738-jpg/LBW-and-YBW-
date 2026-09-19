@@ -1,0 +1,51 @@
+{
+  "schema": "course-deliverable-manifest-v1",
+  "scope": "PROJECT_DEFINED course deliverable evidence only; this manifest does not claim Cao Case 2 reproduction or combustion-mode classification",
+  "evidence": [
+    {
+      "deliverable": "H2 integrated baseline and convergence history",
+      "acceptance_record": "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json",
+      "generator": "cases/studies/p11_4_project_defined_h2_smoke.py",
+      "claim_boundary": "project-defined implementation/integration evidence"
+    },
+    {
+      "deliverable": "20/40/80 grid-convergence trend",
+      "acceptance_record": "cases/studies/data/p11_4_grid_convergence_acceptance.json",
+      "generator": "cases/studies/p11_4_grid_convergence.py",
+      "claim_boundary": "grid-convergence trend only; no asymptotic GCI/grid-independence claim"
+    },
+    {
+      "deliverable": "normalized mass/momentum/energy inventory diagnostics",
+      "acceptance_record": "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json",
+      "generator": "cases/studies/p11_4_conservation_audit.py",
+      "claim_boundary": "mass retains accepted 0.5% gate; momentum and energy are diagnostics without unsourced hard thresholds"
+    },
+    {
+      "deliverable": "equivalence-ratio response and continuous axial outputs",
+      "acceptance_record": "cases/studies/data/p12_project_defined_response_sweep_acceptance.json",
+      "generator": "cases/studies/p12_project_defined_response_sweep.py",
+      "claim_boundary": "PROJECT_DEFINED_RESPONSE_SWEEP; no ramjet/scramjet/dual-mode/unstart/LBW/YBW labels"
+    },
+    {
+      "deliverable": "stricter Eq.11.46 continuation evidence",
+      "acceptance_record": "cases/studies/data/p12_thermal_throat_continuation_acceptance.json",
+      "generator": "cases/studies/p12_thermal_throat_continuation.py",
+      "claim_boundary": "teacher Eq.11.46 density-change gate; normalized residual remains independent diagnostic"
+    },
+    {
+      "deliverable": "thermal-throat grid-sensitivity evidence",
+      "acceptance_record": "cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json",
+      "generator": "cases/studies/p12_thermal_throat_grid_sensitivity.py",
+      "claim_boundary": "grid-sensitivity evidence under frozen case definitions"
+    }
+  ],
+  "source_reproduction_gate": "cases/studies/data/p11_4_cao_case2_evidence_gate.json",
+  "teacher_alignment": "cases/studies/data/teacher_reference_alignment.json",
+  "known_blockers": [
+    "Cao Case 2 exact A(x)",
+    "Cao Case 2 prescribed Yi(x) spatial information/rule",
+    "Cao Case 2 original fuel/injection/source spatial convention",
+    "variable-thermochemistry + Steger-Warming energy-reference/epsilon compatibility",
+    "dimensional mapping from teacher Eq.11.26 to Eq.11.38 wall-heat source"
+  ]
+}
