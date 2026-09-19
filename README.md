@@ -49,6 +49,7 @@ Teacher Eqs. 11.42-11.44 Steger-Warming are retained as a separately audited sou
 - `cases/studies/data/p11_4_cao_case2_evidence_gate.json`
 - `cases/studies/data/p12_project_defined_response_sweep_acceptance.json`
 - `cases/studies/data/p12_thermal_throat_continuation_acceptance.json`
+- `cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`
 - `cases/studies/data/p12_cao_mode_criterion_source.json`
 - `cases/studies/data/teacher_cao_case2_source.json`
 - `cases/studies/data/teacher_reference_alignment.json`
