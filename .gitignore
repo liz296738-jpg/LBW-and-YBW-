@@ -16,3 +16,5 @@ results/*
 !results/p7_4/**
 !results/p8_4/
 !results/p8_4/**
+
+artifacts/dashboard/
