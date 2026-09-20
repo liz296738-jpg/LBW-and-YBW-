@@ -21,6 +21,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import argparse
 import json
 from pathlib import Path
+import sys
 import threading
 import traceback
 from typing import Any, Callable
@@ -30,6 +31,13 @@ import webbrowser
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# When this file is executed directly (the Render start-command case), Python
+# places tools/ rather than the repository root on sys.path. The study modules
+# live under cases/, so make the repo root importable explicitly before any
+# solver job imports them.
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 WEB_INDEX = REPO_ROOT / "web" / "mentor_dashboard" / "index.html"
 DATA_ROOT = REPO_ROOT / "cases" / "studies" / "data"
 ARTIFACT_ROOT = REPO_ROOT / "artifacts" / "dashboard"
