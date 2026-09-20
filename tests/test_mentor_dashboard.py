@@ -75,3 +75,7 @@ def test_dashboard_frontend_exists_and_states_guard_boundary() -> None:
 
 def test_dashboard_only_exposes_known_run_modes() -> None:
     assert set(dashboard.RUNNERS) == {"baseline", "response", "profile"}
+
+
+def test_dashboard_adds_repo_root_to_python_path_for_direct_execution() -> None:
+    assert str(dashboard.REPO_ROOT) in sys.path
