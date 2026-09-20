@@ -47,5 +47,42 @@
     "Cao Case 2 original fuel/injection/source spatial convention",
     "variable-thermochemistry + Steger-Warming energy-reference/epsilon compatibility",
     "dimensional mapping from teacher Eq.11.26 to Eq.11.38 wall-heat source"
-  ]
+  ],
+  "course_project_status": "DELIVERABLE_COMPLETE",
+  "status_scope": "Project-defined course deliverable only; known source/scientific blockers remain explicit and unresolved.",
+  "final_packaging_acceptance": {
+    "acceptance_date": "2026-09-20",
+    "accepted_packaging_commit": "fd7a51985685004319d6aaf83da72e99e947e68b",
+    "ordinary_test": {
+      "workflow": "Test",
+      "run_number": 814,
+      "run_id": 35437539323,
+      "conclusion": "success",
+      "url": "https://github.com/liz296738-jpg/LBW-and-YBW-/actions/runs/35437539323"
+    },
+    "p12_workflows": [
+      {
+        "workflow": "P12 Project-Defined Response Sweep",
+        "run_number": 3,
+        "run_id": 35518624324,
+        "conclusion": "success",
+        "url": "https://github.com/liz296738-jpg/LBW-and-YBW-/actions/runs/35518624324"
+      },
+      {
+        "workflow": "P12 Thermal-Throat Continuation",
+        "run_number": 3,
+        "run_id": 35516647845,
+        "conclusion": "success",
+        "url": "https://github.com/liz296738-jpg/LBW-and-YBW-/actions/runs/35516647845"
+      },
+      {
+        "workflow": "P12 Thermal-Throat Grid Sensitivity",
+        "run_number": 7,
+        "run_id": 35504665526,
+        "conclusion": "success",
+        "url": "https://github.com/liz296738-jpg/LBW-and-YBW-/actions/runs/35504665526"
+      }
+    ],
+    "closeout_note": "A later documentation/provenance-only closeout commit may record this acceptance; the accepted numerical/package content is pinned to accepted_packaging_commit."
+  }
 }
