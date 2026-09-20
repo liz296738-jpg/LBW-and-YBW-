@@ -19,9 +19,20 @@ This checklist separates **implemented/accepted evidence** from the stronger cla
 - [x] Freeze one documented, copy-paste run command for the accepted H2 integrated baseline and one for the accepted P12 response study, with expected output locations (`docs/deliverable_runbook.md`).
 - [x] Freeze a compact deliverable results package containing the accepted convergence history, key axial distributions (`Mach`, `p`, `T`, `u`, `rho`, composition), 20/40/80 grid comparison, normalized mass/momentum/energy inventory diagnostics, and accepted equivalence-ratio response results (`docs/course_deliverable_results.md`).
 - [x] Add a single manifest mapping every plotted/tabulated deliverable result to its machine-readable acceptance/evidence record and provenance (`cases/studies/data/course_deliverable_manifest.json`).
-- [ ] Run the complete ordinary test suite and the relevant P12 numerical workflows on the final packaging commit; record the exact accepted commit/workflow provenance.
+- [x] Run the complete ordinary test suite and the relevant P12 numerical workflows on the final packaging commit; record the exact accepted commit/workflow provenance.
 
-Until all unchecked items above are closed, the repository may describe P11.4/P12 evidence as accepted where applicable, but must **not** mark the overall course project as `deliverable complete`.
+All required presentation/package closeout items are now closed. The **project-defined course deliverable is `deliverable complete`**. This status does not remove or weaken any scientific/source blocker listed below.
+
+## Final accepted packaging provenance
+
+The numerically accepted packaging commit is `fd7a51985685004319d6aaf83da72e99e947e68b`. The following GitHub Actions runs all targeted that exact commit and completed successfully:
+
+- ordinary `Test` workflow: run #814, run ID `35437539323`;
+- `P12 Project-Defined Response Sweep`: run #3, run ID `35518624324`;
+- `P12 Thermal-Throat Continuation`: run #3, run ID `35516647845`;
+- `P12 Thermal-Throat Grid Sensitivity`: run #7, run ID `35504665526`.
+
+The subsequent closeout record is documentation/provenance-only; it does not change the solver, numerical cases, acceptance thresholds, workflow definitions, frozen evidence, or compact results package.
 
 ## Scientific claim boundaries that remain after packaging
 
