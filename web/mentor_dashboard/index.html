@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Scramjet 1D CFD · 导师控制台</title>
+  <style>
+    :root {
+      --bg: #f5f5f7;
+      --surface: rgba(255,255,255,.82);
+      --surface-solid: #ffffff;
+      --surface-2: #f2f2f7;
+      --text: #1d1d1f;
+      --muted: #6e6e73;
+      --line: rgba(0,0,0,.08);
+      --blue: #0071e3;
+      --blue-soft: rgba(0,113,227,.10);
+      --green: #16853f;
+      --green-soft: rgba(22,133,63,.10);
+      --amber: #9a6700;
+      --amber-soft: rgba(154,103,0,.11);
+      --red: #d70015;
+      --red-soft: rgba(215,0,21,.08);
+      --shadow: 0 18px 50px rgba(0,0,0,.06);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --sidebar: 252px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
+                   "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB",
+                   "Microsoft YaHei", sans-serif;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #09090b;
+        --surface: rgba(28,28,30,.78);
+        --surface-solid: #1c1c1e;
+        --surface-2: #2c2c2e;
+        --text: #f5f5f7;
+        --muted: #a1a1a6;
+        --line: rgba(255,255,255,.10);
+        --blue: #2997ff;
+        --blue-soft: rgba(41,151,255,.14);
+        --green: #32d74b;
+        --green-soft: rgba(50,215,75,.12);
+        --amber: #ffd60a;
+        --amber-soft: rgba(255,214,10,.10);
+        --red: #ff453a;
+        --red-soft: rgba(255,69,58,.10);
+        --shadow: 0 18px 54px rgba(0,0,0,.32);
+      }
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 76% -10%, rgba(0,113,227,.13), transparent 32rem),
+        radial-gradient(circle at 15% 8%, rgba(114,46,209,.08), transparent 26rem),
+        var(--bg);
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .app { min-height: 100vh; display: grid; grid-template-columns: var(--sidebar) 1fr; }
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; padding: 28px 18px 20px;
+      border-right: 1px solid var(--line);
+      background: color-mix(in srgb, var(--surface) 84%, transparent);
+      backdrop-filter: saturate(180%) blur(22px);
+      -webkit-backdrop-filter: saturate(180%) blur(22px);
+      z-index: 20;
+    }
+    .brand { padding: 0 10px 24px; }
+    .brand-mark {
+      width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
+      margin-bottom: 14px; font-weight: 750; letter-spacing: -.04em;
+      background: linear-gradient(145deg, #0a84ff, #5856d6);
+      color: white; box-shadow: 0 10px 24px rgba(0,113,227,.22);
+    }
+    .brand h1 { font-size: 17px; margin: 0 0 5px; letter-spacing: -.02em; }
+    .brand p { font-size: 12px; color: var(--muted); margin: 0; line-height: 1.45; }
+    .nav { display: grid; gap: 5px; }
+    .nav button {
+      border: 0; background: transparent; width: 100%; cursor: pointer;
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+      border-radius: 11px; color: var(--muted); text-align: left;
+      transition: .18s ease;
+    }
+    .nav button:hover { background: var(--surface-2); color: var(--text); }
+    .nav button.active { background: var(--blue-soft); color: var(--blue); font-weight: 650; }
+    .nav-icon { width: 22px; font-size: 17px; text-align: center; }
+    .sidebar-footer { position: absolute; left: 18px; right: 18px; bottom: 20px; }
+    .scope-mini {
+      border: 1px solid var(--line); background: var(--surface); border-radius: 14px;
+      padding: 12px; color: var(--muted); font-size: 11px; line-height: 1.5;
+    }
+
+    main { min-width: 0; padding: 38px clamp(22px, 4vw, 64px) 70px; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 20px;
+      max-width: 1280px; margin: 0 auto 28px;
+    }
+    .eyebrow {
+      text-transform: uppercase; letter-spacing: .13em; font-size: 11px; font-weight: 750;
+      color: var(--muted); margin-bottom: 7px;
+    }
+    .topbar h2 { font-size: clamp(30px, 4vw, 46px); line-height: 1.05; margin: 0; letter-spacing: -.045em; }
+    .topbar p { margin: 10px 0 0; color: var(--muted); max-width: 760px; line-height: 1.55; }
+    .status {
+      display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+      padding: 9px 13px; border-radius: 999px; border: 1px solid var(--line);
+      background: var(--surface); box-shadow: 0 8px 24px rgba(0,0,0,.035);
+      font-size: 12px; font-weight: 700;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 5px var(--green-soft); }
+    .section { display: none; max-width: 1280px; margin: 0 auto; animation: fade .22s ease; }
+    .section.active { display: block; }
+    @keyframes fade { from { opacity: .45; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+    .hero {
+      border: 1px solid var(--line); border-radius: var(--radius-xl); overflow: hidden;
+      padding: clamp(26px, 4vw, 46px); background:
+        radial-gradient(circle at 85% 10%, rgba(0,113,227,.16), transparent 23rem),
+        linear-gradient(150deg, var(--surface-solid), color-mix(in srgb, var(--surface-solid) 88%, #0071e3 12%));
+      box-shadow: var(--shadow);
+      margin-bottom: 22px;
+    }
+    .hero-grid { display: grid; grid-template-columns: minmax(0,1.35fr) minmax(260px,.65fr); gap: 30px; align-items: center; }
+    .hero h3 { font-size: clamp(30px, 4vw, 54px); line-height: 1.02; letter-spacing: -.05em; margin: 0 0 14px; }
+    .hero p { margin: 0; color: var(--muted); line-height: 1.6; font-size: 15px; max-width: 720px; }
+    .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+    .badge {
+      display: inline-flex; align-items: center; border-radius: 999px; padding: 7px 10px;
+      font-size: 11px; font-weight: 700; letter-spacing: .01em;
+      border: 1px solid var(--line); background: var(--surface);
+    }
+    .badge.blue { color: var(--blue); background: var(--blue-soft); border-color: transparent; }
+    .badge.green { color: var(--green); background: var(--green-soft); border-color: transparent; }
+    .badge.amber { color: var(--amber); background: var(--amber-soft); border-color: transparent; }
+    .hero-side {
+      min-height: 190px; padding: 22px; border-radius: 22px; background: rgba(255,255,255,.48);
+      border: 1px solid var(--line); backdrop-filter: blur(14px);
+    }
+    @media (prefers-color-scheme: dark) { .hero-side { background: rgba(0,0,0,.16); } }
+    .hero-side .big { font-size: 46px; font-weight: 780; letter-spacing: -.055em; margin: 4px 0 2px; }
+    .hero-side .label { color: var(--muted); font-size: 12px; }
+    .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
+    .card, .panel {
+      border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-lg);
+      box-shadow: 0 12px 34px rgba(0,0,0,.035); backdrop-filter: blur(18px);
+    }
+    .card { padding: 18px; min-height: 124px; }
+    .card .kicker { color: var(--muted); font-size: 11px; font-weight: 650; margin-bottom: 14px; }
+    .card .value { font-size: 27px; font-weight: 760; letter-spacing: -.035em; }
+    .card .sub { color: var(--muted); font-size: 11px; margin-top: 7px; line-height: 1.45; }
+    .panel { padding: 22px; margin-bottom: 18px; }
+    .panel-head { display: flex; align-items: start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+    .panel h3, .panel h4 { margin: 0; letter-spacing: -.025em; }
+    .panel h3 { font-size: 21px; }
+    .panel h4 { font-size: 16px; }
+    .panel-head p, .panel > p { color: var(--muted); font-size: 13px; line-height: 1.55; margin: 6px 0 0; }
+    .two-col { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 18px; }
+    .three-col { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+    .chart {
+      width: 100%; min-height: 220px; border-radius: 14px; background: var(--surface-2);
+      border: 1px solid var(--line); overflow: hidden; position: relative;
+    }
+    .chart svg { width: 100%; height: 220px; display: block; }
+    .chart-caption { color: var(--muted); font-size: 11px; margin-top: 9px; line-height: 1.45; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; }
+    table { width: 100%; border-collapse: collapse; min-width: 760px; background: color-mix(in srgb, var(--surface-solid) 82%, transparent); }
+    th, td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--line); font-size: 12px; white-space: nowrap; }
+    th { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .06em; }
+    tbody tr:last-child td { border-bottom: 0; }
+    .pill { display: inline-flex; border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 760; }
+    .pill.ok { color: var(--green); background: var(--green-soft); }
+    .pill.warn { color: var(--amber); background: var(--amber-soft); }
+    .pill.info { color: var(--blue); background: var(--blue-soft); }
+    .pill.bad { color: var(--red); background: var(--red-soft); }
+    .kv { display: grid; grid-template-columns: 1fr auto; gap: 10px 18px; font-size: 12px; }
+    .kv div:nth-child(odd) { color: var(--muted); }
+    .kv div:nth-child(even) { font-variant-numeric: tabular-nums; text-align: right; }
+    .callout {
+      padding: 16px 18px; border-radius: 15px; background: var(--amber-soft);
+      border: 1px solid color-mix(in srgb, var(--amber) 20%, transparent);
+      color: color-mix(in srgb, var(--text) 85%, var(--amber) 15%);
+      font-size: 12px; line-height: 1.6;
+    }
+    .blocker-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+    .blocker-list li {
+      display: flex; gap: 10px; align-items: flex-start; padding: 12px 13px;
+      border-radius: 13px; background: var(--surface-2); border: 1px solid var(--line);
+      font-size: 12px; line-height: 1.5;
+    }
+    .blocker-list li::before { content: "—"; color: var(--amber); font-weight: 800; }
+    .run-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+    .run-card {
+      padding: 18px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface-solid);
+      display: flex; flex-direction: column; min-height: 260px;
+    }
+    .run-card .run-title { font-size: 16px; font-weight: 730; letter-spacing: -.02em; margin-bottom: 8px; }
+    .run-card p { color: var(--muted); font-size: 12px; line-height: 1.55; margin: 0 0 14px; }
+    .run-spec { display: grid; gap: 7px; font-size: 11px; color: var(--muted); margin-bottom: 18px; }
+    .primary {
+      margin-top: auto; border: 0; cursor: pointer; border-radius: 12px; padding: 11px 14px;
+      background: var(--blue); color: white; font-weight: 700; transition: .18s ease;
+    }
+    .primary:hover { filter: brightness(1.06); transform: translateY(-1px); }
+    .primary:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .secondary {
+      border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+      border-radius: 10px; padding: 8px 11px; cursor: pointer; font-size: 11px; font-weight: 650;
+    }
+    .job {
+      display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 13px 0;
+      border-bottom: 1px solid var(--line); font-size: 12px;
+    }
+    .job:last-child { border-bottom: 0; }
+    .job-meta { color: var(--muted); font-size: 10px; margin-top: 4px; }
+    .code {
+      padding: 13px 14px; border-radius: 12px; background: #111113; color: #f5f5f7;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px;
+      overflow-x: auto; white-space: nowrap;
+    }
+    .loading {
+      position: fixed; inset: 0; z-index: 100; display: grid; place-items: center;
+      background: color-mix(in srgb, var(--bg) 86%, transparent); backdrop-filter: blur(12px);
+    }
+    .loading.hidden { display: none; }
+    .spinner { width: 30px; height: 30px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--blue); animation: spin .8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .mobile-nav { display: none; }
+    .toast {
+      position: fixed; right: 24px; bottom: 24px; z-index: 110; max-width: 430px;
+      background: var(--surface-solid); border: 1px solid var(--line); box-shadow: var(--shadow);
+      padding: 13px 15px; border-radius: 14px; font-size: 12px; line-height: 1.45;
+      transform: translateY(12px); opacity: 0; pointer-events: none; transition: .2s ease;
+    }
+    .toast.show { transform: none; opacity: 1; }
+    @media (max-width: 980px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .mobile-nav {
+        position: sticky; top: 0; z-index: 30; display: flex; gap: 7px; overflow-x: auto;
+        padding: 10px 14px; border-bottom: 1px solid var(--line);
+        background: color-mix(in srgb, var(--surface) 90%, transparent); backdrop-filter: blur(20px);
+      }
+      .mobile-nav button { border: 0; background: var(--surface-2); padding: 8px 11px; border-radius: 999px; white-space: nowrap; }
+      .mobile-nav button.active { background: var(--blue); color: white; }
+      main { padding-top: 26px; }
+      .hero-grid, .two-col { grid-template-columns: 1fr; }
+      .metric-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .run-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 620px) {
+      .topbar { display: block; }
+      .status { margin-top: 16px; }
+      .metric-grid, .three-col { grid-template-columns: 1fr; }
+      main { padding-inline: 14px; }
+      .hero, .panel { border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="loading" class="loading"><div class="spinner" aria-label="加载中"></div></div>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">1D</div>
+        <h1>Scramjet CFD</h1>
+        <p>导师控制台 · Project-defined course deliverable</p>
+      </div>
+      <nav class="nav" aria-label="主要导航">
+        <button class="active" data-section="overview"><span class="nav-icon">◫</span>总览</button>
+        <button data-section="baseline"><span class="nav-icon">⌁</span>H₂ 基线</button>
+        <button data-section="grid"><span class="nav-icon">▦</span>网格与守恒</button>
+        <button data-section="response"><span class="nav-icon">⌇</span>P12 响应</button>
+        <button data-section="evidence"><span class="nav-icon">✓</span>证据与边界</button>
+        <button data-section="run"><span class="nav-icon">▶</span>运行算例</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="scope-mini">
+          页面只展示冻结证据与受控算例。Guard 触发只表示 solver/model-domain inadmissible，不解释为 unstart。
+        </div>
+      </div>
+    </aside>
+
+    <div>
+      <div class="mobile-nav">
+        <button class="active" data-section="overview">总览</button>
+        <button data-section="baseline">H₂ 基线</button>
+        <button data-section="grid">网格</button>
+        <button data-section="response">响应</button>
+        <button data-section="evidence">证据</button>
+        <button data-section="run">运行</button>
+      </div>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <div class="eyebrow">Mentor Console</div>
+            <h2>一维超燃 / 双模态冲压发动机 CFD</h2>
+            <p>把已验收的数值结果、网格可信度、离散守恒、参数响应和来源边界集中在一个页面里。</p>
+          </div>
+          <div class="status"><span class="dot"></span><span id="top-status">读取中…</span></div>
+        </header>
+
+        <section id="overview" class="section active">
+          <div class="hero">
+            <div class="hero-grid">
+              <div>
+                <div class="eyebrow">Course Deliverable</div>
+                <h3>结果先说清楚，<br>证据随时可追。</h3>
+                <p id="hero-scope">正在读取仓库内冻结的 acceptance / evidence 数据。</p>
+                <div class="hero-badges">
+                  <span class="badge green">Deliverable complete</span>
+                  <span class="badge blue">H₂ integrated baseline</span>
+                  <span class="badge blue">20 / 40 / 80 grid trend</span>
+                  <span class="badge amber">Source blockers preserved</span>
+                </div>
+              </div>
+              <div class="hero-side">
+                <div class="label">Accepted packaging commit</div>
+                <div class="big" id="commit-short">—</div>
+                <div class="label">完整 SHA 已记录在 manifest；当前页面不改变任何物理模型或验收阈值。</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="metric-grid">
+            <div class="card"><div class="kicker">Baseline Mach</div><div class="value" id="m-mach">—</div><div class="sub">20-cell accepted H₂ baseline</div></div>
+            <div class="card"><div class="kicker">Peak Temperature</div><div class="value" id="m-temp">—</div><div class="sub">K · accepted baseline</div></div>
+            <div class="card"><div class="kicker">Eq.11.46</div><div class="value" id="m-density">—</div><div class="sub">maximum relative density change</div></div>
+            <div class="card"><div class="kicker">P12 Accepted φ</div><div class="value" id="m-phi">—</div><div class="sub">converged project-defined points</div></div>
+          </div>
+
+          <div class="two-col">
+            <div class="panel">
+              <div class="panel-head"><div><h3>三层网格趋势</h3><p>关键输出随 20→40→80 cells 的变化。</p></div><span class="pill ok">Accepted</span></div>
+              <div id="overview-grid-chart" class="chart"></div>
+              <div class="chart-caption">这里只称为 grid-convergence trend；未做渐近区/GCI 时不声称严格网格无关。</div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div><h3>P12 等价比响应</h3><p>展示连续数值量，不从 guard / 不收敛单独推断燃烧模态。</p></div><span class="pill info">Project-defined</span></div>
+              <div id="overview-response-chart" class="chart"></div>
+              <div class="chart-caption">φ=0.30 的 cold-start 路径触发 forward-flow guard，仅记录为模型域不可接受。</div>
+            </div>
+          </div>
+        </section>
+
+        <section id="baseline" class="section">
+          <div class="panel">
+            <div class="panel-head"><div><h3>H₂ 综合基线</h3><p>PROJECT_DEFINED_INTEGRATED_SMOKE_CASE · 不是 Cao Case 2 reproduction。</p></div><span class="pill ok">Converged</span></div>
+            <div class="metric-grid">
+              <div class="card"><div class="kicker">Cells</div><div class="value" id="b-cells">—</div><div class="sub">accepted smoke baseline</div></div>
+              <div class="card"><div class="kicker">Steps</div><div class="value" id="b-steps">—</div><div class="sub">pseudo-time iterations</div></div>
+              <div class="card"><div class="kicker">Pressure</div><div class="value" id="b-pressure">—</div><div class="sub">Pa · min → max</div></div>
+              <div class="card"><div class="kicker">Temperature</div><div class="value" id="b-temperature">—</div><div class="sub">K · min → max</div></div>
+            </div>
+            <div class="two-col">
+              <div class="panel" style="margin:0">
+                <h4>数值门</h4>
+                <div class="kv" id="baseline-numerics"></div>
+              </div>
+              <div class="panel" style="margin:0">
+                <h4>算例输出</h4>
+                <div class="kv" id="baseline-outputs"></div>
+              </div>
+            </div>
+          </div>
+          <div class="callout">
+            基线 smoke acceptance 历史上冻结的是 20 cells、CFL 0.5、Eq.11.46 density-change tolerance = 1e-4。
+            更严格的 2e-5 网格/P12 证据是另外冻结的数值研究；页面不会把不同 tolerance 混成同一个趋势结论。
+          </div>
+        </section>
+
+        <section id="grid" class="section">
+          <div class="two-col">
+            <div class="panel">
+              <div class="panel-head"><div><h3>Minimum Mach</h3><p>20 / 40 / 80 cells</p></div><span class="pill ok">Trend</span></div>
+              <div id="grid-mach-chart" class="chart"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div><h3>Peak Pressure</h3><p>20 / 40 / 80 cells</p></div><span class="pill ok">Trend</span></div>
+              <div id="grid-pressure-chart" class="chart"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>网格审计明细</h3><p>同一 case definition、同一 2e-5 Eq.11.46 gate。</p></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Cells</th><th>dx (m)</th><th>Steps</th><th>Density change</th><th>Norm. residual</th><th>Min Mach</th><th>Max Mach</th><th>Max p (Pa)</th><th>Max T (K)</th></tr></thead><tbody id="grid-table"></tbody></table></div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>守恒诊断</h3><p>P12 accepted points 的入口自然尺度无量纲库存率。</p></div><span class="pill info">Mass gate 0.5%</span></div>
+            <div class="table-wrap"><table><thead><tr><th>φ</th><th>Status</th><th>Mass / inlet</th><th>Momentum / inlet</th><th>Energy / inlet</th><th>备注</th></tr></thead><tbody id="conservation-table"></tbody></table></div>
+            <div class="chart-caption">质量继续使用 ≤0.5% 的既有门；动量与能量仅报告诊断，不新增无来源硬阈值。</div>
+          </div>
+        </section>
+
+        <section id="response" class="section">
+          <div class="panel">
+            <div class="panel-head"><div><h3>P12 Project-defined response sweep</h3><p>固定边界、热化学、源项和收敛定义，仅扫描已冻结等价比点。</p></div><span class="pill info">Eq.11.46 = 2e-5</span></div>
+            <div id="response-mach-chart" class="chart"></div>
+          </div>
+          <div class="panel">
+            <div class="table-wrap"><table><thead><tr><th>φ</th><th>Status</th><th>Eq.11.46</th><th>Norm. residual</th><th>Mach range</th><th>p range (Pa)</th><th>T range (K)</th></tr></thead><tbody id="response-table"></tbody></table></div>
+          </div>
+          <div class="two-col">
+            <div class="panel"><div class="panel-head"><div><h3>Warm-start continuation</h3><p>20-cell stricter continuation evidence。</p></div></div><div id="continuation-list"></div></div>
+            <div class="panel"><div class="panel-head"><div><h3>Thermal-throat grid sensitivity</h3><p>φ=0.24 / 0.26 across 20/40/80 cells。</p></div></div><div id="throat-grid-list"></div></div>
+          </div>
+          <div class="callout">
+            “SCRAM_SIDE” 若出现，仅表示对已接受数值点按 Cao Eq.(3-2) 的限定范围应用 thermal-throat criterion。
+            它不是对整个项目做更广义的 ramjet/scramjet/dual-mode/unstart 分类。
+          </div>
+        </section>
+
+        <section id="evidence" class="section">
+          <div class="two-col">
+            <div class="panel">
+              <div class="panel-head"><div><h3>科学边界</h3><p>导师可以直接看到“哪些能说、哪些不能说”。</p></div><span class="pill ok">Frozen</span></div>
+              <div class="kv" id="claim-boundaries"></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div><h3>Cao Case 2 evidence gate</h3><p>来源身份与入口证据已冻结，正式复现仍受空间输入阻塞。</p></div><span class="pill warn">Blocked</span></div>
+              <div class="kv" id="source-gate"></div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>Known blockers</h3><p>这些不是 bug，也不会由页面“自动补全”。</p></div></div>
+            <ul id="blockers" class="blocker-list"></ul>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><div><h3>核心 provenance</h3><p>所有展示数字都来自仓库内 acceptance / evidence JSON。</p></div></div>
+            <div class="code" id="provenance-code">Loading…</div>
+          </div>
+        </section>
+
+        <section id="run" class="section">
+          <div class="panel">
+            <div class="panel-head"><div><h3>受控运行入口</h3><p>只开放已经冻结过的 project-defined 路径。页面不会修改源项、阈值或物理保护。</p></div><span class="pill ok">Local only</span></div>
+            <div class="run-grid">
+              <div class="run-card">
+                <div class="run-title">H₂ Baseline · 20 cells</div>
+                <p>快速复现课程交付中的综合基线。使用历史验收配置，不把它和更严格网格研究混在一起。</p>
+                <div id="spec-baseline" class="run-spec"></div>
+                <button class="primary run-button" data-run="baseline">运行 H₂ 基线</button>
+              </div>
+              <div class="run-card">
+                <div class="run-title">P12 Response Sweep</div>
+                <p>运行 φ = 0.10 / 0.20 / 0.30 的既定 sweep；forward-flow guard 保持启用。</p>
+                <div id="spec-response" class="run-spec"></div>
+                <button class="primary run-button" data-run="response">运行 P12 sweep</button>
+              </div>
+              <div class="run-card">
+                <div class="run-title">80-cell Full Profile</div>
+                <p>生成 Mach、p、T、u、ρ 与组分的完整轴向 CSV/JSON。计算耗时明显更长。</p>
+                <div id="spec-profile" class="run-spec"></div>
+                <button class="primary run-button" data-run="profile">生成完整 profile</button>
+              </div>
+            </div>
+          </div>
+          <div class="two-col">
+            <div class="panel">
+              <div class="panel-head"><div><h3>任务状态</h3><p>同一时间只允许一个 solver job，防止误点重复占用 CPU。</p></div><button id="refresh-jobs" class="secondary">刷新</button></div>
+              <div id="jobs"><div class="job"><div><strong>暂无任务</strong><div class="job-meta">从上方选择一个受控算例运行。</div></div></div></div>
+            </div>
+            <div class="panel">
+              <div class="panel-head"><div><h3>启动方式</h3><p>从仓库根目录运行。</p></div><button id="copy-command" class="secondary">复制</button></div>
+              <div class="code">python tools/mentor_dashboard.py</div>
+              <p>默认只监听 127.0.0.1，不向局域网/公网暴露。浏览器未自动打开时访问 http://127.0.0.1:8765。</p>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    let DATA = null;
+    let pollTimer = null;
+
+    const $ = (id) => document.getElementById(id);
+    const fmt = (v, d=4) => (v === null || v === undefined || Number.isNaN(Number(v))) ? "—" : Number(v).toLocaleString("zh-CN", {maximumFractionDigits:d});
+    const sci = (v, d=3) => (v === null || v === undefined) ? "—" : Number(v).toExponential(d);
+    const pct = (v, d=3) => (v === null || v === undefined) ? "—" : ((Number(v)*100).toFixed(d) + "%");
+    const shortSha = (sha) => sha ? sha.slice(0, 8) : "—";
+
+    function toast(message) {
+      const el = $("toast");
+      el.textContent = message;
+      el.classList.add("show");
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => el.classList.remove("show"), 2800);
+    }
+
+    function statusPill(status) {
+      if (status === "CONVERGED" || status === "success") return '<span class="pill ok">' + status + '</span>';
+      if (status && status.includes("GUARD")) return '<span class="pill warn">MODEL-DOMAIN INADMISSIBLE</span>';
+      if (status === "running" || status === "queued") return '<span class="pill info">' + status.toUpperCase() + '</span>';
+      return '<span class="pill bad">' + (status || "UNKNOWN") + '</span>';
+    }
+
+    function setSection(id) {
+      document.querySelectorAll(".section").forEach(el => el.classList.toggle("active", el.id === id));
+      document.querySelectorAll("[data-section]").forEach(el => el.classList.toggle("active", el.dataset.section === id));
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+
+    document.querySelectorAll("[data-section]").forEach(btn => btn.addEventListener("click", () => setSection(btn.dataset.section)));
+
+    function renderLineChart(container, labels, values, options={}) {
+      const el = typeof container === "string" ? $(container) : container;
+      const valid = values.map((v,i)=>({v:Number(v),i})).filter(x=>Number.isFinite(x.v));
+      if (!valid.length) { el.innerHTML = '<div style="padding:26px;color:var(--muted)">无可绘制数据</div>'; return; }
+      const W=720,H=220,L=58,R=24,T=24,B=44;
+      let min=Math.min(...valid.map(x=>x.v)), max=Math.max(...valid.map(x=>x.v));
+      if (min===max) { min*=.98; max*=1.02; }
+      const pad=(max-min)*.14 || 1; min-=pad; max+=pad;
+      const x = i => L + (values.length===1 ? 0 : i*(W-L-R)/(values.length-1));
+      const y = v => T + (max-v)*(H-T-B)/(max-min);
+      const pts=valid.map(o=>x(o.i)+","+y(o.v)).join(" ");
+      const yTicks=[0,.5,1].map(q=>max-q*(max-min));
+      const grid=yTicks.map(v=>'<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="currentColor" opacity=".08"/><text x="'+(L-10)+'" y="'+(y(v)+4)+'" text-anchor="end" fill="currentColor" opacity=".55" font-size="10">'+(options.tick ? options.tick(v) : fmt(v,3))+'</text>').join("");
+      const xl=labels.map((lab,i)=>'<text x="'+x(i)+'" y="'+(H-15)+'" text-anchor="middle" fill="currentColor" opacity=".58" font-size="10">'+lab+'</text>').join("");
+      const dots=valid.map(o=>'<circle cx="'+x(o.i)+'" cy="'+y(o.v)+'" r="5" fill="var(--blue)" stroke="var(--surface-solid)" stroke-width="3"/><text x="'+x(o.i)+'" y="'+(y(o.v)-12)+'" text-anchor="middle" fill="currentColor" font-size="10" font-weight="700">'+(options.value ? options.value(o.v) : fmt(o.v,3))+'</text>').join("");
+      el.innerHTML='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+(options.label || "chart")+'">'+grid+'<polyline points="'+pts+'" fill="none" stroke="var(--blue)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>'+dots+xl+'</svg>';
+    }
+
+    function renderOverview() {
+      const b=DATA.baseline, n=b.numerical_gate, o=b.case_outputs;
+      $("top-status").textContent = DATA.project.status === "DELIVERABLE_COMPLETE" ? "Deliverable complete" : DATA.project.status;
+      $("hero-scope").textContent = DATA.project.status_scope || DATA.project.dashboard_scope;
+      $("commit-short").textContent = shortSha(DATA.project.accepted_packaging_commit);
+      $("m-mach").textContent = fmt(o.min_mach,3)+"–"+fmt(o.max_mach,3);
+      $("m-temp").textContent = fmt(o.max_temperature_K,0)+" K";
+      $("m-density").textContent = sci(n.final_density_change,2);
+      const accepted=DATA.response.points.filter(p=>p.status==="CONVERGED").map(p=>p.equivalence_ratio.toFixed(2));
+      $("m-phi").textContent = accepted.join(" / ");
+
+      const grid=DATA.grid.levels;
+      renderLineChart("overview-grid-chart", grid.map(x=>String(x.cells)), grid.map(x=>x.min_mach), {
+        label:"Minimum Mach by grid", value:v=>fmt(v,3)
+      });
+      const rp=DATA.response.points;
+      renderLineChart("overview-response-chart", rp.map(x=>"φ "+x.equivalence_ratio.toFixed(2)), rp.map(x=>x.min_mach), {
+        label:"P12 minimum Mach by equivalence ratio", value:v=>fmt(v,3)
+      });
+    }
+
+    function renderBaseline() {
+      const n=DATA.baseline.numerical_gate, o=DATA.baseline.case_outputs;
+      $("b-cells").textContent=n.cells;
+      $("b-steps").textContent=n.steps;
+      $("b-pressure").textContent=fmt(o.min_pressure_Pa,0)+" → "+fmt(o.max_pressure_Pa,0);
+      $("b-temperature").textContent=fmt(o.min_temperature_K,1)+" → "+fmt(o.max_temperature_K,1);
+      $("baseline-numerics").innerHTML = [
+        ["CFL",fmt(n.cfl,2)],["Eq.11.46 tolerance",sci(n.teacher_density_change_tolerance,1)],
+        ["Final density change",sci(n.final_density_change,4)],["Normalized residual",sci(n.final_normalized_residual,4)],
+        ["Converged",String(n.converged)],["dx",fmt(n.dx_m,4)+" m"]
+      ].map(([a,b])=>'<div>'+a+'</div><div>'+b+'</div>').join("");
+      $("baseline-outputs").innerHTML = [
+        ["Mach",fmt(o.min_mach,4)+" → "+fmt(o.max_mach,4)],
+        ["Pressure",fmt(o.min_pressure_Pa,0)+" → "+fmt(o.max_pressure_Pa,0)+" Pa"],
+        ["Temperature",fmt(o.min_temperature_K,2)+" → "+fmt(o.max_temperature_K,2)+" K"],
+        ["Inlet air mdot",fmt(o.inlet_air_mass_flow_kg_per_s,6)+" kg/s"],
+        ["Fuel source",fmt(o.fuel_mass_source_kg_per_s,7)+" kg/s"],
+        ["Source reproduction","No"]
+      ].map(([a,b])=>'<div>'+a+'</div><div>'+b+'</div>').join("");
+    }
+
+    function renderGrid() {
+      const levels=DATA.grid.levels;
+      renderLineChart("grid-mach-chart", levels.map(x=>String(x.cells)), levels.map(x=>x.min_mach), {value:v=>fmt(v,4)});
+      renderLineChart("grid-pressure-chart", levels.map(x=>String(x.cells)), levels.map(x=>x.max_pressure_Pa), {value:v=>fmt(v/1000,1)+"k", tick:v=>fmt(v/1000,0)+"k"});
+      $("grid-table").innerHTML=levels.map(x=>'<tr><td>'+x.cells+'</td><td>'+fmt(x.dx_m,4)+'</td><td>'+x.steps+'</td><td>'+sci(x.density_change,3)+'</td><td>'+sci(x.normalized_residual,3)+'</td><td>'+fmt(x.min_mach,5)+'</td><td>'+fmt(x.max_mach,5)+'</td><td>'+fmt(x.max_pressure_Pa,0)+'</td><td>'+fmt(x.max_temperature_K,2)+'</td></tr>').join("");
+
+      $("conservation-table").innerHTML=DATA.response.points.map(p=>{
+        const note=p.status==="CONVERGED" ? "mass gate checked; momentum/energy diagnostic only" : "guard preserved; no physical mode label";
+        return '<tr><td>'+p.equivalence_ratio.toFixed(2)+'</td><td>'+statusPill(p.status)+'</td><td>'+pct(p.mass_inventory_relative_to_inlet,4)+'</td><td>'+pct(p.momentum_inventory_relative_to_inlet,4)+'</td><td>'+pct(p.energy_inventory_relative_to_inlet,4)+'</td><td>'+note+'</td></tr>';
+      }).join("");
+    }
+
+    function renderResponse() {
+      const points=DATA.response.points;
+      renderLineChart("response-mach-chart", points.map(p=>"φ "+p.equivalence_ratio.toFixed(2)), points.map(p=>p.min_mach), {value:v=>fmt(v,4)});
+      $("response-table").innerHTML=points.map(p=>'<tr>'
+        +'<td>'+p.equivalence_ratio.toFixed(2)+'</td><td>'+statusPill(p.status)+'</td>'
+        +'<td>'+sci(p.density_change,3)+'</td><td>'+sci(p.normalized_residual,3)+'</td>'
+        +'<td>'+(p.min_mach==null?"—":fmt(p.min_mach,4)+"–"+fmt(p.max_mach,4))+'</td>'
+        +'<td>'+(p.min_pressure_Pa==null?"—":fmt(p.min_pressure_Pa,0)+"–"+fmt(p.max_pressure_Pa,0))+'</td>'
+        +'<td>'+(p.min_temperature_K==null?"—":fmt(p.min_temperature_K,1)+"–"+fmt(p.max_temperature_K,1))+'</td>'
+        +'</tr>').join("");
+
+      $("continuation-list").innerHTML=DATA.continuation.points.map(p=>'<div class="job"><div><strong>φ='+p.equivalence_ratio.toFixed(2)+'</strong><div class="job-meta">'+p.initialization+' · min Mach '+fmt(p.min_mach,5)+' · mass '+pct(p.mass_inventory_relative_to_inlet,4)+'</div></div><div>'+statusPill(p.status)+'</div></div>').join("");
+
+      const tg=DATA.thermal_throat_grid.target_points;
+      const rows=[
+        ...tg["phi_0.24"].map(p=>Object.assign({phi:.24,status:p.state || "—"},p)),
+        ...tg["phi_0.26"].map(p=>Object.assign({phi:.26,status:p.status || p.state || "—"},p))
+      ];
+      $("throat-grid-list").innerHTML=rows.map(p=>'<div class="job"><div><strong>φ='+p.phi.toFixed(2)+' · '+p.cells+' cells</strong><div class="job-meta">min Mach '+fmt(p.min_mach,5)+' · density change '+sci(p.density_change,2)+'</div></div><div>'+(p.status==="SCRAM_SIDE"?'<span class="pill info">Eq.(3-2) SCRAM_SIDE</span>':statusPill(p.status))+'</div></div>').join("");
+    }
+
+    function renderEvidence() {
+      const c=DATA.claim_boundaries;
+      $("claim-boundaries").innerHTML=[
+        ["Cao Case 2 formal reproduction", c.formal_cao_case2_reproduction ? "Yes":"No"],
+        ["Guard meaning", c.forward_flow_guard_meaning],
+        ["Guard = unstart?", c.forward_flow_guard_is_unstart ? "Yes":"No"],
+        ["Normalized residual", c.normalized_residual_role],
+        ["Grid claim", c.grid_claim],
+        ["LBW/YBW are modes?", c.lbw_ybw_are_mode_labels ? "Yes":"No"]
+      ].map(([a,b])=>'<div>'+a+'</div><div style="max-width:460px">'+b+'</div>').join("");
+
+      const sg=DATA.source_gate;
+      $("source-gate").innerHTML=[
+        ["Candidate",sg.candidate],
+        ["Formal reproduction ready",String(sg.formal_reproduction_ready)],
+        ["Frozen source record",sg.frozen_source_evidence?.record || "—"],
+        ["Exact A(x)","Blocked"],
+        ["Exact Yi(x)","Blocked"],
+        ["Fuel/source spatial convention","Blocked"]
+      ].map(([a,b])=>'<div>'+a+'</div><div>'+b+'</div>').join("");
+
+      $("blockers").innerHTML=DATA.blockers.map(x=>'<li>'+x+'</li>').join("");
+      $("provenance-code").textContent="accepted_packaging_commit = "+DATA.project.accepted_packaging_commit
+        +"\nresponse_acceptance_head   = "+DATA.response.provenance.accepted_head_sha
+        +"\ngrid_workflow_run_id       = "+DATA.grid.workflow_run_id
+        +"\nresponse_workflow_run_id   = "+DATA.response.provenance.workflow_run_id
+        +"\nthermal_grid_workflow_id   = "+DATA.thermal_throat_grid.workflow_run_id;
+    }
+
+    function renderRunSpecs() {
+      for (const [mode,s] of Object.entries(DATA.run_modes)) {
+        const el=$("spec-"+mode);
+        const lines=[];
+        if (s.cells) lines.push("<span>Cells <strong>"+s.cells+"</strong></span>");
+        if (s.equivalence_ratios) lines.push("<span>φ <strong>"+s.equivalence_ratios.join(" / ")+"</strong></span>");
+        lines.push("<span>CFL <strong>"+s.cfl+"</strong></span>");
+        lines.push("<span>Eq.11.46 <strong>"+Number(s.teacher_eq_11_46_tolerance).toExponential(1)+"</strong></span>");
+        lines.push("<span>Max steps <strong>"+Number(s.max_steps).toLocaleString()+"</strong></span>");
+        el.innerHTML=lines.join("");
+      }
+    }
+
+    async function fetchJobs() {
+      const res=await fetch("/api/jobs",{cache:"no-store"});
+      const data=await res.json();
+      const jobs=data.jobs || [];
+      const active=jobs.some(j=>["queued","running"].includes(j.status));
+      document.querySelectorAll(".run-button").forEach(b=>b.disabled=active);
+      if (!jobs.length) {
+        $("jobs").innerHTML='<div class="job"><div><strong>暂无任务</strong><div class="job-meta">从上方选择一个受控算例运行。</div></div></div>';
+      } else {
+        $("jobs").innerHTML=jobs.map(j=>'<div class="job"><div><strong>'+j.label+'</strong><div class="job-meta">'+j.id+' · '+j.created_at+(j.error?' · '+j.error:"")+(j.result?.artifact_path?' · '+j.result.artifact_path:"")+'</div></div><div>'+statusPill(j.status)+'</div></div>').join("");
+      }
+      if (active && !pollTimer) pollTimer=setInterval(fetchJobs,2500);
+      if (!active && pollTimer) { clearInterval(pollTimer); pollTimer=null; }
+    }
+
+    async function startRun(mode) {
+      try {
+        const res=await fetch("/api/run/"+mode,{method:"POST"});
+        const data=await res.json();
+        if (!res.ok) throw new Error(data.error || "运行请求失败");
+        toast("已启动："+data.label);
+        await fetchJobs();
+      } catch (err) { toast(err.message); }
+    }
+
+    document.querySelectorAll(".run-button").forEach(btn=>btn.addEventListener("click",()=>startRun(btn.dataset.run)));
+    $("refresh-jobs").addEventListener("click",fetchJobs);
+    $("copy-command").addEventListener("click", async ()=>{
+      try { await navigator.clipboard.writeText("python tools/mentor_dashboard.py"); toast("启动命令已复制"); }
+      catch { toast("复制失败，请手动复制命令"); }
+    });
+
+    async function init() {
+      try {
+        const res=await fetch("/api/summary",{cache:"no-store"});
+        DATA=await res.json();
+        if (!res.ok) throw new Error(DATA.error || "读取数据失败");
+        renderOverview(); renderBaseline(); renderGrid(); renderResponse(); renderEvidence(); renderRunSpecs();
+        await fetchJobs();
+      } catch (err) {
+        $("top-status").textContent="Data error";
+        toast(err.message);
+      } finally {
+        $("loading").classList.add("hidden");
+      }
+    }
+    init();
+  </script>
+</body>
+</html>
