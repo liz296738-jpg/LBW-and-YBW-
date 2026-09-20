@@ -16,7 +16,7 @@
 | P11.1-P11.2 | Complete / supporting | Public studies and reduced-order benchmarks | Parametric framework, cold surrogate, NASA heated benchmark | Evidence-gated reproducible outputs |
 | P11.3 | **Complete on the defensible H2/C2H4 teacher path; explicit source gaps retained** | Teacher-reference second-scheme building blocks | Variable thermo + closures + sources + boundaries + integrated Rusanov march | Equation-by-equation regression and source audit |
 | P11.4 | **Baseline accepted; exact Cao Case 2 reproduction source-blocked** | Integrated teacher-path case and reproduction evidence | Project-defined H2 steady case, grid audit, conservation audit, Case 2 evidence gate | Convergence, conservation, grid trend, strict claim boundary |
-| P12 | **Active / criterion source-frozen, broader claims evidence-gated** | Project-defined continuous response with scoped Cao thermal-throat criterion | Guarded response sweep plus source-faithful Eq. (3-2) criterion application | No invented tolerances; guard/nonconvergence never promoted to physical mode claims |
+| P12 | **Course-deliverable complete for the project-defined scope; source reproduction / broader claims remain evidence-gated** | Project-defined continuous response with scoped Cao thermal-throat criterion | Guarded response sweep plus source-faithful Eq. (3-2) criterion application | Final Test + P12 workflows accepted on pinned packaging commit; no invented tolerances or unsupported mode claims |
 
 ## Naming Correction
 
