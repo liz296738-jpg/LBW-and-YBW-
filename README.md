@@ -38,6 +38,17 @@ The following items are intentionally **not guessed**:
 
 Teacher Eqs. 11.42-11.44 Steger-Warming are retained as a separately audited source-transcription path. Their classic closed form is valid in the calorically-perfect constant-property limit, but the examined teacher/Cao sources do not provide a defensible correction for the project's variable `cp(T,Y)` plus absolute species-energy formulation. The integrated variable-thermochemistry solver therefore remains on Rusanov rather than inventing an energy-reference fix.
 
+## Mentor Dashboard
+
+A local Apple-style mentor dashboard is available for reviewing accepted results and running frozen project-defined cases without exposing scientifically gated controls.
+
+```bash
+python -m pip install -e ".[dev]"
+python tools/mentor_dashboard.py
+```
+
+The dashboard opens at `http://127.0.0.1:8765` and includes overview, H2 baseline, 20/40/80 grid trend, normalized conservation diagnostics, P12 response/continuation evidence, provenance/blockers, and controlled run buttons. See `docs/mentor_dashboard.md` for the scientific/UI boundary and usage details.
+
 ## Key Evidence Records
 
 - `docs/development_roadmap.md`
