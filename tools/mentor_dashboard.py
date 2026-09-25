@@ -20,6 +20,9 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import argparse
 import json
+import os
+import secrets
+import sys
 from pathlib import Path
 import threading
 import traceback
@@ -30,9 +33,22 @@ import webbrowser
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+# Script execution puts tools/, not the repository root, on sys.path.
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 WEB_INDEX = REPO_ROOT / "web" / "mentor_dashboard" / "index.html"
 DATA_ROOT = REPO_ROOT / "cases" / "studies" / "data"
-ARTIFACT_ROOT = REPO_ROOT / "artifacts" / "dashboard"
+ARTIFACT_ROOT = Path(os.environ.get("DASHBOARD_DATA_DIR", str(REPO_ROOT / "artifacts" / "dashboard"))).resolve()
+RUN_CONTEXT = threading.local()
+
+
+def _output_dir() -> Path:
+    return ARTIFACT_ROOT / getattr(RUN_CONTEXT, "job_id", "manual")
+
+
+def _artifact_name(path: Path) -> str:
+    return path.relative_to(ARTIFACT_ROOT).as_posix()
 
 RUN_SPECS: dict[str, dict[str, Any]] = {
     "baseline": {
@@ -123,8 +139,8 @@ def build_summary() -> dict[str, Any]:
 
 
 def _write_json_artifact(filename: str, payload: Any) -> Path:
-    ARTIFACT_ROOT.mkdir(parents=True, exist_ok=True)
-    path = ARTIFACT_ROOT / filename
+    _output_dir().mkdir(parents=True, exist_ok=True)
+    path = _output_dir() / filename
     path.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
@@ -153,7 +169,7 @@ def _run_baseline() -> dict[str, Any]:
         "result": asdict(result),
     }
     path = _write_json_artifact("latest_p11_4_h2_baseline.json", payload)
-    payload["artifact_path"] = str(path.relative_to(REPO_ROOT))
+    payload["artifact_path"] = _artifact_name(path)
     return payload
 
 
@@ -172,7 +188,7 @@ def _run_response() -> dict[str, Any]:
         "points": [asdict(point) for point in points],
     }
     path = _write_json_artifact("latest_p12_response_sweep.json", payload)
-    payload["artifact_path"] = str(path.relative_to(REPO_ROOT))
+    payload["artifact_path"] = _artifact_name(path)
     return payload
 
 
@@ -180,7 +196,7 @@ def _run_profile() -> dict[str, Any]:
     from cases.studies import p11_4_profile_output as profile
 
     spec = RUN_SPECS["profile"]
-    output_dir = ARTIFACT_ROOT / "latest_p11_4_profile"
+    output_dir = _output_dir() / "profile"
     csv_path, json_path, summary = profile.write_profile_artifacts(
         output_dir,
         cells=int(spec["cells"]),
@@ -194,8 +210,8 @@ def _run_profile() -> dict[str, Any]:
         "classification": profile.CASE_CLASSIFICATION,
         "not_a_source_reproduction": profile.NOT_A_SOURCE_REPRODUCTION,
         "summary": asdict(summary),
-        "csv_artifact_path": str(csv_path.relative_to(REPO_ROOT)),
-        "json_artifact_path": str(json_path.relative_to(REPO_ROOT)),
+        "csv_artifact_path": _artifact_name(csv_path),
+        "json_artifact_path": _artifact_name(json_path),
     }
 
 
@@ -229,15 +245,40 @@ class Job:
 class JobStore:
     """Small in-process job store; only one solver job may run at a time."""
 
-    def __init__(self) -> None:
+    def __init__(self, state_path: Path | None = None) -> None:
+        self._state_path = state_path
         self._lock = threading.Lock()
         self._jobs: dict[str, Job] = {}
+        if state_path is not None and state_path.exists():
+            for record in json.loads(state_path.read_text(encoding="utf-8")):
+                job = Job(**record)
+                if job.status in {"queued", "running"}:
+                    job.status = "interrupted"
+                    job.error = "服务重启中断了计算，请重新运行。"
+                    job.completed_at = _utc_now()
+                self._jobs[job.id] = job
+            self._persist()
+
+    def _persist(self) -> None:
+        if self._state_path is None:
+            return
+        self._state_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = self._state_path.with_suffix(".tmp")
+        temporary.write_text(json.dumps([j.to_dict() for j in self._jobs.values()],
+                                        ensure_ascii=False), encoding="utf-8")
+        temporary.replace(self._state_path)
 
     def list(self) -> list[dict[str, Any]]:
         with self._lock:
             jobs = list(self._jobs.values())
             jobs.sort(key=lambda job: job.created_at, reverse=True)
             return [job.to_dict() for job in jobs[:12]]
+
+    def artifacts(self) -> set[str]:
+        with self._lock:
+            return {value for job in self._jobs.values() if job.status == "success"
+                    for key, value in (job.result or {}).items()
+                    if key.endswith("artifact_path") and isinstance(value, str)}
 
     def get(self, job_id: str) -> dict[str, Any] | None:
         with self._lock:
@@ -267,6 +308,7 @@ class JobStore:
                 created_at=_utc_now(),
             )
             self._jobs[job.id] = job
+            self._persist()
 
         thread = threading.Thread(target=self._execute, args=(job.id,), daemon=True)
         thread.start()
@@ -278,7 +320,9 @@ class JobStore:
             job.status = "running"
             job.started_at = _utc_now()
             mode = job.mode
+            self._persist()
 
+        RUN_CONTEXT.job_id = job_id
         try:
             result = RUNNERS[mode]()
         except Exception as exc:  # pragma: no cover - exercised by live solver jobs
@@ -289,6 +333,7 @@ class JobStore:
                 job.status = "error"
                 job.error = message
                 job.completed_at = _utc_now()
+                self._persist()
             return
 
         with self._lock:
@@ -296,9 +341,10 @@ class JobStore:
             job.status = "success"
             job.result = result
             job.completed_at = _utc_now()
+            self._persist()
 
 
-JOB_STORE = JobStore()
+JOB_STORE = JobStore(ARTIFACT_ROOT / "jobs.json")
 
 
 class DashboardHandler(BaseHTTPRequestHandler):
@@ -344,6 +390,25 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 return
             self._send_json(payload)
             return
+        if path.startswith("/api/artifacts/"):
+            # Only expose files referenced by a completed job, never arbitrary paths.
+            artifact = path.removeprefix("/api/artifacts/")
+            allowed = JOB_STORE.artifacts()
+            if artifact not in allowed:
+                self.send_error(HTTPStatus.NOT_FOUND.value)
+                return
+            target = (ARTIFACT_ROOT / artifact).resolve()
+            if not target.is_relative_to(ARTIFACT_ROOT) or not target.is_file():
+                self.send_error(HTTPStatus.NOT_FOUND.value)
+                return
+            body = target.read_bytes()
+            self.send_response(HTTPStatus.OK.value)
+            self.send_header("Content-Type", "text/csv" if target.suffix == ".csv" else "application/json")
+            self.send_header("Content-Disposition", f'attachment; filename="{target.name}"')
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/api/jobs":
             self._send_json({"jobs": JOB_STORE.list()})
             return
@@ -363,6 +428,14 @@ class DashboardHandler(BaseHTTPRequestHandler):
         if not path.startswith(prefix):
             self.send_error(HTTPStatus.NOT_FOUND.value)
             return
+        token = getattr(self.server, "run_token", "")
+        if not token:
+            self._send_json({"error": "运行功能未启用：请配置 DASHBOARD_RUN_TOKEN。"}, HTTPStatus.FORBIDDEN)
+            return
+        supplied = self.headers.get("Authorization", "")
+        if not secrets.compare_digest(supplied.encode(), ("Bearer " + token).encode()):
+            self._send_json({"error": "运行口令不正确。"}, HTTPStatus.UNAUTHORIZED)
+            return
         mode = path[len(prefix) :]
         try:
             job = JOB_STORE.start(mode)
@@ -381,13 +454,15 @@ class DashboardHandler(BaseHTTPRequestHandler):
 def create_server(host: str = "127.0.0.1", port: int = 8765) -> ThreadingHTTPServer:
     if not WEB_INDEX.exists():
         raise FileNotFoundError(f"Dashboard frontend not found: {WEB_INDEX}")
-    return ThreadingHTTPServer((host, port), DashboardHandler)
+    server = ThreadingHTTPServer((host, port), DashboardHandler)
+    server.run_token = os.environ.get("DASHBOARD_RUN_TOKEN", "")
+    return server
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Launch the mentor CFD dashboard.")
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", default=8765, type=int)
+    parser.add_argument("--host", default=os.environ.get("HOST", "0.0.0.0" if "PORT" in os.environ else "127.0.0.1"))
+    parser.add_argument("--port", default=int(os.environ.get("PORT", "8765")), type=int)
     parser.add_argument(
         "--no-browser",
         action="store_true",

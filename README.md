@@ -44,6 +44,7 @@ A local Apple-style mentor dashboard is available for reviewing accepted results
 
 ```bash
 python -m pip install -e ".[dev]"
+export DASHBOARD_RUN_TOKEN="choose-a-private-run-password"
 python tools/mentor_dashboard.py
 ```
 

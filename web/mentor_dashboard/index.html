@@ -647,8 +647,17 @@
       }
     }
 
+    let runToken = "";
+    function escapeHtml(value) {
+      const el=document.createElement("span"); el.textContent=String(value); return el.innerHTML;
+    }
+    function artifactLinks(result) {
+      return Object.entries(result || {}).filter(([key])=>key.endsWith("artifact_path"))
+        .map(([,path])=>'<a href="/api/artifacts/'+path.split('/').map(encodeURIComponent).join('/')+'" download>下载 '+escapeHtml(path.split('/').pop())+'</a>').join(' · ');
+    }
     async function fetchJobs() {
       const res=await fetch("/api/jobs",{cache:"no-store"});
+      if (!res.ok) throw new Error("任务状态读取失败");
       const data=await res.json();
       const jobs=data.jobs || [];
       const active=jobs.some(j=>["queued","running"].includes(j.status));
@@ -656,15 +665,18 @@
       if (!jobs.length) {
         $("jobs").innerHTML='<div class="job"><div><strong>暂无任务</strong><div class="job-meta">从上方选择一个受控算例运行。</div></div></div>';
       } else {
-        $("jobs").innerHTML=jobs.map(j=>'<div class="job"><div><strong>'+j.label+'</strong><div class="job-meta">'+j.id+' · '+j.created_at+(j.error?' · '+j.error:"")+(j.result?.artifact_path?' · '+j.result.artifact_path:"")+'</div></div><div>'+statusPill(j.status)+'</div></div>').join("");
+        $("jobs").innerHTML=jobs.map(j=>'<div class="job"><div><strong>'+escapeHtml(j.label)+'</strong><div class="job-meta">'+escapeHtml(j.id)+' · '+escapeHtml(j.created_at)+(j.error?' · '+escapeHtml(j.error):"")+(j.result?' · '+artifactLinks(j.result):"")+'</div></div><div>'+statusPill(j.status)+'</div></div>').join("");
       }
-      if (active && !pollTimer) pollTimer=setInterval(fetchJobs,2500);
+      if (active && !pollTimer) pollTimer=setInterval(()=>fetchJobs().catch(()=>toast("连接中断，正在重试…")),2500);
       if (!active && pollTimer) { clearInterval(pollTimer); pollTimer=null; }
     }
 
     async function startRun(mode) {
       try {
-        const res=await fetch("/api/run/"+mode,{method:"POST"});
+        if (!runToken) runToken=prompt("请输入运行口令（仅在当前页面内存中保存）") || "";
+        if (!runToken) return;
+        const res=await fetch("/api/run/"+mode,{method:"POST",headers:{Authorization:"Bearer "+runToken}});
+        if (res.status===401) runToken="";
         const data=await res.json();
         if (!res.ok) throw new Error(data.error || "运行请求失败");
         toast("已启动："+data.label);
@@ -673,7 +685,7 @@
     }
 
     document.querySelectorAll(".run-button").forEach(btn=>btn.addEventListener("click",()=>startRun(btn.dataset.run)));
-    $("refresh-jobs").addEventListener("click",fetchJobs);
+    $("refresh-jobs").addEventListener("click",()=>fetchJobs().catch(err=>toast(err.message)));
     $("copy-command").addEventListener("click", async ()=>{
       try { await navigator.clipboard.writeText("python tools/mentor_dashboard.py"); toast("启动命令已复制"); }
       catch { toast("复制失败，请手动复制命令"); }
