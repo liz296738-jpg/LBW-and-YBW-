@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: scramjet-mentor-dashboard
+    runtime: python
+    buildCommand: pip install -e .
+    startCommand: python tools/mentor_dashboard.py --host 0.0.0.0 --port $PORT --no-browser
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.11
+      - key: DASHBOARD_RUN_TOKEN
+        generateValue: true

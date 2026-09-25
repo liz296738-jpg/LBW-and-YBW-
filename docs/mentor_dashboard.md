@@ -8,6 +8,7 @@ From the repository root:
 
 ```bash
 python -m pip install -e ".[dev]"
+export DASHBOARD_RUN_TOKEN="choose-a-private-run-password"
 python tools/mentor_dashboard.py
 ```
 
@@ -51,3 +52,29 @@ The dashboard does not change the scientific status of the project:
 - 20/40/80 evidence is described as a grid-convergence trend unless an asymptotic/GCI analysis is actually performed.
 - Any `SCRAM_SIDE` display is limited to the documented Cao Eq. (3-2) thermal-throat criterion scope for otherwise accepted points.
 - LBW/YBW remain project/person identifiers, not physical combustion modes.
+
+## Hosted deployment and downloads
+
+Use `render.yaml` for a new Render Blueprint. For an existing Render service set:
+
+- Build command: `pip install -e .`
+- Start command: `python tools/mentor_dashboard.py --host 0.0.0.0 --port $PORT --no-browser`
+- Health check: `/api/health`
+- Environment: `DASHBOARD_RUN_TOKEN` set to a private run password.
+
+The dashboard asks for the password when starting a calculation. A missing token
+makes execution read-only; viewing frozen evidence remains public. Completed run
+outputs and job metadata are also public to visitors, so this dashboard is intended
+for these non-sensitive project-defined cases. Do not put the password in the URL.
+
+Each job has its own output directory and CSV/JSON download links. Job records are
+saved atomically. On process restart, unfinished jobs become `interrupted` and may
+be rerun manually; numerical state/checkpoint resumption is not implemented.
+Use a single server process per data directory. Set `DASHBOARD_DATA_DIR` to a
+persistent disk mount to retain jobs and outputs across hosting redeploys. The
+default local directory is `artifacts/dashboard`; ephemeral hosting storage does
+not preserve data across redeploys. A persistent disk is not provisioned by the
+Blueprint and may require a paid hosting plan.
+
+The overview still shows frozen accepted evidence, not results from the latest
+interactive job. Download job-specific outputs for fresh calculations.
