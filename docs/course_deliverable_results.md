@@ -4,7 +4,7 @@ This package is a presentation index over evidence already accepted on `main`. I
 
 ## Reproducible baseline and convergence
 
-Use `docs/deliverable_runbook.md` for the frozen copy-paste P11.4 H2 integrated-baseline command. The authoritative machine-readable record is `cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json`; it contains the accepted convergence history and normalized mass/momentum/energy inventory diagnostics. Teacher Eq.11.46 maximum relative density change is the steady-state gate. Normalized residual is an independent diagnostic, not an additional hard threshold.
+Use `docs/deliverable_runbook.md` for the frozen copy-paste P11.4 H2 integrated-baseline command. The authoritative machine-readable record is `cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json`; it contains the accepted convergence history and normalized mass/momentum/energy inventory diagnostics. Teacher Eq.11.46 maximum relative density change is the steady-state convergence metric. The numerical tolerance used by each study is an explicitly frozen project setting; the repository does not attribute the value `2e-5` itself to the teacher source. Normalized residual is an independent diagnostic, not an additional hard threshold.
 
 ## Three-level numerical grid trend
 
@@ -26,7 +26,7 @@ The accepted P12 response record is `cases/studies/data/p12_project_defined_resp
 
 The phi=0.3 path triggered the preserved forward-flow guard. That event is not interpreted as unstart or as a combustion-mode transition.
 
-The stricter Eq.11.46 continuation evidence is `cases/studies/data/p12_thermal_throat_continuation_acceptance.json`; the corresponding frozen grid-sensitivity evidence is `cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`.
+The stricter project-tolerance Eq.11.46 continuation evidence is `cases/studies/data/p12_thermal_throat_continuation_acceptance.json`; the corresponding frozen grid-sensitivity evidence is `cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`.
 
 ## Evidence/provenance map
 
