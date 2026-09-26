@@ -32,17 +32,20 @@ def test_dashboard_run_specs_match_frozen_project_defined_paths() -> None:
     assert baseline["cells"] == 20
     assert baseline["cfl"] == 0.5
     assert baseline["teacher_eq_11_46_tolerance"] == 1.0e-4
+    assert "project-selected" in baseline["tolerance_provenance"]
     assert baseline["max_steps"] == 8_000
     assert baseline["source_reproduction"] is False
 
     assert response["classification"] == "P12_PROJECT_DEFINED_RESPONSE_SWEEP"
     assert response["equivalence_ratios"] == [0.10, 0.20, 0.30]
     assert response["teacher_eq_11_46_tolerance"] == 2.0e-5
+    assert "project-selected" in response["tolerance_provenance"]
     assert response["source_reproduction"] is False
 
     assert profile["classification"] == "PROJECT_DEFINED_H2_FULL_PROFILE_EXPORT"
     assert profile["cells"] == 80
     assert profile["teacher_eq_11_46_tolerance"] == 2.0e-5
+    assert "project-selected" in profile["tolerance_provenance"]
     assert profile["source_reproduction"] is False
 
 
@@ -57,6 +60,7 @@ def test_dashboard_summary_preserves_scientific_claim_boundaries() -> None:
     assert claims["lbw_ybw_are_mode_labels"] is False
     assert "diagnostic only" in claims["normalized_residual_role"]
     assert "grid-convergence trend only" in claims["grid_claim"]
+    assert "explicit project controls" in claims["eq_11_46_tolerance_role"]
     assert summary["source_gate"]["formal_reproduction_ready"] is False
     assert summary["blockers"]
 
