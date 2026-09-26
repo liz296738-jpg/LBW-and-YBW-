@@ -151,7 +151,7 @@ Safe current outputs include:
 - explicit solver-admissibility status;
 - the scoped Cao Eq. (3-2) thermal-throat side when the numerical point is otherwise accepted and the criterion is evaluated on its documented domain.
 
-The accepted project-defined H2 response sweep has converged `phi=0.10` and `phi=0.20` points under the authoritative Eq. 11.46 `2e-5` maximum relative-density-change gate. The cold-start `phi=0.30` point is `solver/model-domain inadmissible` because the existing forward-flow guard triggers; it receives no physical mode label.
+The accepted project-defined H2 response sweep has converged `phi=0.10` and `phi=0.20` points using the teacher Eq. 11.46 maximum relative-density-change metric with a project-selected numerical tolerance of `2e-5`. The cold-start `phi=0.30` point is `solver/model-domain inadmissible` because the existing forward-flow guard triggers; it receives no physical mode label.
 
 Grid-refined project-defined evidence also records `phi=0.24` on the Eq. (3-2) scram side for 20/40/80 cells, while `phi=0.26` is solver/model-domain inadmissible on all three grids. This is a grid-convergence trend/criterion application only and does **not** establish a grid-independent transition equivalence ratio.
 
