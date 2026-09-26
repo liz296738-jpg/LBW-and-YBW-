@@ -1,5 +1,5 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "classification": "P12_PROJECT_DEFINED_RESPONSE_SWEEP_ACCEPTANCE",
   "not_a_source_reproduction": true,
   "mode_label_claim": false,
@@ -11,20 +11,25 @@
     "artifact_zip_sha256": "f7fb2d6c70b305d4ba7cd4612d8c5ed57fb786c59668e0799f6bf2b7355e206e",
     "note": "These identifiers freeze the original accepted response-sweep computation. They are historical evidence provenance, not an assertion that the acceptance JSON was generated at the current main SHA."
   },
-  "project_equivalence_ratios": [0.1, 0.2, 0.3],
+  "project_equivalence_ratios": [
+    0.1,
+    0.2,
+    0.3
+  ],
   "acceptance_policy": {
-    "teacher_steady_gate": "Eq.11.46 density-change <= 2e-5 for converged response points",
+    "teacher_steady_gate": "Teacher Eq.11.46 defines the maximum relative-density-change metric; converged P12 response points use the explicitly project-selected numerical tolerance <= 2e-5.",
     "normalized_residual": "reported as an independent finite nonnegative diagnostic; no unsourced threshold imposed",
     "mass_inventory_gate": "normalized absolute domain mass-inventory rate <= 0.005 of inlet mass flux",
     "momentum_energy_inventory": "reported as finite nonnegative normalized diagnostics without an invented acceptance threshold",
-    "forward_flow_guard": "preserved; a triggered point is outside the current admissible solver path and is not assigned a physical combustion-mode or unstart label"
+    "forward_flow_guard": "preserved; a triggered point is outside the current admissible solver path and is not assigned a physical combustion-mode or unstart label",
+    "tolerance_provenance": "The numeric value 2e-5 is a project numerical choice. The repository does not claim that the teacher source prescribes this specific threshold."
   },
   "points": [
     {
       "equivalence_ratio": 0.1,
       "status": "CONVERGED",
       "steps": 260,
-      "density_change": 1.990841204973215e-05,
+      "density_change": 0.00001990841204973215,
       "normalized_residual": 0.0006885596988485371,
       "fuel_mass_source_kg_per_s": 0.0034876931661826844,
       "mass_inventory_relative_to_inlet": 0.000337525671420571,
@@ -41,7 +46,7 @@
       "equivalence_ratio": 0.2,
       "status": "CONVERGED",
       "steps": 485,
-      "density_change": 1.9799228071952737e-05,
+      "density_change": 0.000019799228071952737,
       "normalized_residual": 0.0007879577164719876,
       "fuel_mass_source_kg_per_s": 0.006975386332365369,
       "mass_inventory_relative_to_inlet": 0.00046080119689590447,
@@ -62,5 +67,6 @@
       "physical_mode_claim": null
     }
   ],
-  "interpretation": "Under the authoritative Eq.11.46 density-change <= 2e-5 gate, the project-defined H2 path has accepted converged points at phi=0.1 and phi=0.2; both remain fully supersonic. The phi=0.3 cold-start pseudo-time path triggers the existing forward-flow model-domain guard. This result does not identify a physical mode transition or unstart event."
+  "interpretation": "Using the project-selected 2e-5 tolerance applied to the teacher Eq.11.46 density-change metric, the project-defined H2 path has accepted converged points at phi=0.1 and phi=0.2; both remain fully supersonic. The phi=0.3 cold-start pseudo-time path triggers the existing forward-flow model-domain guard. This result does not identify a physical mode transition or unstart event.",
+  "metadata_revision_note": "2026-09-26: clarified convergence-tolerance provenance only. Numerical points, historical workflow/artifact provenance, and admissibility interpretation are unchanged."
 }
