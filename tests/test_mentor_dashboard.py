@@ -90,3 +90,17 @@ def test_dashboard_artifact_request_rejects_path_traversal() -> None:
 
     with pytest.raises(ValueError, match="escaped"):
         dashboard._resolve_artifact_request("%2E%2E/course_deliverable_manifest.json")
+
+
+def test_dashboard_runtime_identity_is_non_secret_and_versioned() -> None:
+    identity = dashboard._runtime_identity()
+
+    assert identity["python"]
+    assert set(identity["packages"]) == {"numpy", "matplotlib", "scramjet1d"}
+    assert set(identity["render"]) == {
+        "is_render",
+        "git_commit",
+        "git_branch",
+        "git_repo_slug",
+        "service_id",
+    }
