@@ -25,7 +25,7 @@ import sys
 import threading
 import traceback
 from typing import Any, Callable
-from urllib.parse import urlparse
+from urllib.parse import quote, unquote, urlparse
 import uuid
 import webbrowser
 
@@ -142,6 +142,32 @@ def _write_json_artifact(filename: str, payload: Any) -> Path:
     )
     return path
 
+def _artifact_download_url(path: Path) -> str:
+    """Return a URL only for files rooted under the dashboard artifact directory."""
+
+    root = ARTIFACT_ROOT.resolve()
+    resolved = path.resolve()
+    try:
+        relative = resolved.relative_to(root)
+    except ValueError as exc:
+        raise ValueError("artifact path must stay inside the dashboard artifact root") from exc
+    return "/api/artifacts/" + quote(relative.as_posix(), safe="/")
+
+
+def _resolve_artifact_request(encoded_relative_path: str) -> Path:
+    """Resolve an artifact request without permitting path traversal."""
+
+    relative_text = unquote(encoded_relative_path)
+    if not relative_text or relative_text.startswith("/"):
+        raise ValueError("invalid artifact path")
+    root = ARTIFACT_ROOT.resolve()
+    candidate = (root / relative_text).resolve()
+    try:
+        candidate.relative_to(root)
+    except ValueError as exc:
+        raise ValueError("artifact request escaped the dashboard artifact root") from exc
+    return candidate
+
 
 def _run_baseline() -> dict[str, Any]:
     from cases.studies import p11_4_project_defined_h2_smoke as baseline
@@ -165,6 +191,7 @@ def _run_baseline() -> dict[str, Any]:
     }
     path = _write_json_artifact("latest_p11_4_h2_baseline.json", payload)
     payload["artifact_path"] = str(path.relative_to(REPO_ROOT))
+    payload["artifact_download_url"] = _artifact_download_url(path)
     return payload
 
 
@@ -184,6 +211,7 @@ def _run_response() -> dict[str, Any]:
     }
     path = _write_json_artifact("latest_p12_response_sweep.json", payload)
     payload["artifact_path"] = str(path.relative_to(REPO_ROOT))
+    payload["artifact_download_url"] = _artifact_download_url(path)
     return payload
 
 
@@ -207,6 +235,8 @@ def _run_profile() -> dict[str, Any]:
         "summary": asdict(summary),
         "csv_artifact_path": str(csv_path.relative_to(REPO_ROOT)),
         "json_artifact_path": str(json_path.relative_to(REPO_ROOT)),
+        "csv_download_url": _artifact_download_url(csv_path),
+        "json_download_url": _artifact_download_url(json_path),
     }
 
 
@@ -349,6 +379,27 @@ class DashboardHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
+    def _send_artifact(self, encoded_relative_path: str) -> None:
+        try:
+            artifact = _resolve_artifact_request(encoded_relative_path)
+        except ValueError:
+            self.send_error(HTTPStatus.BAD_REQUEST.value, "Invalid artifact path")
+            return
+        if not artifact.is_file():
+            self.send_error(HTTPStatus.NOT_FOUND.value, "Artifact not found")
+            return
+        body = artifact.read_bytes()
+        content_type = "application/json; charset=utf-8"
+        if artifact.suffix.lower() == ".csv":
+            content_type = "text/csv; charset=utf-8"
+        self.send_response(HTTPStatus.OK.value)
+        self.send_header("Content-Type", content_type)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Disposition", f'attachment; filename="{artifact.name}"')
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
     def do_GET(self) -> None:  # noqa: N802 - required by BaseHTTPRequestHandler
         path = urlparse(self.path).path
         if path in {"/", "/index.html"}:
@@ -389,6 +440,10 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
         if path == "/api/jobs":
             self._send_json({"jobs": JOB_STORE.list()})
+            return
+        artifact_prefix = "/api/artifacts/"
+        if path.startswith(artifact_prefix):
+            self._send_artifact(path[len(artifact_prefix) :])
             return
         if path.startswith("/api/jobs/"):
             job_id = path.rsplit("/", 1)[-1]
