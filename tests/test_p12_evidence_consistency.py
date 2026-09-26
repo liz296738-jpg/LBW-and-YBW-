@@ -48,3 +48,14 @@ def test_p12_foundation_matches_frozen_response_minimum_mach_values() -> None:
         min_mach = point["min_mach"]
         assert f"phi={phi:.2f}" in text
         assert f"min(Ma)={min_mach:.6f}..." in text
+
+
+def test_mass_inventory_gate_is_explicitly_project_defined() -> None:
+    record = _acceptance()
+    policy = record["acceptance_policy"]
+
+    assert "project-defined QA threshold" in policy["mass_inventory_gate"]
+    assert "internal project acceptance threshold" in policy["mass_inventory_gate_provenance"]
+    assert "no teacher, paper, experiment, or universal CFD standard" in (
+        policy["mass_inventory_gate_provenance"]
+    )
