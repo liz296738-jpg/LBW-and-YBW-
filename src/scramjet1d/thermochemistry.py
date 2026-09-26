@@ -2,9 +2,9 @@
 
 This module implements the temperature/composition-dependent ideal-gas mixture
 relations used by the teacher-provided Chapter 11 and corroborated by Cao
-Ruifeng's one-dimensional scramjet model. It remains independent of the
-production Euler state conversion until the source-backed coefficient database
-and state-recovery path are independently verified.
+Ruifeng's one-dimensional scramjet model. It was developed and verified independently before integration. The source-backed
+H2/C2H4 subset is now used by the teacher variable-composition solver path;
+unsupported fuel/species branches remain explicitly source-gated.
 
 Conventions
 -----------
@@ -23,6 +23,8 @@ from math import isclose, isfinite
 from typing import Mapping
 
 
+# 2022 CODATA: R = N_A k = 8.31446261815324 J/(mol K), exact under the SI;
+# multiplied by 1000 for the repository's kg/kmol molecular-weight convention.
 UNIVERSAL_GAS_CONSTANT_J_PER_KMOL_K = 8314.46261815324
 
 
