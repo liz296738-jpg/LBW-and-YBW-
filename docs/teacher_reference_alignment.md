@@ -28,6 +28,8 @@ The dimensional mapping from photographed Eq. 11.26 to the exact wall-specific-h
 
 The source record is no longer missing. The Cao Case 2 identity and Table 2-2 inlet evidence are frozen, including H2 fuel, `Ma=2.12`, `rho=0.28 kg/m^3`, `p=46.7 kPa`, `T=521 K`, `u=977 m/s`, reported `k=1.33`, `phi=0.2`, inlet composition, `Tw=900 K`, and reported grid spacings.
 
+A separate non-corrective consistency audit (`cases/studies/data/p11_4_cao_case2_consistency_audit.json`) evaluates those simultaneously reported values against the frozen ideal-mixture/GRI thermochemistry. The table entries are preserved exactly, but they are not treated as mutually exact thermodynamic constraints; no source field is silently tuned to force closure.
+
 Formal source reproduction remains blocked by three unresolved spatial inputs:
 
 1. exact source `A(x)`;
