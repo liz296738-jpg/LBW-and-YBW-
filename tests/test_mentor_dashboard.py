@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 import sys
 
@@ -104,3 +105,32 @@ def test_dashboard_runtime_identity_is_non_secret_and_versioned() -> None:
         "git_repo_slug",
         "service_id",
     }
+
+
+def test_dashboard_provenanced_json_is_self_describing(tmp_path, monkeypatch) -> None:
+    monkeypatch.setattr(dashboard, "ARTIFACT_ROOT", tmp_path)
+    monkeypatch.setattr(
+        dashboard,
+        "_runtime_identity",
+        lambda: {
+            "python": "3.11.11",
+            "packages": {"numpy": "2.4.6"},
+            "render": {"git_commit": "abc123"},
+        },
+    )
+    monkeypatch.setattr(dashboard, "_utc_now", lambda: "2026-09-26T00:00:00+00:00")
+
+    payload, path = dashboard._write_provenanced_json_artifact(
+        "example.json",
+        {"classification": "PROJECT_DEFINED_TEST", "value": 1.0},
+    )
+
+    stored = json.loads(path.read_text(encoding="utf-8"))
+    assert stored == payload
+    assert stored["generated_at_utc"] == "2026-09-26T00:00:00+00:00"
+    assert stored["runtime_provenance"]["python"] == "3.11.11"
+    assert stored["runtime_provenance"]["render"]["git_commit"] == "abc123"
+
+    digest = dashboard._sha256_file(path)
+    assert len(digest) == 64
+    assert all(character in "0123456789abcdef" for character in digest)
