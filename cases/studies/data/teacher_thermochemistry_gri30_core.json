@@ -6,11 +6,15 @@
   "purpose": "Freeze a traceable two-interval CHEMKIN/NASA polynomial set for the teacher-reference hydrogen and ethylene reaction branches before production solver integration.",
   "coefficient_source": {
     "identity": "GRI-Mech Version 3.0 Thermodynamics, released 1999-07-30, NASA Polynomial format for CHEMKIN-II",
-    "official_context": "University of California Berkeley GRI-Mech thermodynamic-data page states that GRI-Mech thermochemistry is based on standard databases including NASA-Lewis and Technion archives and publishes 298 K thermodynamic tables generated from the polynomial coefficients.",
-    "exact_coefficient_record": "OpenFOAM/OpenFOAM-6 public mirror: tutorials/combustion/reactingFoam/RAS/SandiaD_LTS/chemkin/thermo30.dat",
-    "mirror_header": "GRI-Mech Version 3.0 Thermodynamics released 7/30/99; NASA Polynomial format for CHEMKIN-II",
+    "authority": "PRIMARY_PUBLIC_THERMOCHEMISTRY_SOURCE",
+    "official_berkeley_url": "http://combustion.berkeley.edu/gri-mech/version30/files30/thermo30.dat",
+    "official_context_url": "https://combustion.berkeley.edu/gri-mech/new21/data/thermo_table.html",
+    "official_context": "The Berkeley GRI-Mech thermodynamic-data page states that GRI-Mech thermochemistry is based on standard databases including NASA-Lewis and Technion archives and publishes tabulated thermodynamic values computed from the polynomial coefficients.",
+    "reproducible_snapshot": "OpenFOAM/OpenFOAM-6 public mirror: tutorials/combustion/reactingFoam/RAS/SandiaD_LTS/chemkin/thermo30.dat",
+    "reproducible_snapshot_url": "https://github.com/OpenFOAM/OpenFOAM-6/blob/master/tutorials/combustion/reactingFoam/RAS/SandiaD_LTS/chemkin/thermo30.dat",
+    "snapshot_header": "GRI-Mech Version 3.0 Thermodynamics released 7/30/99; NASA Polynomial format for CHEMKIN-II",
     "coefficient_convention": "Classic CHEMKIN NASA7 record. For teacher Chapter 11 cp/h equations this project stores a1..a6; a7 is entropy-only and is not used by the present model.",
-    "source_class": "PUBLIC_STANDARD_DATABASE_WITH_REPRODUCIBLE_MIRROR"
+    "source_class": "PRIMARY_BERKELEY_GRI_MECH_WITH_REPRODUCIBLE_PUBLIC_SNAPSHOT"
   },
   "molecular_weight_source": {
     "identity": "NIST Chemistry WebBook SRD 69",
@@ -19,79 +23,178 @@
   },
   "independent_sanity_source": {
     "identity": "Berkeley GRI-Mech Thermodynamic Data at 298 K",
+    "url": "https://combustion.berkeley.edu/gri-mech/new21/data/thermo_table.html",
     "quantity": "molar cp at approximately 298 K",
     "units": "cal/(mol K)",
-    "policy": "Used only as an independent rounded-value regression check; the polynomial coefficients remain the computational source."
+    "policy": "Independent rounded-value regression check only; it does not replace the GRI-Mech polynomial coefficients."
   },
   "species": {
     "H2": {
       "formula": "H2",
       "molecular_weight_kg_per_kmol": 2.01588,
-      "temperature_min_K": 200.0,
-      "switch_temperature_K": 1000.0,
-      "temperature_max_K": 3500.0,
-      "low_coefficients_a1_to_a6": [2.34433112, 0.00798052075, -0.000019478151, 2.01572094e-8, -7.37611761e-12, -917.935173],
-      "high_coefficients_a1_to_a6": [3.33727920, -4.94024731e-5, 4.99456778e-7, -1.79566394e-10, 2.00255376e-14, -950.158922],
+      "temperature_min_K": 200,
+      "switch_temperature_K": 1000,
+      "temperature_max_K": 3500,
+      "low_coefficients_a1_to_a6": [
+        2.34433112,
+        0.00798052075,
+        -0.000019478151,
+        2.01572094e-8,
+        -7.37611761e-12,
+        -917.935173
+      ],
+      "high_coefficients_a1_to_a6": [
+        3.3372792,
+        -0.0000494024731,
+        4.99456778e-7,
+        -1.79566394e-10,
+        2.00255376e-14,
+        -950.158922
+      ],
       "berkeley_cp_298_cal_per_mol_K": 6.89
     },
     "O2": {
       "formula": "O2",
       "molecular_weight_kg_per_kmol": 31.9988,
-      "temperature_min_K": 200.0,
-      "switch_temperature_K": 1000.0,
-      "temperature_max_K": 3500.0,
-      "low_coefficients_a1_to_a6": [3.78245636, -0.00299673416, 9.84730201e-6, -9.68129509e-9, 3.24372837e-12, -1063.94356],
-      "high_coefficients_a1_to_a6": [3.28253784, 0.00148308754, -7.57966669e-7, 2.09470555e-10, -2.16717794e-14, -1088.45772],
+      "temperature_min_K": 200,
+      "switch_temperature_K": 1000,
+      "temperature_max_K": 3500,
+      "low_coefficients_a1_to_a6": [
+        3.78245636,
+        -0.00299673416,
+        0.00000984730201,
+        -9.68129509e-9,
+        3.24372837e-12,
+        -1063.94356
+      ],
+      "high_coefficients_a1_to_a6": [
+        3.28253784,
+        0.00148308754,
+        -7.57966669e-7,
+        2.09470555e-10,
+        -2.16717794e-14,
+        -1088.45772
+      ],
       "berkeley_cp_298_cal_per_mol_K": 7.02
     },
     "N2": {
       "formula": "N2",
       "molecular_weight_kg_per_kmol": 28.0134,
-      "temperature_min_K": 250.0,
-      "switch_temperature_K": 1000.0,
-      "temperature_max_K": 5000.0,
-      "low_coefficients_a1_to_a6": [3.298677, 0.0014082404, -3.963222e-6, 5.641515e-9, -2.444854e-12, -1020.8999],
-      "high_coefficients_a1_to_a6": [2.92664, 0.0014879768, -5.68476e-7, 1.0097038e-10, -6.753351e-15, -922.7977],
+      "temperature_min_K": 250,
+      "switch_temperature_K": 1000,
+      "temperature_max_K": 5000,
+      "low_coefficients_a1_to_a6": [
+        3.298677,
+        0.0014082404,
+        -0.000003963222,
+        5.641515e-9,
+        -2.444854e-12,
+        -1020.8999
+      ],
+      "high_coefficients_a1_to_a6": [
+        2.92664,
+        0.0014879768,
+        -5.68476e-7,
+        1.0097038e-10,
+        -6.753351e-15,
+        -922.7977
+      ],
       "berkeley_cp_298_cal_per_mol_K": 6.96
     },
     "AR": {
       "formula": "Ar",
       "molecular_weight_kg_per_kmol": 39.948,
-      "temperature_min_K": 250.0,
-      "switch_temperature_K": 1000.0,
-      "temperature_max_K": 5000.0,
-      "low_coefficients_a1_to_a6": [2.5, 0.0, 0.0, 0.0, 0.0, -745.375],
-      "high_coefficients_a1_to_a6": [2.5, 0.0, 0.0, 0.0, 0.0, -745.375],
+      "temperature_min_K": 250,
+      "switch_temperature_K": 1000,
+      "temperature_max_K": 5000,
+      "low_coefficients_a1_to_a6": [
+        2.5,
+        0,
+        0,
+        0,
+        0,
+        -745.375
+      ],
+      "high_coefficients_a1_to_a6": [
+        2.5,
+        0,
+        0,
+        0,
+        0,
+        -745.375
+      ],
       "berkeley_cp_298_cal_per_mol_K": 4.97
     },
     "H2O": {
       "formula": "H2O",
       "molecular_weight_kg_per_kmol": 18.0153,
-      "temperature_min_K": 200.0,
-      "switch_temperature_K": 1000.0,
-      "temperature_max_K": 3500.0,
-      "low_coefficients_a1_to_a6": [4.19864056, -0.00203643410, 6.52040211e-6, -5.48797062e-9, 1.77197817e-12, -30293.7267],
-      "high_coefficients_a1_to_a6": [3.03399249, 0.00217691804, -1.64072518e-7, -9.70419870e-11, 1.68200992e-14, -30004.2971],
+      "temperature_min_K": 200,
+      "switch_temperature_K": 1000,
+      "temperature_max_K": 3500,
+      "low_coefficients_a1_to_a6": [
+        4.19864056,
+        -0.0020364341,
+        0.00000652040211,
+        -5.48797062e-9,
+        1.77197817e-12,
+        -30293.7267
+      ],
+      "high_coefficients_a1_to_a6": [
+        3.03399249,
+        0.00217691804,
+        -1.64072518e-7,
+        -9.7041987e-11,
+        1.68200992e-14,
+        -30004.2971
+      ],
       "berkeley_cp_298_cal_per_mol_K": 8.03
     },
     "C2H4": {
       "formula": "C2H4",
       "molecular_weight_kg_per_kmol": 28.0532,
-      "temperature_min_K": 200.0,
-      "switch_temperature_K": 1000.0,
-      "temperature_max_K": 3500.0,
-      "low_coefficients_a1_to_a6": [3.95920148, -0.00757052247, 5.70990292e-5, -6.91588753e-8, 2.69884373e-11, 5089.77593],
-      "high_coefficients_a1_to_a6": [2.03611116, 0.0146454151, -6.71077915e-6, 1.47222923e-9, -1.25706061e-13, 4939.88614],
+      "temperature_min_K": 200,
+      "switch_temperature_K": 1000,
+      "temperature_max_K": 3500,
+      "low_coefficients_a1_to_a6": [
+        3.95920148,
+        -0.00757052247,
+        0.0000570990292,
+        -6.91588753e-8,
+        2.69884373e-11,
+        5089.77593
+      ],
+      "high_coefficients_a1_to_a6": [
+        2.03611116,
+        0.0146454151,
+        -0.00000671077915,
+        1.47222923e-9,
+        -1.25706061e-13,
+        4939.88614
+      ],
       "berkeley_cp_298_cal_per_mol_K": 10.25
     },
     "CO2": {
       "formula": "CO2",
       "molecular_weight_kg_per_kmol": 44.0095,
-      "temperature_min_K": 200.0,
-      "switch_temperature_K": 1000.0,
-      "temperature_max_K": 3500.0,
-      "low_coefficients_a1_to_a6": [2.35677352, 0.00898459677, -7.12356269e-6, 2.45919022e-9, -1.43699548e-13, -48371.9697],
-      "high_coefficients_a1_to_a6": [3.85746029, 0.00441437026, -2.21481404e-6, 5.23490188e-10, -4.72084164e-14, -48759.1660],
+      "temperature_min_K": 200,
+      "switch_temperature_K": 1000,
+      "temperature_max_K": 3500,
+      "low_coefficients_a1_to_a6": [
+        2.35677352,
+        0.00898459677,
+        -0.00000712356269,
+        2.45919022e-9,
+        -1.43699548e-13,
+        -48371.9697
+      ],
+      "high_coefficients_a1_to_a6": [
+        3.85746029,
+        0.00441437026,
+        -0.00000221481404,
+        5.23490188e-10,
+        -4.72084164e-14,
+        -48759.166
+      ],
       "berkeley_cp_298_cal_per_mol_K": 8.88
     }
   },
@@ -105,5 +208,11 @@
     "solver_integration_ready": false,
     "reason": "The source-backed core database now supports hydrogen and ethylene branches, but production state recovery should remain separate until piecewise data loading and regression checks pass and the intended supported-fuel scope is explicit.",
     "kerosene_policy": "Do not invent C10H22 coefficients. Either recover a source-compatible pseudo-kerosene thermochemical record or keep the kerosene branch unavailable in the first teacher-reference integrated case."
+  },
+  "validation_policy": {
+    "switch_continuity_relative_tolerance": 0.00001,
+    "cp_298_absolute_tolerance_cal_per_mol_K": 0.03,
+    "provenance": "PROJECT_DEFINED_REGRESSION_TOLERANCES",
+    "interpretation": "These tolerances are software/data-integrity gates chosen to catch transcription or interval-selection errors. They are not uncertainty bounds published by GRI-Mech, Berkeley, NIST, or the teacher material and must not be reported as physical validation uncertainty."
   }
 }
