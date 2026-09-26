@@ -18,9 +18,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from importlib.metadata import PackageNotFoundError, version as package_version
 import argparse
 import json
+import os
 from pathlib import Path
+import platform
 import sys
 import threading
 import traceback
@@ -260,6 +263,28 @@ def _validate_runtime_imports() -> None:
         __import__(module_name)
 
 
+def _runtime_identity() -> dict[str, Any]:
+    """Return non-secret runtime provenance for reproducible dashboard runs."""
+
+    packages: dict[str, str | None] = {}
+    for package in ("numpy", "matplotlib", "scramjet1d"):
+        try:
+            packages[package] = package_version(package)
+        except PackageNotFoundError:
+            packages[package] = None
+    return {
+        "python": platform.python_version(),
+        "packages": packages,
+        "render": {
+            "is_render": os.environ.get("RENDER") == "true",
+            "git_commit": os.environ.get("RENDER_GIT_COMMIT"),
+            "git_branch": os.environ.get("RENDER_GIT_BRANCH"),
+            "git_repo_slug": os.environ.get("RENDER_GIT_REPO_SLUG"),
+            "service_id": os.environ.get("RENDER_SERVICE_ID"),
+        },
+    }
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -335,6 +360,7 @@ class JobStore:
 
         try:
             result = RUNNERS[mode]()
+            result["runtime_provenance"] = _runtime_identity()
         except Exception as exc:  # pragma: no cover - exercised by live solver jobs
             message = f"{type(exc).__name__}: {exc}"
             traceback.print_exc()
@@ -424,6 +450,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     "ok": True,
                     "service": "mentor-dashboard",
                     "runtime_imports": True,
+                    "runtime": _runtime_identity(),
                 }
             )
             return
