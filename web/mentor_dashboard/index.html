@@ -218,6 +218,13 @@
       border-bottom: 1px solid var(--line); font-size: 12px;
     }
     .job:last-child { border-bottom: 0; }
+    .download-links { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+    .download-link {
+      display: inline-flex; align-items: center; text-decoration: none;
+      border: 1px solid var(--line); background: var(--surface-2); color: var(--blue);
+      border-radius: 9px; padding: 6px 9px; font-size: 10px; font-weight: 700;
+    }
+    .download-link:hover { background: var(--blue-soft); }
     .job-meta { color: var(--muted); font-size: 10px; margin-top: 4px; }
     .code {
       padding: 13px 14px; border-radius: 12px; background: #111113; color: #f5f5f7;
@@ -439,7 +446,7 @@
 
         <section id="run" class="section">
           <div class="panel">
-            <div class="panel-head"><div><h3>受控运行入口</h3><p>只开放已经冻结过的 project-defined 路径。页面不会修改源项、阈值或物理保护。</p></div><span class="pill ok">Local only</span></div>
+            <div class="panel-head"><div><h3>受控运行入口</h3><p>只开放已经冻结过的 project-defined 路径。页面不会修改源项、阈值或物理保护。</p></div><span class="pill info" id="runtime-health">检查运行环境…</span></div>
             <div class="run-grid">
               <div class="run-card">
                 <div class="run-title">H₂ Baseline · 20 cells</div>
@@ -467,9 +474,9 @@
               <div id="jobs"><div class="job"><div><strong>暂无任务</strong><div class="job-meta">从上方选择一个受控算例运行。</div></div></div></div>
             </div>
             <div class="panel">
-              <div class="panel-head"><div><h3>启动方式</h3><p>从仓库根目录运行。</p></div><button id="copy-command" class="secondary">复制</button></div>
+              <div class="panel-head"><div><h3>部署与本地复现</h3><p>当前页面可由 Render 公网服务运行；本地仍可用同一入口复现。</p></div><button id="copy-command" class="secondary">复制本地命令</button></div>
               <div class="code">python tools/mentor_dashboard.py</div>
-              <p>默认只监听 127.0.0.1，不向局域网/公网暴露。浏览器未自动打开时访问 http://127.0.0.1:8765。</p>
+              <p>本地默认监听 127.0.0.1:8765；线上 Render 使用同一 Python 入口并通过平台 PORT 提供服务。线上运行结果属于当前实例临时 artifact，重要结果应下载并纳入正式 evidence workflow 后再作为冻结证据。</p>
             </div>
           </div>
         </section>
@@ -656,7 +663,15 @@
       if (!jobs.length) {
         $("jobs").innerHTML='<div class="job"><div><strong>暂无任务</strong><div class="job-meta">从上方选择一个受控算例运行。</div></div></div>';
       } else {
-        $("jobs").innerHTML=jobs.map(j=>'<div class="job"><div><strong>'+j.label+'</strong><div class="job-meta">'+j.id+' · '+j.created_at+(j.error?' · '+j.error:"")+(j.result?.artifact_path?' · '+j.result.artifact_path:"")+'</div></div><div>'+statusPill(j.status)+'</div></div>').join("");
+        $("jobs").innerHTML=jobs.map(j=>{
+          const links=[];
+          if (j.result?.artifact_download_url) links.push('<a class="download-link" href="'+j.result.artifact_download_url+'">下载 JSON</a>');
+          if (j.result?.csv_download_url) links.push('<a class="download-link" href="'+j.result.csv_download_url+'">下载 CSV</a>');
+          if (j.result?.json_download_url) links.push('<a class="download-link" href="'+j.result.json_download_url+'">下载摘要 JSON</a>');
+          const downloads=links.length?'<div class="download-links">'+links.join("")+'</div>':"";
+          const error=j.error?'<div class="job-meta" style="color:var(--red)">错误：'+j.error+'</div>':"";
+          return '<div class="job"><div><strong>'+j.label+'</strong><div class="job-meta">'+j.id+' · '+j.created_at+'</div>'+error+downloads+'</div><div>'+statusPill(j.status)+'</div></div>';
+        }).join("");
       }
       if (active && !pollTimer) pollTimer=setInterval(fetchJobs,2500);
       if (!active && pollTimer) { clearInterval(pollTimer); pollTimer=null; }
@@ -679,7 +694,23 @@
       catch { toast("复制失败，请手动复制命令"); }
     });
 
+    async function checkRuntimeHealth() {
+      const el=$("runtime-health");
+      try {
+        const res=await fetch("/api/health",{cache:"no-store"});
+        const data=await res.json();
+        if (!res.ok || !data.ok || !data.runtime_imports) throw new Error(data.error || "runtime check failed");
+        el.className="pill ok";
+        el.textContent="Runtime ready";
+      } catch (err) {
+        el.className="pill bad";
+        el.textContent="Runtime error";
+        el.title=err.message;
+      }
+    }
+
     async function init() {
+      checkRuntimeHealth();
       try {
         const res=await fetch("/api/summary",{cache:"no-store"});
         DATA=await res.json();
