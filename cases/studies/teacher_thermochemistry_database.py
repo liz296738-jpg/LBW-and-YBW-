@@ -16,6 +16,8 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA_PATH = ROOT / "cases" / "studies" / "data" / "teacher_thermochemistry_gri30_core.json"
 EXPECTED_STATUS = "H2_C2H4_CORE_SPECIES_DATABASE_FROZEN_KEROSENE_PENDING"
 CAL_PER_J = 1.0 / 4.184
+SWITCH_CONTINUITY_RELATIVE_TOLERANCE = 1.0e-5
+BERKELEY_CP_298_ABSOLUTE_TOLERANCE_CAL_PER_MOL_K = 0.03
 
 
 def load_source_record(path: Path | str = DATA_PATH) -> dict[str, Any]:
@@ -33,8 +35,20 @@ def load_source_record(path: Path | str = DATA_PATH) -> dict[str, Any]:
     source = record.get("coefficient_source", {})
     if "GRI-Mech Version 3.0" not in source.get("identity", ""):
         raise ValueError("GRI-Mech 3.0 coefficient source identity is missing")
-    if "NASA Polynomial format for CHEMKIN-II" not in source.get("mirror_header", ""):
+    if source.get("authority") != "PRIMARY_PUBLIC_THERMOCHEMISTRY_SOURCE":
+        raise ValueError("GRI-Mech authority classification is not frozen")
+    if "combustion.berkeley.edu" not in source.get("official_berkeley_url", ""):
+        raise ValueError("official Berkeley GRI-Mech coefficient URL is missing")
+    if "NASA Polynomial format for CHEMKIN-II" not in source.get("snapshot_header", ""):
         raise ValueError("CHEMKIN/NASA coefficient convention is not frozen")
+
+    validation = record.get("validation_policy", {})
+    if validation.get("provenance") != "PROJECT_DEFINED_REGRESSION_TOLERANCES":
+        raise ValueError("thermochemistry regression-threshold provenance is missing")
+    if float(validation.get("switch_continuity_relative_tolerance", float("nan"))) != SWITCH_CONTINUITY_RELATIVE_TOLERANCE:
+        raise ValueError("switch-continuity regression tolerance drifted")
+    if float(validation.get("cp_298_absolute_tolerance_cal_per_mol_K", float("nan"))) != BERKELEY_CP_298_ABSOLUTE_TOLERANCE_CAL_PER_MOL_K:
+        raise ValueError("298 K cp regression tolerance drifted")
 
     species = record.get("species")
     required = {"H2", "O2", "N2", "AR", "H2O", "C2H4", "CO2"}
@@ -95,7 +109,7 @@ def build_species_database(
 def validate_switch_continuity(
     database: dict[str, PiecewiseSpeciesThermo] | None = None,
     *,
-    relative_tolerance: float = 1.0e-5,
+    relative_tolerance: float = SWITCH_CONTINUITY_RELATIVE_TOLERANCE,
 ) -> dict[str, dict[str, float]]:
     """Check source low/high interval continuity for ``cp`` and absolute ``h``."""
 
@@ -127,7 +141,7 @@ def validate_berkeley_cp_298(
     database: dict[str, PiecewiseSpeciesThermo] | None = None,
     path: Path | str = DATA_PATH,
     *,
-    absolute_tolerance_cal_per_mol_K: float = 0.03,
+    absolute_tolerance_cal_per_mol_K: float = BERKELEY_CP_298_ABSOLUTE_TOLERANCE_CAL_PER_MOL_K,
 ) -> dict[str, dict[str, float]]:
     """Cross-check source polynomials against Berkeley's rounded 298 K cp table."""
 
