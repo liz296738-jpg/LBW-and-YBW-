@@ -40,14 +40,14 @@ Teacher Eqs. 11.42-11.44 Steger-Warming are retained as a separately audited sou
 
 ## Mentor Dashboard
 
-A local Apple-style mentor dashboard is available for reviewing accepted results and running frozen project-defined cases without exposing scientifically gated controls.
+An Apple-style mentor dashboard is available locally and through the deployed Render service for reviewing accepted results and running frozen project-defined cases without exposing scientifically gated controls.
 
 ```bash
 python -m pip install -e ".[dev]"
 python tools/mentor_dashboard.py
 ```
 
-The dashboard opens at `http://127.0.0.1:8765` and includes overview, H2 baseline, 20/40/80 grid trend, normalized conservation diagnostics, P12 response/continuation evidence, provenance/blockers, and controlled run buttons. See `docs/mentor_dashboard.md` for the scientific/UI boundary and usage details.
+The local dashboard opens at `http://127.0.0.1:8765`; the deployed service uses the same Python entry point. It includes overview, H2 baseline, 20/40/80 grid trend, normalized conservation diagnostics, P12 response/continuation evidence, provenance/blockers, controlled run buttons, downloadable run artifacts, runtime provenance, and SHA-256 integrity records. Render-generated artifacts are transient and do not become frozen evidence until intentionally incorporated into the repository evidence workflow. See `docs/mentor_dashboard.md` for the scientific/UI boundary and usage details.
 
 ## Key Evidence Records
 
