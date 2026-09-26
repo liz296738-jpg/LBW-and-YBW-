@@ -12,7 +12,7 @@ The accepted 20/40/80 comparison is `cases/studies/data/p11_4_grid_convergence_a
 
 ## Axial distributions and conservation diagnostics
 
-The integrated baseline and P12 generators provide the continuous axial quantities required for delivery: Mach, pressure, temperature, velocity, density, and composition. The corresponding evidence/generator mapping is frozen in `cases/studies/data/course_deliverable_manifest.json`. Mass inventory retains the accepted 0.5% inlet-scale gate. Momentum and energy inventory rates are normalized quantitative diagnostics only; no unsourced hard thresholds are introduced.
+The integrated baseline and P12 generators provide the continuous axial quantities required for delivery: Mach, pressure, temperature, velocity, density, and composition. The corresponding evidence/generator mapping is frozen in `cases/studies/data/course_deliverable_manifest.json`. Mass inventory retains the accepted **project-defined** 0.5% inlet-scale QA gate. That numeric value is not attributed to the teacher, a paper, an experiment, or a universal CFD standard. Momentum and energy inventory rates are normalized quantitative diagnostics only; no unsourced hard thresholds are introduced.
 
 ## Accepted project-defined equivalence-ratio response
 
