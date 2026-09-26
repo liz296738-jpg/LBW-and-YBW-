@@ -4,11 +4,13 @@ This runbook freezes copy-paste commands for the accepted project-defined H2 bas
 
 ## Environment
 
-From the repository root, using Python 3.11:
+From the repository root, using the repository-pinned Python 3.11.11 (`.python-version`):
 
 ```bash
+python --version  # expected: Python 3.11.11
 python -m pip install -e ".[dev]"
 ```
+Direct numerical/runtime dependencies are pinned in `pyproject.toml` to the versions exercised by CI/Render. The purpose of these pins is reproducibility; dependency changes require a new verification run before results are promoted as accepted evidence.
 
 ## Accepted H2 integrated baseline
 
