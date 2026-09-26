@@ -148,7 +148,7 @@ def run_response_point(
             mapping,
             geometry,
             dx,
-            NumericalConfig(cfl=0.5, tolerance=tolerance),
+            NumericalConfig(cfl=baseline.PROJECT_CFL, tolerance=tolerance),
             inlet,
             species,
             hydraulic_diameter_m=hydraulic_diameter,
