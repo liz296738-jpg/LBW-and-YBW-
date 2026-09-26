@@ -1,8 +1,15 @@
 # Mathematical Model
 
-## Assumptions for Current Model
+## Model hierarchy and current scope
 
-The implemented baseline model is one-dimensional, compressible, inviscid, and adiabatic. It uses an ideal, calorically perfect gas with constant `gamma` and constant `R`; it excludes combustion and fuel injection. These are staged assumptions, not claims about the final model.
+The repository contains **two deliberately separated model levels**:
+
+1. **Baseline verification model (P2--P5).** One-dimensional compressible Euler flow, initially inviscid and adiabatic, with an ideal calorically-perfect gas using constant `gamma` and `R`. This level exists for code verification of state recovery, fluxes, geometry coupling, boundaries, CFL stepping, and SSP-RK3. It is not the current integrated combustor model.
+2. **Integrated teacher-reference model (P11/P12).** Quasi-one-dimensional compressible flow with variable area, teacher-aligned wall-friction and fuel/source closures, H2/C2H4 composition-dependent thermochemistry, teacher-compatible inlet/outlet treatment, SSP-RK3/CFL pseudo-time marching, and Eq. 11.46 density-change convergence reporting. The accepted H2 integrated case uses the audited variable-thermochemistry **Rusanov** production flux because a source-backed variable-thermochemistry Steger-Warming energy-reference correction and Eq. 11.44 numerical epsilon policy have not been recovered.
+
+Wall heat transfer is supported as an explicit dimensional source input, but the photographed teacher Eq. 11.26 empirical-to-dimensional mapping remains source-gated. Cao Case 2 is likewise not claimed as a formal reproduction while its exact `A(x)`, prescribed `Yi(x)` spatial information, and original source/injection spatial convention remain unavailable.
+
+This hierarchy prevents early verification assumptions (for example, inviscid/adiabatic/no-fuel P3 cases) from being mistaken for the physics currently exercised by the accepted integrated H2/P12 deliverable.
 
 ## Primitive Variables
 
