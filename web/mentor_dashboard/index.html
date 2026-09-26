@@ -378,8 +378,8 @@
             </div>
           </div>
           <div class="callout">
-            基线 smoke acceptance 历史上冻结的是 20 cells、CFL 0.5、Eq.11.46 density-change tolerance = 1e-4。
-            更严格的 2e-5 网格/P12 证据是另外冻结的数值研究；页面不会把不同 tolerance 混成同一个趋势结论。
+            基线 smoke acceptance 历史上冻结的是 20 cells、CFL 0.5，并对老师 Eq.11.46 density-change 指标采用项目数值容差 1e-4。
+            更严格的项目数值容差 2e-5 用于另外冻结的网格/P12 数值研究；页面不会把不同 tolerance 混成同一个趋势结论，也不会把 2e-5 误写成老师给定阈值。
           </div>
         </section>
 
@@ -395,7 +395,7 @@
             </div>
           </div>
           <div class="panel">
-            <div class="panel-head"><div><h3>网格审计明细</h3><p>同一 case definition、同一 2e-5 Eq.11.46 gate。</p></div></div>
+            <div class="panel-head"><div><h3>网格审计明细</h3><p>同一 case definition、同一项目数值容差 2e-5（作用于 Eq.11.46 指标）。</p></div></div>
             <div class="table-wrap"><table><thead><tr><th>Cells</th><th>dx (m)</th><th>Steps</th><th>Density change</th><th>Norm. residual</th><th>Min Mach</th><th>Max Mach</th><th>Max p (Pa)</th><th>Max T (K)</th></tr></thead><tbody id="grid-table"></tbody></table></div>
           </div>
           <div class="panel">
@@ -407,7 +407,7 @@
 
         <section id="response" class="section">
           <div class="panel">
-            <div class="panel-head"><div><h3>P12 Project-defined response sweep</h3><p>固定边界、热化学、源项和收敛定义，仅扫描已冻结等价比点。</p></div><span class="pill info">Eq.11.46 = 2e-5</span></div>
+            <div class="panel-head"><div><h3>P12 Project-defined response sweep</h3><p>固定边界、热化学、源项和收敛定义，仅扫描已冻结等价比点。</p></div><span class="pill info">Eq.11.46 · project tol 2e-5</span></div>
             <div id="response-mach-chart" class="chart"></div>
           </div>
           <div class="panel">
@@ -648,7 +648,7 @@
         if (s.cells) lines.push("<span>Cells <strong>"+s.cells+"</strong></span>");
         if (s.equivalence_ratios) lines.push("<span>φ <strong>"+s.equivalence_ratios.join(" / ")+"</strong></span>");
         lines.push("<span>CFL <strong>"+s.cfl+"</strong></span>");
-        lines.push("<span>Eq.11.46 <strong>"+Number(s.teacher_eq_11_46_tolerance).toExponential(1)+"</strong></span>");
+        lines.push("<span>Eq.11.46 project tol <strong>"+Number(s.teacher_eq_11_46_tolerance).toExponential(1)+"</strong></span>");
         lines.push("<span>Max steps <strong>"+Number(s.max_steps).toLocaleString()+"</strong></span>");
         el.innerHTML=lines.join("");
       }
