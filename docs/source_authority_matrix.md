@@ -28,6 +28,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | Cao Case 2 formal reproduction | inlet/source identity frozen, exact spatial inputs incomplete | B | blocked by exact A(x), Yi(x), and source/injection spatial convention |
 | NASA Burrows--Kurkov | official experiment and NASA computational-reference archive | D | supporting reduced-order V&V only; not the teacher deliverable |
 | grid-convergence/GCI methodology | ASME/NASA verification guidance | E | used for claim discipline; no automatic grid-independence claim |
+| project numerical tolerances / QA gates | repository acceptance policy | project-defined, not an external authority class | values such as Eq.11.46 tolerance `2e-5` and 0.5% mass-inventory QA gate are explicitly labelled project controls; they must not be attributed to the teacher, ASME, NASA, papers, or experiments |
 
 ## Public source locators
 
