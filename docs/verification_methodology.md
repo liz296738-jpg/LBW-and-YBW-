@@ -52,6 +52,25 @@ Using the two finest grids, nominal first-order `p=1`, and conservative `Fs=3`, 
 
 These are discretization-uncertainty indicators for the stated project-defined quantities, not experimental error bars and not proof that Cao Case 2 has been reproduced.
 
+## Discrete conservation policy
+
+For a converged finite-volume state, the project evaluates the domain-integrated
+semi-discrete RHS using the same operator that advances the solution. Each
+conservative-equation inventory rate is normalized by a corresponding inlet
+flux scale so mass, momentum, and energy imbalance can be compared
+dimensionlessly.
+
+The **0.5% mass-inventory threshold is a project-defined QA acceptance
+criterion**, not a value attributed to the teacher source, ASME, NASA, a paper,
+or an experiment. It is retained for continuity with the frozen project
+acceptance history. Momentum and energy inventory rates are reported
+quantitatively without inventing hard thresholds.
+
+This distinction matters: the conservation identity and normalization follow
+from the discretized governing equations, while the numeric pass/fail tolerance
+is an engineering quality-control choice. Passing that QA gate is numerical
+evidence; it is not experimental validation of the combustion model.
+
 ## Experimental/reference validation boundary
 
 The NASA Burrows--Kurkov hydrogen supersonic-combustion experiment is retained as a supporting validation reference because it includes measured pressure, temperature/composition information and a well-documented Mach-2.44 vitiated-air configuration. It is not substituted for the teacher-defined/Cao geometry or operating conditions.
