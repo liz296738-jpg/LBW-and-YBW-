@@ -1,6 +1,15 @@
 name: P11.4 Three-Level Grid Audit
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'cases/studies/p11_4_grid_convergence.py'
+      - 'cases/studies/p11_4_project_defined_h2_smoke.py'
+      - 'docs/verification_methodology.md'
+      - 'tests/test_p11_4_grid_verification.py'
+      - 'src/scramjet1d/**'
+      - '.github/workflows/p11_4_grid_convergence.yml'
   pull_request:
     paths:
       - 'cases/studies/p11_4_grid_convergence.py'
@@ -17,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.11.11'
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[dev]'
       - name: Run 20/40/80 grid audit
