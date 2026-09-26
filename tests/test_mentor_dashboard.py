@@ -75,3 +75,18 @@ def test_dashboard_frontend_exists_and_states_guard_boundary() -> None:
 
 def test_dashboard_only_exposes_known_run_modes() -> None:
     assert set(dashboard.RUNNERS) == {"baseline", "response", "profile"}
+
+
+def test_dashboard_artifact_urls_are_confined_to_artifact_root() -> None:
+    candidate = dashboard.ARTIFACT_ROOT / "example.json"
+    assert dashboard._artifact_download_url(candidate) == "/api/artifacts/example.json"
+
+
+def test_dashboard_artifact_request_rejects_path_traversal() -> None:
+    import pytest
+
+    with pytest.raises(ValueError, match="escaped"):
+        dashboard._resolve_artifact_request("../course_deliverable_manifest.json")
+
+    with pytest.raises(ValueError, match="escaped"):
+        dashboard._resolve_artifact_request("%2E%2E/course_deliverable_manifest.json")
