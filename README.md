@@ -51,6 +51,7 @@ The dashboard opens at `http://127.0.0.1:8765` and includes overview, H2 baselin
 
 ## Key Evidence Records
 
+- `docs/verification_methodology.md` — verification/validation separation, grid-refinement and GCI claim policy, and primary public references
 - `docs/development_roadmap.md`
 - `docs/teacher_reference_alignment.md`
 - `docs/teacher_steger_warming_source_audit.md`
