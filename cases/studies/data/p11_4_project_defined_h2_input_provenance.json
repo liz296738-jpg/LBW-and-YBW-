@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "record_kind": "p11-4-project-defined-h2-input-provenance",
+  "case_classification": "PROJECT_DEFINED_INTEGRATED_SMOKE_CASE",
+  "source_reproduction": false,
+  "purpose": "Make every baseline input explicit and prevent project-selected controls from being mistaken for teacher/Cao/experimental data.",
+  "physical_inputs": {
+    "LENGTH_M": {
+      "value": 0.4,
+      "units": "m",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Smoke-case domain length; not Cao Case 2 geometry."
+    },
+    "INLET_AREA_M2": {
+      "value": 0.004,
+      "units": "m^2",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Mild-divergence smoke geometry; exact Cao A(x) remains source-gated."
+    },
+    "EXIT_AREA_M2": {
+      "value": 0.005,
+      "units": "m^2",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Mild-divergence smoke geometry; not a source-reproduced exit area."
+    },
+    "COMBUSTOR_HEIGHT_M": {
+      "value": 0.04,
+      "units": "m",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Rectangular-height control used to derive a self-consistent hydraulic diameter."
+    },
+    "INLET_PRESSURE_PA": {
+      "value": 55000,
+      "units": "Pa",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Does not represent Cao Case 2 Table 2-2 pressure."
+    },
+    "INLET_TEMPERATURE_K": {
+      "value": 800,
+      "units": "K",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Does not represent Cao Case 2 Table 2-2 temperature."
+    },
+    "INLET_VELOCITY_M_PER_S": {
+      "value": 1250,
+      "units": "m/s",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Does not represent Cao Case 2 Table 2-2 velocity."
+    },
+    "EQUIVALENCE_RATIO": {
+      "value": 0.2,
+      "units": "1",
+      "provenance": "PROJECT_DEFINED_NUMERICALLY_MATCHES_CAO_CASE2_PHI_ONLY",
+      "note": "The numeric value equals Cao Case 2 phi=0.2, but the geometry, inlet state, composition closure and source-spatial convention are different; this does not make the smoke case a Case 2 reproduction."
+    },
+    "INJECTOR_X_M": {
+      "value": 0.08,
+      "units": "m",
+      "provenance": "PROJECT_DEFINED",
+      "note": "No exact Cao/teacher source injector position is claimed for this smoke case."
+    },
+    "MIXING_C_M": {
+      "value": 30,
+      "units": "1",
+      "provenance": "PROJECT_SELECTED_WITHIN_TEACHER_SOURCE_RANGE",
+      "source_reference": "Teacher Chapter 11 Eq.11.20 ledger; source range C_m=25-60.",
+      "source_range": [
+        25,
+        60
+      ],
+      "note": "The allowed range is source-backed; the specific value 30 is a project choice."
+    },
+    "INJECTION_MODE": {
+      "value": "parallel",
+      "provenance": "PROJECT_SELECTED_TEACHER_BRANCH",
+      "source_reference": "Teacher Chapter 11 Eq.11.19 includes parallel, normal and strut branches.",
+      "note": "Branch existence is source-backed; selecting the parallel branch for this smoke case is project-defined."
+    },
+    "FUEL_TEMPERATURE_K": {
+      "value": 450,
+      "units": "K",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Injected-fuel temperature for the smoke case; not claimed as Cao Case 2 source data."
+    },
+    "FUEL_AXIAL_VELOCITY_M_PER_S": {
+      "value": 120,
+      "units": "m/s",
+      "provenance": "PROJECT_DEFINED",
+      "note": "Injected-stream axial velocity for the smoke case; not claimed as Cao Case 2 source data."
+    },
+    "WALL_HEAT_GRADIENT_J_PER_KG_PER_M": {
+      "value": 0,
+      "units": "J/(kg m)",
+      "provenance": "SOURCE_GATED_NEUTRALIZATION",
+      "note": "Set explicitly to zero because the dimensional mapping from teacher Eq.11.26 to the Eq.11.38 wall-heat input is unresolved. Zero is a scope control, not a validated adiabatic-wall claim."
+    }
+  },
+  "numerical_controls": {
+    "CFL": {
+      "value": 0.5,
+      "provenance": "TEACHER_ALIGNED",
+      "source_reference": "Teacher Chapter 11 Eq.11.45 spectral factor as documented by teacher_steady_solver; no undocumented dt0 is invented."
+    },
+    "DEFAULT_DENSITY_CHANGE_TOLERANCE": {
+      "value": 0.00002,
+      "provenance": "PROJECT_DEFINED_NUMERICAL_TOLERANCE",
+      "note": "Applied to the teacher Eq.11.46 metric; the numeric tolerance itself is not attributed to the teacher source."
+    },
+    "DEFAULT_MAX_STEPS": {
+      "value": 20000,
+      "provenance": "PROJECT_DEFINED_NUMERICAL_CAP"
+    },
+    "GRID_LEVELS": {
+      "value": [
+        20,
+        40,
+        80
+      ],
+      "provenance": "PROJECT_DEFINED_VERIFICATION_DESIGN",
+      "note": "Refinement ratio r=2 chosen for solution verification; not a physical engine input."
+    }
+  },
+  "policy": "A source-backed equation/range does not automatically make a selected case value source-backed. Project choices remain explicit even when they lie inside a teacher-provided admissible range."
+}
