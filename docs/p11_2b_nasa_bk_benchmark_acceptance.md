@@ -16,6 +16,9 @@ The public NASA experiment and exit probe profiles remain independently ingested
 
 ## Numerical acceptance
 
+**Threshold provenance.** The numerical thresholds used below (the <2% conservative-target discrepancy gate and the <0.5% 160-to-320 refinement-change gate) are **project-defined regression/benchmark gates**. They are not uncertainty bounds reported by Burrows--Kurkov, not NASA experimental acceptance criteria, and not ASME validation thresholds. They are retained only to make this reduced-order computational-reference benchmark deterministic and auditable. Experimental validation claims require experimental uncertainty and compatible measured quantities; this benchmark explicitly does not make that claim.
+
+
 Reference effective-gas model:
 
 - `gamma = 1.2779315953440815`
