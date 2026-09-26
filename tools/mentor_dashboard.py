@@ -21,6 +21,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import argparse
 import json
 from pathlib import Path
+import sys
 import threading
 import traceback
 from typing import Any, Callable
@@ -30,6 +31,16 @@ import webbrowser
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+# When this file is launched as `python tools/mentor_dashboard.py`, Python puts
+# `tools/` (not the repository root) on sys.path. The controlled study runners
+# live under `cases/studies`, so Render/local script execution must explicitly
+# expose the repository root for those imports. This is an execution-path fix
+# only; it does not change any CFD physics, numerics, or frozen acceptance data.
+repo_root_text = str(REPO_ROOT)
+if repo_root_text not in sys.path:
+    sys.path.insert(0, repo_root_text)
+
 WEB_INDEX = REPO_ROOT / "web" / "mentor_dashboard" / "index.html"
 DATA_ROOT = REPO_ROOT / "cases" / "studies" / "data"
 ARTIFACT_ROOT = REPO_ROOT / "artifacts" / "dashboard"
@@ -205,6 +216,19 @@ RUNNERS: dict[str, Callable[[], dict[str, Any]]] = {
     "profile": _run_profile,
 }
 
+RUNTIME_STUDY_MODULES = (
+    "cases.studies.p11_4_project_defined_h2_smoke",
+    "cases.studies.p12_project_defined_response_sweep",
+    "cases.studies.p11_4_profile_output",
+)
+
+
+def _validate_runtime_imports() -> None:
+    """Fail fast if the deployed dashboard cannot load its controlled runners."""
+
+    for module_name in RUNTIME_STUDY_MODULES:
+        __import__(module_name)
+
 
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -331,7 +355,26 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self._send_index()
             return
         if path == "/api/health":
-            self._send_json({"ok": True, "service": "mentor-dashboard"})
+            try:
+                _validate_runtime_imports()
+            except Exception as exc:
+                self._send_json(
+                    {
+                        "ok": False,
+                        "service": "mentor-dashboard",
+                        "runtime_imports": False,
+                        "error": f"{type(exc).__name__}: {exc}",
+                    },
+                    HTTPStatus.SERVICE_UNAVAILABLE,
+                )
+                return
+            self._send_json(
+                {
+                    "ok": True,
+                    "service": "mentor-dashboard",
+                    "runtime_imports": True,
+                }
+            )
             return
         if path == "/api/summary":
             try:
@@ -395,6 +438,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    _validate_runtime_imports()
     server = create_server(args.host, args.port)
     url = f"http://{args.host}:{args.port}"
     print(f"Mentor dashboard: {url}")
