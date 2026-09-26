@@ -56,6 +56,9 @@ RUN_SPECS: dict[str, dict[str, Any]] = {
         "cells": 20,
         "cfl": 0.5,
         "teacher_eq_11_46_tolerance": 1.0e-4,
+        "tolerance_provenance": (
+            "project-selected numerical tolerance applied to teacher Eq.11.46 metric"
+        ),
         "max_steps": 8_000,
         "source_reproduction": False,
     },
@@ -66,6 +69,9 @@ RUN_SPECS: dict[str, dict[str, Any]] = {
         "cells": 20,
         "cfl": 0.5,
         "teacher_eq_11_46_tolerance": 2.0e-5,
+        "tolerance_provenance": (
+            "project-selected numerical tolerance applied to teacher Eq.11.46 metric"
+        ),
         "max_steps": 8_000,
         "source_reproduction": False,
     },
@@ -75,6 +81,9 @@ RUN_SPECS: dict[str, dict[str, Any]] = {
         "cells": 80,
         "cfl": 0.5,
         "teacher_eq_11_46_tolerance": 2.0e-5,
+        "tolerance_provenance": (
+            "project-selected numerical tolerance applied to teacher Eq.11.46 metric"
+        ),
         "max_steps": 20_000,
         "source_reproduction": False,
         "note": "High-resolution run; expected to take substantially longer than the 20-cell baseline.",
@@ -131,6 +140,10 @@ def build_summary() -> dict[str, Any]:
             ),
             "grid_claim": (
                 "grid-convergence trend only; no asymptotic GCI/grid-independence claim"
+            ),
+            "eq_11_46_tolerance_role": (
+                "Eq.11.46 defines the metric; numerical tolerance values are "
+                "explicit project controls unless separately source-frozen"
             ),
             "lbw_ybw_are_mode_labels": False,
         },
