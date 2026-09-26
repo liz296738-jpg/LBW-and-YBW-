@@ -42,7 +42,7 @@ The frozen acceptance record remains `cases/studies/data/p11_4_project_defined_h
 
 ## Accepted P12 project-defined response study
 
-The response command below uses the same default sweep implementation and acceptance semantics as the dedicated P12 workflow. Teacher Eq. 11.46 maximum relative density change remains the authoritative steady-state gate. Normalized residual is reported independently and is not assigned an invented hard threshold. The existing forward-flow guard is preserved.
+The response command below uses the same default sweep implementation and acceptance semantics as the dedicated P12 workflow. Teacher Eq. 11.46 maximum relative density change remains the source-defined steady-state metric. The `2e-5` tolerance used here is a frozen project numerical choice, not a numeric threshold attributed to the teacher source. Normalized residual is reported independently and is not assigned an invented hard threshold. The existing forward-flow guard is preserved.
 
 ```bash
 python - <<'PY'
@@ -69,7 +69,7 @@ PY
 
 Expected output: `artifacts/deliverable/p12_project_defined_response_sweep.json`.
 
-The machine-readable accepted response evidence remains `cases/studies/data/p12_project_defined_response_sweep_acceptance.json`. Stricter `2e-5` continuation and thermal-throat grid evidence remain frozen separately in `cases/studies/data/p12_thermal_throat_continuation_acceptance.json` and `cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`.
+The machine-readable accepted response evidence remains `cases/studies/data/p12_project_defined_response_sweep_acceptance.json`. Stricter project-selected `2e-5` continuation and thermal-throat grid evidence remain frozen separately in `cases/studies/data/p12_thermal_throat_continuation_acceptance.json` and `cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`.
 
 ## Claim boundaries
 
