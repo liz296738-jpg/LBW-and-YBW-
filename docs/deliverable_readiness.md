@@ -5,11 +5,11 @@ This checklist separates **implemented/accepted evidence** from the stronger cla
 ## Accepted core evidence
 
 - [x] Reproducible project-defined H2 integrated case (`cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json`).
-- [x] Teacher Eq. 11.46 maximum relative-density-change convergence is the authoritative steady-state gate; normalized residual is an independent diagnostic, not a second invented hard threshold.
+- [x] Teacher Eq. 11.46 defines the maximum relative-density-change steady-state metric; each study freezes its numerical tolerance separately as a project control unless the source explicitly provides one. Normalized residual is an independent diagnostic, not a second invented hard threshold.
 - [x] Three-level 20/40/80 numerical grid trend (`cases/studies/data/p11_4_grid_convergence_acceptance.json`). This is a grid-convergence trend, not a formal asymptotic grid-independence/GCI claim.
 - [x] Discrete mass, momentum, and energy inventory-rate diagnostics are available and normalized by documented inlet natural scales. Mass retains the accepted 0.5% gate; momentum and energy remain quantitative diagnostics without unsourced acceptance thresholds.
 - [x] P12 project-defined equivalence-ratio response evidence is machine-readable (`cases/studies/data/p12_project_defined_response_sweep_acceptance.json`).
-- [x] The stricter Eq. 11.46 `2e-5` continuation evidence is frozen (`cases/studies/data/p12_thermal_throat_continuation_acceptance.json`).
+- [x] The stricter project-selected `2e-5` tolerance continuation evidence using the Eq. 11.46 metric is frozen (`cases/studies/data/p12_thermal_throat_continuation_acceptance.json`).
 - [x] P12 thermal-throat grid-sensitivity evidence is frozen (`cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`).
 - [x] Forward-flow guard failures are recorded as `solver/model-domain inadmissible`; they are not interpreted as unstart or combustion-mode transitions.
 - [x] Source/assumption boundaries and known blockers are maintained in `README.md`, `docs/development_roadmap.md`, `docs/teacher_reference_alignment.md`, and the evidence records.
