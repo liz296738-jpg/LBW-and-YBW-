@@ -33,7 +33,10 @@ CASE_CLASSIFICATION = "P12_PROJECT_DEFINED_RESPONSE_SWEEP"
 NOT_A_SOURCE_REPRODUCTION = True
 NO_MODE_LABEL_CLAIM = True
 PROJECT_EQUIVALENCE_RATIOS = (0.10, 0.20, 0.30)
-TEACHER_EQ_11_46_STEADY_TOLERANCE = 2.0e-5
+PROJECT_EQ_11_46_STEADY_TOLERANCE = 2.0e-5
+# Eq.11.46 supplies the convergence metric. The numeric tolerance is a
+# project-selected numerical control unless an explicit source threshold is frozen.
+TEACHER_EQ_11_46_STEADY_TOLERANCE = PROJECT_EQ_11_46_STEADY_TOLERANCE
 STATUS_CONVERGED = "CONVERGED"
 STATUS_MAX_STEPS = "MAX_STEPS_REACHED"
 STATUS_FORWARD_FLOW_GUARD = "FORWARD_FLOW_GUARD_TRIGGERED"
@@ -87,7 +90,7 @@ def run_response_point(
     phi: float,
     cells: int = 20,
     *,
-    tolerance: float = TEACHER_EQ_11_46_STEADY_TOLERANCE,
+    tolerance: float = PROJECT_EQ_11_46_STEADY_TOLERANCE,
     max_steps: int = 8000,
 ) -> ResponsePoint:
     if not np.isfinite(phi) or phi <= 0.0:
