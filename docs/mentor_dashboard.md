@@ -1,6 +1,6 @@
 # Mentor Dashboard
 
-A local mentor-facing dashboard is included for the project-defined course deliverable.
+A mentor-facing dashboard is included for the project-defined course deliverable. The same Python entry point is used locally and by the deployed Render web service.
 
 ## Start
 
@@ -11,7 +11,7 @@ python -m pip install -e ".[dev]"
 python tools/mentor_dashboard.py
 ```
 
-The dashboard opens at `http://127.0.0.1:8765` by default. It binds only to the local loopback interface unless `--host` is explicitly changed.
+The dashboard opens at `http://127.0.0.1:8765` by default. It binds only to the local loopback interface unless `--host` is explicitly changed. The deployed service uses `python tools/mentor_dashboard.py --host 0.0.0.0 --port $PORT --no-browser` and is currently exposed at `https://lbw-and-ybw.onrender.com`.
 
 ## What the dashboard shows
 
@@ -37,6 +37,10 @@ The **运行算例** page exposes only three frozen project-defined paths:
 3. the accepted 80-cell full-profile export using the `2e-5` gate.
 
 Only one solver job can run at a time. Generated outputs are written under `artifacts/dashboard/` and are intentionally ignored by Git.
+
+Downloaded baseline/response JSON records are self-describing: they include UTC generation time plus runtime provenance (Python version, installed scientific-package versions, and available Render Git/service identity). The 80-cell profile export additionally emits a run manifest containing SHA-256 digests for its CSV and JSON outputs. The dashboard displays integrity digests next to completed jobs.
+
+Render instance storage is operational, not archival. Dashboard-generated artifacts can disappear after a restart or redeploy. A result becomes frozen scientific evidence only after it is intentionally reviewed and incorporated into the repository evidence workflow; merely running it on the dashboard does not change any accepted scientific claim.
 
 The dashboard does **not** expose controls for changing source terms, thermochemistry, wall-heat mapping, flux-scheme compatibility fixes, or other scientifically gated inputs.
 
