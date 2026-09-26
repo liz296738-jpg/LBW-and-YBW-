@@ -14,6 +14,9 @@ import json
 import numpy as np
 
 from cases.studies.p11_4_project_defined_h2_smoke import (
+    DEFAULT_DENSITY_CHANGE_TOLERANCE,
+    DEFAULT_MAX_STEPS,
+    PROJECT_CFL,
     WALL_HEAT_GRADIENT_J_PER_KG_PER_M,
     build_case,
 )
@@ -43,8 +46,8 @@ class ConservationAuditResult:
 def run_conservation_audit(
     cells: int = 80,
     *,
-    tolerance: float = 2.0e-5,
-    max_steps: int = 20_000,
+    tolerance: float = DEFAULT_DENSITY_CHANGE_TOLERANCE,
+    max_steps: int = DEFAULT_MAX_STEPS,
 ) -> ConservationAuditResult:
     (
         species,
@@ -61,7 +64,7 @@ def run_conservation_audit(
         mapping,
         geometry,
         dx,
-        NumericalConfig(cfl=0.5, tolerance=tolerance),
+        NumericalConfig(cfl=PROJECT_CFL, tolerance=tolerance),
         inlet,
         species,
         hydraulic_diameter_m=hydraulic_diameter,
