@@ -20,6 +20,7 @@ from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib.metadata import PackageNotFoundError, version as package_version
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -145,6 +146,29 @@ def _write_json_artifact(filename: str, payload: Any) -> Path:
     )
     return path
 
+
+def _sha256_file(path: Path) -> str:
+    """Return the SHA-256 digest of a generated artifact."""
+
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def _write_provenanced_json_artifact(
+    filename: str, payload: dict[str, Any]
+) -> tuple[dict[str, Any], Path]:
+    """Persist a self-describing run record before exposing it for download."""
+
+    record = dict(payload)
+    record["generated_at_utc"] = _utc_now()
+    record["runtime_provenance"] = _runtime_identity()
+    path = _write_json_artifact(filename, record)
+    return record, path
+
+
 def _artifact_download_url(path: Path) -> str:
     """Return a URL only for files rooted under the dashboard artifact directory."""
 
@@ -186,15 +210,18 @@ def _run_baseline() -> dict[str, Any]:
     if result.min_temperature_K <= 0.0 or result.min_pressure_Pa <= 0.0:
         raise RuntimeError("Accepted H2 baseline produced a nonphysical state.")
 
-    payload = {
-        "classification": baseline.CASE_CLASSIFICATION,
-        "not_a_source_reproduction": baseline.NOT_A_SOURCE_REPRODUCTION,
-        "run_spec": spec,
-        "result": asdict(result),
-    }
-    path = _write_json_artifact("latest_p11_4_h2_baseline.json", payload)
+    payload, path = _write_provenanced_json_artifact(
+        "latest_p11_4_h2_baseline.json",
+        {
+            "classification": baseline.CASE_CLASSIFICATION,
+            "not_a_source_reproduction": baseline.NOT_A_SOURCE_REPRODUCTION,
+            "run_spec": spec,
+            "result": asdict(result),
+        },
+    )
     payload["artifact_path"] = str(path.relative_to(REPO_ROOT))
     payload["artifact_download_url"] = _artifact_download_url(path)
+    payload["artifact_sha256"] = _sha256_file(path)
     return payload
 
 
@@ -202,19 +229,22 @@ def _run_response() -> dict[str, Any]:
     from cases.studies import p12_project_defined_response_sweep as sweep
 
     points = sweep.run_sweep()
-    payload = {
-        "classification": sweep.CASE_CLASSIFICATION,
-        "not_a_source_reproduction": sweep.NOT_A_SOURCE_REPRODUCTION,
-        "mode_label_claim": False,
-        "teacher_eq_11_46_steady_tolerance": (
-            sweep.TEACHER_EQ_11_46_STEADY_TOLERANCE
-        ),
-        "equivalence_ratios": list(sweep.PROJECT_EQUIVALENCE_RATIOS),
-        "points": [asdict(point) for point in points],
-    }
-    path = _write_json_artifact("latest_p12_response_sweep.json", payload)
+    payload, path = _write_provenanced_json_artifact(
+        "latest_p12_response_sweep.json",
+        {
+            "classification": sweep.CASE_CLASSIFICATION,
+            "not_a_source_reproduction": sweep.NOT_A_SOURCE_REPRODUCTION,
+            "mode_label_claim": False,
+            "teacher_eq_11_46_steady_tolerance": (
+                sweep.TEACHER_EQ_11_46_STEADY_TOLERANCE
+            ),
+            "equivalence_ratios": list(sweep.PROJECT_EQUIVALENCE_RATIOS),
+            "points": [asdict(point) for point in points],
+        },
+    )
     payload["artifact_path"] = str(path.relative_to(REPO_ROOT))
     payload["artifact_download_url"] = _artifact_download_url(path)
+    payload["artifact_sha256"] = _sha256_file(path)
     return payload
 
 
@@ -232,15 +262,29 @@ def _run_profile() -> dict[str, Any]:
     if not summary.converged:
         raise RuntimeError("Accepted H2 full-profile run did not converge.")
 
-    return {
-        "classification": profile.CASE_CLASSIFICATION,
-        "not_a_source_reproduction": profile.NOT_A_SOURCE_REPRODUCTION,
-        "summary": asdict(summary),
-        "csv_artifact_path": str(csv_path.relative_to(REPO_ROOT)),
-        "json_artifact_path": str(json_path.relative_to(REPO_ROOT)),
-        "csv_download_url": _artifact_download_url(csv_path),
-        "json_download_url": _artifact_download_url(json_path),
-    }
+    manifest, manifest_path = _write_provenanced_json_artifact(
+        "latest_p11_4_profile_run_manifest.json",
+        {
+            "classification": profile.CASE_CLASSIFICATION,
+            "not_a_source_reproduction": profile.NOT_A_SOURCE_REPRODUCTION,
+            "run_spec": spec,
+            "summary": asdict(summary),
+            "csv_artifact_path": str(csv_path.relative_to(REPO_ROOT)),
+            "json_artifact_path": str(json_path.relative_to(REPO_ROOT)),
+            "csv_sha256": _sha256_file(csv_path),
+            "json_sha256": _sha256_file(json_path),
+        },
+    )
+    manifest.update(
+        {
+            "csv_download_url": _artifact_download_url(csv_path),
+            "json_download_url": _artifact_download_url(json_path),
+            "manifest_artifact_path": str(manifest_path.relative_to(REPO_ROOT)),
+            "manifest_download_url": _artifact_download_url(manifest_path),
+            "manifest_sha256": _sha256_file(manifest_path),
+        }
+    )
+    return manifest
 
 
 RUNNERS: dict[str, Callable[[], dict[str, Any]]] = {
@@ -360,7 +404,7 @@ class JobStore:
 
         try:
             result = RUNNERS[mode]()
-            result["runtime_provenance"] = _runtime_identity()
+            result.setdefault("runtime_provenance", _runtime_identity())
         except Exception as exc:  # pragma: no cover - exercised by live solver jobs
             message = f"{type(exc).__name__}: {exc}"
             traceback.print_exc()
