@@ -51,6 +51,12 @@ FUEL_TEMPERATURE_K = 450.0
 FUEL_AXIAL_VELOCITY_M_PER_S = 120.0
 WALL_HEAT_GRADIENT_J_PER_KG_PER_M = 0.0  # Eq.11.26 dimensional mapping unresolved.
 
+# PROJECT NUMERICAL CONTROLS. Eq.11.45/11.46 define the teacher-aligned
+# timestep/convergence forms; these concrete run controls are frozen separately.
+PROJECT_CFL = 0.5
+DEFAULT_DENSITY_CHANGE_TOLERANCE = 2.0e-5
+DEFAULT_MAX_STEPS = 20_000
+
 
 @dataclass(frozen=True)
 class SmokeResult:
@@ -170,8 +176,8 @@ def build_case(cells: int):
 def run_smoke(
     cells: int = 40,
     *,
-    tolerance: float = 2.0e-5,
-    max_steps: int = 20_000,
+    tolerance: float = DEFAULT_DENSITY_CHANGE_TOLERANCE,
+    max_steps: int = DEFAULT_MAX_STEPS,
 ) -> SmokeResult:
     (
         species,
@@ -188,7 +194,7 @@ def run_smoke(
         mapping,
         geometry,
         dx,
-        NumericalConfig(cfl=0.5, tolerance=tolerance),
+        NumericalConfig(cfl=PROJECT_CFL, tolerance=tolerance),
         inlet,
         species,
         hydraulic_diameter_m=hydraulic_diameter,
