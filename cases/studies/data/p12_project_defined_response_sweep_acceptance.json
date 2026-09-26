@@ -19,10 +19,11 @@
   "acceptance_policy": {
     "teacher_steady_gate": "Teacher Eq.11.46 defines the maximum relative-density-change metric; converged P12 response points use the explicitly project-selected numerical tolerance <= 2e-5.",
     "normalized_residual": "reported as an independent finite nonnegative diagnostic; no unsourced threshold imposed",
-    "mass_inventory_gate": "normalized absolute domain mass-inventory rate <= 0.005 of inlet mass flux",
+    "mass_inventory_gate": "project-defined QA threshold: normalized absolute domain mass-inventory rate <= 0.005 of inlet mass flux",
     "momentum_energy_inventory": "reported as finite nonnegative normalized diagnostics without an invented acceptance threshold",
     "forward_flow_guard": "preserved; a triggered point is outside the current admissible solver path and is not assigned a physical combustion-mode or unstart label",
-    "tolerance_provenance": "The numeric value 2e-5 is a project numerical choice. The repository does not claim that the teacher source prescribes this specific threshold."
+    "tolerance_provenance": "The numeric value 2e-5 is a project numerical choice. The repository does not claim that the teacher source prescribes this specific threshold.",
+    "mass_inventory_gate_provenance": "0.005 is an internal project acceptance threshold first frozen with the P12 response evidence; no teacher, paper, experiment, or universal CFD standard is claimed to prescribe this numeric value."
   },
   "points": [
     {
@@ -68,5 +69,5 @@
     }
   ],
   "interpretation": "Using the project-selected 2e-5 tolerance applied to the teacher Eq.11.46 density-change metric, the project-defined H2 path has accepted converged points at phi=0.1 and phi=0.2; both remain fully supersonic. The phi=0.3 cold-start pseudo-time path triggers the existing forward-flow model-domain guard. This result does not identify a physical mode transition or unstart event.",
-  "metadata_revision_note": "2026-09-26: clarified convergence-tolerance provenance only. Numerical points, historical workflow/artifact provenance, and admissibility interpretation are unchanged."
+  "metadata_revision_note": "2026-09-26: clarified convergence-tolerance provenance only. Numerical points, historical workflow/artifact provenance, and admissibility interpretation are unchanged. 2026-09-26: clarified that the 0.5% mass-inventory gate is project-defined QA, not a sourced universal threshold; numerical points are unchanged."
 }
