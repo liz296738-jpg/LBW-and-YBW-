@@ -28,9 +28,9 @@ The initial 20-cell continuation with Eq.11.46 tolerance `1e-4` reached a near-s
 
 ## Accepted 20/40/80 grid-refined continuation
 
-The dedicated grid study repeats the same continuation sequence `phi=0.20 -> 0.22 -> 0.24 -> 0.26` on 20, 40 and 80 cells using teacher Eq.11.46 tolerance `2e-5`.
+The dedicated grid study repeats the same continuation sequence `phi=0.20 -> 0.22 -> 0.24 -> 0.26` on 20, 40 and 80 cells using the teacher Eq.11.46 maximum relative-density-change metric with a project-selected numerical tolerance of `2e-5`.
 
-All three grids complete the dedicated CI workflow. Every accepted converged point satisfies the Eq.11.46 gate and the existing 0.5% normalized mass-inventory gate. Momentum and energy inventory rates remain reported diagnostics without invented hard thresholds.
+All three grids complete the dedicated CI workflow. Every accepted converged point satisfies the project-selected `2e-5` tolerance applied to the Eq.11.46 metric and the project-defined 0.5% normalized mass-inventory QA gate. Neither numeric threshold is attributed to Cao, the teacher source, an experiment, or a universal CFD standard. Momentum and energy inventory rates remain reported diagnostics without invented hard thresholds.
 
 At `phi=0.24`, all three grids are admissible and remain on the Cao Eq. (3-2) scram side. The minimum Mach values are:
 
