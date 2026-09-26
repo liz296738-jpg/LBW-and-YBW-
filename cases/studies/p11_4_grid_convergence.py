@@ -15,11 +15,15 @@ from dataclasses import asdict
 import json
 import math
 
-from cases.studies.p11_4_project_defined_h2_smoke import run_smoke
+from cases.studies.p11_4_project_defined_h2_smoke import (
+    DEFAULT_DENSITY_CHANGE_TOLERANCE,
+    DEFAULT_MAX_STEPS,
+    run_smoke,
+)
 
 GRID_LEVELS = (20, 40, 80)
-TOLERANCE = 2.0e-5
-MAX_STEPS = 20_000
+TOLERANCE = DEFAULT_DENSITY_CHANGE_TOLERANCE
+MAX_STEPS = DEFAULT_MAX_STEPS
 REFINEMENT_RATIO = 2.0
 NOMINAL_SPATIAL_ORDER = 1.0
 CONSERVATIVE_GCI_SAFETY_FACTOR = 3.0
