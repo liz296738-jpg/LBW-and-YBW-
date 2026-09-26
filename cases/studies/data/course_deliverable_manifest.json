@@ -18,7 +18,7 @@
       "deliverable": "normalized mass/momentum/energy inventory diagnostics",
       "acceptance_record": "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json",
       "generator": "cases/studies/p11_4_conservation_audit.py",
-      "claim_boundary": "mass retains accepted 0.5% gate; momentum and energy are diagnostics without unsourced hard thresholds"
+      "claim_boundary": "mass uses an explicit project-defined 0.5% QA threshold; momentum and energy are normalized diagnostics without unsourced hard thresholds"
     },
     {
       "deliverable": "equivalence-ratio response and continuous axial outputs",
@@ -30,7 +30,7 @@
       "deliverable": "stricter Eq.11.46 continuation evidence",
       "acceptance_record": "cases/studies/data/p12_thermal_throat_continuation_acceptance.json",
       "generator": "cases/studies/p12_thermal_throat_continuation.py",
-      "claim_boundary": "teacher Eq.11.46 density-change gate; normalized residual remains independent diagnostic"
+      "claim_boundary": "teacher Eq.11.46 convergence metric with separately frozen project numerical tolerance; normalized residual remains independent diagnostic"
     },
     {
       "deliverable": "thermal-throat grid-sensitivity evidence",
