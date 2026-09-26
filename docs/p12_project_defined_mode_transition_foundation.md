@@ -12,7 +12,7 @@ P12 studies whether the accepted one-dimensional infrastructure can support a de
 
 ## Inputs that may be reused
 
-The accepted P11.4 project-defined H2 case may be reused only as a project-defined baseline. Its geometry, inlet state, equivalence ratio, injector location, mixing constant, injection state, zero explicit wall-heat-gradient scope, Rusanov flux, SSP-RK3 integration, CFL choice, and Eq.11.46 steady gate remain project choices or previously documented model choices.
+The accepted P11.4 project-defined H2 case may be reused only as a project-defined baseline. Its geometry, inlet state, equivalence ratio, injector location, mixing constant, injection state, zero explicit wall-heat-gradient scope, Rusanov flux, SSP-RK3 integration, and CFL choice remain project choices or previously documented model choices. Teacher Eq.11.46 supplies the maximum relative-density-change convergence metric; each numerical tolerance applied to that metric is separately frozen as a project numerical setting unless an explicit teacher-source threshold is recovered.
 
 No Cao-specific geometry, prescribed species profile, shock-train geometry, transition location, or Case 2 result may be inferred from that baseline.
 
@@ -60,8 +60,8 @@ The accepted evidence record is:
 
 Results:
 
-- `phi=0.10`: converged and fully supersonic, with `min(Ma)=1.694412...`;
-- `phi=0.20`: converged and fully supersonic, with `min(Ma)=1.278991...`;
+- `phi=0.10`: converged and fully supersonic, with `min(Ma)=1.691903...`;
+- `phi=0.20`: converged and fully supersonic, with `min(Ma)=1.271409...`;
 - `phi=0.30`: the existing forward-flow Eq.11.38 friction guard is triggered during the cold-start pseudo-time path and no physical mode label is assigned.
 
 Applying Cao Eq. (3-2) to the two admissible converged points places both robustly on the source-defined scram side over the explicit numerical sonic-tolerance sensitivity set `1e-6`, `1e-4`, `1e-3`, `1e-2`. The accepted points therefore do **not** yet bracket the `Ma=1` transition boundary.
@@ -74,7 +74,7 @@ This continuation is a numerical strategy only. It does not alter the physical m
 
 ## Acceptance rules retained
 
-- every accepted response point must satisfy the stated teacher Eq.11.46 density-change tolerance;
+- every accepted response point must satisfy the explicitly stated project numerical tolerance applied to the teacher Eq.11.46 density-change metric;
 - normalized residual remains an independent diagnostic and is not assigned an unsourced threshold;
 - positive/source-valid thermodynamic states must be retained;
 - normalized mass/momentum/energy inventory diagnostics must be reported for converged points;
