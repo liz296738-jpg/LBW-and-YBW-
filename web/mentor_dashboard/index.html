@@ -668,9 +668,16 @@
           if (j.result?.artifact_download_url) links.push('<a class="download-link" href="'+j.result.artifact_download_url+'">下载 JSON</a>');
           if (j.result?.csv_download_url) links.push('<a class="download-link" href="'+j.result.csv_download_url+'">下载 CSV</a>');
           if (j.result?.json_download_url) links.push('<a class="download-link" href="'+j.result.json_download_url+'">下载摘要 JSON</a>');
+          if (j.result?.manifest_download_url) links.push('<a class="download-link" href="'+j.result.manifest_download_url+'">下载运行 Manifest</a>');
           const downloads=links.length?'<div class="download-links">'+links.join("")+'</div>':"";
           const error=j.error?'<div class="job-meta" style="color:var(--red)">错误：'+j.error+'</div>':"";
-          return '<div class="job"><div><strong>'+j.label+'</strong><div class="job-meta">'+j.id+' · '+j.created_at+'</div>'+error+downloads+'</div><div>'+statusPill(j.status)+'</div></div>';
+          const hashes=[];
+          if (j.result?.artifact_sha256) hashes.push("JSON SHA-256 "+j.result.artifact_sha256);
+          if (j.result?.csv_sha256) hashes.push("CSV SHA-256 "+j.result.csv_sha256);
+          if (j.result?.json_sha256) hashes.push("Profile JSON SHA-256 "+j.result.json_sha256);
+          if (j.result?.manifest_sha256) hashes.push("Manifest SHA-256 "+j.result.manifest_sha256);
+          const integrity=hashes.length?'<div class="job-meta">完整性：'+hashes.join(" · ")+'</div>':"";
+          return '<div class="job"><div><strong>'+j.label+'</strong><div class="job-meta">'+j.id+' · '+j.created_at+'</div>'+error+downloads+integrity+'</div><div>'+statusPill(j.status)+'</div></div>';
         }).join("");
       }
       if (active && !pollTimer) pollTimer=setInterval(fetchJobs,2500);
