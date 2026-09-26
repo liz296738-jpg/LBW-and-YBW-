@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "classification": "CAO_CASE2_SOURCE_TABLE_INTERNAL_CONSISTENCY_AUDIT",
+  "generator": "cases/studies/p11_4_cao_case2_consistency_audit.py",
+  "source_record": "cases/studies/data/teacher_cao_case2_source.json",
+  "source_values_modified": false,
+  "formal_reproduction_promoted": false,
+  "reported": {
+    "Mach": 2.12,
+    "density_kg_per_m3": 0.28,
+    "pressure_Pa": 46700,
+    "temperature_K": 521,
+    "axial_velocity_m_per_s": 977,
+    "heat_capacity_ratio": 1.33,
+    "mass_fractions": {
+      "N2": 0.64,
+      "O2": 0.22,
+      "H2O": 0.13,
+      "AR": 0.01
+    }
+  },
+  "derived_from_frozen_mixture_thermochemistry": {
+    "gas_constant_J_per_kg_K": 309.19724730657174,
+    "cp_J_per_kg_K": 1155.0279407755302,
+    "gamma_at_reported_temperature": 1.3655545367341522,
+    "pressure_from_reported_rho_T_Pa": 45105.69443708269,
+    "pressure_relative_difference_vs_reported": -0.03413930541578823,
+    "density_from_reported_p_T_kg_per_m3": 0.2898968780591447,
+    "density_relative_difference_vs_reported": 0.03534599306837388,
+    "velocity_from_reported_Mach_m_per_s": 994.3220186930745,
+    "velocity_relative_difference_vs_reported": 0.017729804189431406,
+    "Mach_from_reported_velocity": 2.083067619001754
+  },
+  "derived_using_reported_gamma_with_frozen_mixture_R": {
+    "velocity_from_reported_Mach_m_per_s": 981.2922129114324,
+    "velocity_relative_difference_vs_reported": 0.004393257841793698,
+    "Mach_from_reported_velocity": 2.110727031915153
+  },
+  "acceptance_threshold": null,
+  "interpretation": "Diagnostic only. The source-reported Table 2-2 fields remain authoritative evidence and are not altered. The simultaneously reported p/rho/T/Mach/u/gamma/composition values are not exactly closed under the repository's frozen ideal-mixture/GRI thermochemistry if treated as exact constraints. No parameter is tuned to force agreement, and no universal discrepancy threshold is invented."
+}
