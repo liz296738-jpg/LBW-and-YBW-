@@ -21,13 +21,17 @@ def test_canonical_paper_evidence_map_references_existing_files() -> None:
             assert (ROOT / relative).is_file(), relative
 
 
-def test_p13_remains_in_progress_until_acceptance_is_frozen() -> None:
+def test_p13_is_promoted_only_with_frozen_acceptance() -> None:
     record = json.loads(MAP.read_text(encoding="utf-8"))
-    p13 = record["sections"]["11_p13_in_progress"]
+    p13 = record["sections"]["7.4_p13_cm_sensitivity"]
 
-    assert p13["status"] == "IN_PROGRESS_NOT_ACCEPTED"
-    assert all("acceptance" not in path for path in p13["evidence"])
-    assert "no numerical conclusion" in p13["claim_scope"]
+    assert p13["status"] == "ACCEPTED_PROJECT_DEFINED_SENSITIVITY"
+    assert (
+        "cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json"
+        in p13["evidence"]
+    )
+    assert "no optimum" in p13["claim_scope"]
+    assert "grid-independence" in p13["claim_scope"]
 
 
 def test_paper_mentions_all_mapped_figures() -> None:
