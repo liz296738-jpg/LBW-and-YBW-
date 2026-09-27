@@ -9,7 +9,7 @@ import pytest
 
 from cases.studies import p11_4_project_defined_h2_smoke as baseline
 from cases.studies import p13_teacher_mixing_constant_sensitivity as study
-from scramjet1d.teacher_combustion import MIXING_LENGTH_C_M_RANGE
+from scramjet1d.teacher_combustion import MIXING_LENGTH_C_M_RANGE, mixing_length
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -94,3 +94,27 @@ def test_parallel_closure_has_preregistered_C_m_monotonicity() -> None:
     # fixed downstream cell.
     assert np.all(high.raw_mixing_efficiency <= low.raw_mixing_efficiency)
     assert np.all(high.combustion_efficiency <= low.combustion_efficiency)
+
+
+def test_eq_11_20_baseline_geometry_separates_full_mixing_regimes() -> None:
+    downstream_available = baseline.LENGTH_M - baseline.INJECTOR_X_M
+    assert downstream_available == pytest.approx(0.32)
+
+    lengths = {
+        C_m: mixing_length(
+            baseline.EQUIVALENCE_RATIO,
+            C_m,
+            baseline.COMBUSTOR_HEIGHT_M,
+        )
+        for C_m in study.PROJECT_SAMPLE_VALUES
+    }
+
+    assert lengths[25.0] == pytest.approx(0.25249357575587444)
+    assert lengths[30.0] == pytest.approx(0.3029922909070493)
+    assert lengths[42.5] == pytest.approx(0.4292390787849865)
+    assert lengths[60.0] == pytest.approx(0.6059845818140986)
+
+    assert lengths[25.0] < downstream_available
+    assert lengths[30.0] < downstream_available
+    assert lengths[42.5] > downstream_available
+    assert lengths[60.0] > downstream_available
