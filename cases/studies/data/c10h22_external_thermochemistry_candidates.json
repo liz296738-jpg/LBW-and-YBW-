@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "record_kind": "c10h22-external-thermochemistry-candidate-audit",
+  "teacher_path_status": "BLOCKED_SOURCE_COMPATIBLE_THERMOCHEMISTRY_NOT_RECOVERED",
+  "external_branch_status": "SUPPORTED_IN_PRINCIPLE_NOT_INTEGRATED",
+  "candidates": [
+    {
+      "source": "Lawrence Livermore National Laboratory C8-C16 n-alkane mechanisms",
+      "url": "https://combustion.llnl.gov/archived-mechanisms/alkanes/c8c16-nalkanes",
+      "role": "authoritative external detailed n-decane mechanism/thermochemistry candidate",
+      "validation_context": [
+        "shock tubes",
+        "flow reactors",
+        "jet-stirred reactors"
+      ]
+    },
+    {
+      "source": "Honnet et al., A surrogate fuel for kerosene",
+      "year": 2009,
+      "journal": "Proceedings of the Combustion Institute",
+      "volume": "32(1)",
+      "pages": "485-492",
+      "doi": "10.1016/j.proci.2008.06.218",
+      "role": "n-decane as an established major kerosene-surrogate component"
+    },
+    {
+      "source": "Singh, Nishiie & Qiao, Experimental and Kinetic Modeling Study of the Combustion of n-Decane, Jet-A, and S-8 in Laminar Premixed Flames",
+      "year": 2011,
+      "journal": "Combustion Science and Technology",
+      "volume": "183(10)",
+      "pages": "1002-1026",
+      "doi": "10.1080/00102202.2011.575420",
+      "role": "experimental flame-speed comparison demonstrating quantitative validation of n-decane mechanisms"
+    }
+  ],
+  "prohibited_promotions": [
+    "Do not add external C10H22 coefficients to the teacher production database without an explicit new-model decision.",
+    "Do not claim pure n-decane universally represents Jet-A, JP-8, RP-3, or another kerosene.",
+    "Do not mix thermochemical reference-state conventions without a documented compatibility audit.",
+    "Do not call an external n-decane extension a teacher/Cao source reproduction."
+  ],
+  "current_production_policy": {
+    "teacher_H2_C2H4_path_ready": true,
+    "teacher_C10H22_path_ready": false,
+    "external_C10H22_branch_integrated": false
+  },
+  "evidence_document": "docs/c10h22_external_thermochemistry_candidates.md"
+}
