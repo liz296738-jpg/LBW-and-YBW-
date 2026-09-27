@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "record_kind": "p15-injector-location-literature-context",
+  "status": "LITERATURE_CONTEXT_ONLY_SAMPLING_NOT_YET_FROZEN",
+  "role": "SUPPORTING_VARIABLE_RELEVANCE_NOT_CURRENT_MODEL_VALIDATION",
+  "sources": [
+    {
+      "authors": [
+        "Eunju Jeong",
+        "Sean O'Byrne",
+        "In-Seuck Jeung",
+        "A. Houwing"
+      ],
+      "year": 2020,
+      "title": "The Effect of Fuel Injection Location on Supersonic Hydrogen Combustion in a Cavity-Based Model Scramjet Combustor",
+      "journal": "Energies",
+      "volume": "13",
+      "issue": "1",
+      "page": "193",
+      "doi": "10.3390/en13010193",
+      "evidence_type": "supersonic hydrogen combustion experiment",
+      "supported_context": "Different hydrogen injection configurations/locations alter mixing, ignition/flame structure and related combustor response.",
+      "boundary": "Cavity geometry and injection modes differ from the current quasi-1D single-injector model; not a validation dataset for a future P15 sweep."
+    },
+    {
+      "authors": [
+        "Wenxiong Xi",
+        "Pengchao Liu",
+        "Rongdi Zhang",
+        "et al."
+      ],
+      "year": 2024,
+      "title": "Numerical Investigation of Flow Structures and Combustion Mechanisms with Different Injection Locations in a Hydrogen-Fueled Scramjet Combustor",
+      "journal": "Fire",
+      "volume": "7",
+      "issue": "6",
+      "page": "191",
+      "doi": "10.3390/fire7060191",
+      "evidence_type": "3D reacting-flow numerical study with validation context",
+      "supported_context": "Injector placement is an engineering-relevant variable affecting flame formation, propagation and pressure/combustion behavior.",
+      "boundary": "3D cavity/LES/finite-rate-chemistry physics are outside the current teacher quasi-1D algebraic-closure model."
+    }
+  ],
+  "repository_constraint": {
+    "nominal_baseline_target_x_m": 0.08,
+    "current_realization_policy": "nearest finite-volume cell center",
+    "current_grid_realizations_m": {
+      "20": 0.07,
+      "40": 0.075,
+      "80": 0.0775
+    },
+    "consequence": "A future injector-location study must separate nominal target position from grid-realized source position and should prefer a sampling strategy that does not confound physical location sensitivity with grid-placement offsets."
+  },
+  "next_gate": [
+    "define a cross-grid-comparable position parameterization before CFD",
+    "freeze which quantity is held fixed when injector position moves (total fuel flow, phi, fuel state and injection mode)",
+    "keep nominal and realized cell-center locations in every point artifact",
+    "do not infer universal optimal injector position or cavity-specific flame behavior from the quasi-1D model"
+  ]
+}
