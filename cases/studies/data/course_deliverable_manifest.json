@@ -37,6 +37,12 @@
       "acceptance_record": "cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json",
       "generator": "cases/studies/p12_thermal_throat_grid_sensitivity.py",
       "claim_boundary": "grid-sensitivity evidence under frozen case definitions"
+    },
+    {
+      "deliverable": "teacher-range Eq.11.20 C_m sensitivity",
+      "acceptance_record": "cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json",
+      "generator": "cases/studies/p13_teacher_mixing_constant_sensitivity.py",
+      "claim_boundary": "project-defined sensitivity over source-backed C_m range; no optimum, experimental validation, Cao Case 2 reproduction, or formal grid-independence claim"
     }
   ],
   "source_reproduction_gate": "cases/studies/data/p11_4_cao_case2_evidence_gate.json",
@@ -89,10 +95,10 @@
     "canonical_paper": "paper/main_paper_zh.md",
     "evidence_map": "paper/evidence_map.json",
     "figure_generator": "tools/build_paper_figures.py",
-    "policy": "The paper is a maintained presentation layer over frozen repository evidence. In-progress studies are not promoted to conclusions until reviewed acceptance evidence is committed."
+    "policy": "The paper is a maintained presentation layer over frozen repository evidence. In-progress studies are not promoted to conclusions until reviewed acceptance evidence is committed.",
+    "current_canonical_version": "v0.2"
   },
   "extension_gates": [
-    "teacher-path C10H22 source-compatible thermochemistry remains blocked; external n-decane candidates are a separate future-model route",
-    "P13 C_m sensitivity remains in progress until its reviewed acceptance record is frozen"
+    "teacher-path C10H22 source-compatible thermochemistry remains blocked; external n-decane candidates are a separate future-model route"
   ]
 }
