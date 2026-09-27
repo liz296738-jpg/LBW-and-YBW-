@@ -19,6 +19,7 @@ GRID_RECORD = ROOT / "cases" / "studies" / "data" / "p11_4_grid_convergence_acce
 P12_RESPONSE = ROOT / "cases" / "studies" / "data" / "p12_project_defined_response_sweep_acceptance.json"
 P12_CONTINUATION = ROOT / "cases" / "studies" / "data" / "p12_thermal_throat_continuation_acceptance.json"
 P12_GRID = ROOT / "cases" / "studies" / "data" / "p12_thermal_throat_grid_sensitivity_acceptance.json"
+P13_ACCEPTANCE = ROOT / "cases" / "studies" / "data" / "p13_teacher_mixing_constant_sensitivity_acceptance.json"
 
 
 def _load(path: Path) -> dict:
@@ -26,12 +27,13 @@ def _load(path: Path) -> dict:
 
 
 def paper_figure_series() -> dict[str, dict[str, object]]:
-    """Return the accepted numerical series used by paper Figures 2--4."""
+    """Return the accepted numerical series used by paper Figures 2--5."""
 
     grid = _load(GRID_RECORD)
     response = _load(P12_RESPONSE)
     continuation = _load(P12_CONTINUATION)
     thermal_grid = _load(P12_GRID)
+    p13 = _load(P13_ACCEPTANCE)
 
     fig2 = {
         "x": [row["cells"] for row in grid["levels"]],
@@ -93,7 +95,26 @@ def paper_figure_series() -> dict[str, dict[str, object]]:
         "sources": [P12_GRID.relative_to(ROOT).as_posix()],
     }
 
-    return {"fig2_grid_min_mach.svg": fig2, "fig3_phi_min_mach.svg": fig3, "fig4_phi024_grid.svg": fig4}
+    p13_40 = sorted(
+        (row for row in p13["points"] if row["cells"] == 40),
+        key=lambda row: float(row["mixing_C_m"]),
+    )
+    fig5 = {
+        "x": [float(row["mixing_C_m"]) for row in p13_40],
+        "y": [float(row["max_pressure_Pa"]) / 1000.0 for row in p13_40],
+        "title": "P13 accepted C_m sensitivity (40-cell max pressure)",
+        "x_label": "Mixing constant, C_m",
+        "y_label": "Maximum static pressure (kPa)",
+        "reference_y": None,
+        "sources": [P13_ACCEPTANCE.relative_to(ROOT).as_posix()],
+    }
+
+    return {
+        "fig2_grid_min_mach.svg": fig2,
+        "fig3_phi_min_mach.svg": fig3,
+        "fig4_phi024_grid.svg": fig4,
+        "fig5_p13_cm_max_pressure.svg": fig5,
+    }
 
 
 def _fmt(value: float) -> str:
