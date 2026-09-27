@@ -15,6 +15,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | E | Analytical/verification references and standards, e.g. ASME V&V 20 and NASA grid-convergence guidance | Numerical verification methodology, error/uncertainty discipline and terminology | Does not supply missing engine physics or empirical closure parameters |
 | F | Peer-reviewed scramjet reduced-order/model literature (Birzer & Doolan 2009; Torrez et al. 2011; Tian et al. 2014; Zhang et al. 2016) | External corroboration of model-family legitimacy, relevant physics, validation practice, and multimode-model scope | Must not replace teacher/Cao equations, fill missing teacher coefficients/spatial inputs, or promote project-defined parameters into source-backed values |
 | G | Peer-reviewed generalized FVS / real-gas / nonequilibrium numerical-method literature (Liu & Vinokur 1989; Grossman & Walters 1989; Liou et al. 1990; Bertolazzi & Manzini 2001) | Establish that rigorous generalized Steger--Warming-type methods exist and define a future compatibility research route | Must not be inserted into the teacher production solver without deriving compatibility with the exact state vector, energy reference, algebraic composition closure, and Eq.11.44 policy |
+| H | Authoritative external n-decane / kerosene-surrogate mechanisms and experiments (LLNL C8--C16; Honnet et al. 2009; Singh et al. 2011) | Future external C10H22 model-extension candidates and validation context | Must not be promoted into the teacher thermochemistry database or called teacher/Cao reproduction without source-compatible teacher evidence |
 
 ## Current equation/source mapping
 
@@ -22,6 +23,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | --- | --- | --- | --- |
 | quasi-1D conservative formulation and teacher source vector | teacher-reference modules and Chapter 11 ledger | A, supported by B | implemented |
 | teacher mixing/stoichiometric closures, Eqs. 11.18--11.29 | teacher closure ledgers/tests; external lineage audit for Eq.11.19--11.20 | A, with historical/peer-reviewed lineage as corroboration only | implemented for supported H2/C2H4 scope; `C_m=30` remains project-selected even though the source range is teacher-backed |
+| C10H22 external thermochemistry candidate | `docs/c10h22_external_thermochemistry_candidates.md` | H | external branch feasible in principle; teacher C10H22 production path remains source-gated |
 | variable thermochemistry, Eqs. 11.30--11.35 | teacher equation ledger + Cao doctoral relations + GRI/NIST data | A+B+C | implemented for H2/C2H4 core species |
 | teacher Steger--Warming, Eqs. 11.42--11.44 | source transcription and constant-property verification; external generalized-FVS literature audit | A, with G as future-method support | implemented as audited teacher path; external generalized methods exist, but production compatibility with the current variable-thermochemistry state remains unproven and source-gated |
 | pseudo-time/CFL and Eq. 11.46 density-change convergence | teacher steady solver/ledger | A | implemented |
