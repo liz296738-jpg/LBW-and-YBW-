@@ -30,7 +30,7 @@ The direct prescribed `Qdot'(x)` capability remains only a reduced-order surroga
 
 The following items are intentionally **not guessed**:
 
-1. `C10H22` thermochemistry compatible with the frozen teacher/CHEMKIN convention;
+1. `C10H22` thermochemistry compatible with the frozen teacher/CHEMKIN convention; authoritative external n-decane mechanisms have been identified as candidates for a future **separate model-extension branch**, but they are not promoted into the teacher path (`docs/c10h22_external_thermochemistry_candidates.md`);
 2. the dimensional mapping needed to turn photographed Eq. 11.26 into the exact `d(delta q)/dx` energy-source input;
 3. a production variable-thermochemistry Steger-Warming energy correction and a numerical Eq. 11.44 epsilon policy;
 4. the missing Cao Case 2 spatial geometry/composition/source information required for formal reproduction;
