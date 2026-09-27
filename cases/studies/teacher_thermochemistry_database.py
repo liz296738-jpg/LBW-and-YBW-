@@ -25,7 +25,7 @@ def load_source_record(path: Path | str = DATA_PATH) -> dict[str, Any]:
 
     with Path(path).open("r", encoding="utf-8") as stream:
         record = json.load(stream)
-    if record.get("schema_version") != 1:
+    if record.get("schema_version") not in {1, 2}:
         raise ValueError("unsupported teacher thermochemistry database schema")
     if record.get("stage") != "P11.3B":
         raise ValueError("teacher thermochemistry database stage drifted")
@@ -62,8 +62,12 @@ def load_source_record(path: Path | str = DATA_PATH) -> dict[str, Any]:
         raise ValueError("C2H4 thermo coverage drifted")
     if not str(coverage.get("C10H22", "")).startswith("BLOCKED"):
         raise ValueError("C10H22 must remain explicitly blocked")
-    if record.get("production_policy", {}).get("solver_integration_ready") is not False:
-        raise ValueError("database must not silently promote production solver integration")
+    policy = record.get("production_policy", {})
+    if record.get("schema_version") == 1:
+        if policy.get("solver_integration_ready") is not False:
+            raise ValueError("legacy database must not silently promote solver integration")
+    elif policy.get("solver_integration_ready") is not True:
+        raise ValueError("current H2/C2H4 integration status drifted")
     return record
 
 
