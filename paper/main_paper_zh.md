@@ -215,6 +215,8 @@ f_D=4f,\qquad D_h=D_e .
 
 ![图2 P11.4 最低 Mach 的三层网格趋势](assets/fig2_grid_min_mach.svg)
 
+2026-09-27 在将 \(C_m\) 暴露为可显式传入的敏感性参数、并将长 CFD workflow 重构为并行矩阵后，对同一 P11.4 baseline 重新执行了 20/40/80 三层维护复算。新 run #10（run id 36312691382）在原 acceptance 的共享字段上逐项一致，包括三层步数、Eq.11.46 density-change、normalized residual、min/max Mach、最大压力、最大温度以及 successive-grid-change 指标。该证据用于证明软件维护没有造成默认基线数值漂移；原 grid acceptance 仍保持历史权威，本次复算不被解释为新的实验验证或更强的网格无关声明。
+
 ### 6.3 离散守恒审计
 
 项目不只检查“结果看起来合理”，还直接对求解器同一 semi-discrete RHS 进行全域体积分，计算质量、动量和能量库存率：
