@@ -17,6 +17,8 @@
 | P11.3 | **Complete on the defensible H2/C2H4 teacher path; explicit source gaps retained** | Teacher-reference second-scheme building blocks | Variable thermo + closures + sources + boundaries + integrated Rusanov march | Equation-by-equation regression and source audit |
 | P11.4 | **Baseline accepted; exact Cao Case 2 reproduction source-blocked** | Integrated teacher-path case and reproduction evidence | Project-defined H2 steady case, grid audit, conservation audit, Case 2 evidence gate | Convergence, conservation, grid trend, strict claim boundary |
 | P12 | **Course-deliverable complete for the project-defined scope; source reproduction / broader claims remain evidence-gated** | Project-defined continuous response with scoped Cao thermal-throat criterion | Guarded response sweep plus source-faithful Eq. (3-2) criterion application | Final Test + P12 workflows accepted on pinned packaging commit; no invented tolerances or unsupported mode claims |
+| P13 | **Accepted project-defined sensitivity** | Teacher Eq.11.20 `C_m` source-range sensitivity | 4 `C_m` values × 20/40 grids with frozen acceptance/provenance | All 8 points accepted; no optimum/validation/Cao reproduction/grid-independence claim |
+| P14 | **In progress — protocol frozen, CFD matrix running** | Fixed-static-state inlet-Mach sensitivity | Ma=2.0/2.2/2.4/2.6 × 20/40 grids | No result claim until reviewed acceptance is frozen |
 
 ## Naming Correction
 
@@ -156,6 +158,33 @@ The accepted project-defined H2 response sweep has converged `phi=0.10` and `phi
 Grid-refined project-defined evidence also records `phi=0.24` on the Eq. (3-2) scram side for 20/40/80 cells, while `phi=0.26` is solver/model-domain inadmissible on all three grids. This is a grid-convergence trend/criterion application only and does **not** establish a grid-independent transition equivalence ratio.
 
 A solver guard, nonconvergence, or isolated Mach observation outside the frozen criterion scope is not by itself evidence of unstart or a broader physical combustion-mode transition. Broader categorical classification remains blocked by source-compatible isolator/shock-train state variables, geometry, and any additional observables required by the source.
+
+## P13 — Accepted Mixing-Constant Sensitivity
+
+P13 varies only the teacher Eq.11.20 mixing-length constant over the source-backed
+range using project-defined samples `25, 30, 42.5, 60` on 20/40 grids.
+All eight points are accepted in
+`cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json`.
+
+The accepted claim is deliberately narrow: on both grids, maximum static
+pressure and maximum static temperature decrease over the sampled sequence as
+`C_m` increases. Minimum Mach is not promoted as globally monotonic because
+the low-`C_m` ordering changes with grid. No optimum `C_m`, experimental
+validation, Cao Case 2 reproduction, formal grid independence, or physical mode
+boundary is claimed.
+
+## P14 — Inlet-Mach Sensitivity — IN PROGRESS
+
+P14 is preregistered as a **fixed-static-state** inlet-Mach sensitivity.
+It samples Ma=2.0/2.2/2.4/2.6 while holding inlet static p/T, dry-air
+composition, project geometry, phi=0.20, injection settings, `C_m=30`,
+Rusanov/SSP-RK3/CFL controls and Eq.11.46 project tolerance fixed.
+
+The range is literature-anchored engineering context, not a teacher admissible
+range or validation interval. Air and fuel mass flow change as dependent
+consequences of changing Mach at fixed static p/T while preserving equivalence
+ratio. No P14 numerical conclusion is accepted until its dedicated workflow
+produces reviewed acceptance evidence.
 
 ## Remaining Source Gaps
 
