@@ -33,7 +33,7 @@ The page uses no external JavaScript or CSS dependencies and can therefore be us
 The **运行算例** page exposes only three frozen project-defined paths:
 
 1. 20-cell accepted H2 smoke baseline using the historical Eq. 11.46 `1e-4` density-change tolerance;
-2. the accepted P12 response sweep at `phi = 0.10 / 0.20 / 0.30` using the `2e-5` Eq. 11.46 gate;
+2. the accepted P12 response sweep at `phi = 0.10 / 0.20 / 0.30` using the project-selected `2e-5` tolerance applied to the Eq. 11.46 metric;
 3. the accepted 80-cell full-profile export using the `2e-5` gate.
 
 Only one solver job can run at a time. Generated outputs are written under `artifacts/dashboard/` and are intentionally ignored by Git.
@@ -50,7 +50,7 @@ The dashboard does not change the scientific status of the project:
 
 - `PROJECT_DEFINED` cases remain implementation/response evidence, not Cao Case 2 reproduction.
 - A forward-flow guard trigger is shown as `solver/model-domain inadmissible`; it is not labelled as unstart or a combustion-mode transition.
-- Teacher Eq. 11.46 maximum relative density change remains the authoritative steady-state gate.
+- Teacher Eq. 11.46 defines the maximum-relative-density-change steady-state metric; the numerical tolerance used by each displayed study is a separately frozen project control unless explicitly source-backed.
 - Normalized residual remains an independent diagnostic with no invented hard threshold.
 - 20/40/80 evidence is described as a grid-convergence trend unless an asymptotic/GCI analysis is actually performed.
 - Any `SCRAM_SIDE` display is limited to the documented Cao Eq. (3-2) thermal-throat criterion scope for otherwise accepted points.
