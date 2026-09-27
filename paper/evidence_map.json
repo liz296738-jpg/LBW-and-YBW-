@@ -37,10 +37,11 @@
       ]
     },
     "6.2_grid": {
-      "claim_scope": "Accepted 20/40/80 grid-trend evidence; no automatic asymptotic grid-independence claim",
+      "claim_scope": "Accepted 20/40/80 grid-trend evidence plus exact shared-field maintenance rerun; no automatic asymptotic grid-independence claim",
       "evidence": [
         "cases/studies/data/p11_4_grid_convergence_acceptance.json",
-        "docs/verification_methodology.md"
+        "docs/verification_methodology.md",
+        "cases/studies/data/p11_4_grid_maintenance_reproducibility_2026_09_27.json"
       ],
       "figures": [
         "paper/assets/fig2_grid_min_mach.svg"
