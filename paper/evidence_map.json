@@ -119,6 +119,15 @@
       "figures": [
         "paper/assets/fig5_p13_cm_max_pressure.svg"
       ]
+    },
+    "11_p14_inlet_mach_in_progress": {
+      "claim_scope": "Preregistered fixed-static-state inlet-Mach sensitivity; protocol/literature context only until reviewed acceptance evidence exists",
+      "status": "IN_PROGRESS_NOT_ACCEPTED",
+      "evidence": [
+        "cases/studies/data/p14_inlet_mach_literature_context.json",
+        "cases/studies/data/p14_inlet_mach_sensitivity_definition.json",
+        "docs/p14_project_defined_inlet_mach_sensitivity.md"
+      ]
     }
   }
 }
