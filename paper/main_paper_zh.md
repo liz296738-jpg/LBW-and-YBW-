@@ -1,6 +1,6 @@
 # 基于教师参考模型的超燃/双模态冲压发动机准一维 CFD 求解器开发、验证与工程化实现
 
-**版本：v0.1（2026-09-27）**  
+**版本：v0.2（2026-09-27）**  
 **项目仓库：LBW-and-YBW-**  
 **论文性质：持续维护的项目主论文初稿**
 
@@ -8,7 +8,7 @@
 
 针对超燃冲压发动机与双模态冲压发动机快速性能分析、课程设计与控制研究中对低成本、高可解释性数值工具的需求，本文开发了一套面向燃烧室准一维流动的可复现 CFD 求解与证据管理框架。项目以教师提供的《高超声速气动布局理论及应用》第 11 章“双模态冲压发动机一维数值模拟”以及曹瑞峰博士学位论文《超燃冲压发动机燃烧模态转换及其控制方法研究》为主要模型依据，在有限体积框架下求解准一维可压缩守恒方程，并逐步集成变截面、壁面摩阻、燃料喷注、混合/燃烧效率、变组分热化学、边界条件、伪时间推进和稳态收敛判据。当前 H₂/C₂H₄ 教师路径采用 Rusanov 数值通量、SSP-RK3 时间积分和教师 Eq.11.46 最大相对密度变化作为主要稳态诊断；教师 Steger-Warming 公式保留为独立审计路径，但由于变热化学绝对组分能量参考下的生产级兼容性尚未得到教师/Cao 来源的直接闭合，当前未强制替换已验证的 Rusanov 生产路径。
 
-为避免将“代码能运行”误当作“物理模型被验证”，项目将数值验证、模型确认、源资料复现和项目自定义敏感性研究严格区分。已完成的证据包括：项目定义 H₂ 综合算例、20/40/80 三层网格趋势、离散质量/动量/能量库存率审计、NASA Burrows-Kurkov 公开资料驱动的降阶计算参考 benchmark、当量比响应计算、基于曹瑞峰 Eq.(3-2) 的热喉判据应用、GitHub Actions 自动回归测试以及面向导师使用的 Web 控制台。20/40/80 网格结果表明，关键极值随网格加密持续变化但差异逐步缩小，因此本文仅声明“网格收敛趋势”，不宣称已达到严格渐近区或 GCI 意义下的网格无关。P12 项目定义 H₂ 响应研究中，φ=0.10、0.20 可在项目选定的 2×10⁻⁵ Eq.11.46 数值容差下收敛；采用组成一致 warm-start 后，φ=0.22、0.24 也可收敛并保持在所采用的 Cao Eq.(3-2) scram-side 范围内，而 φ=0.26 触发当前正向流摩阻适配器的模型域保护。该保护仅解释为“求解器/模型域不可接受”，不被直接解释为 unstart 或燃烧模态转换。
+为避免将“代码能运行”误当作“物理模型被验证”，项目将数值验证、模型确认、源资料复现和项目自定义敏感性研究严格区分。已完成的证据包括：项目定义 H₂ 综合算例、20/40/80 三层网格趋势、离散质量/动量/能量库存率审计、NASA Burrows-Kurkov 公开资料驱动的降阶计算参考 benchmark、当量比响应计算、基于曹瑞峰 Eq.(3-2) 的热喉判据应用、GitHub Actions 自动回归测试以及面向导师使用的 Web 控制台。20/40/80 网格结果表明，关键极值随网格加密持续变化但差异逐步缩小，因此本文仅声明“网格收敛趋势”，不宣称已达到严格渐近区或 GCI 意义下的网格无关。P12 项目定义 H₂ 响应研究中，φ=0.10、0.20 可在项目选定的 2×10⁻⁵ Eq.11.46 数值容差下收敛；采用组成一致 warm-start 后，φ=0.22、0.24 也可收敛并保持在所采用的 Cao Eq.(3-2) scram-side 范围内，而 φ=0.26 触发当前正向流摩阻适配器的模型域保护。该保护仅解释为“求解器/模型域不可接受”，不被直接解释为 unstart 或燃烧模态转换。P13 进一步在教师 Eq.11.20 给出的 \(C_m=25\sim60\) 范围内开展项目定义敏感性研究；4 个 \(C_m\) 值在 20/40 两层网格上的 8 个算例全部通过冻结的收敛与质量库存 QA 条件。Eq.11.20 与当前 0.32 m 喷注后可用长度给出 \(C_m\approx31.684\) 的“出口前能否达到完全混合”几何交叉点；在两层网格上，最大静压和最大静温均随采样 \(C_m\) 增大而下降，但最低 Mach 在低 \(C_m\) 两点存在网格排序反转，因此本文不宣称所有耦合输出全局单调，也不推断所谓最优 \(C_m\)。
 
 工程实现方面，项目建立了机器可读 acceptance JSON、来源/假设 ledger、运行 commit/workflow/artifact/SHA-256 provenance，并提供本地和 Render 部署的导师控制台，可查看已接受结果、运行冻结算例、导出 JSON/CSV 及完整性摘要。本文同时明确保留若干 source-gated 问题：教师 Eq.11.26 壁面换热经验多项式到 Eq.11.38 能量源项的唯一有量纲映射、变热化学 Steger-Warming 生产兼容性、C10H22 热化学、Cao Case 2 精确 A(x)、Yi(x) 与源项空间约定，以及完整隔离段/激波串模态分类变量。研究表明，在课程与本科阶段工程研究尺度上，采用“来源分级—公式审计—单元测试—数值验证—证据冻结—可视化交付”的开发路线，可以显著提高准一维超燃冲压数值项目的可复现性与科学可辩护性。
 
@@ -18,7 +18,7 @@
 
 A reproducible quasi-one-dimensional CFD and evidence-management framework is developed for rapid analysis of scramjet and dual-mode ramjet combustors. The teacher-provided Chapter 11 model and the doctoral dissertation of Ruifeng Cao are treated as the primary project authorities. The solver integrates variable-area compressible conservation equations, wall-friction and fuel-injection source terms, mixing/combustion closures, composition-dependent thermochemistry, teacher-compatible boundary conditions, SSP-RK3 pseudo-time marching, and the Eq.11.46 maximum relative density-change diagnostic. The current integrated H₂/C₂H₄ production path uses a Rusanov interface flux. The teacher Steger-Warming formulation is retained as an audited constant-property path, while its direct production use with the current absolute-species-energy thermochemistry remains gated pending an explicit compatibility derivation.
 
-The project separates numerical verification, model validation, source reproduction, and project-defined sensitivity studies. Accepted evidence includes an integrated project-defined H₂ case, 20/40/80-cell grid-trend analysis, discrete conservation audits, a NASA Burrows-Kurkov reduced-order computational-reference benchmark, equivalence-ratio response studies, scoped application of the Cao thermal-throat criterion, automated regression testing, and a mentor-facing web dashboard. The project deliberately avoids claiming formal grid independence, exact Cao Case 2 reproduction, experimental validation of the current project-defined H₂ case, or complete dual-mode/unstart prediction where the required source variables are unavailable. Machine-readable acceptance records, provenance metadata, GitHub Actions and SHA-256 artifact integrity are used to make each accepted conclusion traceable and reproducible.
+The project separates numerical verification, model validation, source reproduction, and project-defined sensitivity studies. Accepted evidence includes an integrated project-defined H₂ case, 20/40/80-cell grid-trend analysis, discrete conservation audits, a NASA Burrows-Kurkov reduced-order computational-reference benchmark, equivalence-ratio response studies, scoped application of the Cao thermal-throat criterion, automated regression testing, and a mentor-facing web dashboard. The project deliberately avoids claiming formal grid independence, exact Cao Case 2 reproduction, experimental validation of the current project-defined H₂ case, or complete dual-mode/unstart prediction where the required source variables are unavailable. Machine-readable acceptance records, provenance metadata, GitHub Actions and SHA-256 artifact integrity are used to make each accepted conclusion traceable and reproducible. An accepted P13 sensitivity study additionally evaluates the teacher Eq.11.20 mixing constant over C_m=25--60 on 20/40-cell grids. All eight points converge under the frozen numerical/QA policy. Maximum static pressure and temperature decrease across the sampled C_m sequence on both grids, while minimum Mach is deliberately not claimed to be globally monotonic because the low-C_m ordering reverses between grid levels. No optimum C_m, experimental validation, or formal grid-independence claim is made.
 
 **Keywords:** scramjet; dual-mode ramjet; quasi-one-dimensional CFD; finite-volume method; thermochemistry; verification; combustion-mode transition; reproducibility
 
@@ -268,6 +268,29 @@ Burrows 与 Kurkov 的 NASA TM X-2828 提供了超声速氢燃烧实验数据[11
 
 Cao 等后续同行评议研究指出，燃烧模态转换边界会随燃烧室面积分布、热释放分布、壁温/粗糙度和来流成分而变化[3]；实验研究亦显示燃料类型、喷注构型、总温和喷注分布会影响转换[4]。因此当前项目定义几何中的 φ 值不应被推广为通用双模态边界。
 
+### 7.4 P13 教师 Eq.11.20 \(C_m\) 敏感性
+
+P13 仅改变教师 Eq.11.20 的混合长度常数 \(C_m\)，其余项目定义几何、入口状态、\(\phi=0.20\)、喷注位置、燃料状态、Rusanov 通量、SSP-RK3/CFL 控制及 Eq.11.46 数值容差全部冻结。教师来源给出的范围为 \(25\le C_m\le60\)，项目采样 \(25,30,42.5,60\)，其中 30 为既有项目基线，42.5 为项目定义的区间算术中点。
+
+在冻结的 \(\phi=0.20\) 与燃烧室高度 \(b=0.040\) m 下，Eq.11.20 的 lean branch 给出完全混合长度 \(L_m=0.179C_m\exp(1.72\phi)b\)。当前喷注点 \(x=0.08\) m 到几何出口 \(x=0.40\) m 的可用长度为 0.32 m，由此得到 \(L_m=0.32\) m 对应 \(C_m\approx31.684\)。因此 \(C_m=25/30\) 在该闭合下可于出口前达到完全混合，而 \(42.5/60\) 在当前燃烧室长度内不能达到完全混合。该交叉点是“教师闭合 + 项目几何”直接导出的几何关系，不是经验拟合、最优值或燃烧模态边界。
+
+8 个 \(C_m\)×网格算例均收敛并满足项目定义的 0.5% 质量库存 QA 门槛，且燃料质量源保持为 0.0069753863 kg/s，说明研究只改变混合闭合而没有同时改变喷油量。40-cell 结果如下。
+
+| \(C_m\) | 最低 Mach | 最大压力/kPa | 最大温度/K |
+|---:|---:|---:|---:|
+| 25.0 | 1.25894 | 118.796 | 1587.08 |
+| 30.0 | 1.26344 | 115.474 | 1584.81 |
+| 42.5 | 1.45298 | 93.129 | 1376.34 |
+| 60.0 | 1.62608 | 77.758 | 1201.62 |
+
+在 20 与 40 两层网格上，最大静压和最大静温均沿采样序列 \(C_m=25\to30\to42.5\to60\) 下降，与 Eq.11.20 中较大 \(C_m\) 导致更长混合长度、当前燃烧室内混合/燃烧响应减弱相一致。40-cell 最大静压见图 5。
+
+![图5 P13 已接受的 \(C_m\) 敏感性：40-cell 最大静压](assets/fig5_p13_cm_max_pressure.svg)
+
+最低 Mach 不被声明为 \(C_m\) 的全局单调函数：20-cell 中 \(C_m=25\) 的最低 Mach 略高于 30，而 40-cell 中这一排序反转。这一结果说明不能从混合效率代数单调性直接推出耦合流场所有极值的单调性。
+
+20→40 的网格变化仅作为稳健性诊断。所报告极值中最大相对变化为 \(C_m=25\) 的最大压力，约 2.24%。两层网格不足以形成正式渐近区/GCI 意义下的网格无关结论。P13 因此只支持“教师来源范围内的项目定义敏感性”结论，不支持最优/真实 \(C_m\)、实验验证、Cao Case 2 正式复现或物理模态分类。
+
 ## 8 导师控制台与工程化交付
 
 项目开发了面向非代码用户的导师控制台，并部署在 Render。控制台只公开已经冻结的研究路径，避免通过 UI 随意改变尚未完成科学验证的输入。当前可查看：
@@ -286,7 +309,7 @@ Cao 等后续同行评议研究指出，燃烧模态转换边界会随燃烧室�
 
 ## 9 当前功能汇总
 
-截至 v0.1，项目已实现的主要功能如下：
+截至 v0.2，项目已实现的主要功能如下：
 
 | 类别 | 当前实现 |
 |---|---|
@@ -305,7 +328,7 @@ Cao 等后续同行评议研究指出，燃烧模态转换边界会随燃烧室�
 | 壁面热源 | 显式有量纲输入通道；Eq.11.26 映射仍 gated |
 | 验证 | 单元测试、网格趋势、守恒审计、NASA benchmark |
 | 模态研究 | Cao Eq.(3-2) scoped thermal-throat criterion |
-| 参数研究 | P12 φ 响应；P13 \(C_m\) 敏感性协议已建立、尚未形成 accepted 数值结果 |
+| 参数研究 | P12 φ 响应；P13 教师 Eq.11.20 \(C_m=25\sim60\) 的 20/40 网格 accepted 敏感性研究 |
 | 可复现性 | acceptance JSON、source ledger、GitHub Actions、artifact SHA-256 |
 | 展示 | 导师 Web 控制台、本地/Render 运行、CSV/JSON 下载 |
 
@@ -335,8 +358,8 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 
 ## 11 后续工作
 
-1. 完成 P13 教师来源范围 \(C_m=25\sim60\) 的敏感性研究，并在 20/40 网格上检查结论稳健性；
-2. 在不改变模型边界的条件下扩展入口 Mach、喷注位置等 one-factor-at-a-time 参数研究，并严格标注 source-anchored 与 project-defined 输入；
+1. 在不改变模型边界的条件下扩展入口 Mach、喷注位置等 one-factor-at-a-time 参数研究，并严格标注 source-anchored 与 project-defined 输入；
+2. 若继续深化 \(C_m\) 研究，可增加独立三层网格或外部实验/高保真数据，但不得把当前 P13 两层网格敏感性升级为校准或 GCI 结论；
 3. 若获得教师 Eq.11.26 完整定义，建立并验证有量纲壁面热源适配器；
 4. 若开展 C10H22/n-decane 分支，按独立外部模型扩展冻结热化学来源、参考焓约定和实验 benchmark，不混入教师 H2/C2H4 路径；
 5. 若获得 Cao Case 2 精确几何/组分/源项空间信息，建立独立 formal reproduction 分支；
@@ -348,7 +371,7 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 
 本文完成了一套面向超燃/双模态冲压发动机燃烧室的准一维 CFD 求解与可复现科研工作流。项目的核心价值不仅在于实现变截面、喷注、摩阻、混合/燃烧、变热化学和数值推进，还在于建立了明确的科学边界：来源能够证明的内容才进入 source-backed 模型；项目自行选择的参数被明确标为 project-defined；求解器保护和非收敛不被直接解释为物理模态；缺少关键来源的公式保持 gated，而不是通过“看起来合理”的经验补齐。
 
-现有项目定义 H₂ teacher path 已通过基础回归、三层网格趋势与离散守恒审计，并能够开展当量比响应和受限的 Cao thermal-throat criterion 应用。NASA Burrows-Kurkov 路线则作为**独立的 supporting reduced-order computational-reference benchmark**，用于验证项目的降阶数值/守恒处理与公开数据 provenance；它不被用来声称当前 H₂ 变热化学 teacher path 已获得独立实验验证。导师控制台、GitHub Actions、机器可读 acceptance/provenance 与 SHA-256 完整性记录进一步使项目从“单机脚本”发展为可重复运行、可审查和可持续维护的工程计算系统。
+现有项目定义 H₂ teacher path 已通过基础回归、三层网格趋势与离散守恒审计，并能够开展当量比响应、受限的 Cao thermal-throat criterion 应用以及教师 Eq.11.20 来源范围内的 \(C_m\) 敏感性研究。P13 的 8 个 \(C_m\)×网格点全部满足冻结的收敛/质量 QA 条件；两层网格共同支持最大静压、最大静温随采样 \(C_m\) 增大而下降的项目定义响应，但最低 Mach 的低 \(C_m\) 排序存在网格反转，因此没有被提升为全局单调结论。NASA Burrows-Kurkov 路线则作为**独立的 supporting reduced-order computational-reference benchmark**，用于验证项目的降阶数值/守恒处理与公开数据 provenance；它不被用来声称当前 H₂ 变热化学 teacher path 已获得独立实验验证。导师控制台、GitHub Actions、机器可读 acceptance/provenance 与 SHA-256 完整性记录进一步使项目从“单机脚本”发展为可重复运行、可审查和可持续维护的工程计算系统。
 
 因此，在当前证据范围内，可以将本项目定位为一套达到课程/本科工程研究交付要求、具有明确科学边界和继续扩展能力的准一维 scramjet CFD 平台；而 Eq.11.26、变热化学 Steger-Warming、Cao Case 2 正式复现及完整双模态分类仍应作为后续研究问题，而非当前已解决结论。
 
@@ -409,6 +432,6 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 
 ## 附录 B v0.1 状态说明
 
-- 本版本纳入已接受的 P11.4、NASA benchmark 和 P12 证据；
-- P13 \(C_m\) 敏感性 study 的定义、来源范围与预注册协议已经建立，但尚未形成 accepted 数值结果；前两次专用 CFD workflow 因顺序执行多个求解点而在约 45 分钟处达到原 GitHub Actions timeout。维护后，P13 已改为 4 个 \(C_m\) × 2 个网格的独立并行求解，P11.4 也改为 20/40/80 三网格独立并行求解，并在末端只汇总 JSON 证据、不重复运行 CFD。该改动仅改变 CI 调度方式，不改变方程、算例输入、网格、Eq.11.46 数值容差、保护条件或科学验收规则，因此正文仍将 P13 列为“在研”，直到新 workflow 形成 reviewed acceptance evidence；
-- 后续 P13 acceptance 生成后，优先更新第 7/11 节并新增参数敏感性图表。
+- v0.2 纳入已接受的 P11.4、NASA benchmark、P12 以及 P13 \(C_m\) 敏感性证据；
+- P13 最终采用 4 个 \(C_m\) × 2 个网格独立并行求解，GitHub Actions run #4（run id 36312725524）全部成功，聚合 artifact SHA-256 为 `c08ec1ccc28decdf31dbd4b82fa00e1ac2866a9d6939cef21d9a5e4c073a6dec`；
+- P13 已从“在研”升级为 accepted project-defined sensitivity，但其 claim boundary 仍明确排除最优 \(C_m\)、实验验证、Cao Case 2 复现、正式网格无关/GCI 以及燃烧模态分类。
