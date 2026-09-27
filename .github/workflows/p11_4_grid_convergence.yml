@@ -19,12 +19,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  grid-audit:
-    runs-on: ubuntu-latest
-    # The 20/40/80 audit previously reached the 45-minute wall-clock cap.
-    # This extension changes execution allowance only; grid definitions,
-    # convergence controls, equations, and acceptance claims are unchanged.
-    timeout-minutes: 120
+  solve-level:
+    name: Solve ${{ matrix.cells }} cells
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        cells: [20, 40, 80]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,14 +34,159 @@ jobs:
           python-version: '3.11.11'
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[dev]'
-      - name: Run 20/40/80 grid audit
+      - name: Run one frozen grid level
+        env:
+          CELLS: ${{ matrix.cells }}
         run: |
           python - <<'PY'
+          from dataclasses import asdict
+          import json
+          import os
+          from pathlib import Path
+
+          from cases.studies.p11_4_grid_convergence import MAX_STEPS, TOLERANCE
+          from cases.studies.p11_4_project_defined_h2_smoke import run_smoke
+
+          cells = int(os.environ["CELLS"])
+          result = run_smoke(cells, tolerance=TOLERANCE, max_steps=MAX_STEPS)
+          if not result.converged:
+              raise SystemExit(f"{cells}-cell project-defined grid level did not converge")
+          output = Path(f"p11_4_grid_{cells}.json")
+          output.write_text(
+              json.dumps(asdict(result), indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(output.read_text(encoding="utf-8"))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p11-4-grid-${{ matrix.cells }}
+          path: p11_4_grid_${{ matrix.cells }}.json
+
+  aggregate:
+    name: Aggregate three-level evidence
+    needs: solve-level
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[dev]'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p11-4-grid-*
+          path: grid-levels
+          merge-multiple: true
+      - name: Aggregate without rerunning CFD
+        run: |
+          python - <<'PY'
+          from dataclasses import asdict
           import json
           from pathlib import Path
-          from cases.studies.p11_4_grid_convergence import run_grid_study
-          payload = run_grid_study()
-          Path('p11_4_grid_convergence.json').write_text(json.dumps(payload, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+
+          from cases.studies.p11_4_grid_convergence import (
+              CONSERVATIVE_GCI_SAFETY_FACTOR,
+              GRID_LEVELS,
+              NOMINAL_SPATIAL_ORDER,
+              REFINEMENT_RATIO,
+              TOLERANCE,
+              quantity_verification,
+              relative_change,
+          )
+          from cases.studies.p11_4_project_defined_h2_smoke import SmokeResult
+
+          files = sorted(Path("grid-levels").glob("p11_4_grid_*.json"))
+          if len(files) != len(GRID_LEVELS):
+              raise SystemExit(
+                  f"expected {len(GRID_LEVELS)} grid artifacts, found {len(files)}"
+              )
+
+          results = [
+              SmokeResult(**json.loads(path.read_text(encoding="utf-8")))
+              for path in files
+          ]
+          results.sort(key=lambda row: row.cells)
+          if tuple(row.cells for row in results) != GRID_LEVELS:
+              raise SystemExit("grid-level artifact set does not match 20/40/80")
+          if not all(row.converged for row in results):
+              raise SystemExit("all three project-defined grid levels must converge")
+          if any(row.density_change > TOLERANCE for row in results):
+              raise SystemExit("a grid level violates the frozen Eq.11.46 tolerance")
+
+          pairs = []
+          for coarse, fine in zip(results[:-1], results[1:]):
+              pairs.append(
+                  {
+                      "coarse_cells": coarse.cells,
+                      "fine_cells": fine.cells,
+                      "max_temperature_relative_change": relative_change(
+                          coarse.max_temperature_K, fine.max_temperature_K
+                      ),
+                      "max_pressure_relative_change": relative_change(
+                          coarse.max_pressure_Pa, fine.max_pressure_Pa
+                      ),
+                      "min_mach_relative_change": relative_change(
+                          coarse.min_mach, fine.min_mach
+                      ),
+                      "max_mach_relative_change": relative_change(
+                          coarse.max_mach, fine.max_mach
+                      ),
+                  }
+              )
+
+          coarse, medium, fine = results
+          verification = {
+              "max_temperature_K": quantity_verification(
+                  coarse.max_temperature_K,
+                  medium.max_temperature_K,
+                  fine.max_temperature_K,
+              ),
+              "max_pressure_Pa": quantity_verification(
+                  coarse.max_pressure_Pa,
+                  medium.max_pressure_Pa,
+                  fine.max_pressure_Pa,
+              ),
+              "min_mach": quantity_verification(
+                  coarse.min_mach,
+                  medium.min_mach,
+                  fine.min_mach,
+              ),
+              "max_mach": quantity_verification(
+                  coarse.max_mach,
+                  medium.max_mach,
+                  fine.max_mach,
+              ),
+          }
+
+          payload = {
+              "classification": "PROJECT_DEFINED_NUMERICAL_GRID_AUDIT",
+              "not_a_source_reproduction": True,
+              "not_experimental_validation": True,
+              "tolerance": TOLERANCE,
+              "grid_levels": list(GRID_LEVELS),
+              "refinement_ratio": REFINEMENT_RATIO,
+              "nominal_spatial_order": NOMINAL_SPATIAL_ORDER,
+              "levels": [asdict(row) for row in results],
+              "successive_grid_changes": pairs,
+              "verification": verification,
+              "interpretation": (
+                  "Observed orders are diagnostics only. Conservative fine-grid "
+                  "GCI estimates use nominal first-order spatial accuracy with "
+                  "Fs=3. No automatic asymptotic grid-independence claim is made."
+              ),
+              "workflow_execution": {
+                  "solver_jobs_parallelized": True,
+                  "aggregation_reruns_solver": False,
+                  "gci_safety_factor": CONSERVATIVE_GCI_SAFETY_FACTOR,
+              },
+          }
+          Path("p11_4_grid_convergence.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
           print(json.dumps(payload, indent=2, sort_keys=True))
           PY
       - uses: actions/upload-artifact@v4
