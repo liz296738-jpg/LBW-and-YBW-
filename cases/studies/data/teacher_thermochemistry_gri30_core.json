@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_kind": "teacher-reference-piecewise-thermochemistry-core-database",
   "stage": "P11.3B",
   "status": "H2_C2H4_CORE_SPECIES_DATABASE_FROZEN_KEROSENE_PENDING",
@@ -205,14 +205,21 @@
     "note": "Thermo-property readiness is not reaction/composition-closure readiness. The teacher Eqs. 11.27-11.29 still require their own closure implementation."
   },
   "production_policy": {
-    "solver_integration_ready": false,
-    "reason": "The source-backed core database now supports hydrogen and ethylene branches, but production state recovery should remain separate until piecewise data loading and regression checks pass and the intended supported-fuel scope is explicit.",
-    "kerosene_policy": "Do not invent C10H22 coefficients. Either recover a source-compatible pseudo-kerosene thermochemical record or keep the kerosene branch unavailable in the first teacher-reference integrated case."
+    "solver_integration_ready": true,
+    "integrated_scope": "H2 and C2H4 core-species variable-thermochemistry path on the production Rusanov solver route",
+    "evidence": [
+      "cases/studies/data/teacher_reference_alignment.json",
+      "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json",
+      "tests/test_teacher_thermochemistry_database.py"
+    ],
+    "limitation": "This readiness statement applies to the currently integrated H2/C2H4 Rusanov path only. It does not promote C10H22, the source-gated variable-thermochemistry Steger-Warming path, or unresolved wall-heat mapping.",
+    "kerosene_policy": "Do not invent C10H22 coefficients. Either recover a source-compatible pseudo-kerosene thermochemical record or keep the kerosene branch unavailable."
   },
   "validation_policy": {
     "switch_continuity_relative_tolerance": 0.00001,
     "cp_298_absolute_tolerance_cal_per_mol_K": 0.03,
     "provenance": "PROJECT_DEFINED_REGRESSION_TOLERANCES",
     "interpretation": "These tolerances are software/data-integrity gates chosen to catch transcription or interval-selection errors. They are not uncertainty bounds published by GRI-Mech, Berkeley, NIST, or the teacher material and must not be reported as physical validation uncertainty."
-  }
+  },
+  "metadata_revision_note": "2026-09-27: production-policy status synchronized with the already integrated and regression-tested H2/C2H4 variable-thermochemistry Rusanov path. GRI-Mech/NIST source values and all species coefficients are unchanged."
 }
