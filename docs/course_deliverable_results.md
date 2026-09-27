@@ -28,6 +28,31 @@ The phi=0.3 path triggered the preserved forward-flow guard. That event is not i
 
 The stricter project-tolerance Eq.11.46 continuation evidence is `cases/studies/data/p12_thermal_throat_continuation_acceptance.json`; the corresponding frozen grid-sensitivity evidence is `cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`.
 
+## Accepted P13 mixing-constant sensitivity
+
+The accepted P13 record is
+`cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json`.
+It varies the teacher Eq.11.20 mixing constant using project-defined samples
+`C_m=25, 30, 42.5, 60` on 20/40 grids while all other baseline controls are
+frozen.
+
+At 40 cells:
+
+| C_m | min Mach | max pressure (kPa) | max temperature (K) |
+| ---: | ---: | ---: | ---: |
+| 25.0 | 1.25894 | 118.796 | 1587.08 |
+| 30.0 | 1.26344 | 115.474 | 1584.81 |
+| 42.5 | 1.45298 | 93.129 | 1376.34 |
+| 60.0 | 1.62608 | 77.758 | 1201.62 |
+
+All eight C_m-by-grid points converge and satisfy the frozen numerical/QA
+conditions. Maximum static pressure and maximum static temperature decrease
+over the sampled C_m sequence on both grids. Minimum Mach is not claimed to be
+globally monotonic because the low-C_m ordering differs between grid levels.
+The 20/40 comparison is a robustness diagnostic only; no optimum C_m,
+experimental validation, Cao Case 2 reproduction, formal grid independence,
+or physical mode classification is inferred.
+
 ## Evidence/provenance map
 
 Every deliverable above maps to its acceptance record and generator through `cases/studies/data/course_deliverable_manifest.json`. The response-sweep acceptance record additionally freezes the original accepted head SHA, first merged main SHA, workflow run, artifact ID, and artifact SHA-256.
@@ -38,4 +63,4 @@ Cao Case 2 remains source-blocked until exact A(x), prescribed Yi(x) spatial inf
 
 ## Completion status
 
-This document closes the compact-results-package presentation item only. The repository must not be marked `deliverable complete` until the complete ordinary test suite and relevant P12 numerical workflows have run on the final packaging commit and exact accepted commit/workflow provenance has been recorded.
+The required packaging acceptance has already been completed and exact provenance is recorded in `cases/studies/data/course_deliverable_manifest.json` and `docs/deliverable_readiness.md`; the project-defined course deliverable remains `deliverable complete`. P13 is an accepted post-packaging sensitivity extension. P14 and later studies are additional research extensions and do not retroactively reopen the frozen course-deliverable acceptance.
