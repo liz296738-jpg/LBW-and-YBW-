@@ -21,7 +21,10 @@ on:
 jobs:
   grid-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # The 20/40/80 audit previously reached the 45-minute wall-clock cap.
+    # This extension changes execution allowance only; grid definitions,
+    # convergence controls, equations, and acceptance claims are unchanged.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
