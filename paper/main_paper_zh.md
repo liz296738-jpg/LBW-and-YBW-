@@ -115,7 +115,7 @@ f_{st}=\frac{36x+3y}{103(4x+y)} ,
 
 其中燃料表示为 \(C_xH_y\)。代码对 H₂、C₂H₄ 和 C₁₀H₂₂ 的教材参考值进行回归测试，并通过 C/H/O/N/Ar 元素守恒独立检查反应组分关系。
 
-当前变热化学数据库覆盖 H₂、O₂、N₂、Ar、H₂O、C₂H₄ 和 CO₂。热物性采用源可追溯 NASA 多项式/GRI-Mech 3.0 数据，分子量和 298 K 比热另有独立交叉核对。C₁₀H₂₂ 尚未获得与当前冻结热化学约定兼容的来源，因此仍处于 source-gated 状态。
+当前变热化学数据库覆盖 H₂、O₂、N₂、Ar、H₂O、C₂H₄ 和 CO₂。热物性采用源可追溯 NASA 多项式/GRI-Mech 3.0 数据，分子量和 298 K 比热另有独立交叉核对。C₁₀H₂₂ 尚未获得与当前冻结 teacher/CHEMKIN 热化学约定兼容的来源，因此仍处于 source-gated 状态。外部检索已经确认 LLNL n-alkane 机制及 n-decane/kerosene-surrogate 实验文献可作为未来独立扩展分支的候选依据[18,19]，但本文不把这些外部数据直接并入 teacher path。
 
 ### 3.5 壁面摩阻与换热
 
@@ -382,6 +382,10 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 [16] Smith G P, Golden D M, Frenklach M, et al. GRI-Mech 3.0[DB/OL]. 1999.
 
 [17] ASME. V&V 20-2009: Standard for Verification and Validation in Computational Fluid Dynamics and Heat Transfer[S]. New York: ASME, 2009.
+
+[18] Honnet S, Seshadri K, Niemann U, Peters N. A surrogate fuel for kerosene[J]. Proceedings of the Combustion Institute, 2009, 32(1): 485-492. DOI: 10.1016/j.proci.2008.06.218.
+
+[19] Singh D, Nishiie T, Qiao L. Experimental and Kinetic Modeling Study of the Combustion of n-Decane, Jet-A, and S-8 in Laminar Premixed Flames[J]. Combustion Science and Technology, 2011, 183(10): 1002-1026. DOI: 10.1080/00102202.2011.575420.
 
 ---
 
