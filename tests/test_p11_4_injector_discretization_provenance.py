@@ -40,3 +40,16 @@ def test_input_provenance_records_nominal_vs_discrete_injector_location() -> Non
     assert discrete["40"]["actual_injector_cell_center_m"] == 0.075
     assert discrete["80"]["actual_injector_cell_center_m"] == 0.0775
     assert injector["discrete_realization"]["physics_change"] is False
+
+
+def test_input_provenance_records_derived_baseline_inlet_mach() -> None:
+    record = json.loads(PROVENANCE.read_text(encoding="utf-8"))
+    derived = record["derived_inlet_diagnostics"]
+
+    assert derived["dry_air_sound_speed_m_per_s"] == pytest.approx(
+        557.6829861481523, rel=1.0e-14
+    )
+    assert derived["inlet_mach_from_u_1250_m_per_s"] == pytest.approx(
+        2.241416774489744, rel=1.0e-14
+    )
+    assert "not an independent input" in derived["role"].lower().replace("_", " ")
