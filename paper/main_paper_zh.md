@@ -305,7 +305,7 @@ Cao 等后续同行评议研究指出，燃烧模态转换边界会随燃烧室�
 | 壁面热源 | 显式有量纲输入通道；Eq.11.26 映射仍 gated |
 | 验证 | 单元测试、网格趋势、守恒审计、NASA benchmark |
 | 模态研究 | Cao Eq.(3-2) scoped thermal-throat criterion |
-| 参数研究 | P12 φ 响应；P13 \(C_m\) 敏感性协议已建立、结果计算中 |
+| 参数研究 | P12 φ 响应；P13 \(C_m\) 敏感性协议已建立、尚未形成 accepted 数值结果 |
 | 可复现性 | acceptance JSON、source ledger、GitHub Actions、artifact SHA-256 |
 | 展示 | 导师 Web 控制台、本地/Render 运行、CSV/JSON 下载 |
 
@@ -399,5 +399,5 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 ## 附录 B v0.1 状态说明
 
 - 本版本纳入已接受的 P11.4、NASA benchmark 和 P12 证据；
-- P13 \(C_m\) 敏感性 study 的定义、来源范围与预注册协议已经建立，但专用 CFD workflow 在本版成稿时仍在运行，因此正文仅将其列为“在研”，不写入结果结论；
+- P13 \(C_m\) 敏感性 study 的定义、来源范围与预注册协议已经建立，但尚未形成 accepted 数值结果；最近两次专用 CFD workflow 在完成前被后续仓库提交触发的工作流更新取消，因此正文仅将其列为“在研”，不写入结果结论；
 - 后续 P13 acceptance 生成后，优先更新第 7/11 节并新增参数敏感性图表。
