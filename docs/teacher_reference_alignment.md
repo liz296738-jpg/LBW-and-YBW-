@@ -14,7 +14,7 @@ The accepted `PROJECT_DEFINED_INTEGRATED_SMOKE_CASE` is implementation/V&V evide
 
 ## Numerical-path boundary
 
-Teacher Eqs. 11.42-11.44 Steger-Warming remain an audited source-transcription path. The calorically-perfect limit is verified, but the available teacher/Cao evidence does not provide a defensible variable-thermochemistry energy-reference correction or numerical Eq. 11.44 epsilon policy. The integrated variable-thermochemistry path therefore remains Rusanov. This is an explicit blocker, not an invitation to guess a correction.
+Teacher Eqs. 11.42-11.44 Steger-Warming remain an audited source-transcription path. The calorically-perfect limit is verified, but the available teacher/Cao evidence does not provide a defensible variable-thermochemistry energy-reference correction or numerical Eq. 11.44 epsilon policy. External peer-reviewed literature does establish generalized real-gas/multicomponent Steger--Warming-type routes, but compatibility with this repository's exact state vector and absolute-energy convention has not yet been derived and verified. The integrated variable-thermochemistry path therefore remains Rusanov. This is an explicit compatibility gate, not an invitation to import or guess a correction.
 
 ## Thermochemistry and energy accounting
 
