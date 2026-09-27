@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "classification": "P13_TEACHER_MIXING_CONSTANT_SENSITIVITY_ACCEPTANCE",
+  "study_classification": "PROJECT_DEFINED_TEACHER_SOURCE_RANGE_CM_SENSITIVITY",
+  "not_a_source_reproduction": true,
+  "not_experimental_validation": true,
+  "provenance": {
+    "accepted_head_sha": "b92b9095b818f835c9d485278334a45245ac40f7",
+    "workflow_name": "P13 Teacher-Range Mixing Constant Sensitivity",
+    "workflow_run_number": 4,
+    "workflow_run_id": 36312725524,
+    "aggregate_artifact_id": 10929383596,
+    "aggregate_artifact_name": "p13-teacher-mixing-constant-sensitivity",
+    "aggregate_artifact_zip_sha256": "c08ec1ccc28decdf31dbd4b82fa00e1ac2866a9d6939cef21d9a5e4c073a6dec",
+    "execution_policy": "Eight frozen C_m-by-grid CFD points ran as independent matrix jobs; aggregation consumed their JSON artifacts and did not rerun CFD."
+  },
+  "varied_parameter": {
+    "name": "C_m",
+    "teacher_equation": "Eq.11.20",
+    "teacher_source_range": [
+      25,
+      60
+    ],
+    "samples": [
+      {
+        "value": 25,
+        "role": "SOURCE_RANGE_LOWER_BOUND"
+      },
+      {
+        "value": 30,
+        "role": "CURRENT_PROJECT_BASELINE"
+      },
+      {
+        "value": 42.5,
+        "role": "PROJECT_DEFINED_ARITHMETIC_RANGE_MIDPOINT"
+      },
+      {
+        "value": 60,
+        "role": "SOURCE_RANGE_UPPER_BOUND"
+      }
+    ],
+    "geometry_crossover": {
+      "injector_to_exit_distance_m": 0.32,
+      "C_m_for_Lm_equal_available_distance": 31.683974437966963,
+      "interpretation": "Derived directly from the teacher Eq.11.20 lean branch at frozen phi=0.20 and b=0.040 m. It is a project-geometry closure crossover, not an optimum or a physical mode-transition threshold."
+    }
+  },
+  "frozen_controls": {
+    "baseline_case": "PROJECT_DEFINED_INTEGRATED_SMOKE_CASE",
+    "equivalence_ratio": 0.2,
+    "cfl": 0.5,
+    "teacher_eq_11_46_metric_project_tolerance": 0.00002,
+    "max_steps": 20000,
+    "wall_heat_gradient_J_per_kg_per_m": 0,
+    "cell_counts": [
+      20,
+      40
+    ],
+    "fuel_mass_source_invariant_kg_per_s": 0.006975386332365369
+  },
+  "acceptance_policy": {
+    "convergence": "Every point must converge under the frozen project tolerance applied to the teacher Eq.11.46 metric.",
+    "mass_inventory": "Every converged point must satisfy the project-defined normalized mass-inventory QA threshold <= 0.005 of inlet mass flux.",
+    "momentum_energy": "Finite nonnegative normalized diagnostics only; no unsourced hard thresholds.",
+    "thermodynamic_admissibility": "Static pressure and temperature must remain positive and reported scalar outputs finite.",
+    "grid_role": "20/40 comparison is a robustness diagnostic only; no formal grid-independence or GCI claim.",
+    "interpretation_limits": [
+      "No optimum C_m is claimed.",
+      "No experimental validation is claimed.",
+      "No Cao Case 2 reproduction is claimed.",
+      "No universal physical C_m is inferred.",
+      "No ramjet/scramjet/dual-mode/unstart classification is inferred from this sensitivity study."
+    ]
+  },
+  "points": [
+    {
+      "mixing_C_m": 25,
+      "cells": 20,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 512,
+      "density_change": 0.000019904068874783766,
+      "normalized_residual": 0.0007826966818696502,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.0005197924898792764,
+      "momentum_inventory_relative_to_inlet": 0.00010430793687302823,
+      "energy_inventory_relative_to_inlet": 0.00020894256167465223,
+      "min_mach": 1.277518870857815,
+      "max_mach": 2.2404071532051133,
+      "min_pressure_Pa": 54361.306229339614,
+      "max_pressure_Pa": 116129.60053453816,
+      "min_temperature_K": 800.02467637064,
+      "max_temperature_K": 1580.7009367497358
+    },
+    {
+      "mixing_C_m": 25,
+      "cells": 40,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 781,
+      "density_change": 0.000019927664489863813,
+      "normalized_residual": 0.0015764161747254147,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.0007104916108759804,
+      "momentum_inventory_relative_to_inlet": 0.00012412337868885785,
+      "energy_inventory_relative_to_inlet": 0.0002880686132012196,
+      "min_mach": 1.2589448036370414,
+      "max_mach": 2.2486985774284705,
+      "min_pressure_Pa": 53270.50210930229,
+      "max_pressure_Pa": 118795.52373494236,
+      "min_temperature_K": 796.6377204181754,
+      "max_temperature_K": 1587.0779227586809
+    },
+    {
+      "mixing_C_m": 30,
+      "cells": 20,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 485,
+      "density_change": 0.000019799228071952737,
+      "normalized_residual": 0.0007879577164719876,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.00046080119689590447,
+      "momentum_inventory_relative_to_inlet": 0.00009507678610470791,
+      "energy_inventory_relative_to_inlet": 0.0001866130850386762,
+      "min_mach": 1.27140884274981,
+      "max_mach": 2.24150801228316,
+      "min_pressure_Pa": 54230.62389914322,
+      "max_pressure_Pa": 114466.51348360155,
+      "min_temperature_K": 798.9984399939658,
+      "max_temperature_K": 1580.0467522292365
+    },
+    {
+      "mixing_C_m": 30,
+      "cells": 40,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 721,
+      "density_change": 0.000019990461374500907,
+      "normalized_residual": 0.0016026392483982136,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.0005992826539193507,
+      "momentum_inventory_relative_to_inlet": 0.00010782447672415955,
+      "energy_inventory_relative_to_inlet": 0.0002444008496910249,
+      "min_mach": 1.2634394882103626,
+      "max_mach": 2.248787036734907,
+      "min_pressure_Pa": 53246.68763361556,
+      "max_pressure_Pa": 115474.2519502044,
+      "min_temperature_K": 795.7820085468938,
+      "max_temperature_K": 1584.805254556386
+    },
+    {
+      "mixing_C_m": 42.5,
+      "cells": 20,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 339,
+      "density_change": 0.00001995077096547069,
+      "normalized_residual": 0.0007333652319158854,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.00037034181326372866,
+      "momentum_inventory_relative_to_inlet": 0.00010572899280343415,
+      "energy_inventory_relative_to_inlet": 0.00014844474241976923,
+      "min_mach": 1.4567788920200828,
+      "max_mach": 2.2429168152880203,
+      "min_pressure_Pa": 54062.962782395676,
+      "max_pressure_Pa": 92828.3546592352,
+      "min_temperature_K": 796.2880889915596,
+      "max_temperature_K": 1374.5141522642825
+    },
+    {
+      "mixing_C_m": 42.5,
+      "cells": 40,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 504,
+      "density_change": 0.000019729756497578092,
+      "normalized_residual": 0.0014576230376825688,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.00044701411766867626,
+      "momentum_inventory_relative_to_inlet": 0.00011901708773659519,
+      "energy_inventory_relative_to_inlet": 0.00017905175182697,
+      "min_mach": 1.4529756686659288,
+      "max_mach": 2.2489098998935,
+      "min_pressure_Pa": 53213.5898779173,
+      "max_pressure_Pa": 93129.07393130471,
+      "min_temperature_K": 794.604944170942,
+      "max_temperature_K": 1376.343839043102
+    },
+    {
+      "mixing_C_m": 60,
+      "cells": 20,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 275,
+      "density_change": 0.000019750411107477998,
+      "normalized_residual": 0.0006922582959606194,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.0003304298401985724,
+      "momentum_inventory_relative_to_inlet": 0.00011397922760245198,
+      "energy_inventory_relative_to_inlet": 0.00013477380977689073,
+      "min_mach": 1.6282449171556126,
+      "max_mach": 2.2437798998796956,
+      "min_pressure_Pa": 53959.99225426887,
+      "max_pressure_Pa": 77626.49144651966,
+      "min_temperature_K": 794.6548264524154,
+      "max_temperature_K": 1200.620387639674
+    },
+    {
+      "mixing_C_m": 60,
+      "cells": 40,
+      "status": "CONVERGED",
+      "converged": true,
+      "steps": 412,
+      "density_change": 0.00001985323984962929,
+      "normalized_residual": 0.0013959570705543993,
+      "fuel_mass_source_kg_per_s": 0.006975386332365369,
+      "mass_inventory_relative_to_inlet": 0.00040060769545346867,
+      "momentum_inventory_relative_to_inlet": 0.0001320227368267895,
+      "energy_inventory_relative_to_inlet": 0.0001628668006704209,
+      "min_mach": 1.626084737001291,
+      "max_mach": 2.2490184315153288,
+      "min_pressure_Pa": 53191.57475464467,
+      "max_pressure_Pa": 77758.00789870585,
+      "min_temperature_K": 793.8300235070983,
+      "max_temperature_K": 1201.615952309794
+    }
+  ],
+  "grid_changes": [
+    {
+      "mixing_C_m": 25,
+      "coarse_cells": 20,
+      "fine_cells": 40,
+      "min_mach_relative_change": 0.014753678769008571,
+      "max_pressure_relative_change": 0.022441276544665358,
+      "max_temperature_relative_change": 0.004018067366131923
+    },
+    {
+      "mixing_C_m": 30,
+      "coarse_cells": 20,
+      "fine_cells": 40,
+      "min_mach_relative_change": 0.006307666187270992,
+      "max_pressure_relative_change": 0.008726953841081525,
+      "max_temperature_relative_change": 0.003002578590314845
+    },
+    {
+      "mixing_C_m": 42.5,
+      "coarse_cells": 20,
+      "fine_cells": 40,
+      "min_mach_relative_change": 0.0026175409789525573,
+      "max_pressure_relative_change": 0.0032290589756247675,
+      "max_temperature_relative_change": 0.0013293820387872942
+    },
+    {
+      "mixing_C_m": 60,
+      "coarse_cells": 20,
+      "fine_cells": 40,
+      "min_mach_relative_change": 0.0013284548493489165,
+      "max_pressure_relative_change": 0.0016913557296569686,
+      "max_temperature_relative_change": 0.0008285215157191954
+    }
+  ],
+  "accepted_interpretation": [
+    "All eight sampled C_m-by-grid points converged and satisfy the frozen numerical/QA conditions.",
+    "On both 20- and 40-cell grids, maximum static pressure and maximum static temperature decrease across the sampled C_m sequence 25 -> 30 -> 42.5 -> 60, consistent with the teacher closure producing longer mixing length and weaker in-domain mixing/combustion as C_m increases.",
+    "Minimum Mach is not promoted as a monotonic function of C_m: the low-C_m ordering differs between the 20- and 40-cell grids, demonstrating coupled response and grid sensitivity.",
+    "The 20-to-40 relative changes in the reported extrema decrease substantially toward the high-C_m end, but the two-grid study is only a robustness diagnostic and does not establish formal grid independence.",
+    "The Eq.11.20 project-geometry crossover near C_m=31.684 helps separate samples that can versus cannot reach complete mixing before the project combustor exit; it is not an optimum, calibrated value, or combustion-mode boundary."
+  ]
+}
