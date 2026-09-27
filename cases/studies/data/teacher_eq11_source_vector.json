@@ -1,12 +1,21 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_kind": "teacher-reference-eq11-38-source-vector-adapter",
   "stage": "P11.3I",
   "status": "EQ11_38_NON_GEOMETRIC_SOURCE_ADAPTERS_VERIFIED_INTEGRATED_CASE_PENDING",
   "primary_source": {
     "identity": "高超声速气动布局理论及应用, 第11章 双模态冲压发动机一维数值模拟",
-    "pages": [254, 255, 260],
-    "equations": ["11.12", "11.15", "11.16", "11.38"]
+    "pages": [
+      254,
+      255,
+      260
+    ],
+    "equations": [
+      "11.12",
+      "11.15",
+      "11.16",
+      "11.38"
+    ]
   },
   "implemented": [
     "localized finite-volume Delta(mdot_s)/Delta x injector adapter",
@@ -41,5 +50,22 @@
     "teacher_boundary_adapter_ready": false,
     "integrated_teacher_case_ready": false
   },
-  "next_step": "Build a narrow integrated H2/C2H4 teacher case only after the domain/inlet treatment around the injector is frozen; do not use a fuel-containing transmissive inlet plus an injector source because that would double-count incoming fuel."
+  "next_step": "Build a narrow integrated H2/C2H4 teacher case only after the domain/inlet treatment around the injector is frozen; do not use a fuel-containing transmissive inlet plus an injector source because that would double-count incoming fuel.",
+  "historical_stage_status": "EQ11_38_NON_GEOMETRIC_SOURCE_ADAPTERS_VERIFIED_INTEGRATED_CASE_PENDING",
+  "current_status": {
+    "source_adapter_integrated": true,
+    "teacher_static_inlet_adapter_ready": true,
+    "teacher_outlet_extrapolation_adapter_ready": true,
+    "integrated_h2_teacher_path_ready": true,
+    "production_flux": "Rusanov",
+    "source_gated_items": [
+      "Eq.11.26 empirical-to-dimensional wall-heat mapping",
+      "variable-thermochemistry Steger-Warming production compatibility"
+    ],
+    "superseded_by": [
+      "cases/studies/data/teacher_reference_alignment.json",
+      "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json"
+    ]
+  },
+  "metadata_revision_note": "2026-09-27: preserved the original P11.3I stage record and added current integration status. No Eq.11.38 formula, coefficient, or numerical result changed."
 }
