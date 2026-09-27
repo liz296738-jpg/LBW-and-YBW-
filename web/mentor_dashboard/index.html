@@ -421,6 +421,22 @@
             “SCRAM_SIDE” 若出现，仅表示对已接受数值点按 Cao Eq.(3-2) 的限定范围应用 thermal-throat criterion。
             它不是对整个项目做更广义的 ramjet/scramjet/dual-mode/unstart 分类。
           </div>
+
+          <div class="panel" style="margin-top:18px">
+            <div class="panel-head">
+              <div>
+                <h3>P13 教师 Eq.11.20 · C_m 敏感性</h3>
+                <p>只读展示已冻结 acceptance：C_m = 25 / 30 / 42.5 / 60，20 / 40 cells。</p>
+              </div>
+              <span class="pill ok">Accepted</span>
+            </div>
+            <div id="p13-pressure-chart" class="chart"></div>
+            <div class="chart-caption">主图使用 40-cell 最大静压；20/40 两层均支持该采样序列随 C_m 增大而下降。最低 Mach 不被声明为全局单调。</div>
+          </div>
+          <div class="panel">
+            <div class="table-wrap"><table><thead><tr><th>C_m</th><th>Cells</th><th>Eq.11.46</th><th>Min Mach</th><th>Max p (kPa)</th><th>Max T (K)</th><th>Mass / inlet</th></tr></thead><tbody id="p13-table"></tbody></table></div>
+            <div class="chart-caption">Eq.11.20 + 当前几何给出的完全混合交叉点约 C_m=31.684；它不是最优值或燃烧模态边界。不开放 P13 在线参数扫描。</div>
+          </div>
         </section>
 
         <section id="evidence" class="section">
@@ -612,6 +628,22 @@
       $("throat-grid-list").innerHTML=rows.map(p=>'<div class="job"><div><strong>φ='+p.phi.toFixed(2)+' · '+p.cells+' cells</strong><div class="job-meta">min Mach '+fmt(p.min_mach,5)+' · density change '+sci(p.density_change,2)+'</div></div><div>'+(p.status==="SCRAM_SIDE"?'<span class="pill info">Eq.(3-2) SCRAM_SIDE</span>':statusPill(p.status))+'</div></div>').join("");
     }
 
+    function renderP13() {
+      const p13=DATA.p13;
+      const rows=[...p13.points].sort((a,b)=>a.cells-b.cells || a.mixing_C_m-b.mixing_C_m);
+      const fine=rows.filter(x=>x.cells===40);
+      renderLineChart("p13-pressure-chart", fine.map(x=>"C_m "+fmt(x.mixing_C_m,1)), fine.map(x=>x.max_pressure_Pa/1000), {
+        label:"P13 40-cell maximum static pressure by mixing constant",
+        value:v=>fmt(v,1)+" kPa",
+        tick:v=>fmt(v,0)+" kPa"
+      });
+      $("p13-table").innerHTML=rows.map(x=>'<tr>'
+        +'<td>'+fmt(x.mixing_C_m,1)+'</td><td>'+x.cells+'</td>'
+        +'<td>'+sci(x.density_change,3)+'</td><td>'+fmt(x.min_mach,5)+'</td>'
+        +'<td>'+fmt(x.max_pressure_Pa/1000,3)+'</td><td>'+fmt(x.max_temperature_K,2)+'</td>'
+        +'<td>'+pct(x.mass_inventory_relative_to_inlet,4)+'</td></tr>').join("");
+    }
+
     function renderEvidence() {
       const c=DATA.claim_boundaries;
       $("claim-boundaries").innerHTML=[
@@ -620,6 +652,7 @@
         ["Guard = unstart?", c.forward_flow_guard_is_unstart ? "Yes":"No"],
         ["Normalized residual", c.normalized_residual_role],
         ["Grid claim", c.grid_claim],
+        ["P13 claim", c.p13_claim],
         ["LBW/YBW are modes?", c.lbw_ybw_are_mode_labels ? "Yes":"No"]
       ].map(([a,b])=>'<div>'+a+'</div><div style="max-width:460px">'+b+'</div>').join("");
 
@@ -638,7 +671,9 @@
         +"\nresponse_acceptance_head   = "+DATA.response.provenance.accepted_head_sha
         +"\ngrid_workflow_run_id       = "+DATA.grid.workflow_run_id
         +"\nresponse_workflow_run_id   = "+DATA.response.provenance.workflow_run_id
-        +"\nthermal_grid_workflow_id   = "+DATA.thermal_throat_grid.workflow_run_id;
+        +"\nthermal_grid_workflow_id   = "+DATA.thermal_throat_grid.workflow_run_id
+        +"\np13_acceptance_head       = "+DATA.p13.provenance.accepted_head_sha
+        +"\np13_workflow_run_id       = "+DATA.p13.provenance.workflow_run_id;
     }
 
     function renderRunSpecs() {
@@ -722,7 +757,7 @@
         const res=await fetch("/api/summary",{cache:"no-store"});
         DATA=await res.json();
         if (!res.ok) throw new Error(DATA.error || "读取数据失败");
-        renderOverview(); renderBaseline(); renderGrid(); renderResponse(); renderEvidence(); renderRunSpecs();
+        renderOverview(); renderBaseline(); renderGrid(); renderResponse(); renderP13(); renderEvidence(); renderRunSpecs();
         await fetchJobs();
       } catch (err) {
         $("top-status").textContent="Data error";
