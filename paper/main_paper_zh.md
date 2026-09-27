@@ -341,7 +341,7 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 
 本文完成了一套面向超燃/双模态冲压发动机燃烧室的准一维 CFD 求解与可复现科研工作流。项目的核心价值不仅在于实现变截面、喷注、摩阻、混合/燃烧、变热化学和数值推进，还在于建立了明确的科学边界：来源能够证明的内容才进入 source-backed 模型；项目自行选择的参数被明确标为 project-defined；求解器保护和非收敛不被直接解释为物理模态；缺少关键来源的公式保持 gated，而不是通过“看起来合理”的经验补齐。
 
-现有 H₂ 综合路径已经通过基础回归、三层网格趋势、离散守恒审计与公开 NASA computational-reference benchmark 等多层验证，并能够开展当量比响应和受限的 Cao thermal-throat criterion 应用。导师控制台、GitHub Actions、机器可读 acceptance/provenance 与 SHA-256 完整性记录进一步使项目从“单机脚本”发展为可重复运行、可审查和可持续维护的工程计算系统。
+现有项目定义 H₂ teacher path 已通过基础回归、三层网格趋势与离散守恒审计，并能够开展当量比响应和受限的 Cao thermal-throat criterion 应用。NASA Burrows-Kurkov 路线则作为**独立的 supporting reduced-order computational-reference benchmark**，用于验证项目的降阶数值/守恒处理与公开数据 provenance；它不被用来声称当前 H₂ 变热化学 teacher path 已获得独立实验验证。导师控制台、GitHub Actions、机器可读 acceptance/provenance 与 SHA-256 完整性记录进一步使项目从“单机脚本”发展为可重复运行、可审查和可持续维护的工程计算系统。
 
 因此，在当前证据范围内，可以将本项目定位为一套达到课程/本科工程研究交付要求、具有明确科学边界和继续扩展能力的准一维 scramjet CFD 平台；而 Eq.11.26、变热化学 Steger-Warming、Cao Case 2 正式复现及完整双模态分类仍应作为后续研究问题，而非当前已解决结论。
 
