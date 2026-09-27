@@ -1,12 +1,19 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_kind": "teacher-reference-spatial-algebraic-composition-closure",
   "stage": "P11.3H",
   "status": "SINGLE_INJECTOR_LEAN_SPATIAL_COMPOSITION_CLOSURE_IMPLEMENTED_SOURCE_COUPLING_PENDING",
   "primary_source": {
     "identity": "高超声速气动布局理论及应用, 第11章 双模态冲压发动机一维数值模拟",
     "page_range": "255-258",
-    "equations": ["11.18", "11.19", "11.20", "11.23", "11.27", "11.29"]
+    "equations": [
+      "11.18",
+      "11.19",
+      "11.20",
+      "11.23",
+      "11.27",
+      "11.29"
+    ]
   },
   "source_alignment_decision": {
     "model_interpretation": "STATIC_SPATIAL_ALGEBRAIC_CLOSURE_DURING_PSEUDO_TIME",
@@ -47,5 +54,22 @@
     "teacher_wall_source_coupling_ready": false,
     "integrated_teacher_case_ready": false
   },
-  "next_step": "Couple a source-backed single-injector fuel mass/momentum/enthalpy source to the P11.3H composition field and teacher friction adapter, while keeping wall-heat conversion gated until its dimensional relation is frozen."
+  "next_step": "Couple a source-backed single-injector fuel mass/momentum/enthalpy source to the P11.3H composition field and teacher friction adapter, while keeping wall-heat conversion gated until its dimensional relation is frozen.",
+  "historical_stage_status": "SINGLE_INJECTOR_LEAN_SPATIAL_COMPOSITION_CLOSURE_IMPLEMENTED_SOURCE_COUPLING_PENDING",
+  "current_status": {
+    "single_injector_source_coupling_ready": true,
+    "teacher_wall_friction_source_coupling_ready": true,
+    "integrated_h2_c2h4_composition_path_ready": true,
+    "production_flux": "Rusanov",
+    "source_gated_items": [
+      "Eq.11.26 empirical-to-dimensional wall-heat mapping",
+      "C10H22 thermochemistry",
+      "variable-thermochemistry Steger-Warming production compatibility"
+    ],
+    "superseded_by": [
+      "cases/studies/data/teacher_reference_alignment.json",
+      "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json"
+    ]
+  },
+  "metadata_revision_note": "2026-09-27: preserved the original P11.3H readiness snapshot and added current integrated-path status. The source-aligned static spatial closure itself is unchanged."
 }
