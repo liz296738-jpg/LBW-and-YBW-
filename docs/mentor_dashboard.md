@@ -24,6 +24,7 @@ The interface reads the frozen acceptance/evidence records already stored in the
 - normalized mass/momentum/energy inventory diagnostics;
 - the accepted P12 equivalence-ratio response sweep;
 - warm-start continuation and thermal-throat grid-sensitivity evidence;
+- the accepted P13 teacher Eq. 11.20 `C_m` sensitivity study on 20/40-cell grids, shown read-only;
 - Cao Case 2 evidence blockers and the remaining source/model boundaries.
 
 The page uses no external JavaScript or CSS dependencies and can therefore be used offline after the Python environment is installed.
@@ -42,7 +43,7 @@ Downloaded baseline/response JSON records are self-describing: they include UTC 
 
 Render instance storage is operational, not archival. Dashboard-generated artifacts can disappear after a restart or redeploy. A result becomes frozen scientific evidence only after it is intentionally reviewed and incorporated into the repository evidence workflow; merely running it on the dashboard does not change any accepted scientific claim.
 
-The dashboard does **not** expose controls for changing source terms, thermochemistry, wall-heat mapping, flux-scheme compatibility fixes, or other scientifically gated inputs.
+The dashboard does **not** expose controls for changing source terms, thermochemistry, wall-heat mapping, flux-scheme compatibility fixes, or other scientifically gated inputs. P13 is intentionally display-only: the page does not expose an online `C_m` parameter scanner, so ad-hoc runs cannot bypass the frozen study design and acceptance workflow.
 
 ## Scientific claim boundary
 
@@ -53,5 +54,6 @@ The dashboard does not change the scientific status of the project:
 - Teacher Eq. 11.46 defines the maximum-relative-density-change steady-state metric; the numerical tolerance used by each displayed study is a separately frozen project control unless explicitly source-backed.
 - Normalized residual remains an independent diagnostic with no invented hard threshold.
 - 20/40/80 evidence is described as a grid-convergence trend unless an asymptotic/GCI analysis is actually performed.
+- P13 remains a project-defined sensitivity study over the teacher Eq. 11.20 source range; the dashboard does not present it as an optimum `C_m`, experimental validation, Cao Case 2 reproduction, or formal grid-independence result.
 - Any `SCRAM_SIDE` display is limited to the documented Cao Eq. (3-2) thermal-throat criterion scope for otherwise accepted points.
 - LBW/YBW remain project/person identifiers, not physical combustion modes.
