@@ -39,7 +39,7 @@ The two Cao references support two different pieces of the overall project:
 1. the doctoral thesis strongly supports variable composition, variable heat capacity, and absolute chemical+sensible enthalpy accounting;
 2. the master's reduced-order model explicitly uses constant specific heat in the relevant one-dimensional derivation.
 
-Neither reference found in the teacher package gives a source-backed rule that modifies Eq. (11.42) so that classical Steger–Warming remains exactly energy-consistent with the project's variable-thermochemistry conservative state.
+Neither reference found in the teacher package gives a source-backed rule that modifies Eq. (11.42) so that classical Steger–Warming remains exactly energy-consistent with the project's variable-thermochemistry conservative state. This is specifically a **teacher/Cao source gap**; it is not a claim that the broader CFD literature lacks generalized real-gas or multicomponent FVS methods.
 
 Therefore **no correction is introduced**. In particular, P11.3N does not:
 
@@ -60,4 +60,4 @@ The literal teacher Steger–Warming implementation remains valuable as:
 - a diagnostic for future source recovery;
 - a clearly documented unresolved numerical-model compatibility item.
 
-If a later teacher note, original implementation, or other authoritative source gives the missing variable-thermochemistry FVS convention, it can reopen the gate. Until then the project should continue with the accepted Rusanov path rather than inventing a correction.
+External peer-reviewed literature does contain generalized Steger--Warming / real-gas / thermally-perfect-mixture formulations; see `docs/steger_warming_extension_literature.md`. Those formulations establish that a rigorous extension is possible in principle, but they do not automatically match this repository's three-equation algebraic-composition state vector and absolute species-energy convention. A dedicated derivation and verification gate is therefore required before any production replacement. Until that work is completed, the project should continue with the accepted Rusanov path rather than importing a non-equivalent correction.
