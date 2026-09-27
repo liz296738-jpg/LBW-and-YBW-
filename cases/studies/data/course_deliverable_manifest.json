@@ -52,7 +52,8 @@
     "Cao Case 2 prescribed Yi(x) spatial information/rule",
     "Cao Case 2 original fuel/injection/source spatial convention",
     "variable-thermochemistry + Steger-Warming energy-reference/epsilon compatibility",
-    "dimensional mapping from teacher Eq.11.26 to Eq.11.38 wall-heat source"
+    "dimensional mapping from teacher Eq.11.26 to Eq.11.38 wall-heat source",
+    "teacher-path C10H22 source-compatible thermochemistry remains unresolved; external n-decane candidates belong only to a separately validated future extension"
   ],
   "course_project_status": "DELIVERABLE_COMPLETE",
   "status_scope": "Project-defined course deliverable only; known source/scientific blockers remain explicit and unresolved.",
