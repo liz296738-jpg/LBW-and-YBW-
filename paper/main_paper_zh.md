@@ -319,11 +319,17 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 
 广义真实气体/多组分 FVS 文献证明理论路线存在[12-15]，但当前尚缺对本项目状态向量、绝对能量参考与代数组分闭合的兼容性推导。后续若实现，应至少验证：通量重构、能量参考不变性、常比热极限、接触面行为、正性和 smooth-case 收敛阶。
 
-### 10.3 Cao Case 2 正式复现
+### 10.3 C10H22 / 煤油替代燃料热化学
+
+教师 Chapter 11 包含 C10H22 的化学计量/组成分支，但当前尚未获得与教师/CHEMKIN 约定兼容、能够直接进入现有绝对组分能量数据库的 C10H22 热化学多项式，因此教师 production path 仍保持 blocked。
+
+外部来源表明未来建立独立 n-decane 扩展分支具有明确科学基础：LLNL 提供 C8--C16 正构烷烃详细机理，Honnet 等将 n-decane 作为煤油 surrogate 的主要组分之一，Singh 等还给出了 n-decane/Jet-A/S-8 的实验与动力学比较。这些资料支持“外部模型扩展可行”，但不等于教师模型已经恢复。任何未来 C10H22 分支必须单独冻结机理版本、NASA 多项式、参考焓约定和实验 benchmark，并标记为 EXTERNAL MODEL EXTENSION，不能称为 teacher/Cao reproduction。
+
+### 10.4 Cao Case 2 正式复现
 
 已冻结的来源数据包括 H₂、Ma=2.12、ρ=0.28 kg/m³、p=46.7 kPa、T=521 K、u=977 m/s、γ=1.33、φ=0.2、入口组分、Tw=900 K 和报告网格间距。但仍缺少精确 A(x)、预设 Yi(x) 规则和原始源项/喷注空间约定。因此不能用当前项目定义几何替代正式复现。
 
-### 10.4 完整双模态/unstart 分类
+### 10.5 完整双模态/unstart 分类
 
 当前燃烧室模型缺少与曹论文 Table 3-1 完全兼容的隔离段/激波串状态变量和几何。只有 Eq.(3-2) scoped thermal-throat indicator 可以在满足适用条件时使用。forward-flow guard、单一 Mach 值或非收敛本身都不能独立定义物理模态。
 
@@ -332,10 +338,11 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 1. 完成 P13 教师来源范围 \(C_m=25\sim60\) 的敏感性研究，并在 20/40 网格上检查结论稳健性；
 2. 在不改变模型边界的条件下扩展入口 Mach、喷注位置等 one-factor-at-a-time 参数研究，并严格标注 source-anchored 与 project-defined 输入；
 3. 若获得教师 Eq.11.26 完整定义，建立并验证有量纲壁面热源适配器；
-4. 若获得 Cao Case 2 精确几何/组分/源项空间信息，建立独立 formal reproduction 分支；
-5. 对 generalized Steger-Warming 建立专门的状态向量与 Jacobian 推导，并通过常比热极限、smooth manufactured case、shock/nozzle 及生产 baseline 回归后再考虑切换；
-6. 若需要完整燃烧模态分类，加入来源兼容的 isolator/shock-train 低阶模型与相应实验/论文验证；
-7. 将论文与 acceptance/evidence 记录建立自动版本映射，每次新增正式 accepted evidence 时同步更新本文结果章节。
+4. 若开展 C10H22/n-decane 分支，按独立外部模型扩展冻结热化学来源、参考焓约定和实验 benchmark，不混入教师 H2/C2H4 路径；
+5. 若获得 Cao Case 2 精确几何/组分/源项空间信息，建立独立 formal reproduction 分支；
+6. 对 generalized Steger-Warming 建立专门的状态向量与 Jacobian 推导，并通过常比热极限、smooth manufactured case、shock/nozzle 及生产 baseline 回归后再考虑切换；
+7. 若需要完整燃烧模态分类，加入来源兼容的 isolator/shock-train 低阶模型与相应实验/论文验证；
+8. 将论文与 acceptance/evidence 记录建立自动版本映射，每次新增正式 accepted evidence 时同步更新本文结果章节。
 
 ## 12 结论
 
