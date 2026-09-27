@@ -97,12 +97,14 @@
       ]
     },
     "10_limitations": {
-      "claim_scope": "Current scientific/source blockers",
+      "claim_scope": "Current scientific/source blockers, including the blocked teacher C10H22 path and separately supported external n-decane extension route",
       "evidence": [
         "cases/studies/data/teacher_cao_case2_source.json",
         "cases/studies/data/eq11_26_external_source_search_audit.json",
         "cases/studies/data/teacher_steger_warming_source_audit.json",
-        "cases/studies/data/teacher_reference_alignment.json"
+        "cases/studies/data/teacher_reference_alignment.json",
+        "cases/studies/data/c10h22_external_thermochemistry_candidates.json",
+        "docs/c10h22_external_thermochemistry_candidates.md"
       ]
     },
     "11_p13_in_progress": {
