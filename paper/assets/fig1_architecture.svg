@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="620" viewBox="0 0 1000 620">
+<style>text{font-family:Arial,sans-serif;fill:#111}.b{fill:#fff;stroke:#333;stroke-width:2}.t{font-size:18px;text-anchor:middle}.h{font-size:24px;font-weight:bold;text-anchor:middle}.a{stroke:#555;stroke-width:2;fill:none;marker-end:url(#m)}</style>
+<defs><marker id="m" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#555"/></marker></defs>
+<text x="500" y="35" class="h">Project architecture and scientific-evidence flow</text>
+<rect x="50" y="80" width="220" height="110" class="b"/><text x="160" y="120" class="t"><tspan x="160">Teacher / Cao sources</tspan><tspan x="160" dy="26">+ peer-reviewed literature</tspan></text>
+<rect x="390" y="80" width="220" height="110" class="b"/><text x="500" y="120" class="t"><tspan x="500">Source-aligned closures</tspan><tspan x="500" dy="26">&amp; evidence ledgers</tspan></text>
+<rect x="730" y="80" width="220" height="110" class="b"/><text x="840" y="120" class="t"><tspan x="840">Quasi-1D solver</tspan><tspan x="840" dy="26">Rusanov + SSP-RK3</tspan></text>
+<rect x="50" y="300" width="220" height="110" class="b"/><text x="160" y="335" class="t"><tspan x="160">Verification layer</tspan><tspan x="160" dy="25">tests / conservation</tspan><tspan x="160" dy="25">grid studies</tspan></text>
+<rect x="390" y="300" width="220" height="110" class="b"/><text x="500" y="335" class="t"><tspan x="500">Accepted studies</tspan><tspan x="500" dy="25">P11.4 / P12</tspan><tspan x="500" dy="25">NASA benchmark</tspan></text>
+<rect x="730" y="300" width="220" height="110" class="b"/><text x="840" y="335" class="t"><tspan x="840">Mentor dashboard</tspan><tspan x="840" dy="25">JSON/CSV + SHA-256</tspan><tspan x="840" dy="25">Render deployment</tspan></text>
+<rect x="390" y="485" width="220" height="95" class="b"/><text x="500" y="525" class="t"><tspan x="500">GitHub Actions</tspan><tspan x="500" dy="26">reproducibility &amp; provenance</tspan></text>
+<path d="M270 135 H390" class="a"/><path d="M610 135 H730" class="a"/><path d="M840 190 V300" class="a"/><path d="M730 355 H610" class="a"/><path d="M390 355 H270" class="a"/><path d="M500 410 V485" class="a"/><path d="M610 532 L780 410" class="a"/><path d="M390 532 L220 410" class="a"/>
+</svg>
