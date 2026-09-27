@@ -30,6 +30,7 @@ GEOMETRY_RECORD = DATA_DIR / "p11_2b_liu_model_b_geometry_source.json"
 ANGLE_RECORD = DATA_DIR / "p11_2b_liu_angle_convention_source.json"
 APPLICABILITY_RECORD = DATA_DIR / "p11_2b_jin_validation_applicability.json"
 FRICTION_RECORD = DATA_DIR / "p11_2b_jin_friction_convention_source.json"
+NASA_BENCHMARK_ACCEPTANCE = DATA_DIR / "p11_2b_nasa_bk_benchmark_acceptance.json"
 DEFAULT_OUTPUT = ROOT / "artifacts" / "p11_2b" / "p11_2b_readiness.json"
 CANDIDATE_ID = "JIN-LIU-MODEL-B-VALIDATION"
 
@@ -257,9 +258,12 @@ def build_evidence_gate_summary(
 
 
 def build_readiness_record(source_ledger: Path = SOURCE_LEDGER) -> dict[str, object]:
-    """Assess the tracked evidence ledger without inventing missing inputs."""
+    """Assess the historical Jin--Liu formal-case gate without hiding later work."""
     with source_ledger.open("r", encoding="utf-8") as stream:
         ledger = json.load(stream)
+    with NASA_BENCHMARK_ACCEPTANCE.open("r", encoding="utf-8") as stream:
+        nasa_benchmark = json.load(stream)
+
     assessment = assess_ledger_formal_case_readiness(ledger)
     declared_status = ledger.get("project_decision", {}).get("formal_case_status")
     evidence_summary = build_evidence_gate_summary(
@@ -267,12 +271,31 @@ def build_readiness_record(source_ledger: Path = SOURCE_LEDGER) -> dict[str, obj
         formal_case_ready=bool(assessment.get("formal_case_ready")),
     )
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "stage": "P11.2B",
         "artifact_kind": "formal-case-readiness",
+        "scope_note": (
+            "This record is the historical Jin--Liu source-backed formal-case gate. "
+            "formal_case_ready=false does not mean the separate NASA Burrows--Kurkov "
+            "reduced-order computational-reference benchmark is unaccepted."
+        ),
         "source_ledger": source_ledger.resolve().relative_to(ROOT.resolve()).as_posix(),
         "declared_project_status": declared_status,
         "evidence_gate_summary": evidence_summary,
+        "later_nasa_burrows_kurkov_benchmark": {
+            "acceptance_record": NASA_BENCHMARK_ACCEPTANCE.resolve()
+            .relative_to(ROOT.resolve())
+            .as_posix(),
+            "status": nasa_benchmark.get("status"),
+            "benchmark_ready": nasa_benchmark.get("benchmark_ready"),
+            "formal_experimental_validation_ready": nasa_benchmark.get(
+                "formal_experimental_validation_ready"
+            ),
+            "claim_boundary": (
+                "Accepted as a reduced-order computational-reference benchmark; "
+                "not promoted to independent experimental bulk-state validation."
+            ),
+        },
         **assessment,
     }
 
