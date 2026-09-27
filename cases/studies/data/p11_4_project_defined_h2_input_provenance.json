@@ -141,5 +141,12 @@
       "note": "Refinement ratio r=2 chosen for solution verification; not a physical engine input."
     }
   },
-  "policy": "A source-backed equation/range does not automatically make a selected case value source-backed. Project choices remain explicit even when they lie inside a teacher-provided admissible range."
+  "policy": "A source-backed equation/range does not automatically make a selected case value source-backed. Project choices remain explicit even when they lie inside a teacher-provided admissible range.",
+  "derived_inlet_diagnostics": {
+    "role": "DERIVED_FROM_FROZEN_INPUTS_AND_CURRENT_SOURCE_BACKED_THERMOCHEMISTRY_NOT_AN_INDEPENDENT_INPUT",
+    "dry_air_sound_speed_m_per_s": 557.6829861481523,
+    "inlet_mach_from_u_1250_m_per_s": 2.241416774489744,
+    "relation": "Mach = u / sqrt(gamma(T,Y)*R(Y)*T)",
+    "note": "This derived Mach is recorded to prevent later sensitivity studies from incorrectly treating a nearby rounded Mach value such as 2.2 as the original baseline."
+  }
 }
