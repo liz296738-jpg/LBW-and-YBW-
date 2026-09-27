@@ -21,7 +21,11 @@ on:
 jobs:
   sensitivity:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    # Eight CFD points are solved sequentially in this workflow. The previous
+    # 45-minute cap cancelled scientifically valid long runs before validation.
+    # Extending the wall-clock allowance changes no model, input, tolerance, or
+    # acceptance rule; it only permits the frozen study to finish.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
