@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-eq11-26-external-source-search-audit",
+  "status": "NO_UNIQUE_SOURCE_TRACEABLE_DIMENSIONAL_ADAPTER_RECOVERED",
+  "teacher_equation": "11.26",
+  "target_coupling": "Eq.11.38 rho*u*d(delta q)/dx energy source",
+  "recovered": {
+    "eq_11_25_external_lineage_corroboration": true,
+    "eq_11_26_exact_polynomial_external_primary_definition": false,
+    "eq_11_26_units_recovered": false,
+    "eq_11_26_to_delta_q_mapping_recovered": false,
+    "production_adapter_ready": false
+  },
+  "non_substitutable_alternatives": [
+    "Eckert/reference-enthalpy wall heat-transfer models",
+    "regenerative-cooling wall heat-transfer models",
+    "generic convective heat-transfer coefficients"
+  ],
+  "production_policy": {
+    "explicit_dimensional_input_channel_ready": true,
+    "project_baseline_value_J_per_kg_per_m": 0,
+    "baseline_zero_classification": "SOURCE_GATED_NEUTRALIZATION_NOT_VALIDATED_ADIABATIC_CLAIM",
+    "external_model_silent_substitution_allowed": false
+  },
+  "reopening_evidence": [
+    "teacher note/page defining Eq.11.26 coupling and units",
+    "primary teacher/Cao-lineage source with explicit dimensional relation",
+    "original same-lineage implementation with unambiguous variable and unit mapping"
+  ],
+  "evidence_document": "docs/eq11_26_external_source_search_audit.md"
+}
