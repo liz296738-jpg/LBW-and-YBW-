@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "record_kind": "teacher-mixing-closure-external-lineage-audit",
+  "primary_project_authority": "Teacher Chapter 11 Eqs.11.19-11.20",
+  "external_lineage": [
+    {
+      "source": "Heiser & Pratt, Hypersonic Airbreathing Propulsion",
+      "year": 1994,
+      "publisher": "American Institute of Aeronautics and Astronautics",
+      "isbn": "9781563470356",
+      "role": "classic scramjet mixing-model lineage"
+    },
+    {
+      "source": "Pulsonetti, Erdos & Early, Engineering Model for Analysis of Scramjet Combustor Performance with Finite-Rate Chemistry",
+      "year": 1991,
+      "journal": "Journal of Propulsion and Power",
+      "volume": "7",
+      "pages": "1055-1063",
+      "doi": "10.2514/3.23427",
+      "role": "empirical mixing plus finite-rate reduced-order scramjet model"
+    },
+    {
+      "source": "NASA/AIAA Langley mixing-recipe public record",
+      "identifier": "AIAA 2002-0543",
+      "role": "external corroboration of the 0.179 exp(1.72 phi) / rich-side exponential functional family and gap-scaled complete-mixing length"
+    }
+  ],
+  "evidence_classification": {
+    "eq_11_20_functional_form": "TEACHER_PRIMARY_EXTERNALLY_CORROBORATED_LINEAGE",
+    "C_m_25_60_range": "TEACHER_PRIMARY_LATER_SECONDARY_CORROBORATED_NOT_YET_PRIMARY_EXTERNAL_PAGE_VERIFIED",
+    "baseline_C_m_30": "PROJECT_SELECTED_WITHIN_TEACHER_SOURCE_RANGE"
+  },
+  "prohibited_promotions": [
+    "Do not claim C_m=30 is experimentally calibrated or literature-optimal.",
+    "Do not claim the exact C_m=25-60 interval is directly verified from Pulsonetti primary full text until a source page is inspected.",
+    "Do not replace teacher Eq.11.19-11.20 with a different public mixing recipe."
+  ],
+  "evidence_document": "docs/teacher_mixing_external_lineage.md"
+}
