@@ -111,3 +111,23 @@ def test_teacher_wall_ledger_keeps_heat_adapter_gated() -> None:
     assert record["readiness"]["teacher_to_repo_friction_convention_mapping_ready"] is True
     assert record["readiness"]["wall_heat_dimensional_adapter_ready"] is False
     assert record["scientific_boundaries"]["heat_coefficient_is_not_assumed_to_be_wall_heat_flux_W_per_m2"] is True
+
+
+def test_teacher_wall_correlations_are_positive_over_integrated_lean_domain() -> None:
+    # The integrated teacher composition path is restricted to phi <= 1 and
+    # physical combustion efficiency eta in [0, 1], hence z = phi*eta is in [0,1].
+    # Lock positivity of the literal source polynomials on that actual domain
+    # without clipping or changing their coefficients.
+    z = np.linspace(0.0, 1.0, 1001)
+    one = np.ones_like(z)
+
+    friction = friction_coefficient_raw(z, one)
+    heat = wall_heat_coefficient_raw(z, one)
+
+    assert np.all(np.isfinite(friction))
+    assert np.all(np.isfinite(heat))
+    assert np.min(friction) > 0.0
+    assert np.min(heat) > 0.0
+
+    # This check is a mathematical domain invariant, not a new empirical
+    # calibration range or a substitute for the source-gated Eq.11.26 adapter.
