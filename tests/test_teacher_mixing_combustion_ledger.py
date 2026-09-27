@@ -17,7 +17,7 @@ def _load() -> dict[str, object]:
 
 def test_teacher_closure_ledger_freezes_primary_source_and_equation_scope() -> None:
     record = _load()
-    assert record["schema_version"] == 1
+    assert record["schema_version"] == 2
     assert record["stage"] == "P11.3C"
     assert record["status"] == (
         "TEACHER_CH11_MIXING_LEAN_COMPOSITION_AND_EFFICIENCY_POLICY_VERIFIED_VARIABLE_COMPOSITION_COUPLING_GATED"
@@ -68,3 +68,21 @@ def test_teacher_closure_ledger_freezes_explicit_efficiency_policy_and_remaining
     assert readiness["combustion_efficiency_policy_ready"] is True
     assert readiness["variable_composition_solver_coupling_ready"] is False
     assert readiness["production_solver_replacement_ready"] is False
+
+
+def test_teacher_closure_ledger_preserves_history_and_current_integration() -> None:
+    record = _load()
+    historical = record["readiness"]
+    current = record["current_status"]
+
+    # Keep the original P11.3C development snapshot intact.
+    assert historical["variable_composition_solver_coupling_ready"] is False
+    assert historical["production_solver_replacement_ready"] is False
+
+    # Record the later verified integrated state separately.
+    assert current["variable_composition_solver_coupling_ready"] is True
+    assert current["h2_c2h4_integrated_teacher_path_ready"] is True
+    assert current["production_flux"] == "Rusanov"
+    assert current["c10h22_thermochemistry_ready"] is False
+    assert "C10H22 source-compatible thermochemistry" in current["source_gated_items"]
+    assert "variable-thermochemistry Steger-Warming production compatibility" in current["source_gated_items"]
