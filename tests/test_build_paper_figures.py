@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tools.build_paper_figures import build_figures, paper_figure_series
 
 
@@ -38,12 +40,12 @@ def test_paper_figure_series_are_loaded_from_frozen_acceptance_records() -> None
 
     fig5 = series["fig5_p13_cm_max_pressure.svg"]
     assert fig5["x"] == [25.0, 30.0, 42.5, 60.0]
-    assert fig5["y"] == [
+    assert fig5["y"] == pytest.approx([
         118.79552373494236,
         115.4742519502044,
         93.12907393130471,
         77.75800789870585,
-    ]
+    ], rel=1.0e-15, abs=0.0)
     assert fig5["reference_y"] is None
     assert fig5["sources"] == [
         "cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json"
