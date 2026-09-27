@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "stage": "P11.3C",
   "status": "TEACHER_CH11_MIXING_LEAN_COMPOSITION_AND_EFFICIENCY_POLICY_VERIFIED_VARIABLE_COMPOSITION_COUPLING_GATED",
   "primary_source": {
@@ -17,20 +17,36 @@
       "topic": "combustion efficiency from injected and residual fuel",
       "source_percent_form": "(m_fi - m_fr) / m_fi * 100%",
       "computational_fraction_form": "(m_fi - m_fr) / m_fi",
-      "physical_interval": [0.0, 1.0]
+      "physical_interval": [
+        0,
+        1
+      ]
     },
     "11.19": {
       "topic": "mixing efficiency correlations",
-      "branches": ["parallel injection", "normal injection", "strut injection"],
+      "branches": [
+        "parallel injection",
+        "normal injection",
+        "strut injection"
+      ],
       "source_ranges": {
-        "alpha": [0.17, 0.25],
-        "A": [1.77, 3.4]
+        "alpha": [
+          0.17,
+          0.25
+        ],
+        "A": [
+          1.77,
+          3.4
+        ]
       },
       "implementation_policy": "RETURN_RAW_EMPIRICAL_CORRELATION_WITHOUT_SILENT_CLIPPING"
     },
     "11.20": {
       "topic": "complete-mixing length",
-      "source_range_C_m": [25.0, 60.0],
+      "source_range_C_m": [
+        25,
+        60
+      ],
       "branch_condition": "phi0 <= 1 versus phi0 > 1"
     },
     "11.21-11.24": {
@@ -49,7 +65,11 @@
         "N2": 3.7274,
         "AR": 0.04592
       },
-      "fuel_branches": ["H2", "C10H22", "C2H4"]
+      "fuel_branches": [
+        "H2",
+        "C10H22",
+        "C2H4"
+      ]
     }
   },
   "project_adapter_policy": {
@@ -84,5 +104,22 @@
     "variable_composition_solver_coupling_ready": false,
     "production_solver_replacement_ready": false
   },
-  "next_gate": "Build and verify a per-cell H2/C2H4 composition-field compatibility layer using the frozen lean-composition equations and explicit efficiency adapter before modifying variable-composition fluxes or time marching."
+  "next_gate": "Build and verify a per-cell H2/C2H4 composition-field compatibility layer using the frozen lean-composition equations and explicit efficiency adapter before modifying variable-composition fluxes or time marching.",
+  "historical_stage_status": "TEACHER_CH11_MIXING_LEAN_COMPOSITION_AND_EFFICIENCY_POLICY_VERIFIED_VARIABLE_COMPOSITION_COUPLING_GATED",
+  "current_status": {
+    "variable_composition_solver_coupling_ready": true,
+    "h2_c2h4_integrated_teacher_path_ready": true,
+    "production_flux": "Rusanov",
+    "c10h22_thermochemistry_ready": false,
+    "source_gated_items": [
+      "C10H22 source-compatible thermochemistry",
+      "Eq.11.26 empirical-to-dimensional wall-heat mapping",
+      "variable-thermochemistry Steger-Warming production compatibility"
+    ],
+    "superseded_by": [
+      "cases/studies/data/teacher_reference_alignment.json",
+      "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json"
+    ]
+  },
+  "metadata_revision_note": "2026-09-27: preserved the original P11.3C readiness snapshot and added current H2/C2H4 integrated-path status. No Eq.11.18-11.29 formula, coefficient, or accepted numerical result changed."
 }
