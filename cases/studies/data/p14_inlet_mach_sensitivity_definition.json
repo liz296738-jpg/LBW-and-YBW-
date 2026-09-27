@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "classification": "P14_PROJECT_DEFINED_INLET_MACH_SENSITIVITY",
+  "source_reproduction": false,
+  "experimental_validation": false,
+  "scientific_question": "How does the accepted project-defined H2 teacher-path solution respond to prescribed supersonic inlet Mach number when inlet static p/T, dry-air composition, geometry, phi, injector location, mixing closure and numerical controls are frozen?",
+  "varied_parameter": {
+    "name": "target_inlet_Mach",
+    "sample_values": [
+      2,
+      2.2,
+      2.4,
+      2.6
+    ],
+    "role": "PROJECT_DEFINED_LITERATURE_ANCHORED_EVEN_GRID",
+    "supporting_context": "cases/studies/data/p14_inlet_mach_literature_context.json",
+    "teacher_admissible_range_claim": false
+  },
+  "boundary_parameterization": {
+    "frozen_static_pressure_Pa": 55000,
+    "frozen_static_temperature_K": 800,
+    "frozen_inlet_composition": "teacher H2 dry-air basis at phi=eta=0",
+    "velocity_rule": "u = M_target * sqrt(gamma(T,Y) * R(Y) * T)",
+    "density_rule": "rho = p/(R*T); invariant across target Mach because p/T/composition are frozen",
+    "air_mass_flow_rule": "m_dot_air = rho*u*A_in; therefore varies linearly with target Mach",
+    "equivalence_ratio": 0.2,
+    "fuel_mass_flow_rule": "m_dot_f = phi*f_st*m_dot_air; therefore changes proportionally with air mass flow while fuel/air ratio remains fixed",
+    "interpretation_boundary": "This is a fixed-static-state inlet-Mach sensitivity, not a fixed-total-pressure/total-temperature flight-Mach sweep."
+  },
+  "frozen_controls": {
+    "geometry": "P11.4 project-defined 0.40 m mild linear-divergence geometry",
+    "inlet_area_m2": 0.004,
+    "exit_area_m2": 0.005,
+    "combustor_height_m": 0.04,
+    "injector_x_m": 0.08,
+    "mixing_C_m": 30,
+    "injection_mode": "parallel",
+    "fuel": "H2",
+    "fuel_temperature_K": 450,
+    "fuel_axial_velocity_m_per_s": 120,
+    "wall_heat_gradient_J_per_kg_per_m": 0,
+    "production_flux": "Rusanov",
+    "time_integrator": "SSP-RK3",
+    "cfl": 0.5,
+    "teacher_eq_11_46_metric_project_tolerance": 0.00002,
+    "max_steps": 20000,
+    "cell_counts": [
+      20,
+      40
+    ]
+  },
+  "preregistered_algebraic_expectations": [
+    "At fixed inlet T and composition, sound speed is invariant across the study.",
+    "Derived inlet axial velocity is exactly proportional to target inlet Mach.",
+    "At fixed inlet p/T/composition/area, inlet density is invariant and inlet air mass flow is proportional to target Mach.",
+    "At fixed equivalence ratio, injected fuel mass flow is proportional to inlet air mass flow and fuel/air mass ratio remains invariant.",
+    "No monotonic Mach, pressure, temperature, convergence-step, or conservation-diagnostic response is assumed a priori for the coupled CFD solution."
+  ],
+  "numerical_design": {
+    "cell_counts": [
+      20,
+      40
+    ],
+    "grid_role": "robustness diagnostic only; no formal grid-independence/GCI claim",
+    "recorded_outputs": [
+      "actual inlet Mach",
+      "derived inlet velocity",
+      "inlet air mass flow",
+      "fuel mass source",
+      "teacher Eq.11.46 density-change metric",
+      "normalized residual",
+      "normalized mass/momentum/energy inventory diagnostics",
+      "minimum/maximum Mach",
+      "minimum/maximum pressure",
+      "minimum/maximum temperature"
+    ]
+  },
+  "status_policy": {
+    "accepted_point_statuses": [
+      "CONVERGED",
+      "FORWARD_FLOW_GUARD_TRIGGERED"
+    ],
+    "max_steps_is_accepted": false,
+    "guard_interpretation": "solver/model-domain inadmissible only; not unstart or a combustion-mode label"
+  },
+  "prohibited_claims": [
+    "flight-Mach performance law under fixed total conditions",
+    "experimental validation from the supporting literature",
+    "Cao Case 2 reproduction",
+    "universal inlet-Mach optimum",
+    "ramjet/scramjet/dual-mode/unstart classification from guard or extrema",
+    "formal grid independence from the 20/40 comparison"
+  ]
+}
