@@ -21,7 +21,7 @@ def _requirements_by_name(entries: list[dict]) -> dict[str, dict]:
 def test_current_readiness_record_is_explicitly_blocked() -> None:
     record = MODULE.build_readiness_record()
 
-    assert record["schema_version"] == 1
+    assert record["schema_version"] == 2
     assert record["stage"] == "P11.2B"
     assert record["artifact_kind"] == "formal-case-readiness"
     assert record["formal_case_ready"] is False
@@ -32,6 +32,11 @@ def test_current_readiness_record_is_explicitly_blocked() -> None:
         == "BLOCKED_PENDING_SOURCE_BACKED_ABSOLUTE_PROFILE_OR_SHAPE_PLUS_ENERGY"
     )
     assert record["blockers"] == ["no candidate_formal_cases declared"]
+    assert "historical Jin--Liu" in record["scope_note"]
+    nasa = record["later_nasa_burrows_kurkov_benchmark"]
+    assert nasa["benchmark_ready"] is True
+    assert nasa["formal_experimental_validation_ready"] is False
+    assert nasa["status"] == "FORMAL_REDUCED_ORDER_REFERENCE_BENCHMARK_ACCEPTED"
 
 
 def test_evidence_summary_closes_requirements_with_dedicated_support() -> None:
