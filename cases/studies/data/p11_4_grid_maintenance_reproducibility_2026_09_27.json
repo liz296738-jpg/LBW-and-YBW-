@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "record_kind": "P11_4_GRID_MAINTENANCE_REPRODUCIBILITY",
+  "comparison_target": "cases/studies/data/p11_4_grid_convergence_acceptance.json",
+  "rerun_provenance": {
+    "workflow": "P11.4 Three-Level Grid Audit",
+    "run_number": 10,
+    "run_id": 36312691382,
+    "head_sha": "77b7cae2583ce58f63608535024b6e7d369e44e8",
+    "conclusion": "success",
+    "aggregate_artifact_id": 10929971746,
+    "aggregate_artifact_name": "p11-4-grid-convergence",
+    "aggregate_artifact_zip_sha256": "4e2b8a43a9f0b04001f50830e948cb64eadd1505e1f901bb2edfd5270fa3a6e5",
+    "execution_policy": "20/40/80 frozen grid levels solved as independent jobs; aggregation consumed artifacts without rerunning CFD."
+  },
+  "reason": "Maintenance reproducibility check after exposing baseline mixing_C_m as an explicit parameter and parallelizing long CFD workflows.",
+  "comparison": {
+    "shared_acceptance_fields_exact_match": true,
+    "compared_level_fields": [
+      "cells",
+      "dx_m",
+      "converged",
+      "steps",
+      "density_change",
+      "normalized_residual",
+      "max_temperature_K",
+      "max_pressure_Pa",
+      "min_mach",
+      "max_mach"
+    ],
+    "compared_study_fields": [
+      "tolerance",
+      "successive_grid_changes"
+    ],
+    "grid_levels": [
+      20,
+      40,
+      80
+    ],
+    "interpretation": "No numerical drift was detected in fields shared with the original frozen acceptance. The original acceptance remains authoritative; this record adds maintenance/reproducibility provenance only."
+  },
+  "scientific_boundary": {
+    "changes_physics": false,
+    "changes_original_acceptance": false,
+    "formal_grid_independence_claim": false,
+    "experimental_validation_claim": false
+  }
+}
