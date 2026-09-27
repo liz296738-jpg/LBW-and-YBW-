@@ -8,7 +8,7 @@ Develop a quasi-one-dimensional compressible-flow CFD solver and reproducible st
 
 ## Current Status
 
-Current stage: **COURSE DELIVERABLE COMPLETE for the project-defined H2/P12 scope; source-reproduction and broader physical-classification blockers remain explicit.**
+Current stage: **COURSE DELIVERABLE COMPLETE for the project-defined H2/P12 scope; P13 teacher-range mixing sensitivity accepted; P14 inlet-Mach sensitivity in progress; source-reproduction and broader physical-classification blockers remain explicit.**
 
 The teacher-reference implementation path is substantially complete for the lean `H2` / `C2H4` branch. Accepted P11.4 evidence includes the clearly labelled `PROJECT_DEFINED_INTEGRATED_SMOKE_CASE`, teacher Eq. 11.46 convergence reporting, positive/source-valid states, a 20/40/80-cell grid trend, discrete conservation diagnostics, reproducible 80-cell profiles, and the explicit Cao Case 2 evidence gate.
 
@@ -17,6 +17,10 @@ The Cao Case 2 source identity and Table 2-2 inlet evidence are frozen. Formal r
 P12 has frozen the scoped Cao Eq. (3-2) thermal-throat criterion. The accepted project-defined H2 response sweep converges at `phi=0.10` and `phi=0.20` using the teacher Eq. 11.46 density-change metric with a project-selected numerical tolerance of `2e-5`. A composition-consistent warm-start continuation at 20 cells also converges at `phi=0.22` and `phi=0.24`; all accepted points remain on the scoped Eq. (3-2) scram side. At the same project-selected `2e-5` tolerance, `phi=0.26` triggers the preserved forward-flow guard and is recorded only as `solver/model-domain inadmissible`, with no physical mode label. The older `1e-4` near-sonic `phi=0.26` continuation evidence is superseded and is not accepted transition evidence.
 
 Grid-refined project-defined evidence separately records `phi=0.24` on the Eq. (3-2) scram side for 20/40/80 cells while `phi=0.26` is solver/model-domain inadmissible on all three grids. This is a grid-convergence trend/criterion application only; no grid-independent transition equivalence ratio is claimed.
+
+P13 has accepted the project-defined teacher Eq.11.20 `C_m` sensitivity over samples `25/30/42.5/60` on 20/40 grids. All eight points satisfy the frozen convergence/QA conditions. Maximum static pressure and maximum static temperature decrease across the sampled `C_m` sequence on both grids, while minimum Mach is explicitly not promoted as globally monotonic. No optimum `C_m`, experimental validation, Cao Case 2 reproduction, or formal grid-independence claim is made.
+
+P14 is currently preregistered and computing a fixed-static-state inlet-Mach sensitivity at `Ma=2.0/2.2/2.4/2.6` on 20/40 grids. Its literature-supported interval is engineering context only, not a teacher admissible range or validation interval. No P14 CFD conclusion is accepted until its dedicated workflow is reviewed and frozen.
 
 Final packaging acceptance is pinned to commit `fd7a51985685004319d6aaf83da72e99e947e68b`: ordinary Test #814 plus the P12 response-sweep, continuation, and 20/40/80 thermal-throat grid-sensitivity workflows all completed successfully on that exact commit. The closeout provenance is recorded in `docs/deliverable_readiness.md` and `cases/studies/data/course_deliverable_manifest.json`. This completion status applies only to the project-defined course deliverable and does not convert any unresolved source blocker into a source-backed claim.
 
@@ -47,7 +51,7 @@ python -m pip install -e ".[dev]"
 python tools/mentor_dashboard.py
 ```
 
-The local dashboard opens at `http://127.0.0.1:8765`; the deployed service uses the same Python entry point. It includes overview, H2 baseline, 20/40/80 grid trend, normalized conservation diagnostics, P12 response/continuation evidence, provenance/blockers, controlled run buttons, downloadable run artifacts, runtime provenance, and SHA-256 integrity records. Render-generated artifacts are transient and do not become frozen evidence until intentionally incorporated into the repository evidence workflow. See `docs/mentor_dashboard.md` for the scientific/UI boundary and usage details.
+The local dashboard opens at `http://127.0.0.1:8765`; the deployed service uses the same Python entry point. It includes overview, H2 baseline, 20/40/80 grid trend, normalized conservation diagnostics, P12 response/continuation evidence, the accepted P13 `C_m` sensitivity as a read-only result, provenance/blockers, controlled run buttons, downloadable run artifacts, runtime provenance, and SHA-256 integrity records. Render-generated artifacts are transient and do not become frozen evidence until intentionally incorporated into the repository evidence workflow. See `docs/mentor_dashboard.md` for the scientific/UI boundary and usage details.
 
 ## Key Evidence Records
 
@@ -69,6 +73,8 @@ The local dashboard opens at `http://127.0.0.1:8765`; the deployed service uses 
 - `cases/studies/data/p12_project_defined_response_sweep_acceptance.json`
 - `cases/studies/data/p12_thermal_throat_continuation_acceptance.json`
 - `cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`
+- `cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json`
+- `cases/studies/data/p14_inlet_mach_sensitivity_definition.json` — preregistered P14 definition; not an acceptance record
 - `cases/studies/data/p12_cao_mode_criterion_source.json`
 - `cases/studies/data/teacher_cao_case2_source.json`
 - `cases/studies/data/teacher_reference_alignment.json`
