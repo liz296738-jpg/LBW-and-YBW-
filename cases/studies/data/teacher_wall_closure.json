@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "stage": "P11.3D",
   "status": "TEACHER_WALL_FRICTION_AND_HEAT_COEFFICIENTS_TRANSCRIBED_FRICTION_MAPPING_READY_HEAT_ADAPTER_GATED",
   "primary_source": {
@@ -20,13 +20,23 @@
     "11.25": {
       "topic": "wall friction coefficient",
       "independent_variable": "z = phi*eta",
-      "coefficients_c0_to_c3": [0.0018, 0.001958, 0.00927, -0.0088525],
+      "coefficients_c0_to_c3": [
+        0.0018,
+        0.001958,
+        0.00927,
+        -0.0088525
+      ],
       "implementation_policy": "RETURN_RAW_EMPIRICAL_POLYNOMIAL_WITHOUT_CLIPPING"
     },
     "11.26": {
       "topic": "wall heat coefficient",
       "independent_variable": "z = phi*eta",
-      "coefficients_c0_to_c3": [0.0009, 0.001125, 0.00594, -0.00469],
+      "coefficients_c0_to_c3": [
+        0.0009,
+        0.001125,
+        0.00594,
+        -0.00469
+      ],
       "implementation_policy": "RETURN_RAW_EMPIRICAL_POLYNOMIAL_ONLY"
     },
     "11.38_friction_term": {
@@ -54,5 +64,23 @@
     "wall_heat_dimensional_adapter_ready": false,
     "production_solver_replacement_ready": false
   },
-  "next_gate": "Use f_D=4*f only through an explicit teacher adapter for forward-flow cases. Recover or derive a source-traceable relation between Eq.11.26 q(x) and Eq.11.38 d(delta_q)/dx before any teacher wall-heat coupling."
+  "next_gate": "Use f_D=4*f only through an explicit teacher adapter for forward-flow cases. Recover or derive a source-traceable relation between Eq.11.26 q(x) and Eq.11.38 d(delta_q)/dx before any teacher wall-heat coupling.",
+  "historical_stage_status": "TEACHER_WALL_FRICTION_AND_HEAT_COEFFICIENTS_TRANSCRIBED_FRICTION_MAPPING_READY_HEAT_ADAPTER_GATED",
+  "current_status": {
+    "teacher_friction_integrated_in_production_path": true,
+    "friction_mapping": "f_D = 4*f for the teacher forward-flow convention with D_h=D_e",
+    "wall_heat_empirical_to_dimensional_adapter_ready": false,
+    "explicit_dimensional_wall_heat_input_channel_ready": true,
+    "production_flux": "Rusanov",
+    "source_gated_items": [
+      "Eq.11.26 empirical-to-dimensional d(delta q)/dx mapping",
+      "variable-thermochemistry Steger-Warming production compatibility"
+    ],
+    "superseded_by": [
+      "cases/studies/data/teacher_reference_alignment.json",
+      "cases/studies/data/teacher_eq11_source_vector.json",
+      "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json"
+    ]
+  },
+  "metadata_revision_note": "2026-09-27: preserved the original P11.3D readiness snapshot and added current split status: Eq.11.25 friction is integrated, while the Eq.11.26 empirical-to-dimensional wall-heat mapping remains source-gated. No coefficient or formula changed."
 }
