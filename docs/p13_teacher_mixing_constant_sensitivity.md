@@ -45,6 +45,19 @@ Thus, at a fixed downstream position and with every other baseline input fixed:
 
 These are algebraic closure checks. They are **not predictions of monotonic Mach, pressure, or temperature response**, because the coupled quasi-1D solution also contains area, friction, injection, thermochemistry, and nonlinear conservation effects.
 
+### Baseline geometry implication from Eq.11.20
+
+For the frozen baseline `phi=0.20` and combustor height `b=0.040 m`, the lean Eq.11.20 branch gives:
+
+| C_m | complete-mixing length L_m (m) | relation to 0.32 m injector-to-exit distance |
+| ---: | ---: | --- |
+| 25.0 | 0.25249 | complete mixing can be reached before the geometric exit |
+| 30.0 | 0.30299 | complete mixing can be reached only near the geometric exit |
+| 42.5 | 0.42924 | complete mixing is not reached within the current combustor length |
+| 60.0 | 0.60598 | complete mixing is not reached within the current combustor length |
+
+The available geometric distance is `0.40 - 0.08 = 0.32 m`. This comparison follows directly from the frozen project geometry and the teacher Eq.11.20 closure; it does not use any P13 CFD result. It therefore provides a pre-solution explanation for why the lower and upper parts of the `C_m` range may behave differently, while still making no monotonic prediction for coupled Mach, pressure, or temperature extrema.
+
 ## Frozen controls
 
 The study reuses the P11.4 baseline input ledger:
