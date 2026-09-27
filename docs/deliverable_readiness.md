@@ -11,6 +11,7 @@ This checklist separates **implemented/accepted evidence** from the stronger cla
 - [x] P12 project-defined equivalence-ratio response evidence is machine-readable (`cases/studies/data/p12_project_defined_response_sweep_acceptance.json`).
 - [x] The stricter project-selected `2e-5` tolerance continuation evidence using the Eq. 11.46 metric is frozen (`cases/studies/data/p12_thermal_throat_continuation_acceptance.json`).
 - [x] P12 thermal-throat grid-sensitivity evidence is frozen (`cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json`).
+- [x] P13 teacher-range `C_m` sensitivity evidence is frozen (`cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json`); it remains a project-defined sensitivity, not calibration or experimental validation.
 - [x] Forward-flow guard failures are recorded as `solver/model-domain inadmissible`; they are not interpreted as unstart or combustion-mode transitions.
 - [x] Source/assumption boundaries and known blockers are maintained in `README.md`, `docs/development_roadmap.md`, `docs/teacher_reference_alignment.md`, and the evidence records.
 
@@ -42,3 +43,7 @@ Packaging completion does not remove source blockers. In particular:
 - The integrated variable-thermochemistry production path remains Rusanov unless a defensible source resolves the Steger-Warming energy-reference/epsilon issues.
 - Eq. 11.26 is not converted into a dimensional wall-heat source without a defensible source mapping.
 - The scoped Cao Eq. (3-2) thermal-throat criterion must not be generalized into broader ramjet/scramjet/dual-mode/unstart labels without the required source-compatible observables and geometry.
+
+## Post-deliverable research extensions
+
+- P14 inlet-Mach sensitivity is preregistered and currently in progress. It is an extension of the already complete project-defined course deliverable, not a prerequisite that reopens the packaging acceptance.
