@@ -10,7 +10,7 @@ The teacher-provided Chapter 11 material and the two Cao Ruifeng theses remain t
 
 The defensible H2/C2H4 teacher path is now integrated and regression-tested on the production Rusanov route. Implemented teacher-aligned elements include quasi-1D conservative finite-volume equations, variable area, SSP/TVD-RK3, CFL stepping, static p/T/u inlet and zero-gradient outlet semantics, Eq. 11.46 maximum relative-density convergence reporting, source-backed variable thermochemistry, lean H2/C2H4 algebraic composition closure, Eqs. 11.18-11.24 mixing/stoichiometric relations, Eq. 11.25 friction, and Eq. 11.38 fuel mass/momentum/total-enthalpy source channels.
 
-The accepted `PROJECT_DEFINED_INTEGRATED_SMOKE_CASE` is implementation/V&V evidence, not a source reproduction. Its 20/40/80-cell grid audit and discrete conservation audit are accepted. Mass inventory uses the existing 0.5% inlet-flow gate; momentum and energy inventory rates remain dimensionless diagnostics without invented acceptance thresholds.
+The accepted `PROJECT_DEFINED_INTEGRATED_SMOKE_CASE` is implementation/V&V evidence, not a source reproduction. Its 20/40/80-cell grid audit and discrete conservation audit are accepted. Mass inventory uses the existing **project-defined** 0.5% inlet-flow QA gate; this numeric value is not attributed to the teacher, a paper, NASA, or ASME. Momentum and energy inventory rates remain dimensionless diagnostics without invented acceptance thresholds.
 
 ## Numerical-path boundary
 
