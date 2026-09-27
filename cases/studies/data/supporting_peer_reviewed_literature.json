@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "record_kind": "supporting-peer-reviewed-scramjet-cross-validation",
+  "role": "SUPPORTING_ONLY_NOT_PRIMARY_TEACHER_AUTHORITY",
+  "claim_policy": {
+    "may_support": [
+      "quasi-1D scramjet model-family legitimacy",
+      "physical relevance of area change, wall friction, mass/fuel injection, mixing, wall heat transfer, and chemistry",
+      "need for experiment/CFD comparison in reduced-order validation",
+      "need for isolator/shock-train physics for broader dual-mode classification"
+    ],
+    "may_not_support": [
+      "replacement of teacher Eqs.11.18-11.46",
+      "teacher Eq.11.26 dimensional mapping",
+      "variable-thermochemistry Steger-Warming correction or Eq.11.44 epsilon",
+      "Cao Case 2 missing A(x), Yi(x), or source/injection spatial convention",
+      "project parameter tuning solely to match public literature"
+    ]
+  },
+  "papers": [
+    {
+      "title": "Quasi-One-Dimensional Model of Hydrogen-Fueled Scramjet Combustors",
+      "authors": [
+        "Cristian Birzer",
+        "Con J. Doolan"
+      ],
+      "year": 2009,
+      "journal": "Journal of Propulsion and Power",
+      "volume": "25",
+      "issue": "6",
+      "pages": "1220-1225",
+      "doi": "10.2514/1.43716",
+      "role": "quasi-1D H2 scramjet model with skin friction/wall heat transfer and experimental validation"
+    },
+    {
+      "title": "Quasi-One-Dimensional Multimodes Analysis for Dual-Mode Scramjet",
+      "authors": [
+        "L. Tian",
+        "L.-H. Chen",
+        "Q. Chen",
+        "F. Li",
+        "X. Chang"
+      ],
+      "year": 2014,
+      "journal": "Journal of Propulsion and Power",
+      "volume": "30",
+      "issue": "6",
+      "pages": "1559-1567",
+      "doi": "10.2514/1.B35177",
+      "role": "multimode quasi-1D model with separate precombustion shock-train/isolator treatment and experimental pressure comparison"
+    },
+    {
+      "title": "Quasi-One-Dimensional Model of Scramjet Combustor Coupled with Regenerative Cooling",
+      "authors": [
+        "D. Zhang",
+        "Y. Feng",
+        "S.-L. Zhang",
+        "J. Qin",
+        "K.-L. Cheng",
+        "W. Bao",
+        "D. Yu"
+      ],
+      "year": 2016,
+      "journal": "Journal of Propulsion and Power",
+      "volume": "32",
+      "issue": "3",
+      "pages": "687-697",
+      "doi": "10.2514/1.B35887",
+      "role": "wall heat transfer, sonic fuel injection, mixing efficiency, finite-rate chemistry in quasi-1D combustor model"
+    },
+    {
+      "title": "Reduced-Order Modeling of Turbulent Reacting Flows with Application to Ramjets and Scramjets",
+      "authors": [
+        "S. M. Torrez",
+        "J. F. Driscoll",
+        "M. Ihme",
+        "M. A. Fotia"
+      ],
+      "year": 2011,
+      "journal": "Journal of Propulsion and Power",
+      "volume": "27",
+      "issue": "2",
+      "pages": "371-382",
+      "doi": "10.2514/1.50272",
+      "role": "reduced-order reacting-flow model compared with CFD and experiment"
+    }
+  ],
+  "evidence_document": "docs/peer_reviewed_cross_validation.md"
+}
