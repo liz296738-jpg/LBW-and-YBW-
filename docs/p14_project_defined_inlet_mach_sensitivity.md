@@ -41,7 +41,7 @@ P14 reuses the P11.4 project-defined H2 controls:
 - 0.40 m mild linear-divergence combustor;
 - 0.0040 to 0.0050 m2 area;
 - 0.040 m fixed height;
-- injector at 0.08 m;
+- nominal injector target coordinate 0.08 m, realized at the frozen nearest cell center (0.070 m on 20 cells and 0.075 m on 40 cells);
 - H2 fuel, `phi=0.20`;
 - `C_m=30`, parallel-injection branch;
 - injected fuel temperature 450 K;
