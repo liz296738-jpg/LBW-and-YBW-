@@ -152,13 +152,13 @@ f_D=4f,\qquad D_h=D_e .
 
 ### 4.2 Steger-Warming 路径
 
-教师 Eq.11.42-11.44 的 Steger-Warming Flux Vector Splitting 已完成公式转录和常比热理想气体极限回归。问题在于：当前生产模型使用 \(c_p(T,Y)\) 与绝对组分能量，而经典能量分裂在这一状态定义下不能直接保证与物理 Euler 能量通量严格重构。
+教师 Eq.11.42-11.44 的 Steger-Warming Flux Vector Splitting 已完成公式转录和常比热理想气体极限回归；其经典通量向量分裂方法源自 Steger 与 Warming 的工作[20]。问题在于：当前生产模型使用 \(c_p(T,Y)\) 与绝对组分能量，而经典能量分裂在这一状态定义下不能直接保证与物理 Euler 能量通量严格重构。
 
 外部文献表明，real-gas、多组分和非平衡条件下确实存在广义 Steger-Warming/FVS 理论[12-15]。因此当前问题不是“学术界不存在方法”，而是尚未证明这些广义公式与本项目三方程+代数组分闭合的状态向量、能量参考和教师 Eq.11.44 数值平滑策略完全兼容。在完成专门推导和验证前，生产路径继续使用 Rusanov。
 
 ### 4.3 时间推进与稳态判据
 
-时间积分采用三阶 SSP-RK3。教师 Eq.11.45 的谱半径项包含
+时间积分采用三阶 SSP-RK3；其 TVD/SSP Runge-Kutta 理论可参见 Gottlieb 与 Shu 的经典分析[21]。教师 Eq.11.45 的谱半径项包含
 
 \[
 0.5\Delta x/\max(|u|+c),
@@ -418,6 +418,10 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 [18] Honnet S, Seshadri K, Niemann U, Peters N. A surrogate fuel for kerosene[J]. Proceedings of the Combustion Institute, 2009, 32(1): 485-492. DOI: 10.1016/j.proci.2008.06.218.
 
 [19] Singh D, Nishiie T, Qiao L. Experimental and Kinetic Modeling Study of the Combustion of n-Decane, Jet-A, and S-8 in Laminar Premixed Flames[J]. Combustion Science and Technology, 2011, 183(10): 1002-1026. DOI: 10.1080/00102202.2011.575420.
+
+[20] Steger J L, Warming R F. Flux vector splitting of the inviscid gasdynamic equations with application to finite-difference methods[J]. Journal of Computational Physics, 1981, 40: 263-293.
+
+[21] Gottlieb S, Shu C W. Total variation diminishing Runge-Kutta schemes[J]. Mathematics of Computation, 1998, 67: 73-85.
 
 ---
 
