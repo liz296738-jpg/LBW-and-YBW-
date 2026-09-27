@@ -84,5 +84,15 @@
       }
     ],
     "closeout_note": "A later documentation/provenance-only closeout commit may record this acceptance; the accepted numerical/package content is pinned to accepted_packaging_commit."
-  }
+  },
+  "publication": {
+    "canonical_paper": "paper/main_paper_zh.md",
+    "evidence_map": "paper/evidence_map.json",
+    "figure_generator": "tools/build_paper_figures.py",
+    "policy": "The paper is a maintained presentation layer over frozen repository evidence. In-progress studies are not promoted to conclusions until reviewed acceptance evidence is committed."
+  },
+  "extension_gates": [
+    "teacher-path C10H22 source-compatible thermochemistry remains blocked; external n-decane candidates are a separate future-model route",
+    "P13 C_m sensitivity remains in progress until its reviewed acceptance record is frozen"
+  ]
 }
