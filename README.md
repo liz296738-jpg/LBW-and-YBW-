@@ -52,6 +52,8 @@ The local dashboard opens at `http://127.0.0.1:8765`; the deployed service uses 
 ## Key Evidence Records
 
 - `docs/verification_methodology.md` — verification/validation separation, grid-refinement and GCI claim policy, and primary public references
+- `docs/peer_reviewed_cross_validation.md` — supporting peer-reviewed scramjet model-family cross-validation with explicit non-substitution boundaries
+- `cases/studies/data/supporting_peer_reviewed_literature.json` — machine-readable literature-role ledger
 - `docs/development_roadmap.md`
 - `docs/teacher_reference_alignment.md`
 - `docs/teacher_steger_warming_source_audit.md`
