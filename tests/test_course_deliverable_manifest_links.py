@@ -20,11 +20,18 @@ def test_deliverable_manifest_links_canonical_publication_files() -> None:
     assert record["course_project_status"] == "DELIVERABLE_COMPLETE"
 
 
-def test_in_progress_extensions_are_not_silently_promoted() -> None:
+def test_extension_gates_and_accepted_p13_are_separated() -> None:
     record = json.loads(MANIFEST.read_text(encoding="utf-8"))
     gates = " ".join(record["extension_gates"])
 
     assert "C10H22" in gates
     assert "separate future-model route" in gates
-    assert "P13" in gates
-    assert "in progress" in gates
+    assert "P13" not in gates
+
+    acceptance_records = {
+        row["acceptance_record"] for row in record["evidence"]
+    }
+    assert (
+        "cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json"
+        in acceptance_records
+    )
