@@ -107,12 +107,16 @@
         "docs/c10h22_external_thermochemistry_candidates.md"
       ]
     },
-    "11_p13_in_progress": {
-      "claim_scope": "Protocol/source-range only; no numerical conclusion until accepted evidence exists",
-      "status": "IN_PROGRESS_NOT_ACCEPTED",
+    "7.4_p13_cm_sensitivity": {
+      "claim_scope": "Accepted project-defined sensitivity over the teacher Eq.11.20 C_m source range; no optimum, experimental validation, Cao Case 2 reproduction, or grid-independence claim",
+      "status": "ACCEPTED_PROJECT_DEFINED_SENSITIVITY",
       "evidence": [
         "cases/studies/data/p13_teacher_mixing_constant_sensitivity_definition.json",
+        "cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json",
         "docs/p13_teacher_mixing_constant_sensitivity.md"
+      ],
+      "figures": [
+        "paper/assets/fig5_p13_cm_max_pressure.svg"
       ]
     }
   }
