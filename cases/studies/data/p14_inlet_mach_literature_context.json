@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "record_kind": "p14-inlet-mach-literature-context",
+  "role": "SUPPORTING_RANGE_CONTEXT_NOT_SOURCE_REPRODUCTION",
+  "primary_project_authority": "Teacher Chapter 11 plus Cao 2016 remain primary for the project physics; external papers only support the engineering relevance of the sampled inlet-Mach interval.",
+  "sources": [
+    {
+      "source_type": "TEACHER_PROJECT_SOURCE",
+      "authors": [
+        "曹瑞峰"
+      ],
+      "year": 2016,
+      "title": "超燃冲压发动机燃烧模态转换及其控制方法研究",
+      "locator": "2.5.4.2 算例2 / 表2-2",
+      "relevant_fact": "source-reported isolator entrance Mach = 2.12 for H2 Case 2",
+      "boundary": "Different vitiated inlet composition and unresolved A(x)/Yi(x)/source-spatial inputs prevent formal reproduction."
+    },
+    {
+      "source_type": "PEER_REVIEWED_SUPPORTING_CONTEXT",
+      "authors": [
+        "Biswadip Shome"
+      ],
+      "year": 2025,
+      "title": "Closed-form analytical method for conceptual design and optimization of scramjet combustor",
+      "journal": "Physics of Fluids",
+      "doi": "10.1063/5.0267063",
+      "relevant_fact": "The abstract reports comparison for an H2-air scramjet isolator-combustor at inlet Mach 2 and equivalence ratio 0.2.",
+      "boundary": "Different model/geometry; used only to support the engineering relevance of a Mach-2 lower anchor."
+    },
+    {
+      "source_type": "PEER_REVIEWED_EXPERIMENTAL_CONTEXT",
+      "authors": [
+        "Jong-Ryul Byun",
+        "Hojoong Choi"
+      ],
+      "year": 2026,
+      "title": "Effects of Entrance Mach Number and Fueling Distribution in a Cavity-Based Scramjet Combustor",
+      "journal": "Journal of Propulsion and Power",
+      "volume": "42",
+      "issue": "4",
+      "pages": "558-573",
+      "doi": "10.2514/1.B39243",
+      "relevant_fact": "Experiments compare isolator entrance Mach numbers 2.2, 2.4, and 2.6.",
+      "boundary": "Cavity geometry and gaseous surrogate fuel differ from the current H2 project-defined baseline; not a validation dataset for P14."
+    }
+  ],
+  "project_consequence": {
+    "engineering_context_interval": [
+      2,
+      2.6
+    ],
+    "interval_is_teacher_admissible_range": false,
+    "interval_is_validation_range": false,
+    "sample_values": [
+      2,
+      2.2,
+      2.4,
+      2.6
+    ],
+    "sample_design": "PROJECT_DEFINED_LITERATURE_ANCHORED_EVEN_GRID",
+    "claim": "The literature establishes that inlet/isolator Mach variation in this neighborhood is an engineering-relevant scramjet variable. It does not prescribe the current project's geometry, state, or expected response."
+  }
+}
