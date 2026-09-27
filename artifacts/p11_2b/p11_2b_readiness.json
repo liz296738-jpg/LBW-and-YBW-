@@ -55,7 +55,7 @@
         "requirement": "study_layer_radial_area_law",
         "revision_policy": "A higher-authority primary figure or author dataset must override this interpretation if contradictory.",
         "status": "RESOLVED_SOURCE_CORROBORATED_INTERPRETATION",
-        "wall_divergence_angle_deg": 2.0
+        "wall_divergence_angle_deg": 2
       },
       {
         "basis": "Jin Eqs. (9)-(10) use 4 Cf dx/D and explicitly cite Shapiro [51]; Shapiro defines the duct friction coefficient as wall shear divided by dynamic head. Equating that wall force to the repository Darcy source yields f_D=4 Cf.",
@@ -69,7 +69,15 @@
   },
   "formal_case_ready": false,
   "ready_candidate_count": 0,
-  "schema_version": 1,
+  "schema_version": 2,
   "source_ledger": "cases/studies/data/p11_2b_heat_release_model_source.json",
-  "stage": "P11.2B"
+  "stage": "P11.2B",
+  "scope_note": "This record is the historical Jin--Liu source-backed formal-case gate. formal_case_ready=false does not mean the separate NASA Burrows--Kurkov reduced-order computational-reference benchmark is unaccepted.",
+  "later_nasa_burrows_kurkov_benchmark": {
+    "acceptance_record": "cases/studies/data/p11_2b_nasa_bk_benchmark_acceptance.json",
+    "status": "FORMAL_REDUCED_ORDER_REFERENCE_BENCHMARK_ACCEPTED",
+    "benchmark_ready": true,
+    "formal_experimental_validation_ready": false,
+    "claim_boundary": "Accepted as a reduced-order computational-reference benchmark; not promoted to independent experimental bulk-state validation."
+  }
 }
