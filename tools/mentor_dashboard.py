@@ -135,8 +135,9 @@ def build_summary() -> dict[str, Any]:
             "forward_flow_guard_meaning": "solver/model-domain inadmissible",
             "forward_flow_guard_is_unstart": False,
             "normalized_residual_role": (
-                "independent diagnostic only; teacher Eq.11.46 density change "
-                "is the authoritative steady-state gate"
+                "independent diagnostic only; teacher Eq.11.46 defines the "
+                "steady-state density-change metric and each study freezes "
+                "its numerical tolerance separately"
             ),
             "grid_claim": (
                 "grid-convergence trend only; no asymptotic GCI/grid-independence claim"
