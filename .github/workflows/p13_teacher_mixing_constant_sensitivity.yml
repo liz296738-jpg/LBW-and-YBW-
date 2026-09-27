@@ -19,13 +19,15 @@ on:
   workflow_dispatch:
 
 jobs:
-  sensitivity:
+  solve-point:
+    name: C_m=${{ matrix.C_m }}, N=${{ matrix.cells }}
     runs-on: ubuntu-24.04
-    # Eight CFD points are solved sequentially in this workflow. The previous
-    # 45-minute cap cancelled scientifically valid long runs before validation.
-    # Extending the wall-clock allowance changes no model, input, tolerance, or
-    # acceptance rule; it only permits the frozen study to finish.
-    timeout-minutes: 120
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        C_m: ['25.0', '30.0', '42.5', '60.0']
+        cells: [20, 40]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -33,13 +35,86 @@ jobs:
           python-version: '3.11.11'
       - run: python -m pip install --upgrade pip
       - run: pip install -e '.[dev]'
-      - name: Run teacher-range C_m sensitivity study
-        run: |
-          python -m cases.studies.p13_teacher_mixing_constant_sensitivity \
-            --output p13_teacher_mixing_constant_sensitivity.json
-      - name: Validate scientific and numerical boundaries
+      - name: Run one frozen sensitivity point
+        env:
+          C_M: ${{ matrix.C_m }}
+          CELLS: ${{ matrix.cells }}
         run: |
           python - <<'PY'
+          from dataclasses import asdict
+          import json
+          import os
+          from pathlib import Path
+
+          from cases.studies import p11_4_project_defined_h2_smoke as baseline
+          from cases.studies import p13_teacher_mixing_constant_sensitivity as study
+
+          C_m = float(os.environ["C_M"])
+          cells = int(os.environ["CELLS"])
+          point = study.run_point(C_m, cells)
+
+          allowed = {study.STATUS_CONVERGED, study.STATUS_FORWARD_FLOW_GUARD}
+          if point.status not in allowed:
+              raise SystemExit(
+                  f"unexpected P13 status at C_m={C_m}, cells={cells}: {point.status}"
+              )
+          if C_m == baseline.MIXING_C_M and point.status != study.STATUS_CONVERGED:
+              raise SystemExit(
+                  f"accepted baseline C_m=30 failed at {cells} cells"
+              )
+          if point.status == study.STATUS_CONVERGED:
+              if not point.converged:
+                  raise SystemExit("CONVERGED point has converged=false")
+              if point.density_change > baseline.DEFAULT_DENSITY_CHANGE_TOLERANCE:
+                  raise SystemExit(
+                      "project tolerance on teacher Eq.11.46 metric failed"
+                  )
+              if point.min_pressure_Pa <= 0.0 or point.min_temperature_K <= 0.0:
+                  raise SystemExit("converged point has non-positive physical state")
+              if point.mass_inventory_relative_to_inlet > 5.0e-3:
+                  raise SystemExit(
+                      "project-defined 0.5% mass-inventory QA gate failed"
+                  )
+          else:
+              if point.converged or not point.note:
+                  raise SystemExit("guarded point metadata is inconsistent")
+              if "forward axial flow" not in point.note:
+                  raise SystemExit("guarded point does not preserve existing guard")
+
+          safe_C_m = os.environ["C_M"].replace(".", "p")
+          output = Path(f"p13_point_Cm_{safe_C_m}_N_{cells}.json")
+          output.write_text(
+              json.dumps(asdict(point), indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(output.read_text(encoding="utf-8"))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p13-point-Cm-${{ matrix.C_m }}-N-${{ matrix.cells }}
+          path: p13_point_*.json
+
+  aggregate:
+    name: Aggregate P13 evidence
+    needs: solve-point
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11.11'
+      - run: python -m pip install --upgrade pip
+      - run: pip install -e '.[dev]'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: p13-point-*
+          path: p13-points
+          merge-multiple: true
+      - name: Aggregate and validate without rerunning CFD
+        run: |
+          python - <<'PY'
+          from dataclasses import asdict
           import json
           import math
           from pathlib import Path
@@ -47,101 +122,174 @@ jobs:
           from cases.studies import p11_4_project_defined_h2_smoke as baseline
           from cases.studies import p13_teacher_mixing_constant_sensitivity as study
 
-          payload = json.loads(
-              Path('p13_teacher_mixing_constant_sensitivity.json').read_text(
-                  encoding='utf-8'
-              )
-          )
-
-          if payload['classification'] != study.CASE_CLASSIFICATION:
-              raise SystemExit('classification drifted')
-          if payload['not_a_source_reproduction'] is not True:
-              raise SystemExit('P13 must remain explicitly not a source reproduction')
-          if payload['varied_parameter']['source_range'] != [25.0, 60.0]:
-              raise SystemExit('teacher C_m source range drifted')
-          if payload['varied_parameter']['sample_values'] != [25.0, 30.0, 42.5, 60.0]:
-              raise SystemExit('project sample design drifted')
-
-          points = payload['points']
+          files = sorted(Path("p13-points").glob("p13_point_*.json"))
           expected = {
               (C_m, cells)
               for C_m in study.PROJECT_SAMPLE_VALUES
               for cells in study.PROJECT_CELL_COUNTS
           }
-          actual = {(row['mixing_C_m'], row['cells']) for row in points}
-          if actual != expected or len(points) != len(expected):
-              raise SystemExit('P13 case matrix is incomplete')
+          if len(files) != len(expected):
+              raise SystemExit(
+                  f"expected {len(expected)} point artifacts, found {len(files)}"
+              )
+
+          points = [
+              study.MixingConstantPoint(
+                  **json.loads(path.read_text(encoding="utf-8"))
+              )
+              for path in files
+          ]
+          actual = {(row.mixing_C_m, row.cells) for row in points}
+          if actual != expected:
+              raise SystemExit("P13 point-artifact matrix is incomplete or duplicated")
+          points.sort(key=lambda row: (row.mixing_C_m, row.cells))
 
           allowed = {study.STATUS_CONVERGED, study.STATUS_FORWARD_FLOW_GUARD}
-          if any(row['status'] not in allowed for row in points):
-              raise SystemExit('P13 produced MAX_STEPS or another unexpected status')
+          if any(row.status not in allowed for row in points):
+              raise SystemExit("P13 contains an unexpected point status")
 
-          # The already accepted project baseline must remain converged on both
-          # sensitivity grids. Other source-range points may be guarded, but are
-          # never converted into physical mode labels.
           for cells in study.PROJECT_CELL_COUNTS:
               baseline_row = next(
                   row for row in points
-                  if row['mixing_C_m'] == baseline.MIXING_C_M and row['cells'] == cells
+                  if row.mixing_C_m == baseline.MIXING_C_M and row.cells == cells
               )
-              if baseline_row['status'] != study.STATUS_CONVERGED:
-                  raise SystemExit(f'baseline C_m=30 failed at {cells} cells')
+              if baseline_row.status != study.STATUS_CONVERGED:
+                  raise SystemExit(f"baseline C_m=30 failed at {cells} cells")
 
-          for row in points:
-              if row['status'] == study.STATUS_FORWARD_FLOW_GUARD:
-                  if row['converged'] or not row['note']:
-                      raise SystemExit('guarded point metadata is inconsistent')
-                  if 'forward axial flow' not in row['note']:
-                      raise SystemExit('guarded point does not preserve the existing guard')
-                  continue
-
-              if row['converged'] is not True:
-                  raise SystemExit('CONVERGED point has converged=false')
-              if row['density_change'] > baseline.DEFAULT_DENSITY_CHANGE_TOLERANCE:
-                  raise SystemExit('project tolerance on teacher Eq.11.46 metric failed')
-              if not math.isfinite(row['normalized_residual']) or row['normalized_residual'] < 0.0:
-                  raise SystemExit('normalized residual diagnostic is invalid')
-              if row['mass_inventory_relative_to_inlet'] > 5.0e-3:
-                  raise SystemExit('project-defined 0.5% mass-inventory QA gate failed')
-              for key in (
-                  'momentum_inventory_relative_to_inlet',
-                  'energy_inventory_relative_to_inlet',
-              ):
-                  value = row[key]
-                  if not math.isfinite(value) or value < 0.0:
-                      raise SystemExit(f'{key} diagnostic is invalid')
-              if row['min_pressure_Pa'] <= 0.0 or row['min_temperature_K'] <= 0.0:
-                  raise SystemExit('converged point contains a non-positive physical state')
-              if not all(math.isfinite(row[key]) for key in (
-                  'min_mach', 'max_mach', 'max_pressure_Pa', 'max_temperature_K'
-              )):
-                  raise SystemExit('converged output contains a non-finite scalar')
-
-          # Fuel source must be invariant to C_m at fixed grid because C_m changes
-          # the mixing closure, not the prescribed injected mass flow.
-          for cells in study.PROJECT_CELL_COUNTS:
               fuel = [
-                  row['fuel_mass_source_kg_per_s']
+                  row.fuel_mass_source_kg_per_s
                   for row in points
-                  if row['cells'] == cells
+                  if row.cells == cells
               ]
               if max(fuel) - min(fuel) > 1.0e-14:
-                  raise SystemExit('fuel injection strength changed during C_m sensitivity')
+                  raise SystemExit(
+                      "fuel injection strength changed during C_m sensitivity"
+                  )
 
-          for row in payload['grid_changes']:
-              if row['available']:
-                  for key in (
-                      'min_mach_relative_change',
-                      'max_pressure_relative_change',
-                      'max_temperature_relative_change',
-                  ):
-                      if not math.isfinite(row[key]) or row[key] < 0.0:
-                          raise SystemExit('grid-change diagnostic is invalid')
-                  if 'not formal grid independence/GCI' not in row['claim_boundary']:
-                      raise SystemExit('grid sensitivity claim boundary missing')
+          for row in points:
+              if row.status == study.STATUS_FORWARD_FLOW_GUARD:
+                  if row.converged or not row.note:
+                      raise SystemExit("guarded point metadata is inconsistent")
+                  if "forward axial flow" not in row.note:
+                      raise SystemExit(
+                          "guarded point does not preserve the existing guard"
+                      )
+                  continue
+              if not row.converged:
+                  raise SystemExit("CONVERGED point has converged=false")
+              if row.density_change > baseline.DEFAULT_DENSITY_CHANGE_TOLERANCE:
+                  raise SystemExit(
+                      "project tolerance on teacher Eq.11.46 metric failed"
+                  )
+              if (
+                  not math.isfinite(row.normalized_residual)
+                  or row.normalized_residual < 0.0
+              ):
+                  raise SystemExit("normalized residual diagnostic is invalid")
+              if row.mass_inventory_relative_to_inlet > 5.0e-3:
+                  raise SystemExit(
+                      "project-defined 0.5% mass-inventory QA gate failed"
+                  )
+              for value in (
+                  row.momentum_inventory_relative_to_inlet,
+                  row.energy_inventory_relative_to_inlet,
+              ):
+                  if not math.isfinite(value) or value < 0.0:
+                      raise SystemExit("conservation diagnostic is invalid")
+              if row.min_pressure_Pa <= 0.0 or row.min_temperature_K <= 0.0:
+                  raise SystemExit("converged point has non-positive physical state")
 
-          if 'No optimum' not in payload['claim_boundary']:
-              raise SystemExit('P13 optimum/validation claim boundary missing')
+          by_key = {(row.mixing_C_m, row.cells): row for row in points}
+          grid_changes = []
+          for C_m in study.PROJECT_SAMPLE_VALUES:
+              coarse = by_key[(C_m, study.PROJECT_CELL_COUNTS[0])]
+              fine = by_key[(C_m, study.PROJECT_CELL_COUNTS[1])]
+              if (
+                  coarse.status != study.STATUS_CONVERGED
+                  or fine.status != study.STATUS_CONVERGED
+              ):
+                  grid_changes.append(
+                      {
+                          "mixing_C_m": C_m,
+                          "available": False,
+                          "reason": (
+                              "both grid levels must converge before a "
+                              "grid-change diagnostic is reported"
+                          ),
+                      }
+                  )
+                  continue
+              grid_changes.append(
+                  {
+                      "mixing_C_m": C_m,
+                      "available": True,
+                      "coarse_cells": coarse.cells,
+                      "fine_cells": fine.cells,
+                      "min_mach_relative_change": study._relative_change(
+                          coarse.min_mach, fine.min_mach
+                      ),
+                      "max_pressure_relative_change": study._relative_change(
+                          coarse.max_pressure_Pa, fine.max_pressure_Pa
+                      ),
+                      "max_temperature_relative_change": study._relative_change(
+                          coarse.max_temperature_K, fine.max_temperature_K
+                      ),
+                      "claim_boundary": (
+                          "sensitivity robustness diagnostic only; "
+                          "not formal grid independence/GCI"
+                      ),
+                  }
+              )
+
+          payload = {
+              "schema_version": 1,
+              "classification": study.CASE_CLASSIFICATION,
+              "not_a_source_reproduction": study.NOT_A_SOURCE_REPRODUCTION,
+              "varied_parameter": {
+                  "name": "C_m",
+                  "teacher_equation": "Eq.11.20",
+                  "source_range": list(study.SOURCE_RANGE),
+                  "sample_values": list(study.PROJECT_SAMPLE_VALUES),
+                  "sample_policy": (
+                      "source lower bound, existing project baseline, "
+                      "arithmetic source-range midpoint, source upper bound"
+                  ),
+              },
+              "frozen_baseline_controls": {
+                  "case": baseline.CASE_CLASSIFICATION,
+                  "cfl": baseline.PROJECT_CFL,
+                  "teacher_eq_11_46_metric_project_tolerance": (
+                      baseline.DEFAULT_DENSITY_CHANGE_TOLERANCE
+                  ),
+                  "max_steps": baseline.DEFAULT_MAX_STEPS,
+                  "wall_heat_gradient_J_per_kg_per_m": (
+                      baseline.WALL_HEAT_GRADIENT_J_PER_KG_PER_M
+                  ),
+              },
+              "points": [asdict(row) for row in points],
+              "grid_changes": grid_changes,
+              "claim_boundary": (
+                  "Project-defined sensitivity over a teacher-source-backed "
+                  "C_m range. No optimum, experimental validation, Cao Case 2 "
+                  "reproduction, or grid-independent result is claimed."
+              ),
+              "workflow_execution": {
+                  "solver_jobs_parallelized": True,
+                  "aggregation_reruns_solver": False,
+              },
+          }
+
+          if "No optimum" not in payload["claim_boundary"]:
+              raise SystemExit("P13 claim boundary missing")
+          for row in grid_changes:
+              if row["available"] and "not formal grid independence/GCI" not in row["claim_boundary"]:
+                  raise SystemExit("grid-sensitivity claim boundary missing")
+
+          Path("p13_teacher_mixing_constant_sensitivity.json").write_text(
+              json.dumps(payload, indent=2, sort_keys=True) + "\n",
+              encoding="utf-8",
+          )
+          print(json.dumps(payload, indent=2, sort_keys=True))
           PY
       - uses: actions/upload-artifact@v4
         with:
