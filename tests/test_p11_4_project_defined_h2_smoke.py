@@ -8,6 +8,7 @@ from cases.studies.p11_4_project_defined_h2_smoke import (
     EXIT_AREA_M2,
     INLET_AREA_M2,
     INLET_VELOCITY_M_PER_S,
+    MIXING_C_M,
     NOT_A_SOURCE_REPRODUCTION,
     WALL_HEAT_GRADIENT_J_PER_KG_PER_M,
     build_case,
@@ -75,3 +76,32 @@ def test_case_keeps_upstream_air_only_and_downstream_teacher_composition() -> No
     assert downstream["H2O"] >= 0.0
     assert sum(upstream.values()) == pytest.approx(1.0)
     assert sum(downstream.values()) == pytest.approx(1.0)
+
+
+def test_baseline_mixing_constant_is_explicit_and_default_build_is_unchanged() -> None:
+    default = build_case(20)
+    explicit = build_case(20, mixing_C_m=MIXING_C_M)
+
+    default_mapping = default[2]
+    explicit_mapping = explicit[2]
+
+    assert MIXING_C_M == 30.0
+    np.testing.assert_allclose(
+        default_mapping.downstream_closure.mixing_length_m,
+        explicit_mapping.downstream_closure.mixing_length_m,
+        rtol=0.0,
+        atol=0.0,
+    )
+    np.testing.assert_allclose(
+        default_mapping.composition.mass_fractions,
+        explicit_mapping.composition.mass_fractions,
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
+def test_mixing_constant_outside_teacher_range_is_rejected() -> None:
+    with pytest.raises(ValueError, match="outside the teacher-source range"):
+        build_case(20, mixing_C_m=24.999)
+    with pytest.raises(ValueError, match="outside the teacher-source range"):
+        build_case(20, mixing_C_m=60.001)
