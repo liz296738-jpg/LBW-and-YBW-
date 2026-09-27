@@ -1,8 +1,8 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "record_kind": "teacher-reference-steger-warming-source-audit",
   "stage": "P11.3N",
-  "status": "CAO_AUDIT_COMPLETE_NO_VARIABLE_THERMOCHEMISTRY_FVS_RECONCILIATION_FOUND",
+  "status": "CAO_AUDIT_COMPLETE_EXTERNAL_GENERALIZED_FVS_LITERATURE_FOUND_PRODUCTION_COMPATIBILITY_UNPROVEN",
   "question": "Do the teacher-provided Cao references state how variable cp and absolute species enthalpy are reconciled with the classical Steger-Warming Eq.11.42 energy split?",
   "sources": [
     {
@@ -33,7 +33,9 @@
     "source_backed_classical_constant_property_limit": true,
     "source_backed_variable_thermochemistry_steger_warming_reconciliation": false,
     "unsourced_energy_correction_allowed": false,
-    "rusanov_integrated_compatibility_path_remains_primary": true
+    "rusanov_integrated_compatibility_path_remains_primary": true,
+    "external_generalized_steger_warming_literature_exists": true,
+    "external_method_directly_adoptable_in_current_teacher_state": false
   },
   "blocked_actions": [
     "subtracting formation enthalpy before flux splitting without a source",
@@ -42,5 +44,46 @@
     "promoting variable-thermochemistry Steger-Warming into the source-enabled teacher solver",
     "guessing a numerical Eq.11.44 epsilon"
   ],
-  "next_step": "Continue integrated teacher-case work on the accepted Rusanov path. Reopen variable-thermochemistry Steger-Warming only if a teacher note, original implementation, or other authoritative source supplies the missing thermodynamic/FVS convention."
+  "next_step": "Keep Rusanov as production flux. Use the external generalized-FVS literature only to design a dedicated compatibility derivation and verification program; do not substitute it for teacher Eq.11.42-11.44 or guess Eq.11.44 epsilon.",
+  "external_literature": {
+    "generalized_methods_exist": true,
+    "production_compatibility_proven": false,
+    "evidence_document": "docs/steger_warming_extension_literature.md",
+    "references": [
+      {
+        "authors": "Y. Liu; M. Vinokur",
+        "year": 1989,
+        "doi": "10.1016/0021-9991(89)90125-3",
+        "scope": "general thermal/chemical nonequilibrium numerical formulations including Steger-Warming generalization"
+      },
+      {
+        "authors": "B. Grossman; R. W. Walters",
+        "year": 1989,
+        "doi": "10.2514/3.10142",
+        "scope": "real-gas flux-splitting and equivalent-gamma formulation"
+      },
+      {
+        "authors": "M.-S. Liou; B. van Leer; J.-S. Shuen",
+        "year": 1990,
+        "doi": "10.1016/0021-9991(90)90222-M",
+        "scope": "general-EOS real-gas flux-vector/flux-difference splitting"
+      },
+      {
+        "authors": "E. Bertolazzi; G. Manzini",
+        "year": 2001,
+        "doi": "10.1006/jcph.2001.6644",
+        "scope": "Steger-Warming generalized to mixtures of thermally perfect gases"
+      }
+    ],
+    "adoption_gate": [
+      "derive exact production-state Jacobian/eigensystem compatibility",
+      "prove energy-reference invariance",
+      "recover classical constant-property limit",
+      "verify split recombination equals physical variable-thermochemistry flux",
+      "verify contact/material-interface behavior",
+      "verify positivity/admissibility and convergence",
+      "retain explicit Eq.11.44 epsilon provenance"
+    ]
+  },
+  "metadata_revision_note": "2026-09-27: external peer-reviewed generalized Steger-Warming/real-gas literature was added. Teacher/Cao source findings and all production CFD results are unchanged."
 }
