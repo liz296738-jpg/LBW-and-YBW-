@@ -105,6 +105,7 @@ def build_summary() -> dict[str, Any]:
     response = _load_json("p12_project_defined_response_sweep_acceptance.json")
     continuation = _load_json("p12_thermal_throat_continuation_acceptance.json")
     throat_grid = _load_json("p12_thermal_throat_grid_sensitivity_acceptance.json")
+    p13 = _load_json("p13_teacher_mixing_constant_sensitivity_acceptance.json")
     source_gate = _load_json("p11_4_cao_case2_evidence_gate.json")
 
     return {
@@ -127,6 +128,7 @@ def build_summary() -> dict[str, Any]:
         "response": response,
         "continuation": continuation,
         "thermal_throat_grid": throat_grid,
+        "p13": p13,
         "source_gate": source_gate,
         "blockers": manifest.get("known_blockers", []),
         "run_modes": RUN_SPECS,
@@ -141,6 +143,11 @@ def build_summary() -> dict[str, Any]:
             ),
             "grid_claim": (
                 "grid-convergence trend only; no asymptotic GCI/grid-independence claim"
+            ),
+            "p13_claim": (
+                "accepted project-defined sensitivity over teacher Eq.11.20 C_m range; "
+                "no optimum, experimental validation, Cao Case 2 reproduction, or "
+                "formal grid-independence claim"
             ),
             "eq_11_46_tolerance_role": (
                 "Eq.11.46 defines the metric; numerical tolerance values are "
