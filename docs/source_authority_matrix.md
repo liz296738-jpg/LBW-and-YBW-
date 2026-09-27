@@ -14,6 +14,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | D | Primary experiments and official validation archives, e.g. NASA Burrows--Kurkov | Physical validation/context for compatible measured quantities and conditions | Must not be converted into teacher/Cao geometry or used to tune unsupported source terms |
 | E | Analytical/verification references and standards, e.g. ASME V&V 20 and NASA grid-convergence guidance | Numerical verification methodology, error/uncertainty discipline and terminology | Does not supply missing engine physics or empirical closure parameters |
 | F | Peer-reviewed scramjet reduced-order/model literature (Birzer & Doolan 2009; Torrez et al. 2011; Tian et al. 2014; Zhang et al. 2016) | External corroboration of model-family legitimacy, relevant physics, validation practice, and multimode-model scope | Must not replace teacher/Cao equations, fill missing teacher coefficients/spatial inputs, or promote project-defined parameters into source-backed values |
+| G | Peer-reviewed generalized FVS / real-gas / nonequilibrium numerical-method literature (Liu & Vinokur 1989; Grossman & Walters 1989; Liou et al. 1990; Bertolazzi & Manzini 2001) | Establish that rigorous generalized Steger--Warming-type methods exist and define a future compatibility research route | Must not be inserted into the teacher production solver without deriving compatibility with the exact state vector, energy reference, algebraic composition closure, and Eq.11.44 policy |
 
 ## Current equation/source mapping
 
@@ -22,7 +23,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | quasi-1D conservative formulation and teacher source vector | teacher-reference modules and Chapter 11 ledger | A, supported by B | implemented |
 | teacher mixing/stoichiometric closures, Eqs. 11.18--11.29 | teacher closure ledgers/tests | A | implemented for supported H2/C2H4 scope |
 | variable thermochemistry, Eqs. 11.30--11.35 | teacher equation ledger + Cao doctoral relations + GRI/NIST data | A+B+C | implemented for H2/C2H4 core species |
-| teacher Steger--Warming, Eqs. 11.42--11.44 | source transcription and constant-property verification | A | implemented as audited path; variable-thermochemistry production integration remains source-gated |
+| teacher Steger--Warming, Eqs. 11.42--11.44 | source transcription and constant-property verification; external generalized-FVS literature audit | A, with G as future-method support | implemented as audited teacher path; external generalized methods exist, but production compatibility with the current variable-thermochemistry state remains unproven and source-gated |
 | pseudo-time/CFL and Eq. 11.46 density-change convergence | teacher steady solver/ledger | A | implemented |
 | wall friction Eq. 11.25 | teacher wall closure ledger/tests | A | implemented |
 | wall heat Eq. 11.26 empirical-to-dimensional mapping | teacher record incomplete for unique dimensional mapping | A | source-gated; not guessed |
@@ -44,6 +45,10 @@ This matrix prevents supporting literature, validation experiments, or convenien
 - Torrez et al. (2011), DOI 10.2514/1.50272: https://doi.org/10.2514/1.50272
 - Tian et al. (2014), DOI 10.2514/1.B35177: https://doi.org/10.2514/1.B35177
 - Zhang et al. (2016), DOI 10.2514/1.B35887: https://doi.org/10.2514/1.B35887
+- Liu & Vinokur (1989), DOI 10.1016/0021-9991(89)90125-3: https://doi.org/10.1016/0021-9991(89)90125-3
+- Grossman & Walters (1989), DOI 10.2514/3.10142: https://doi.org/10.2514/3.10142
+- Liou, van Leer & Shuen (1990), DOI 10.1016/0021-9991(90)90222-M: https://doi.org/10.1016/0021-9991(90)90222-M
+- Bertolazzi & Manzini (2001), DOI 10.1006/jcph.2001.6644: https://doi.org/10.1006/jcph.2001.6644
 
 ## Evidence rule
 
