@@ -107,7 +107,7 @@ def project_inlet_air_mass_flow(species) -> float:
     return float(rho * INLET_VELOCITY_M_PER_S * INLET_AREA_M2)
 
 
-def build_case(cells: int):
+def build_case(cells: int, *, mixing_C_m: float = MIXING_C_M):
     if cells < 20:
         raise ValueError("smoke case requires at least 20 cells")
     species = build_species_database()
@@ -126,7 +126,7 @@ def build_case(cells: int):
         dx_m=dx,
         injector_cell=injector_cell,
         combustor_height_m=COMBUSTOR_HEIGHT_M,
-        C_m=MIXING_C_M,
+        C_m=mixing_C_m,
         injection_mode=INJECTION_MODE,
         injected_fuel_temperature_K=FUEL_TEMPERATURE_K,
         injected_fuel_axial_velocity_m_per_s=FUEL_AXIAL_VELOCITY_M_PER_S,
@@ -176,6 +176,7 @@ def build_case(cells: int):
 def run_smoke(
     cells: int = 40,
     *,
+    mixing_C_m: float = MIXING_C_M,
     tolerance: float = DEFAULT_DENSITY_CHANGE_TOLERANCE,
     max_steps: int = DEFAULT_MAX_STEPS,
 ) -> SmokeResult:
@@ -188,7 +189,7 @@ def run_smoke(
         inlet,
         U0,
         inlet_primitive,
-    ) = build_case(cells)
+    ) = build_case(cells, mixing_C_m=mixing_C_m)
     result = solve_teacher_boundary_steady(
         U0,
         mapping,
