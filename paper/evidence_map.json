@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "paper": "paper/main_paper_zh.md",
+  "policy": {
+    "accepted_result_rule": "Only repository-frozen acceptance/evidence records may support numerical conclusions in the canonical paper.",
+    "project_defined_rule": "Project-selected parameters, tolerances, QA gates and study designs must remain labelled project-defined.",
+    "source_gated_rule": "Source-gated physics may be described as unresolved or future work, but not promoted to completed results.",
+    "in_progress_rule": "A workflow run without reviewed/frozen acceptance evidence remains in-progress even if raw computation succeeds."
+  },
+  "sections": {
+    "3.3_mixing_combustion": {
+      "claim_scope": "Teacher Eqs.11.18-11.24 closure and project saturation adapter",
+      "evidence": [
+        "cases/studies/data/teacher_mixing_combustion_closure.json",
+        "cases/studies/data/teacher_mixing_external_lineage.json"
+      ]
+    },
+    "3.5_wall_sources": {
+      "claim_scope": "Eq.11.25 friction integrated; Eq.11.26 dimensional mapping source-gated",
+      "evidence": [
+        "cases/studies/data/teacher_wall_closure.json",
+        "cases/studies/data/eq11_26_external_source_search_audit.json"
+      ]
+    },
+    "4.2_steger_warming": {
+      "claim_scope": "Teacher constant-property audit plus external generalized-FVS literature; production compatibility unproven",
+      "evidence": [
+        "cases/studies/data/teacher_steger_warming_source_audit.json",
+        "docs/steger_warming_extension_literature.md"
+      ]
+    },
+    "6.1_h2_baseline": {
+      "claim_scope": "Accepted project-defined integrated H2 baseline",
+      "evidence": [
+        "cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json",
+        "cases/studies/data/p11_4_project_defined_h2_input_provenance.json"
+      ]
+    },
+    "6.2_grid": {
+      "claim_scope": "Accepted 20/40/80 grid-trend evidence; no automatic asymptotic grid-independence claim",
+      "evidence": [
+        "cases/studies/data/p11_4_grid_convergence_acceptance.json",
+        "docs/verification_methodology.md"
+      ],
+      "figures": [
+        "paper/assets/fig2_grid_min_mach.svg"
+      ]
+    },
+    "6.3_conservation": {
+      "claim_scope": "Discrete conservation diagnostics with project-defined mass QA gate",
+      "evidence": [
+        "cases/studies/p11_4_conservation_audit.py",
+        "cases/studies/data/course_deliverable_manifest.json"
+      ]
+    },
+    "6.4_nasa_benchmark": {
+      "claim_scope": "Reduced-order NASA computational-reference benchmark, not independent experimental bulk-state validation",
+      "evidence": [
+        "cases/studies/data/p11_2b_nasa_bk_benchmark_acceptance.json",
+        "docs/p11_2b_nasa_bk_benchmark_acceptance.md"
+      ]
+    },
+    "7.1_p12_response": {
+      "claim_scope": "Accepted project-defined equivalence-ratio response",
+      "evidence": [
+        "cases/studies/data/p12_project_defined_response_sweep_acceptance.json"
+      ],
+      "figures": [
+        "paper/assets/fig3_phi_min_mach.svg"
+      ]
+    },
+    "7.2_continuation": {
+      "claim_scope": "Accepted composition-consistent warm-start continuation",
+      "evidence": [
+        "cases/studies/data/p12_thermal_throat_continuation_acceptance.json"
+      ],
+      "figures": [
+        "paper/assets/fig3_phi_min_mach.svg"
+      ]
+    },
+    "7.3_cao_criterion": {
+      "claim_scope": "Scoped application of Cao Eq.(3-2), not universal mode threshold",
+      "evidence": [
+        "cases/studies/data/p12_cao_mode_criterion_source.json",
+        "cases/studies/data/p12_thermal_throat_grid_sensitivity_acceptance.json",
+        "cases/studies/data/p12_mode_transition_peer_reviewed_context.json"
+      ],
+      "figures": [
+        "paper/assets/fig4_phi024_grid.svg"
+      ]
+    },
+    "8_dashboard": {
+      "claim_scope": "Mentor dashboard engineering delivery and transient-vs-frozen evidence boundary",
+      "evidence": [
+        "docs/mentor_dashboard.md",
+        "tools/mentor_dashboard.py"
+      ]
+    },
+    "10_limitations": {
+      "claim_scope": "Current scientific/source blockers",
+      "evidence": [
+        "cases/studies/data/teacher_cao_case2_source.json",
+        "cases/studies/data/eq11_26_external_source_search_audit.json",
+        "cases/studies/data/teacher_steger_warming_source_audit.json",
+        "cases/studies/data/teacher_reference_alignment.json"
+      ]
+    },
+    "11_p13_in_progress": {
+      "claim_scope": "Protocol/source-range only; no numerical conclusion until accepted evidence exists",
+      "status": "IN_PROGRESS_NOT_ACCEPTED",
+      "evidence": [
+        "cases/studies/data/p13_teacher_mixing_constant_sensitivity_definition.json",
+        "docs/p13_teacher_mixing_constant_sensitivity.md"
+      ]
+    }
+  }
+}
