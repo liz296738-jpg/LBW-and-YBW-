@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "record_kind": "p12-mode-transition-peer-reviewed-context",
+  "role": "SUPPORTING_CONTEXT_NOT_PRIMARY_CRITERION",
+  "primary_criterion": "teacher-provided Cao 2016 doctoral dissertation Eq.(3-2) and Table 3-1",
+  "references": [
+    {
+      "authors": [
+        "Rui-Feng Cao",
+        "Yue Lu",
+        "Daren Yu",
+        "Juntao Chang"
+      ],
+      "title": "Study on influencing factors of combustion mode transition boundary for a scramjet engine based on one-dimensional model",
+      "journal": "Aerospace Science and Technology",
+      "year": 2020,
+      "volume": "96",
+      "pages": "105590",
+      "doi": "10.1016/j.ast.2019.105590",
+      "supported_context": [
+        "duct area profile affects transition boundary",
+        "heat release distribution affects transition boundary",
+        "wall temperature and roughness affect transition boundary",
+        "incoming air composition affects transition boundary"
+      ]
+    },
+    {
+      "authors": [
+        "Yan Zhang",
+        "Bing Chen",
+        "Gang Liu",
+        "Bao-Xi Wei",
+        "Xu Xu"
+      ],
+      "title": "Influencing factors on the mode transition in a dual-mode scramjet",
+      "journal": "Acta Astronautica",
+      "year": 2014,
+      "volume": "103",
+      "pages": "1-15",
+      "doi": "10.1016/j.actaastro.2014.06.006",
+      "supported_context": [
+        "fuel type affects transition points",
+        "injector configuration affects transition points",
+        "inflow total temperature affects transition",
+        "fuel injection distribution affects transition",
+        "experimental classification uses pressure plus optical/analysis evidence"
+      ]
+    }
+  ],
+  "repository_consequences": {
+    "universal_equivalence_ratio_transition_threshold_supported": false,
+    "forward_flow_guard_is_mode_classifier": false,
+    "missing_Cao_A_x_is_material_to_transition_reproduction": true,
+    "unresolved_wall_treatment_can_be_assumed_irrelevant": false,
+    "current_project_sweeps_are_experimental_mode_validation": false
+  },
+  "evidence_document": "docs/p12_mode_transition_peer_reviewed_context.md"
+}
