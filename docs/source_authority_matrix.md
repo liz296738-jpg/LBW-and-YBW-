@@ -21,7 +21,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | Model element | Current implementation evidence | Authority | Status |
 | --- | --- | --- | --- |
 | quasi-1D conservative formulation and teacher source vector | teacher-reference modules and Chapter 11 ledger | A, supported by B | implemented |
-| teacher mixing/stoichiometric closures, Eqs. 11.18--11.29 | teacher closure ledgers/tests | A | implemented for supported H2/C2H4 scope |
+| teacher mixing/stoichiometric closures, Eqs. 11.18--11.29 | teacher closure ledgers/tests; external lineage audit for Eq.11.19--11.20 | A, with historical/peer-reviewed lineage as corroboration only | implemented for supported H2/C2H4 scope; `C_m=30` remains project-selected even though the source range is teacher-backed |
 | variable thermochemistry, Eqs. 11.30--11.35 | teacher equation ledger + Cao doctoral relations + GRI/NIST data | A+B+C | implemented for H2/C2H4 core species |
 | teacher Steger--Warming, Eqs. 11.42--11.44 | source transcription and constant-property verification; external generalized-FVS literature audit | A, with G as future-method support | implemented as audited teacher path; external generalized methods exist, but production compatibility with the current variable-thermochemistry state remains unproven and source-gated |
 | pseudo-time/CFL and Eq. 11.46 density-change convergence | teacher steady solver/ledger | A | implemented |
