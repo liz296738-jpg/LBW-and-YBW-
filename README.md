@@ -36,7 +36,7 @@ The following items are intentionally **not guessed**:
 4. the missing Cao Case 2 spatial geometry/composition/source information required for formal reproduction;
 5. source-compatible isolator/shock-train state variables and geometry required to attach the detailed Cao Table 3-1 classifier to the current integrated production path.
 
-Teacher Eqs. 11.42-11.44 Steger-Warming are retained as a separately audited source-transcription path. Their classic closed form is valid in the calorically-perfect constant-property limit, but the examined teacher/Cao sources do not provide a defensible correction for the project's variable `cp(T,Y)` plus absolute species-energy formulation. The integrated variable-thermochemistry solver therefore remains on Rusanov rather than inventing an energy-reference fix.
+Teacher Eqs. 11.42-11.44 Steger-Warming are retained as a separately audited source-transcription path. Their classic closed form is valid in the calorically-perfect constant-property limit, but the examined teacher/Cao sources do not provide a defensible correction for the project's variable `cp(T,Y)` plus absolute species-energy formulation. External peer-reviewed CFD literature does contain generalized Steger--Warming / real-gas / thermally-perfect-mixture formulations, but those methods have not yet been proven algebraically compatible with this repository's three-equation algebraic-composition state and absolute species-energy convention. The integrated variable-thermochemistry solver therefore remains on Rusanov rather than importing a non-equivalent energy-reference fix. See `docs/steger_warming_extension_literature.md`.
 
 ## Mentor Dashboard
 
@@ -53,6 +53,7 @@ The local dashboard opens at `http://127.0.0.1:8765`; the deployed service uses 
 
 - `docs/verification_methodology.md` — verification/validation separation, grid-refinement and GCI claim policy, and primary public references
 - `docs/peer_reviewed_cross_validation.md` — supporting peer-reviewed scramjet model-family cross-validation with explicit non-substitution boundaries
+- `docs/steger_warming_extension_literature.md` — generalized real-gas/reactive FVS literature audit and production-adoption gate
 - `cases/studies/data/supporting_peer_reviewed_literature.json` — machine-readable literature-role ledger
 - `docs/development_roadmap.md`
 - `docs/teacher_reference_alignment.md`
