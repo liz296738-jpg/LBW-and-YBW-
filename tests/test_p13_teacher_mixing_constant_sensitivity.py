@@ -75,3 +75,22 @@ def test_p13_rejects_values_outside_teacher_source_range() -> None:
         study._validate_C_m(24.99)
     with pytest.raises(ValueError, match="teacher-source range"):
         study._validate_C_m(60.01)
+
+
+def test_parallel_closure_has_preregistered_C_m_monotonicity() -> None:
+    low = baseline.build_case(40, mixing_C_m=25.0)[2].downstream_closure
+    high = baseline.build_case(40, mixing_C_m=60.0)[2].downstream_closure
+
+    # Eq.11.20: with frozen phi and b, L_m is exactly proportional to C_m.
+    np.testing.assert_allclose(
+        high.mixing_length_m / low.mixing_length_m,
+        np.full_like(low.mixing_length_m, 60.0 / 25.0),
+        rtol=2.0e-15,
+        atol=0.0,
+    )
+
+    # Current baseline uses the parallel Eq.11.19 branch eta_raw=x/L_m, so a
+    # larger C_m cannot increase raw or physical combustion efficiency at any
+    # fixed downstream cell.
+    assert np.all(high.raw_mixing_efficiency <= low.raw_mixing_efficiency)
+    assert np.all(high.combustion_efficiency <= low.combustion_efficiency)
