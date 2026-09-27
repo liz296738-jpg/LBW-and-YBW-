@@ -11,15 +11,19 @@ def _load() -> dict:
     return json.loads(LEDGER.read_text(encoding="utf-8"))
 
 
-def test_cao_audit_does_not_claim_missing_reconciliation() -> None:
+def test_cao_audit_does_not_claim_missing_teacher_reconciliation() -> None:
     record = _load()
     conclusion = record["conclusion"]
+
+    assert record["schema_version"] == 2
     assert record["stage"] == "P11.3N"
     assert conclusion["source_backed_variable_cp_absolute_enthalpy"] is True
     assert conclusion["source_backed_classical_constant_property_limit"] is True
     assert conclusion["source_backed_variable_thermochemistry_steger_warming_reconciliation"] is False
     assert conclusion["unsourced_energy_correction_allowed"] is False
     assert conclusion["rusanov_integrated_compatibility_path_remains_primary"] is True
+    assert conclusion["external_generalized_steger_warming_literature_exists"] is True
+    assert conclusion["external_method_directly_adoptable_in_current_teacher_state"] is False
 
 
 def test_audit_blocks_silent_energy_reference_or_fvs_changes() -> None:
@@ -35,3 +39,17 @@ def test_both_cao_references_are_recorded() -> None:
     identities = {item["identity"] for item in sources}
     assert "超燃冲压发动机燃烧模态转换及其控制方法研究_曹瑞峰.pdf" in identities
     assert "面向控制的超燃冲压发动机一维建模研究_曹瑞峰.pdf" in identities
+
+
+def test_external_generalized_fvs_literature_does_not_bypass_adoption_gate() -> None:
+    record = _load()
+    external = record["external_literature"]
+
+    assert external["generalized_methods_exist"] is True
+    assert external["production_compatibility_proven"] is False
+    assert len(external["references"]) == 4
+    gate = " ".join(external["adoption_gate"]).lower()
+    assert "energy-reference invariance" in gate
+    assert "classical constant-property limit" in gate
+    assert "physical variable-thermochemistry flux" in gate
+    assert "eq.11.44 epsilon provenance" in gate
