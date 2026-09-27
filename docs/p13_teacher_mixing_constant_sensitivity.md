@@ -56,7 +56,7 @@ For the frozen baseline `phi=0.20` and combustor height `b=0.040 m`, the lean Eq
 | 42.5 | 0.42924 | complete mixing is not reached within the current combustor length |
 | 60.0 | 0.60598 | complete mixing is not reached within the current combustor length |
 
-The available geometric distance is `0.40 - 0.08 = 0.32 m`. This comparison follows directly from the frozen project geometry and the teacher Eq.11.20 closure; it does not use any P13 CFD result. It therefore provides a pre-solution explanation for why the lower and upper parts of the `C_m` range may behave differently, while still making no monotonic prediction for coupled Mach, pressure, or temperature extrema.
+The available geometric distance is `0.40 - 0.08 = 0.32 m`. Solving the same Eq.11.20 relation for `L_m=0.32 m` gives a project-geometry crossover at `C_m≈31.684`. Thus the sampled `25/30` values lie on the side where complete mixing can be reached before the geometric exit, while `42.5/60` lie on the side where complete mixing cannot be reached within the current combustor length. This comparison follows directly from the frozen project geometry and the teacher Eq.11.20 closure; it does not use any P13 CFD result. It therefore provides a pre-solution explanation for why the lower and upper parts of the `C_m` range may behave differently, while still making no monotonic prediction for coupled Mach, pressure, or temperature extrema.
 
 ## Frozen controls
 
