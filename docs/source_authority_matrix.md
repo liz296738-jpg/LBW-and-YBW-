@@ -13,6 +13,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | C | Standard property databases: Berkeley GRI-Mech 3.0, NIST Chemistry WebBook SRD 69 | Thermochemical polynomial/property provenance and independent data checks | Does not validate combustion/mixing/engine-mode physics |
 | D | Primary experiments and official validation archives, e.g. NASA Burrows--Kurkov | Physical validation/context for compatible measured quantities and conditions | Must not be converted into teacher/Cao geometry or used to tune unsupported source terms |
 | E | Analytical/verification references and standards, e.g. ASME V&V 20 and NASA grid-convergence guidance | Numerical verification methodology, error/uncertainty discipline and terminology | Does not supply missing engine physics or empirical closure parameters |
+| F | Peer-reviewed scramjet reduced-order/model literature (Birzer & Doolan 2009; Torrez et al. 2011; Tian et al. 2014; Zhang et al. 2016) | External corroboration of model-family legitimacy, relevant physics, validation practice, and multimode-model scope | Must not replace teacher/Cao equations, fill missing teacher coefficients/spatial inputs, or promote project-defined parameters into source-backed values |
 
 ## Current equation/source mapping
 
@@ -28,6 +29,7 @@ This matrix prevents supporting literature, validation experiments, or convenien
 | Cao Case 2 formal reproduction | inlet/source identity frozen, exact spatial inputs incomplete | B | blocked by exact A(x), Yi(x), and source/injection spatial convention |
 | NASA Burrows--Kurkov | official experiment and NASA computational-reference archive | D | supporting reduced-order V&V only; not the teacher deliverable |
 | grid-convergence/GCI methodology | ASME/NASA verification guidance | E | used for claim discipline; no automatic grid-independence claim |
+| quasi-1D scramjet model-family cross-validation | `docs/peer_reviewed_cross_validation.md` and supporting literature ledger | F | supports architecture/scope only; does not validate teacher-specific coefficients or project-defined cases |
 | project numerical tolerances / QA gates | repository acceptance policy | project-defined, not an external authority class | values such as Eq.11.46 tolerance `2e-5` and 0.5% mass-inventory QA gate are explicitly labelled project controls; they must not be attributed to the teacher, ASME, NASA, papers, or experiments |
 
 ## Public source locators
@@ -38,6 +40,10 @@ This matrix prevents supporting literature, validation experiments, or convenien
 - ASME V&V 20: https://www.asme.org/codes-standards/find-codes-standards/standard-for-verification-and-validation-in-computational-fluid-dynamics-and-heat-transfer
 - NASA spatial/grid convergence guidance: https://www.grc.nasa.gov/www/wind/valid/tutorial/spatconv.html
 - NASA Burrows--Kurkov experiment, NASA-TM-X-2828: https://ntrs.nasa.gov/citations/19730023096
+- Birzer & Doolan (2009), DOI 10.2514/1.43716: https://doi.org/10.2514/1.43716
+- Torrez et al. (2011), DOI 10.2514/1.50272: https://doi.org/10.2514/1.50272
+- Tian et al. (2014), DOI 10.2514/1.B35177: https://doi.org/10.2514/1.B35177
+- Zhang et al. (2016), DOI 10.2514/1.B35887: https://doi.org/10.2514/1.B35887
 
 ## Evidence rule
 
