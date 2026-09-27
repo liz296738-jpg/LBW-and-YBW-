@@ -36,6 +36,19 @@ def test_paper_figure_series_are_loaded_from_frozen_acceptance_records() -> None
     ]
     assert fig4["reference_y"] == 1.0
 
+    fig5 = series["fig5_p13_cm_max_pressure.svg"]
+    assert fig5["x"] == [25.0, 30.0, 42.5, 60.0]
+    assert fig5["y"] == [
+        118.79552373494236,
+        115.4742519502044,
+        93.12907393130471,
+        77.75800789870585,
+    ]
+    assert fig5["reference_y"] is None
+    assert fig5["sources"] == [
+        "cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json"
+    ]
+
 
 def test_paper_figure_builder_writes_traceable_svg(tmp_path: Path) -> None:
     paths = build_figures(tmp_path)
@@ -44,6 +57,7 @@ def test_paper_figure_builder_writes_traceable_svg(tmp_path: Path) -> None:
         "fig2_grid_min_mach.svg",
         "fig3_phi_min_mach.svg",
         "fig4_phi024_grid.svg",
+        "fig5_p13_cm_max_pressure.svg",
     }
     for path in paths:
         svg = path.read_text(encoding="utf-8")
