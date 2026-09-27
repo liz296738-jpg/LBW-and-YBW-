@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "record_kind": "p13-teacher-mixing-constant-sensitivity-definition",
+  "classification": "PROJECT_DEFINED_TEACHER_SOURCE_RANGE_CM_SENSITIVITY",
+  "source_reproduction": false,
+  "purpose": "Quantify sensitivity of the accepted project-defined H2 teacher path to the Eq.11.20 mixing-length constant without changing any other physical or numerical control.",
+  "varied_parameter": {
+    "name": "C_m",
+    "equation": "Teacher Chapter 11 Eq.11.20",
+    "source_range": [
+      25,
+      60
+    ],
+    "units": "1",
+    "source_role": "The admissible range is teacher-source-backed; the discrete study sampling design is project-defined."
+  },
+  "samples": [
+    {
+      "value": 25,
+      "role": "SOURCE_RANGE_LOWER_BOUND"
+    },
+    {
+      "value": 30,
+      "role": "CURRENT_PROJECT_BASELINE"
+    },
+    {
+      "value": 42.5,
+      "role": "PROJECT_DEFINED_ARITHMETIC_RANGE_MIDPOINT"
+    },
+    {
+      "value": 60,
+      "role": "SOURCE_RANGE_UPPER_BOUND"
+    }
+  ],
+  "grid_design": {
+    "cell_counts": [
+      20,
+      40
+    ],
+    "role": "PROJECT_DEFINED_SENSITIVITY_ROBUSTNESS_CHECK",
+    "claim_boundary": "Two grids do not establish asymptotic grid independence or a formal GCI result."
+  },
+  "frozen_controls": {
+    "source": "cases/studies/data/p11_4_project_defined_h2_input_provenance.json",
+    "policy": "All baseline physical inputs and numerical controls other than C_m remain frozen to the accepted project-defined H2 path."
+  },
+  "acceptance_policy": {
+    "teacher_convergence_metric": "Eq.11.46 maximum relative density change",
+    "numerical_tolerance": "project-defined value inherited from baseline",
+    "project_mass_inventory_QA": "0.5% inlet-scale threshold; project-defined, not a literature/teacher universal threshold",
+    "guarded_or_nonconverged_points": "reported without physical mode labels",
+    "no_optimum_claim": true,
+    "no_experimental_validation_claim": true
+  }
+}
