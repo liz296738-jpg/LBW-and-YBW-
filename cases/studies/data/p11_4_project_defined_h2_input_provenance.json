@@ -57,7 +57,28 @@
       "value": 0.08,
       "units": "m",
       "provenance": "PROJECT_DEFINED",
-      "note": "No exact Cao/teacher source injector position is claimed for this smoke case."
+      "note": "Nominal project-defined injector target coordinate; not claimed as Cao/teacher source data. The finite-volume source is placed at the nearest cell center by the frozen baseline implementation.",
+      "discrete_realization": {
+        "policy": "nearest finite-volume cell center via argmin(abs(x_cell - INJECTOR_X_M)); exact midpoint ties resolve to the upstream/lower-index cell under the frozen grid construction",
+        "by_grid_cells": {
+          "20": {
+            "dx_m": 0.02,
+            "actual_injector_cell_center_m": 0.07,
+            "offset_from_nominal_m": -0.01
+          },
+          "40": {
+            "dx_m": 0.01,
+            "actual_injector_cell_center_m": 0.075,
+            "offset_from_nominal_m": -0.005
+          },
+          "80": {
+            "dx_m": 0.005,
+            "actual_injector_cell_center_m": 0.0775,
+            "offset_from_nominal_m": -0.0025
+          }
+        },
+        "physics_change": false
+      }
     },
     "MIXING_C_M": {
       "value": 30,
