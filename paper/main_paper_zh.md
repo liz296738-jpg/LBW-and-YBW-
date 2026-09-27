@@ -360,7 +360,7 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 
 ## 11 后续工作
 
-1. 在不改变模型边界的条件下扩展入口 Mach、喷注位置等 one-factor-at-a-time 参数研究，并严格标注 source-anchored 与 project-defined 输入；
+1. P14 入口 Mach 单因素敏感性协议已冻结并进入专用 CFD 计算：采用 2.0/2.2/2.4/2.6 的项目定义、文献锚定采样，在固定静态 p/T 与 φ=0.20 的边界参数化下计算 20/40 网格；在 reviewed acceptance 冻结前不写入数值结论。随后再开展喷注位置等 one-factor-at-a-time 研究；
 2. 若继续深化 \(C_m\) 研究，可增加独立三层网格或外部实验/高保真数据，但不得把当前 P13 两层网格敏感性升级为校准或 GCI 结论；
 3. 若获得教师 Eq.11.26 完整定义，建立并验证有量纲壁面热源适配器；
 4. 若开展 C10H22/n-decane 分支，按独立外部模型扩展冻结热化学来源、参考焓约定和实验 benchmark，不混入教师 H2/C2H4 路径；
@@ -441,3 +441,4 @@ Eq.11.26 多项式已正确转录，但目前未找到能够同时说明物理�
 - v0.2 纳入已接受的 P11.4、NASA benchmark、P12 以及 P13 \(C_m\) 敏感性证据；
 - P13 最终采用 4 个 \(C_m\) × 2 个网格独立并行求解，GitHub Actions run #4（run id 36312725524）全部成功，聚合 artifact SHA-256 为 `c08ec1ccc28decdf31dbd4b82fa00e1ac2866a9d6939cef21d9a5e4c073a6dec`；
 - P13 已从“在研”升级为 accepted project-defined sensitivity，但其 claim boundary 仍明确排除最优 \(C_m\)、实验验证、Cao Case 2 复现、正式网格无关/GCI 以及燃烧模态分类。
+- P14 入口 Mach study 已冻结协议、文献语境和计算定义，采样 Ma=2.0/2.2/2.4/2.6；本版本仅记录其为在研，不提前写入任何 CFD 响应结论。
