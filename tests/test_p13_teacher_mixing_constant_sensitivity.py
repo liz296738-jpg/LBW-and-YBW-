@@ -103,8 +103,8 @@ def test_eq_11_20_baseline_geometry_separates_full_mixing_regimes() -> None:
     lengths = {
         C_m: mixing_length(
             baseline.EQUIVALENCE_RATIO,
-            C_m,
             baseline.COMBUSTOR_HEIGHT_M,
+            C_m,
         )
         for C_m in study.PROJECT_SAMPLE_VALUES
     }
