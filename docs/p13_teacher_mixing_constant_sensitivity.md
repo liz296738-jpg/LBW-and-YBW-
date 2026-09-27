@@ -121,3 +121,50 @@ P13 alone cannot establish:
 Peer-reviewed reduced-order scramjet studies support mixing-limited / mixing-efficiency modeling as a legitimate engineering-model component, but they do not supply the teacher Eq.11.20 coefficient range or identify the correct `C_m` for this project. See `docs/peer_reviewed_cross_validation.md`.
 
 This protocol is frozen before interpreting the P13 CFD output so that result selection does not redefine the scientific question after the fact.
+
+
+## Accepted result
+
+The frozen acceptance record is:
+
+`cases/studies/data/p13_teacher_mixing_constant_sensitivity_acceptance.json`
+
+It pins GitHub Actions run 36312725524 (run #4), head SHA
+`b92b9095b818f835c9d485278334a45245ac40f7`, aggregate artifact
+`p13-teacher-mixing-constant-sensitivity`, and artifact ZIP SHA-256
+`c08ec1ccc28decdf31dbd4b82fa00e1ac2866a9d6939cef21d9a5e4c073a6dec`.
+
+All eight sampled `C_m` × grid points converged under the frozen project
+tolerance applied to teacher Eq.11.46, remained thermodynamically admissible,
+and satisfied the project-defined 0.5% normalized mass-inventory QA gate.
+The injected fuel mass source remained invariant at
+`0.006975386332365369 kg/s`.
+
+At 40 cells, the accepted extrema are:
+
+| C_m | min Mach | max pressure (kPa) | max temperature (K) |
+| ---: | ---: | ---: | ---: |
+| 25.0 | 1.25894 | 118.796 | 1587.08 |
+| 30.0 | 1.26344 | 115.474 | 1584.81 |
+| 42.5 | 1.45298 | 93.129 | 1376.34 |
+| 60.0 | 1.62608 | 77.758 | 1201.62 |
+
+On both 20- and 40-cell grids, maximum static pressure and maximum static
+temperature decrease over the sampled sequence `25 -> 30 -> 42.5 -> 60`.
+This is consistent with the longer Eq.11.20 mixing length reducing in-domain
+mixing/combustion response while all other frozen inputs remain fixed.
+
+Minimum Mach is deliberately **not** promoted as a monotonic response: the
+ordering between `C_m=25` and `C_m=30` reverses between the 20- and 40-cell
+grids. This is direct evidence that coupled extrema should not be inferred from
+the algebraic mixing closure alone.
+
+The 20-to-40 comparison remains a robustness diagnostic only. The largest
+reported relative change among the selected extrema is the `C_m=25`
+maximum-pressure change, about 2.24%. No formal asymptotic grid-independence or
+GCI claim is made.
+
+The accepted scientific boundary remains unchanged: P13 does not identify an
+optimal or universal physical `C_m`, does not validate Cao Case 2, does not
+constitute experimental validation, and does not define a ramjet/scramjet,
+dual-mode, or unstart boundary.
