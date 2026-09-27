@@ -62,6 +62,9 @@ def test_dashboard_summary_preserves_scientific_claim_boundaries() -> None:
     assert "grid-convergence trend only" in claims["grid_claim"]
     assert "explicit project controls" in claims["eq_11_46_tolerance_role"]
     assert summary["source_gate"]["formal_reproduction_ready"] is False
+    assert summary["p13"]["classification"] == "P13_TEACHER_MIXING_CONSTANT_SENSITIVITY_ACCEPTANCE"
+    assert len(summary["p13"]["points"]) == 8
+    assert "no optimum" in claims["p13_claim"]
     assert summary["blockers"]
 
 
@@ -75,6 +78,8 @@ def test_dashboard_frontend_exists_and_states_guard_boundary() -> None:
     assert "solver/model-domain inadmissible" in text
     assert "不解释为 unstart" in text
     assert "Cao Case 2" in text
+    assert "P13 教师 Eq.11.20" in text
+    assert "不开放 P13 在线参数扫描" in text
     assert "python tools/mentor_dashboard.py" in text
 
 
