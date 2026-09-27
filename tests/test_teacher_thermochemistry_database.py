@@ -84,7 +84,7 @@ def test_piecewise_model_rejects_mismatched_species_or_switch() -> None:
         PiecewiseSpeciesThermo(low, high, 1000.0)
 
 
-def test_kerosene_branch_remains_explicitly_blocked_and_solver_not_promoted() -> None:
+def test_kerosene_branch_remains_blocked_while_h2_c2h4_integration_is_explicit() -> None:
     record = load_source_record()
     readiness = build_readiness()
 
@@ -92,4 +92,9 @@ def test_kerosene_branch_remains_explicitly_blocked_and_solver_not_promoted() ->
     assert readiness["core_species_database_ready"] is True
     assert readiness["supported_thermo_fuel_branches"] == ["H2", "C2H4"]
     assert readiness["kerosene_C10H22_thermo_ready"] is False
-    assert readiness["solver_integration_ready"] is False
+    assert readiness["solver_integration_ready"] is True
+    policy = record["production_policy"]
+    assert "H2 and C2H4" in policy["integrated_scope"]
+    assert "Rusanov" in policy["integrated_scope"]
+    assert "C10H22" in policy["limitation"]
+    assert "Steger-Warming" in policy["limitation"]
