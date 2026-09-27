@@ -103,7 +103,7 @@ def test_invalid_phi_eta_inputs_are_rejected() -> None:
 def test_teacher_wall_ledger_keeps_heat_adapter_gated() -> None:
     with LEDGER.open("r", encoding="utf-8") as stream:
         record = json.load(stream)
-    assert record["schema_version"] == 1
+    assert record["schema_version"] == 2
     assert record["stage"] == "P11.3D"
     assert record["equations"]["11.38_friction_term"]["forward_flow_mapping"] == (
         "f_D = 4*f when D_h = D_e and u >= 0"
@@ -131,3 +131,21 @@ def test_teacher_wall_correlations_are_positive_over_integrated_lean_domain() ->
 
     # This check is a mathematical domain invariant, not a new empirical
     # calibration range or a substitute for the source-gated Eq.11.26 adapter.
+
+
+def test_teacher_wall_ledger_preserves_history_and_current_split_readiness() -> None:
+    with LEDGER.open("r", encoding="utf-8") as stream:
+        record = json.load(stream)
+
+    historical = record["readiness"]
+    current = record["current_status"]
+
+    assert historical["friction_solver_adapter_ready"] is True
+    assert historical["wall_heat_dimensional_adapter_ready"] is False
+    assert historical["production_solver_replacement_ready"] is False
+
+    assert current["teacher_friction_integrated_in_production_path"] is True
+    assert current["wall_heat_empirical_to_dimensional_adapter_ready"] is False
+    assert current["explicit_dimensional_wall_heat_input_channel_ready"] is True
+    assert current["production_flux"] == "Rusanov"
+    assert "Eq.11.26 empirical-to-dimensional d(delta q)/dx mapping" in current["source_gated_items"]
