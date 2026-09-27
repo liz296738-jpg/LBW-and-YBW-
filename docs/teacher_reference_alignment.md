@@ -22,7 +22,7 @@ Source-backed piecewise thermochemistry is frozen for `H2`, `O2`, `N2`, `Ar`, `H
 
 Absolute species enthalpy includes sensible plus chemical/zero-point contribution. Composition change and an independent direct chemical `Qdot` must not represent the same chemical energy twice. External wall/additional heat remains a separate channel.
 
-The dimensional mapping from photographed Eq. 11.26 to the exact wall-specific-heat-gain-gradient input remains unresolved and must not be invented.
+The dimensional mapping from photographed Eq. 11.26 to the exact wall-specific-heat-gain-gradient input remains unresolved and must not be invented. An external-source search audit (`docs/eq11_26_external_source_search_audit.md`) found no unique, source-traceable adapter; alternative Eckert/reference-enthalpy or regenerative-cooling heat-transfer laws remain separate model branches rather than substitutes.
 
 ## Cao Case 2 evidence gate
 
@@ -58,6 +58,8 @@ The grid-refined project-defined evidence currently shows `phi=0.24` remaining o
 
 - `docs/development_roadmap.md`
 - `docs/teacher_steger_warming_source_audit.md`
+- `docs/eq11_26_external_source_search_audit.md`
+- `docs/teacher_mixing_external_lineage.md`
 - `docs/p12_cao_source_mode_criteria.md`
 - `docs/p12_cao_criterion_application.md`
 - `cases/studies/data/p11_4_project_defined_h2_smoke_acceptance.json`
