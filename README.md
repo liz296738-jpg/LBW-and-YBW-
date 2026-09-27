@@ -51,6 +51,8 @@ The local dashboard opens at `http://127.0.0.1:8765`; the deployed service uses 
 
 ## Key Evidence Records
 
+- `paper/main_paper_zh.md` — continuously maintained project paper; Word/PDF are release snapshots derived from this canonical source
+
 - `docs/verification_methodology.md` — verification/validation separation, grid-refinement and GCI claim policy, and primary public references
 - `docs/peer_reviewed_cross_validation.md` — supporting peer-reviewed scramjet model-family cross-validation with explicit non-substitution boundaries
 - `docs/steger_warming_extension_literature.md` — generalized real-gas/reactive FVS literature audit and production-adoption gate
