@@ -4,22 +4,22 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>Scramjet 1D CFD · 导师控制台</title>
+  <title>Scramjet 1D CFD · 专业研究平台</title>
   <style>
     :root {
-      --bg: #f5f5f7;
-      --surface: rgba(255,255,255,.82);
+      --bg: #f5f8fc;
+      --surface: rgba(255,255,255,.9);
       --surface-solid: #ffffff;
       --surface-2: #f2f2f7;
-      --text: #1d1d1f;
-      --muted: #6e6e73;
+      --text: #17212b;
+      --muted: #536273;
       --line: rgba(0,0,0,.08);
-      --blue: #0071e3;
-      --blue-soft: rgba(0,113,227,.10);
+      --blue: #1463ff;
+      --blue-soft: rgba(20,99,255,.10);
       --green: #16853f;
       --green-soft: rgba(22,133,63,.10);
-      --amber: #9a6700;
-      --amber-soft: rgba(154,103,0,.11);
+      --amber: #b45309;
+      --amber-soft: rgba(180,83,9,.11);
       --red: #d70015;
       --red-soft: rgba(215,0,21,.08);
       --shadow: 0 18px 50px rgba(0,0,0,.06);
@@ -64,6 +64,7 @@
     }
     button, input { font: inherit; }
     button { color: inherit; }
+    button:focus-visible, a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
     .app { min-height: 100vh; display: grid; grid-template-columns: var(--sidebar) 1fr; }
     .sidebar {
       position: sticky; top: 0; height: 100vh; padding: 28px 18px 20px;
@@ -146,6 +147,18 @@
     @media (prefers-color-scheme: dark) { .hero-side { background: rgba(0,0,0,.16); } }
     .hero-side .big { font-size: 46px; font-weight: 780; letter-spacing: -.055em; margin: 4px 0 2px; }
     .hero-side .label { color: var(--muted); font-size: 12px; }
+    .capability-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; margin: 22px 0; }
+    .capability { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface-solid); }
+    .capability strong { display:block; font-size:16px; margin-bottom:8px; letter-spacing:-.02em; }
+    .capability p { color:var(--muted); font-size:13px; line-height:1.55; margin:0; }
+    .workflow { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius-lg); background:var(--line); }
+    .workflow-step { background:var(--surface-solid); padding:20px; }
+    .workflow-step span { color:var(--blue); font-weight:750; font-size:12px; }
+    .workflow-step h4 { margin:8px 0 6px; font-size:16px; }
+    .workflow-step p { margin:0; color:var(--muted); font-size:12px; line-height:1.55; }
+    .action-row { display:flex; flex-wrap:wrap; gap:10px; margin-top:22px; }
+    .action-link { border:0; border-radius:12px; padding:11px 14px; background:var(--blue); color:#fff; cursor:pointer; font-weight:700; }
+    .action-link.secondary-action { background:var(--surface-solid); color:var(--text); border:1px solid var(--line); }
     .metric-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; margin-bottom: 22px; }
     .card, .panel {
       border: 1px solid var(--line); background: var(--surface); border-radius: var(--radius-lg);
@@ -258,15 +271,18 @@
       .mobile-nav button.active { background: var(--blue); color: white; }
       main { padding-top: 26px; }
       .hero-grid, .two-col { grid-template-columns: 1fr; }
-      .metric-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .metric-grid, .capability-grid, .workflow { grid-template-columns: repeat(2, minmax(0,1fr)); }
       .run-grid { grid-template-columns: 1fr; }
     }
     @media (max-width: 620px) {
       .topbar { display: block; }
       .status { margin-top: 16px; }
-      .metric-grid, .three-col { grid-template-columns: 1fr; }
+      .metric-grid, .three-col, .capability-grid, .workflow { grid-template-columns: 1fr; }
       main { padding-inline: 14px; }
       .hero, .panel { border-radius: 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
     }
   </style>
 </head>
@@ -277,39 +293,39 @@
       <div class="brand">
         <div class="brand-mark">1D</div>
         <h1>Scramjet CFD</h1>
-        <p>导师控制台 · Project-defined course deliverable</p>
+        <p>专业研究平台 · 一维可追溯 CFD 工作流</p>
       </div>
       <nav class="nav" aria-label="主要导航">
-        <button class="active" data-section="overview"><span class="nav-icon">◫</span>总览</button>
-        <button data-section="baseline"><span class="nav-icon">⌁</span>H₂ 基线</button>
+        <button class="active" data-section="overview"><span class="nav-icon">◫</span>首页</button>
+        <button data-section="baseline"><span class="nav-icon">⌁</span>已验证能力</button>
         <button data-section="grid"><span class="nav-icon">▦</span>网格与守恒</button>
-        <button data-section="response"><span class="nav-icon">⌇</span>P12 响应</button>
-        <button data-section="evidence"><span class="nav-icon">✓</span>证据与边界</button>
-        <button data-section="run"><span class="nav-icon">▶</span>运行算例</button>
+        <button data-section="response"><span class="nav-icon">⌇</span>研究响应</button>
+        <button data-section="evidence"><span class="nav-icon">✓</span>研究证据</button>
+        <button data-section="run"><span class="nav-icon">▶</span>受控算例</button>
       </nav>
       <div class="sidebar-footer">
         <div class="scope-mini">
-          页面只展示冻结证据与受控算例。Guard 触发只表示 solver/model-domain inadmissible，不解释为 unstart。
+          仅展示已定稿的研究记录与受控算例。Guard 触发只表示模型适用域之外（solver/model-domain inadmissible），不解释为 unstart。
         </div>
       </div>
     </aside>
 
     <div>
       <div class="mobile-nav">
-        <button class="active" data-section="overview">总览</button>
-        <button data-section="baseline">H₂ 基线</button>
+        <button class="active" data-section="overview">首页</button>
+        <button data-section="baseline">已验证能力</button>
         <button data-section="grid">网格</button>
-        <button data-section="response">响应</button>
-        <button data-section="evidence">证据</button>
-        <button data-section="run">运行</button>
+        <button data-section="response">研究响应</button>
+        <button data-section="evidence">研究证据</button>
+        <button data-section="run">受控算例</button>
       </div>
 
       <main>
         <header class="topbar">
           <div>
-            <div class="eyebrow">Mentor Console</div>
+            <div class="eyebrow">Professional research platform</div>
             <h2>一维超燃 / 双模态冲压发动机 CFD</h2>
-            <p>把已验收的数值结果、网格可信度、离散守恒、参数响应和来源边界集中在一个页面里。</p>
+            <p>用于一维模型的快速参数研究与方法复核，为导师、研究团队和工程合作方保留完整研究脉络。</p>
           </div>
           <div class="status"><span class="dot"></span><span id="top-status">读取中…</span></div>
         </header>
@@ -318,34 +334,50 @@
           <div class="hero">
             <div class="hero-grid">
               <div>
-                <div class="eyebrow">Course Deliverable</div>
-                <h3>结果先说清楚，<br>证据随时可追。</h3>
-                <p id="hero-scope">正在读取仓库内冻结的 acceptance / evidence 数据。</p>
+                <div class="eyebrow">专业研究平台</div>
+                <h3>快速迭代，<br>严谨留痕。</h3>
+                <p id="hero-scope">用于一维模型的快速参数研究与方法复核。这里呈现的是项目定义的数值证据，并非实验验证、工程定型或 Cao Case 2 的正式复现。</p>
                 <div class="hero-badges">
-                  <span class="badge green">Deliverable complete</span>
-                  <span class="badge blue">H₂ integrated baseline</span>
-                  <span class="badge blue">20 / 40 / 80 grid trend</span>
-                  <span class="badge amber">Source blockers preserved</span>
+                  <span class="badge green">已验证 H₂ 基线</span>
+                  <span class="badge blue">20 / 40 / 80 网格趋势</span>
+                  <span class="badge blue">可追溯结果导出</span>
+                  <span class="badge amber">研究限制明确保留</span>
+                </div>
+                <div class="action-row">
+                  <button class="action-link" data-section="baseline">查看已验证能力</button>
+                  <button class="action-link secondary-action" data-section="run">运行示例</button>
                 </div>
               </div>
               <div class="hero-side">
-                <div class="label">Accepted packaging commit</div>
+                <div class="label">已定稿研究记录</div>
                 <div class="big" id="commit-short">—</div>
-                <div class="label">完整 SHA 已记录在 manifest；当前页面不改变任何物理模型或验收阈值。</div>
+                <div class="label">完整 SHA 校验码已归档；页面不改变任何物理模型或验收阈值。</div>
               </div>
             </div>
           </div>
 
           <div class="metric-grid">
-            <div class="card"><div class="kicker">Baseline Mach</div><div class="value" id="m-mach">—</div><div class="sub">20-cell accepted H₂ baseline</div></div>
-            <div class="card"><div class="kicker">Peak Temperature</div><div class="value" id="m-temp">—</div><div class="sub">K · accepted baseline</div></div>
-            <div class="card"><div class="kicker">Eq.11.46</div><div class="value" id="m-density">—</div><div class="sub">maximum relative density change</div></div>
-            <div class="card"><div class="kicker">P12 Accepted φ</div><div class="value" id="m-phi">—</div><div class="sub">converged project-defined points</div></div>
+            <div class="card"><div class="kicker">基线马赫数范围</div><div class="value" id="m-mach">—</div><div class="sub">20 个网格单元的 H₂ 数值验收基线</div></div>
+            <div class="card"><div class="kicker">峰值温度</div><div class="value" id="m-temp">—</div><div class="sub">已接受基线中的最大静温</div></div>
+            <div class="card"><div class="kicker">稳态诊断</div><div class="value" id="m-density">—</div><div class="sub">公式 11.46 的最大相对密度变化</div></div>
+            <div class="card"><div class="kicker">已收敛 φ</div><div class="value" id="m-phi">—</div><div class="sub">项目定义的响应研究点</div></div>
+          </div>
+
+          <div class="capability-grid">
+            <article class="capability"><strong>标准化数值工作流</strong><p>运行输入、数值容差与输出类型均来自已定稿配置，避免临时调整破坏研究可比性。</p></article>
+            <article class="capability"><strong>结果与证据并读</strong><p>每一组结果同时展示计算状态、数据来源与适用边界，方便复核而不是只看结论。</p></article>
+            <article class="capability"><strong>可追溯导出</strong><p>下载结果附带运行记录和 SHA-256 完整性校验，便于协作交接与后续归档。</p></article>
+          </div>
+
+          <div class="workflow" aria-label="研究工作流">
+            <div class="workflow-step"><span>01</span><h4>选择固定研究路径</h4><p>从已审阅的 H₂ 基线、响应扫描或全剖面导出中选择合适示例。</p></div>
+            <div class="workflow-step"><span>02</span><h4>获取可追溯输出</h4><p>系统生成与运行环境、配置和完整性记录关联的结果文件。</p></div>
+            <div class="workflow-step"><span>03</span><h4>复核证据边界</h4><p>结合网格趋势、守恒诊断与来源限制，判断结果可以支持的结论。</p></div>
           </div>
 
           <div class="two-col">
             <div class="panel">
-              <div class="panel-head"><div><h3>三层网格趋势</h3><p>关键输出随 20→40→80 cells 的变化。</p></div><span class="pill ok">Accepted</span></div>
+              <div class="panel-head"><div><h3>三层网格趋势</h3><p>关键输出随 20→40→80 网格单元数的变化。</p></div><span class="pill ok">已验收</span></div>
               <div id="overview-grid-chart" class="chart"></div>
               <div class="chart-caption">这里只称为 grid-convergence trend；未做渐近区/GCI 时不声称严格网格无关。</div>
             </div>
@@ -442,52 +474,52 @@
         <section id="evidence" class="section">
           <div class="two-col">
             <div class="panel">
-              <div class="panel-head"><div><h3>科学边界</h3><p>导师可以直接看到“哪些能说、哪些不能说”。</p></div><span class="pill ok">Frozen</span></div>
+              <div class="panel-head"><div><h3>研究结论的适用边界</h3><p>这里说明哪些结论已有证据支持，以及哪些结论目前不能作出。</p></div><span class="pill ok">已定稿</span></div>
               <div class="kv" id="claim-boundaries"></div>
             </div>
             <div class="panel">
-              <div class="panel-head"><div><h3>Cao Case 2 evidence gate</h3><p>来源身份与入口证据已冻结，正式复现仍受空间输入阻塞。</p></div><span class="pill warn">Blocked</span></div>
+              <div class="panel-head"><div><h3>Cao Case 2 复现准备度</h3><p>来源身份与入口证据已定稿；正式复现仍缺少必要的空间输入信息。</p></div><span class="pill warn">资料待补充</span></div>
               <div class="kv" id="source-gate"></div>
             </div>
           </div>
           <div class="panel">
-            <div class="panel-head"><div><h3>Known blockers</h3><p>这些不是 bug，也不会由页面“自动补全”。</p></div></div>
+            <div class="panel-head"><div><h3>当前限制与所需资料</h3><p>这些是当前研究范围的明确边界，不是页面错误；补齐资料后才可扩展相应能力。</p></div></div>
             <ul id="blockers" class="blocker-list"></ul>
           </div>
           <div class="panel">
-            <div class="panel-head"><div><h3>核心 provenance</h3><p>所有展示数字都来自仓库内 acceptance / evidence JSON。</p></div></div>
+            <div class="panel-head"><div><h3>结果来源记录</h3><p>所有展示数字均来自仓库内已定稿的 acceptance / evidence 记录。</p></div></div>
             <div class="code" id="provenance-code">Loading…</div>
           </div>
         </section>
 
         <section id="run" class="section">
           <div class="panel">
-            <div class="panel-head"><div><h3>受控运行入口</h3><p>只开放已经冻结过的 project-defined 路径。页面不会修改源项、阈值或物理保护。</p></div><span class="pill info" id="runtime-health">检查运行环境…</span></div>
+            <div class="panel-head"><div><h3>受控算例</h3><p>仅开放已审阅的固定研究路径；页面不会修改源项、阈值或物理保护。</p></div><span class="pill info" id="runtime-health">正在检查运行环境…</span></div>
             <div class="run-grid">
               <div class="run-card">
-                <div class="run-title">H₂ Baseline · 20 cells</div>
-                <p>快速复现课程交付中的综合基线。使用历史验收配置，不把它和更严格网格研究混在一起。</p>
+                <div class="run-title">H₂ 基线 · 20 单元</div>
+                <p>复现已接受的综合基线。使用历史验收配置，不与更严格的网格研究混为同一结论。</p>
                 <div id="spec-baseline" class="run-spec"></div>
-                <button class="primary run-button" data-run="baseline">运行 H₂ 基线</button>
+                <button class="primary run-button" data-run="baseline">运行基线示例</button>
               </div>
               <div class="run-card">
-                <div class="run-title">P12 Response Sweep</div>
-                <p>运行 φ = 0.10 / 0.20 / 0.30 的既定 sweep；forward-flow guard 保持启用。</p>
+                <div class="run-title">P12 响应扫描</div>
+                <p>运行 φ = 0.10 / 0.20 / 0.30 的固定扫描；前向流守护条件保持启用。</p>
                 <div id="spec-response" class="run-spec"></div>
-                <button class="primary run-button" data-run="response">运行 P12 sweep</button>
+                <button class="primary run-button" data-run="response">运行响应扫描</button>
               </div>
               <div class="run-card">
-                <div class="run-title">80-cell Full Profile</div>
-                <p>生成 Mach、p、T、u、ρ 与组分的完整轴向 CSV/JSON。计算耗时明显更长。</p>
+                <div class="run-title">80 单元完整剖面</div>
+                <p>导出 Mach、p、T、u、ρ 与组分的轴向 CSV/JSON；这一算例耗时更长。</p>
                 <div id="spec-profile" class="run-spec"></div>
-                <button class="primary run-button" data-run="profile">生成完整 profile</button>
+                <button class="primary run-button" data-run="profile">导出完整剖面</button>
               </div>
             </div>
           </div>
           <div class="two-col">
             <div class="panel">
-              <div class="panel-head"><div><h3>任务状态</h3><p>同一时间只允许一个 solver job，防止误点重复占用 CPU。</p></div><button id="refresh-jobs" class="secondary">刷新</button></div>
-              <div id="jobs"><div class="job"><div><strong>暂无任务</strong><div class="job-meta">从上方选择一个受控算例运行。</div></div></div></div>
+              <div class="panel-head"><div><h3>运行中的受控算例</h3><p>同一时间只允许一个计算任务，避免重复占用计算资源。</p></div><button id="refresh-jobs" class="secondary">刷新状态</button></div>
+              <div id="jobs"><div class="job"><div><strong>暂无运行记录</strong><div class="job-meta">从上方选择一个受控算例开始。</div></div></div></div>
             </div>
             <div class="panel">
               <div class="panel-head"><div><h3>部署与本地复现</h3><p>当前页面可由 Render 公网服务运行；本地仍可用同一入口复现。</p></div><button id="copy-command" class="secondary">复制本地命令</button></div>
@@ -521,10 +553,11 @@
     }
 
     function statusPill(status) {
-      if (status === "CONVERGED" || status === "success") return '<span class="pill ok">' + status + '</span>';
-      if (status && status.includes("GUARD")) return '<span class="pill warn">MODEL-DOMAIN INADMISSIBLE</span>';
-      if (status === "running" || status === "queued") return '<span class="pill info">' + status.toUpperCase() + '</span>';
-      return '<span class="pill bad">' + (status || "UNKNOWN") + '</span>';
+      if (status === "CONVERGED" || status === "success") return '<span class="pill ok">已完成</span>';
+      if (status && status.includes("GUARD")) return '<span class="pill warn">模型适用域之外</span>';
+      if (status === "running") return '<span class="pill info">运行中</span>';
+      if (status === "queued") return '<span class="pill info">等待运行</span>';
+      return '<span class="pill bad">' + (status || "状态未知") + '</span>';
     }
 
     function setSection(id) {
@@ -555,8 +588,8 @@
 
     function renderOverview() {
       const b=DATA.baseline, n=b.numerical_gate, o=b.case_outputs;
-      $("top-status").textContent = DATA.project.status === "DELIVERABLE_COMPLETE" ? "Deliverable complete" : DATA.project.status;
-      $("hero-scope").textContent = DATA.project.status_scope || DATA.project.dashboard_scope;
+      $("top-status").textContent = DATA.project.status === "DELIVERABLE_COMPLETE" ? "研究记录已定稿" : DATA.project.status;
+      $("hero-scope").textContent = "用于一维模型的快速参数研究与方法复核。当前展示的是项目定义的数值证据，并非实验验证、工程定型或 Cao Case 2 的正式复现。";
       $("commit-short").textContent = shortSha(DATA.project.accepted_packaging_commit);
       $("m-mach").textContent = fmt(o.min_mach,3)+"–"+fmt(o.max_mach,3);
       $("m-temp").textContent = fmt(o.max_temperature_K,0)+" K";
@@ -602,7 +635,7 @@
       $("grid-table").innerHTML=levels.map(x=>'<tr><td>'+x.cells+'</td><td>'+fmt(x.dx_m,4)+'</td><td>'+x.steps+'</td><td>'+sci(x.density_change,3)+'</td><td>'+sci(x.normalized_residual,3)+'</td><td>'+fmt(x.min_mach,5)+'</td><td>'+fmt(x.max_mach,5)+'</td><td>'+fmt(x.max_pressure_Pa,0)+'</td><td>'+fmt(x.max_temperature_K,2)+'</td></tr>').join("");
 
       $("conservation-table").innerHTML=DATA.response.points.map(p=>{
-        const note=p.status==="CONVERGED" ? "mass gate checked; momentum/energy diagnostic only" : "guard preserved; no physical mode label";
+        const note=p.status==="CONVERGED" ? "质量门已检查；动量和能量仅作诊断" : "守护条件保留；不赋予物理模态标签";
         return '<tr><td>'+p.equivalence_ratio.toFixed(2)+'</td><td>'+statusPill(p.status)+'</td><td>'+pct(p.mass_inventory_relative_to_inlet,4)+'</td><td>'+pct(p.momentum_inventory_relative_to_inlet,4)+'</td><td>'+pct(p.energy_inventory_relative_to_inlet,4)+'</td><td>'+note+'</td></tr>';
       }).join("");
     }
@@ -647,23 +680,23 @@
     function renderEvidence() {
       const c=DATA.claim_boundaries;
       $("claim-boundaries").innerHTML=[
-        ["Cao Case 2 formal reproduction", c.formal_cao_case2_reproduction ? "Yes":"No"],
-        ["Guard meaning", c.forward_flow_guard_meaning],
-        ["Guard = unstart?", c.forward_flow_guard_is_unstart ? "Yes":"No"],
-        ["Normalized residual", c.normalized_residual_role],
-        ["Grid claim", c.grid_claim],
-        ["P13 claim", c.p13_claim],
-        ["LBW/YBW are modes?", c.lbw_ybw_are_mode_labels ? "Yes":"No"]
+        ["Cao Case 2 正式复现", c.formal_cao_case2_reproduction ? "是":"否"],
+        ["前向流守护条件的含义", "模型适用域之外；不解释为 unstart"],
+        ["守护条件等同于 unstart？", c.forward_flow_guard_is_unstart ? "是":"否"],
+        ["归一化残差", c.normalized_residual_role],
+        ["网格结论", c.grid_claim],
+        ["P13 结论", c.p13_claim],
+        ["LBW/YBW 是燃烧模态？", c.lbw_ybw_are_mode_labels ? "是":"否"]
       ].map(([a,b])=>'<div>'+a+'</div><div style="max-width:460px">'+b+'</div>').join("");
 
       const sg=DATA.source_gate;
       $("source-gate").innerHTML=[
-        ["Candidate",sg.candidate],
-        ["Formal reproduction ready",String(sg.formal_reproduction_ready)],
-        ["Frozen source record",sg.frozen_source_evidence?.record || "—"],
-        ["Exact A(x)","Blocked"],
-        ["Exact Yi(x)","Blocked"],
-        ["Fuel/source spatial convention","Blocked"]
+        ["候选研究对象",sg.candidate],
+        ["已具备正式复现条件",sg.formal_reproduction_ready ? "是":"否"],
+        ["已定稿来源记录",sg.frozen_source_evidence?.record || "—"],
+        ["所需资料：精确 A(x)","尚未提供"],
+        ["所需资料：精确 Yi(x)","尚未提供"],
+        ["所需资料：燃料/源项空间约定","尚未提供"]
       ].map(([a,b])=>'<div>'+a+'</div><div>'+b+'</div>').join("");
 
       $("blockers").innerHTML=DATA.blockers.map(x=>'<li>'+x+'</li>').join("");
@@ -700,18 +733,18 @@
       } else {
         $("jobs").innerHTML=jobs.map(j=>{
           const links=[];
-          if (j.result?.artifact_download_url) links.push('<a class="download-link" href="'+j.result.artifact_download_url+'">下载 JSON</a>');
-          if (j.result?.csv_download_url) links.push('<a class="download-link" href="'+j.result.csv_download_url+'">下载 CSV</a>');
-          if (j.result?.json_download_url) links.push('<a class="download-link" href="'+j.result.json_download_url+'">下载摘要 JSON</a>');
-          if (j.result?.manifest_download_url) links.push('<a class="download-link" href="'+j.result.manifest_download_url+'">下载运行 Manifest</a>');
+          if (j.result?.artifact_download_url) links.push('<a class="download-link" href="'+j.result.artifact_download_url+'">下载结果 JSON</a>');
+          if (j.result?.csv_download_url) links.push('<a class="download-link" href="'+j.result.csv_download_url+'">下载轴向数据 CSV</a>');
+          if (j.result?.json_download_url) links.push('<a class="download-link" href="'+j.result.json_download_url+'">下载剖面摘要 JSON</a>');
+          if (j.result?.manifest_download_url) links.push('<a class="download-link" href="'+j.result.manifest_download_url+'">下载运行清单</a>');
           const downloads=links.length?'<div class="download-links">'+links.join("")+'</div>':"";
-          const error=j.error?'<div class="job-meta" style="color:var(--red)">错误：'+j.error+'</div>':"";
+          const error=j.error?'<div class="job-meta" style="color:var(--red)">运行失败：'+j.error+'</div>':"";
           const hashes=[];
           if (j.result?.artifact_sha256) hashes.push("JSON SHA-256 "+j.result.artifact_sha256);
           if (j.result?.csv_sha256) hashes.push("CSV SHA-256 "+j.result.csv_sha256);
           if (j.result?.json_sha256) hashes.push("Profile JSON SHA-256 "+j.result.json_sha256);
           if (j.result?.manifest_sha256) hashes.push("Manifest SHA-256 "+j.result.manifest_sha256);
-          const integrity=hashes.length?'<div class="job-meta">完整性：'+hashes.join(" · ")+'</div>':"";
+          const integrity=hashes.length?'<div class="job-meta">文件完整性：'+hashes.join(" · ")+'</div>':"";
           return '<div class="job"><div><strong>'+j.label+'</strong><div class="job-meta">'+j.id+' · '+j.created_at+'</div>'+error+downloads+integrity+'</div><div>'+statusPill(j.status)+'</div></div>';
         }).join("");
       }
@@ -743,10 +776,10 @@
         const data=await res.json();
         if (!res.ok || !data.ok || !data.runtime_imports) throw new Error(data.error || "runtime check failed");
         el.className="pill ok";
-        el.textContent="Runtime ready";
+        el.textContent="运行环境已就绪";
       } catch (err) {
         el.className="pill bad";
-        el.textContent="Runtime error";
+        el.textContent="运行环境不可用";
         el.title=err.message;
       }
     }
@@ -760,8 +793,8 @@
         renderOverview(); renderBaseline(); renderGrid(); renderResponse(); renderP13(); renderEvidence(); renderRunSpecs();
         await fetchJobs();
       } catch (err) {
-        $("top-status").textContent="Data error";
-        toast(err.message);
+        $("top-status").textContent="研究记录暂时无法读取";
+        toast("无法读取研究记录，请刷新页面后重试："+err.message);
       } finally {
         $("loading").classList.add("hidden");
       }

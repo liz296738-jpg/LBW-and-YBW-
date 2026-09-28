@@ -1,6 +1,6 @@
-# Mentor Dashboard
+# Professional Research Platform
 
-A mentor-facing dashboard is included for the project-defined course deliverable. The same Python entry point is used locally and by the deployed Render web service.
+This professional research platform serves supervisors, research collaborators, and engineering users working with the project-defined one-dimensional CFD workflow. The same Python entry point is used locally and by the deployed Render web service.
 
 ## Start
 
@@ -13,11 +13,11 @@ python tools/mentor_dashboard.py
 
 The dashboard opens at `http://127.0.0.1:8765` by default. It binds only to the local loopback interface unless `--host` is explicitly changed. The deployed service uses `python tools/mentor_dashboard.py --host 0.0.0.0 --port $PORT --no-browser` and is currently exposed at `https://lbw-and-ybw.onrender.com`.
 
-## What the dashboard shows
+## What the platform shows
 
-The interface reads the frozen acceptance/evidence records already stored in the repository and presents:
+The interface reads the already-finalized acceptance/evidence records stored in the repository and presents:
 
-- course-deliverable status and accepted packaging provenance;
+- a customer-facing overview of verified capabilities and research scope;
 - the accepted project-defined H2 integrated baseline;
 - teacher Eq. 11.46 steady-state diagnostics;
 - 20/40/80 grid-convergence-trend evidence;
@@ -25,13 +25,14 @@ The interface reads the frozen acceptance/evidence records already stored in the
 - the accepted P12 equivalence-ratio response sweep;
 - warm-start continuation and thermal-throat grid-sensitivity evidence;
 - the accepted P13 teacher Eq. 11.20 `C_m` sensitivity study on 20/40-cell grids, shown read-only;
-- Cao Case 2 evidence blockers and the remaining source/model boundaries.
+- Cao Case 2 evidence blockers and the remaining source/model boundaries;
+- fixed, controlled examples that generate downloadable and traceable outputs.
 
 The page uses no external JavaScript or CSS dependencies and can therefore be used offline after the Python environment is installed.
 
-## Controlled run buttons
+## Controlled examples
 
-The **运行算例** page exposes only three frozen project-defined paths:
+The **受控算例** page exposes only three finalized project-defined paths:
 
 1. 20-cell accepted H2 smoke baseline using the historical Eq. 11.46 `1e-4` density-change tolerance;
 2. the accepted P12 response sweep at `phi = 0.10 / 0.20 / 0.30` using the project-selected `2e-5` tolerance applied to the Eq. 11.46 metric;
