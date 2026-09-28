@@ -68,19 +68,30 @@ def test_dashboard_summary_preserves_scientific_claim_boundaries() -> None:
     assert summary["blockers"]
 
 
-def test_dashboard_frontend_exists_and_states_guard_boundary() -> None:
+def test_dashboard_frontend_serves_professional_product_navigation_and_claim_boundary() -> None:
     index = dashboard.WEB_INDEX
     assert index.is_file()
     text = index.read_text(encoding="utf-8")
 
-    assert "导师控制台" in text
-    assert "Deliverable complete" in text
+    assert "专业研究平台" in text
+    assert "已验证能力" in text
+    assert "研究证据" in text
+    assert "受控算例" in text
+    assert "项目定义的数值证据" in text
     assert "solver/model-domain inadmissible" in text
     assert "不解释为 unstart" in text
     assert "Cao Case 2" in text
     assert "P13 教师 Eq.11.20" in text
     assert "不开放 P13 在线参数扫描" in text
     assert "python tools/mentor_dashboard.py" in text
+    assert "当前限制与所需资料" in text
+    assert "运行中的受控算例" in text
+    assert "下载运行清单" in text
+    assert "运行环境已就绪" in text
+    assert "用于一维模型的快速参数研究" in text
+    assert "公式 11.46" in text
+    assert "完整 SHA 校验码已归档" in text
+    assert "20→40→80 网格单元数" in text
 
 
 def test_dashboard_only_exposes_known_run_modes() -> None:
